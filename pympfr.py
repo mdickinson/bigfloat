@@ -23,6 +23,37 @@ import ctypes
 import ctypes.util
 
 ################################################################################
+# Some utility functions, that have little to do with mpfr.
+
+def format_finite(digits, dot_pos):
+    """Given a (possibly empty) string of digits and an integer
+    dot_pos indicating the position of the decimal point relative to
+    the start of that string, output a formatted numeric string with
+    the same value and same implicit exponent."""
+
+    # strip leading zeros
+    olddigits = digits
+    digits = digits.lstrip('0')
+    dot_pos -= len(olddigits) - len(digits)
+
+    # value is 0.digits * 10**dot_pos
+    use_exponent = dot_pos <= -4 or dot_pos > len(digits)
+    if use_exponent:
+        exp = dot_pos-1 if digits else dot_pos
+        dot_pos -= exp
+
+    # left pad with zeros, insert decimal point, and add exponent
+    if dot_pos <= 0:
+        digits = '0'*(1-dot_pos) + digits
+        dot_pos += 1-dot_pos
+    assert 1 <= dot_pos <= len(digits)
+    if dot_pos < len(digits):
+        digits = digits[:dot_pos] + '.' + digits[dot_pos:]
+    if use_exponent:
+        digits += "e{:+}".format(exp)
+    return digits
+
+################################################################################
 # Platform dependent values
 
 # To do: get these values directly by parsing or processing gmp.h
@@ -139,6 +170,48 @@ class pympfr(object):
         mpfr.mpfr_clear(self)
         del self._as_parameter_
 
+    def __del__(self):
+        if hasattr(self, '_as_parameter_'):
+            self._clear()
+
+    def __repr__(self):
+        if self.is_zero:
+            num = '0'
+        elif self.is_finite:
+            expt, digits = self.get_str(10, 0, GMP_RNDN)
+            num = format_finite(digits.lstrip('-'), expt)
+        elif self.is_inf:
+            num = 'Infinity'
+        else:
+            assert self.is_nan
+            num = 'NaN'
+
+        if self.is_negative:
+            num = '-' + num
+        return "pympfr('{0}', precision={1})".format(num, self.precision)
+
+    __str__ = __repr__
+
+    def get_str(self, base, ndigits, rounding_mode):
+        """Convert self to a string in the given base, 2 <= base <= 36.
+
+        The input parameter ndigits gives the number of significant
+        digits required.  If ndigits is 0, this function produces a
+        number of digits that depends on the precision.
+
+        """
+        if not 2 <= base <= 36:
+            raise ValueError("base must be an integer between 2 and 36 inclusive")
+        if ndigits < 0:
+            raise ValueError("n should be a nonnegative integer")
+
+        exp = mpfr_exp_t()
+        p = mpfr.mpfr_get_str(None, ctypes.pointer(exp),
+                              base, ndigits, self, rounding_mode)
+        result = ctypes.cast(p, ctypes.c_char_p).value
+        mpfr.mpfr_free_str(p)
+        return exp.value, result
+
     @property
     def precision(self):
         return mpfr.mpfr_get_prec(self)
@@ -147,9 +220,25 @@ class pympfr(object):
     def precision(self, precision):
         mpfr.mpfr_set_prec(self, precision)
 
-    def __del__(self):
-        if hasattr(self, '_as_parameter_'):
-            self._clear()
+    @property
+    def is_zero(self):
+        return mpfr.mpfr_zero_p(self)
+
+    @property
+    def is_finite(self):
+        return mpfr.mpfr_number_p(self)
+
+    @property
+    def is_inf(self):
+        return mpfr.mpfr_inf_p(self)
+
+    @property
+    def is_nan(self):
+        return mpfr.mpfr_nan_p(self)
+
+    @property
+    def is_negative(self):
+        return mpfr.mpfr_signbit(self)
 
 ################################################################################
 # Limits, and other constants
@@ -195,6 +284,9 @@ mpfr.mpfr_get_default_prec.restype = mpfr_prec_t
 mpfr.mpfr_get_prec.argtypes = [pympfr]
 mpfr.mpfr_get_prec.restype = mpfr_prec_t
 
+set_default_precision = mpfr.mpfr_set_default_prec
+get_default_precision = mpfr.mpfr_get_default_prec
+
 # 5.2 Assignment Functions
 
 mpfr.mpfr_set.argtypes = [pympfr, pympfr, RoundingMode]
@@ -207,13 +299,26 @@ set_d = mpfr.mpfr_set_d
 mpfr.mpfr_get_d.argtypes = [pympfr, RoundingMode]
 mpfr.mpfr_get_d.restype = ctypes.c_double
 
+# declare mpfr_get_str.restype as POINTER(c_char) to avoid the
+# automatic c_char_p -> string unboxing.
+mpfr.mpfr_get_str.argtypes = [ctypes.c_char_p, ctypes.POINTER(mpfr_exp_t),
+                              ctypes.c_int, ctypes.c_size_t,
+                              pympfr, RoundingMode]
+mpfr.mpfr_get_str.restype = ctypes.POINTER(ctypes.c_char)
+
+mpfr.mpfr_free_str.argtypes = [ctypes.POINTER(ctypes.c_char)]
+mpfr.mpfr_free_str.restype = None
+
 get_d = mpfr.mpfr_get_d
 
-################################################################################
-# pympfr: a thin wrapper around the mpfr_t type
+# 5.6 Comparison Functions
 
-def set_default_precision(precision):
-    mpfr.mpfr_set_default_prec(precision)
+# also includes signbit from section 5.12
+for unary_predicate in ['nan_p', 'inf_p', 'number_p', 'zero_p', 'signbit']:
+    mpfr_predicate = getattr(mpfr, 'mpfr_' + unary_predicate)
+    mpfr_predicate.argtypes = [pympfr]
+    mpfr_predicate.restype = bool
 
-get_default_precision = mpfr.mpfr_get_default_prec
+# 5.12 Miscellaneous Functions
 
+# for mpfr_signbit:  see section 5.6
