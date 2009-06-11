@@ -102,6 +102,9 @@ class Precision(object):
             raise TypeError("precision should be in the range [%s, %s]" % (MPFR_PREC_MIN, MPFR_PREC_MAX))
         return mpfr_prec_t(value)
 
+# Rounding mode class is used for automatically validating the
+# rounding mode before passing it to the MPFR library.
+
 class RoundingMode(object):
     @classmethod
     def from_param(cls, value):
@@ -109,65 +112,7 @@ class RoundingMode(object):
             raise ValueError("Invalid rounding mode")
         return mpfr_rnd_t(value)
 
-################################################################################
-# Limits, and other constants
-
-# limits on precision
-MPFR_PREC_MIN = 2
-MPFR_PREC_MAX = mpfr_prec_t(-1).value >> 1
-
-# rounding modes
-GMP_RNDN, GMP_RNDZ, GMP_RNDU, GMP_RNDD = range(4)
-
-################################################################################
-# Wrap functions from the library
-
-mpfr = ctypes.cdll.LoadLibrary(ctypes.util.find_library('mpfr'))
-
-# 5.1 Initialization Functions
-
-mpfr.mpfr_init2.argtypes = [mpfr_t, Precision]
-mpfr.mpfr_init2.restype = None
-
-mpfr.mpfr_clear.argtypes = [mpfr_t]
-mpfr.mpfr_clear.restype = None
-
-mpfr.mpfr_init.argtypes = [mpfr_t]
-mpfr.mpfr_init.restype = None
-
-mpfr.mpfr_set_default_prec.argtypes = [Precision]
-mpfr.mpfr_set_default_prec.restype = None
-
-mpfr.mpfr_get_default_prec.argtypes = []
-mpfr.mpfr_get_default_prec.restype = mpfr_prec_t
-
-mpfr.mpfr_set_prec.argtypes = [mpfr_t, Precision]
-mpfr.mpfr_set_prec.restype = None
-
-mpfr.mpfr_get_prec.argtypes = [mpfr_t]
-mpfr.mpfr_get_prec.restype = mpfr_prec_t
-
-# 5.2 Assignment Functions
-
-mpfr.mpfr_set.argtypes = [mpfr_t, mpfr_t, RoundingMode]
-mpfr.mpfr_set_d.argtypes = [mpfr_t, ctypes.c_double, RoundingMode]
-
-set_d = mpfr.mpfr_set_d
-
-# 5.4 Conversion Functions
-
-mpfr.mpfr_get_d.argtypes = [mpfr_t, RoundingMode]
-mpfr.mpfr_get_d.restype = ctypes.c_double
-
-get_d = mpfr.mpfr_get_d
-
-################################################################################
-# pympfr: a thin wrapper around the mpfr_t type
-
-def set_default_precision(precision):
-    mpfr.mpfr_set_default_prec(precision)
-
-get_default_precision = mpfr.mpfr_get_default_prec
+# This is the main class, implemented as a wrapper around mpfr_t.
 
 class pympfr(object):
     @classmethod
@@ -191,7 +136,7 @@ class pympfr(object):
         self._as_parameter_ = value
 
     def _clear(self):
-        mpfr.mpfr_clear(self._as_parameter_)
+        mpfr.mpfr_clear(self)
         del self._as_parameter_
 
     @property
@@ -205,3 +150,70 @@ class pympfr(object):
     def __del__(self):
         if hasattr(self, '_as_parameter_'):
             self._clear()
+
+################################################################################
+# Limits, and other constants
+
+# limits on precision
+MPFR_PREC_MIN = 2
+MPFR_PREC_MAX = mpfr_prec_t(-1).value >> 1
+
+# rounding modes
+GMP_RNDN, GMP_RNDZ, GMP_RNDU, GMP_RNDD = range(4)
+
+################################################################################
+# Wrap functions from the library
+
+mpfr = ctypes.cdll.LoadLibrary(ctypes.util.find_library('mpfr'))
+
+# 5.1 Initialization Functions
+
+# Only the functions mpfr_init and mpfr_init2 take arguments of type
+# mpfr_t.  All other functions use type pympfr instead.  The reason is
+# that the pympfr type implements a check that the underlying mpfr_t
+# instance is already initialized; for mpfr_init and mpfr_init2 that
+# check isn't valid, of course.
+
+mpfr.mpfr_init2.argtypes = [mpfr_t, Precision]
+mpfr.mpfr_init2.restype = None
+
+mpfr.mpfr_init.argtypes = [mpfr_t]
+mpfr.mpfr_init.restype = None
+
+mpfr.mpfr_clear.argtypes = [pympfr]
+mpfr.mpfr_clear.restype = None
+
+mpfr.mpfr_set_prec.argtypes = [pympfr, Precision]
+mpfr.mpfr_set_prec.restype = None
+
+mpfr.mpfr_set_default_prec.argtypes = [Precision]
+mpfr.mpfr_set_default_prec.restype = None
+
+mpfr.mpfr_get_default_prec.argtypes = []
+mpfr.mpfr_get_default_prec.restype = mpfr_prec_t
+
+mpfr.mpfr_get_prec.argtypes = [pympfr]
+mpfr.mpfr_get_prec.restype = mpfr_prec_t
+
+# 5.2 Assignment Functions
+
+mpfr.mpfr_set.argtypes = [pympfr, pympfr, RoundingMode]
+mpfr.mpfr_set_d.argtypes = [pympfr, ctypes.c_double, RoundingMode]
+
+set_d = mpfr.mpfr_set_d
+
+# 5.4 Conversion Functions
+
+mpfr.mpfr_get_d.argtypes = [pympfr, RoundingMode]
+mpfr.mpfr_get_d.restype = ctypes.c_double
+
+get_d = mpfr.mpfr_get_d
+
+################################################################################
+# pympfr: a thin wrapper around the mpfr_t type
+
+def set_default_precision(precision):
+    mpfr.mpfr_set_default_prec(precision)
+
+get_default_precision = mpfr.mpfr_get_default_prec
+
