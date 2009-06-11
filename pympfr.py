@@ -89,6 +89,9 @@ class __mpfr_struct(ctypes.Structure):
 mpfr_t = __mpfr_struct * 1
 
 # Precision class used for automatic range checking of precisions.
+# Arguments of type mpfr_prec_t should use the Precision class.
+# Return values of type mpfr_prec_t should just be declared as
+# mpfr_prec_t.
 
 class Precision(object):
     @classmethod
@@ -99,6 +102,13 @@ class Precision(object):
             raise TypeError("precision should be in the range [%s, %s]" % (MPFR_PREC_MIN, MPFR_PREC_MAX))
         return mpfr_prec_t(value)
 
+class RoundingMode(object):
+    @classmethod
+    def from_param(cls, value):
+        if not value in [GMP_RNDN, GMP_RNDZ, GMP_RNDU, GMP_RNDD]:
+            raise ValueError("Invalid rounding mode")
+        return mpfr_rnd_t(value)
+
 ################################################################################
 # Limits, and other constants
 
@@ -107,7 +117,7 @@ MPFR_PREC_MIN = 2
 MPFR_PREC_MAX = mpfr_prec_t(-1).value >> 1
 
 # rounding modes
-GMP_RNDN, GMP_RNDZ, GMP_RNDU, GMP_RNDD = map(mpfr_rnd_t, range(4))
+GMP_RNDN, GMP_RNDZ, GMP_RNDU, GMP_RNDD = range(4)
 
 ################################################################################
 # Wrap functions from the library
@@ -139,14 +149,14 @@ mpfr.mpfr_get_prec.restype = mpfr_prec_t
 
 # 5.2 Assignment Functions
 
-mpfr.mpfr_set.argtypes = [mpfr_t, mpfr_t, mpfr_rnd_t]
-mpfr.mpfr_set_d.argtypes = [mpfr_t, ctypes.c_double, mpfr_rnd_t]
+mpfr.mpfr_set.argtypes = [mpfr_t, mpfr_t, RoundingMode]
+mpfr.mpfr_set_d.argtypes = [mpfr_t, ctypes.c_double, RoundingMode]
 
 set_d = mpfr.mpfr_set_d
 
 # 5.4 Conversion Functions
 
-mpfr.mpfr_get_d.argtypes = [mpfr_t, mpfr_rnd_t]
+mpfr.mpfr_get_d.argtypes = [mpfr_t, RoundingMode]
 mpfr.mpfr_get_d.restype = ctypes.c_double
 
 get_d = mpfr.mpfr_get_d
