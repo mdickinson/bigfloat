@@ -170,6 +170,14 @@ def set_default_precision(precision):
 get_default_precision = mpfr.mpfr_get_default_prec
 
 class pympfr(object):
+    @classmethod
+    def from_param(cls, value):
+        if not isinstance(value, pympfr):
+            raise TypeError
+        if not hasattr(value, '_as_parameter_'):
+            raise ValueError("value is not initialized")
+        return value._as_parameter_
+
     def __init__(self, precision=None):
         # if reinitializing, clear first
         if hasattr(self, '_as_parameter_'):
