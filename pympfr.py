@@ -5,8 +5,17 @@ __all__ = [
     # global functions for getting and setting default precision
     'get_default_precision', 'set_default_precision',
 
+    # setters
+    'set_d',
+
+    # getters
+    'get_d',
+
     # constants giving limits on the precision
     'MPFR_PREC_MIN', 'MPFR_PREC_MAX',
+
+    # rounding modes
+    'GMP_RNDN', 'GMP_RNDZ', 'GMP_RNDU', 'GMP_RNDD',
     ]
 
 
@@ -17,7 +26,8 @@ import ctypes.util
 # Platform dependent values
 
 # To do: get these values directly by parsing or processing gmp.h
-# It might be possible to use cpp directly to do this.
+# It might be possible to use cpp directly to do this, or to
+# compile and run a test program that outputs the values.
 
 # set to value of __GMP_MP_SIZE_T_INT in gmp.h (should be 0 or 1)
 __GMP_MP_SIZE_T_INT = 0
@@ -74,11 +84,14 @@ class __mpfr_struct(ctypes.Structure):
 mpfr_t = __mpfr_struct * 1
 
 ################################################################################
-# Limits
+# Limits, and other constants
 
 # limits on precision
 MPFR_PREC_MIN = 2
 MPFR_PREC_MAX = mpfr_prec_t(-1).value >> 1
+
+# rounding modes
+GMP_RNDN, GMP_RNDZ, GMP_RNDU, GMP_RNDD = map(mpfr_rnd_t, range(4))
 
 ################################################################################
 # Wrap functions from the library
@@ -108,6 +121,20 @@ mpfr.mpfr_set_prec.restype = None
 mpfr.mpfr_get_prec.argtypes = [mpfr_t]
 mpfr.mpfr_get_prec.restype = mpfr_prec_t
 
+# 5.2 Assignment Functions
+
+mpfr.mpfr_set.argtypes = [mpfr_t, mpfr_t, mpfr_rnd_t]
+mpfr.mpfr_set_d.argtypes = [mpfr_t, ctypes.c_double, mpfr_rnd_t]
+
+set_d = mpfr.mpfr_set_d
+
+# 5.4 Conversion Functions
+
+mpfr.mpfr_get_d.argtypes = [mpfr_t, mpfr_rnd_t]
+mpfr.mpfr_get_d.restype = ctypes.c_double
+
+get_d = mpfr.mpfr_get_d
+
 ################################################################################
 # pympfr: a thin wrapper around the mpfr_t type that takes care of
 # initialization and clearing.
@@ -117,8 +144,7 @@ def set_default_precision(precision):
         raise ValueError("Precision out of range")
     mpfr.mpfr_set_default_prec(precision)
 
-def get_default_precision():
-    return mpfr.mpfr_get_default_prec()
+get_default_precision = mpfr.mpfr_get_default_prec
 
 class pympfr(object):
     def __init__(self, precision=None):
