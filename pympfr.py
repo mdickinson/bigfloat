@@ -6,7 +6,6 @@ __all__ = [
     'get_default_precision', 'set_default_precision',
 
     # setters
-    'set_d',
 
     # getters
     'get_d',
@@ -157,7 +156,8 @@ class pympfr(object):
     def __init__(self, precision=None):
         # if reinitializing, clear first
         if hasattr(self, '_as_parameter_'):
-            self._clear()
+            raise TypeError("can't reinitialize a previously "
+                            "initialized pympfr instance")
 
         value = mpfr_t()
         if precision is None:
@@ -166,13 +166,13 @@ class pympfr(object):
             mpfr.mpfr_init2(value, precision)
         self._as_parameter_ = value
 
-    def _clear(self):
+    def clear(self):
         mpfr.mpfr_clear(self)
         del self._as_parameter_
 
     def __del__(self):
         if hasattr(self, '_as_parameter_'):
-            self._clear()
+            self.clear()
 
     def __repr__(self):
         if self.is_zero:
@@ -266,14 +266,11 @@ mpfr = ctypes.cdll.LoadLibrary(ctypes.util.find_library('mpfr'))
 mpfr.mpfr_init2.argtypes = [mpfr_t, Precision]
 mpfr.mpfr_init2.restype = None
 
-mpfr.mpfr_init.argtypes = [mpfr_t]
-mpfr.mpfr_init.restype = None
-
 mpfr.mpfr_clear.argtypes = [pympfr]
 mpfr.mpfr_clear.restype = None
 
-mpfr.mpfr_set_prec.argtypes = [pympfr, Precision]
-mpfr.mpfr_set_prec.restype = None
+mpfr.mpfr_init.argtypes = [mpfr_t]
+mpfr.mpfr_init.restype = None
 
 mpfr.mpfr_set_default_prec.argtypes = [Precision]
 mpfr.mpfr_set_default_prec.restype = None
@@ -281,18 +278,21 @@ mpfr.mpfr_set_default_prec.restype = None
 mpfr.mpfr_get_default_prec.argtypes = []
 mpfr.mpfr_get_default_prec.restype = mpfr_prec_t
 
+mpfr.mpfr_set_prec.argtypes = [pympfr, Precision]
+mpfr.mpfr_set_prec.restype = None
+
 mpfr.mpfr_get_prec.argtypes = [pympfr]
 mpfr.mpfr_get_prec.restype = mpfr_prec_t
 
-set_default_precision = mpfr.mpfr_set_default_prec
-get_default_precision = mpfr.mpfr_get_default_prec
-
 # 5.2 Assignment Functions
+
+# We don't implement the MPFR assignments from C integer types, C long
+# double, C decimal64, GMP rationals, or GMP floats.
+
+# To do:  implement assignment from a Python int, using mpfr_set_z.
 
 mpfr.mpfr_set.argtypes = [pympfr, pympfr, RoundingMode]
 mpfr.mpfr_set_d.argtypes = [pympfr, ctypes.c_double, RoundingMode]
-
-set_d = mpfr.mpfr_set_d
 
 # 5.4 Conversion Functions
 
@@ -309,8 +309,6 @@ mpfr.mpfr_get_str.restype = ctypes.POINTER(ctypes.c_char)
 mpfr.mpfr_free_str.argtypes = [ctypes.POINTER(ctypes.c_char)]
 mpfr.mpfr_free_str.restype = None
 
-get_d = mpfr.mpfr_get_d
-
 # 5.6 Comparison Functions
 
 # also includes signbit from section 5.12
@@ -322,3 +320,18 @@ for unary_predicate in ['nan_p', 'inf_p', 'number_p', 'zero_p', 'signbit']:
 # 5.12 Miscellaneous Functions
 
 # for mpfr_signbit:  see section 5.6
+
+################################################################################
+# Functions to be exported at the module level
+
+get_d = mpfr.mpfr_get_d
+set_default_precision = mpfr.mpfr_set_default_prec
+get_default_precision = mpfr.mpfr_get_default_prec
+
+def rewrap(f):
+    def wrapped_f(*args):
+        return f(*args)
+    return wrapped_f
+
+pympfr.set_d = rewrap(mpfr.mpfr_set_d)
+pympfr.set = rewrap(mpfr.mpfr_set)
