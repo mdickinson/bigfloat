@@ -379,6 +379,9 @@ for binary_predicate in ['greater_p', 'greaterequal_p',
 
 # 5.12 Miscellaneous Functions
 
+mpfr.mpfr_nexttoward.argtypes = [pympfr, pympfr]
+mpfr.mpfr_nexttoward.restype = None
+
 # for mpfr_signbit:  see section 5.6
 
 ################################################################################
@@ -397,3 +400,6 @@ def rewrap(f):
 
 pympfr.set_d = rewrap(mpfr.mpfr_set_d)
 pympfr.set = rewrap(mpfr.mpfr_set)
+
+pympfr.nexttoward = rewrap(mpfr.mpfr_nexttoward)
+
