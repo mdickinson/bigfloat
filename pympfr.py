@@ -172,6 +172,34 @@ class pympfr(object):
         """Convert to a Python float, using the given rounding mode"""
         return mpfr.mpfr_get_d(self, rounding_mode)
 
+    def as_integer_ratio(self):
+        """Return pair n, d of integers such that the value of self is exactly
+        equal to n/d, n and d are relatively prime, and d >= 1."""
+
+        if not self.is_finite:
+            raise ValueError("Can't express infinity or nan as "
+                             "an integer ratio")
+        elif self.is_zero:
+            return 0, 1
+
+        # convert to a hex string, and from there to a fraction
+        e, digits = self.get_str(16, 0, GMP_RNDN)
+        digits = digits.lstrip('-').rstrip('0')
+
+        # find number of trailing 0 bits in last hex digit
+        v = int(digits[-1], 16)
+        v &= -v
+        n, d = int(digits, 16)//v, 1
+        e = (e-len(digits) << 2) + {1: 0, 2: 1, 4: 2, 8: 3}[v]
+
+        # number now has value n * 2**e, and n is odd
+        if e >= 0:
+            n <<= e
+        else:
+            d <<= -e
+
+        return (-n if self.is_negative else n), d
+
     def __del__(self):
         if hasattr(self, '_as_parameter_'):
             self.clear()
