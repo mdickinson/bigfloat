@@ -11,7 +11,7 @@ def semiconvergents(x):
     p0, q0, p1, q1 = 1, 0, q, 1
     while n:
         (q, n), d = divmod(d, n), n
-        for _ in range(q):
+        for _ in xrange(q):
             p0, q0 = p0+p1, q0+q1
             yield Fraction(p0, q0)
         p0, q0, p1, q1 = p1, q1, p0, q0
@@ -46,7 +46,7 @@ def logn2(n, p):
         y.precision += 10
 
 marks_results = {}
-all_n = [n for n in range(3, 63) if n & (n-1)]
+all_n = [n for n in xrange(3, 63) if n & (n-1)]
 for n in all_n:
     # 76-bit upper approximation used for the computation of m
     approx = logn2(n, 76)[1]
