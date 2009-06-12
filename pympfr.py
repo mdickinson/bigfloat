@@ -90,9 +90,11 @@ _SHORT_ENUMS = False
 #   mpfr_limb_t: internal type used for the digits
 
 if __GMP_MP_SIZE_T_INT == 1:
-    mpfr_exp_t = mpfr_prec_t = ctypes.c_uint
+    mpfr_prec_t = ctypes.c_uint
+    mpfr_exp_t = ctypes.c_int
 else:
-    mpfr_exp_t = mpfr_prec_t = ctypes.c_ulong
+    mpfr_prec_t = ctypes.c_ulong
+    mpfr_exp_t = ctypes.c_long
 
 mpfr_sign_t = ctypes.c_int
 
