@@ -5,11 +5,6 @@ __all__ = [
     # global functions for getting and setting default precision
     'get_default_precision', 'set_default_precision',
 
-    # setters
-
-    # getters
-    'get_d',
-
     # constants giving limits on the precision
     'MPFR_PREC_MIN', 'MPFR_PREC_MAX',
 
@@ -173,6 +168,10 @@ class pympfr(object):
         mpfr.mpfr_clear(self)
         del self._as_parameter_
 
+    def as_float(self, rounding_mode):
+        """Convert to a Python float, using the given rounding mode"""
+        return mpfr.mpfr_get_d(self, rounding_mode)
+
     def __del__(self):
         if hasattr(self, '_as_parameter_'):
             self.clear()
@@ -327,7 +326,6 @@ for unary_predicate in ['nan_p', 'inf_p', 'number_p', 'zero_p', 'signbit']:
 ################################################################################
 # Functions to be exported at the module level
 
-get_d = mpfr.mpfr_get_d
 set_default_precision = mpfr.mpfr_set_default_prec
 get_default_precision = mpfr.mpfr_get_default_prec
 
