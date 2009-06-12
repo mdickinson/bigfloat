@@ -49,7 +49,7 @@ def format_finite(digits, dot_pos):
     if dot_pos < len(digits):
         digits = digits[:dot_pos] + '.' + digits[dot_pos:]
     if use_exponent:
-        digits += "e{:+}".format(exp)
+        digits += "e{0:+}".format(exp)
     return digits
 
 ################################################################################
