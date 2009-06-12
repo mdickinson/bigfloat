@@ -131,7 +131,8 @@ class Precision(object):
         if not isinstance(value, (int, long)):
             raise TypeError("precision should be an integer")
         if not MPFR_PREC_MIN <= value <= MPFR_PREC_MAX:
-            raise TypeError("precision should be in the range [%s, %s]" % (MPFR_PREC_MIN, MPFR_PREC_MAX))
+            raise TypeError("precision should be in the range "
+                "[{0}, {1}]".format(MPFR_PREC_MIN, MPFR_PREC_MAX))
         return mpfr_prec_t(value)
 
 # Rounding mode class is used for automatically validating the
