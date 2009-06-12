@@ -10,6 +10,10 @@ __all__ = [
 
     # rounding modes
     'GMP_RNDN', 'GMP_RNDZ', 'GMP_RNDU', 'GMP_RNDD',
+
+    # the two comparisons that aren't covered by the usual operators
+    'lessgreater', 'unordered',
+
     ]
 
 
@@ -270,6 +274,25 @@ class pympfr(object):
     def is_negative(self):
         return mpfr.mpfr_signbit(self)
 
+    # comparisons
+    def __eq__(self, other):
+        return mpfr.mpfr_equal_p(self, other)
+
+    def __ne__(self, other):
+        return not self == other
+
+    def __le__(self, other):
+        return mpfr.mpfr_lessequal_p(self, other)
+
+    def __ge__(self, other):
+        return mpfr.mpfr_greaterequal_p(self, other)
+
+    def __lt__(self, other):
+        return mpfr.mpfr_less_p(self, other)
+
+    def __gt__(self, other):
+        return mpfr.mpfr_greater_p(self, other)
+
 ################################################################################
 # Limits, and other constants
 
@@ -347,6 +370,13 @@ for unary_predicate in ['nan_p', 'inf_p', 'number_p', 'zero_p', 'signbit']:
     mpfr_predicate.argtypes = [pympfr]
     mpfr_predicate.restype = bool
 
+for binary_predicate in ['greater_p', 'greaterequal_p',
+                         'less_p', 'lessequal_p',
+                         'lessgreater_p', 'equal_p', 'unordered_p']:
+    mpfr_predicate = getattr(mpfr, 'mpfr_' + binary_predicate)
+    mpfr_predicate.argtypes = [pympfr, pympfr]
+    mpfr_predicate.restype = bool
+
 # 5.12 Miscellaneous Functions
 
 # for mpfr_signbit:  see section 5.6
@@ -356,6 +386,9 @@ for unary_predicate in ['nan_p', 'inf_p', 'number_p', 'zero_p', 'signbit']:
 
 set_default_precision = mpfr.mpfr_set_default_prec
 get_default_precision = mpfr.mpfr_get_default_prec
+
+lessgreater = mpfr.mpfr_lessgreater_p
+unordered = mpfr.mpfr_unordered_p
 
 def rewrap(f):
     def wrapped_f(*args):
