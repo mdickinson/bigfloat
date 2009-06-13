@@ -348,6 +348,25 @@ mpfr.mpfr_get_prec.restype = mpfr_prec_t
 
 # 5.2 Assignment Functions
 
+# need to wrap mpfr_strtofr specially: the Python version returns a
+# pair consisting of the ternary value and the number of characters
+# consumed.
+
+mpfr.mpfr_strtofr.argtypes = [pympfr, ctypes.c_char_p,
+                              ctypes.POINTER(ctypes.c_char_p),
+                              ctypes.c_int, RoundingMode]
+mpfr.mpfr_strtofr.restype = ctypes.c_int
+
+def strtofr(x, s, base, rounding_mode):
+    """Set value of x from string s."""
+    startptr = ctypes.c_char_p(s)
+    endptr = ctypes.c_char_p()
+    ternary = mpfr.mpfr_strtofr(x, startptr, ctypes.byref(endptr), base, rounding_mode)
+    # get number of digits consumed
+    ndigits = ctypes.cast(endptr, ctypes.c_void_p).value - \
+        ctypes.cast(startptr, ctypes.c_void_p).value
+    return ternary, ndigits
+
 # We don't implement the MPFR assignments from C integer types, C long
 # double, C decimal64, GMP rationals, or GMP floats.
 
