@@ -149,7 +149,7 @@ class RoundingMode(object):
 class pympfr(object):
     @classmethod
     def from_param(cls, value):
-        if not isinstance(value, pympfr):
+        if not isinstance(value, cls):
             raise TypeError
         if not hasattr(value, '_as_parameter_'):
             raise ValueError("value is not initialized")
