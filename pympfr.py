@@ -353,7 +353,7 @@ mpfr.mpfr_get_prec.restype = mpfr_prec_t
 
 # To do:  implement assignment from a Python int, using mpfr_set_z.
 
-mpfr.mpfr_set_d.argtypes = [pympfr, ctypes.c_double, RoundingMode]
+# for mpfr_set, mpfr_set_d see standard functions below
 
 # 5.4 Conversion Functions
 
@@ -460,11 +460,18 @@ standard_ternary_functions = [
     'fma', 'fms',
     ]
 
+# more standard functions, with argument types
+
+additional_standard_functions = [
+    ('set_d', [ctypes.c_double]),
+]
+
 standard_functions = \
     [(name, []) for name in standard_constants] + \
     [(name, [pympfr]) for name in standard_unary_functions] + \
     [(name, [pympfr]*2) for name in standard_binary_functions] + \
-    [(name, [pympfr]*3) for name in standard_ternary_functions]
+    [(name, [pympfr]*3) for name in standard_ternary_functions] + \
+    additional_standard_functions
 
 for fn, args in standard_functions:
     mpfr_fn = getattr(mpfr, 'mpfr_' + fn)
