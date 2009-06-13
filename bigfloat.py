@@ -338,8 +338,10 @@ class BigFloat(object):
 
         # ints, long and floats mix freely with BigFloats, and are
         # converted exactly.
-        if isinstance(arg, (int, long, float, BigFloat)):
+        if isinstance(arg, (int, long, float)):
             return cls.exact(arg)
+        elif isinstance(arg, BigFloat):
+            return arg
         else:
             raise TypeError("Unable to convert argument %s of type %s "
                             "to BigFloat" % (arg, type(arg)))
