@@ -344,7 +344,6 @@ mpfr.mpfr_get_prec.restype = mpfr_prec_t
 
 # To do:  implement assignment from a Python int, using mpfr_set_z.
 
-mpfr.mpfr_set.argtypes = [pympfr, pympfr, RoundingMode]
 mpfr.mpfr_set_d.argtypes = [pympfr, ctypes.c_double, RoundingMode]
 
 # 5.4 Conversion Functions
@@ -401,5 +400,63 @@ def rewrap(f):
 pympfr.set_d = rewrap(mpfr.mpfr_set_d)
 pympfr.set = rewrap(mpfr.mpfr_set)
 
-pympfr.nexttoward = rewrap(mpfr.mpfr_nexttoward)
+################################################################################
+# Standard arithmetic and mathematical functions
+#
+# A large number of MPFR's functions take a standard form: a
+# *standard* function is one that takes some number of arguments,
+# including a rounding mode, and returns the result in an existing
+# variable of type mpfr_t, along with a ternary value.  For all such
+# functions:
+#
+#   - the first argument has type mpfr_t, and receives the result
+#   - the last argument is the rounding mode
+#   - the return value has type int, and gives the ternary value
+#
+# In this section we provide details about these functions.
 
+standard_constants = [
+    'const_log2', 'const_pi', 'const_euler', 'const_catalan',
+    ]
+
+# standard functions taking a single mpfr_t as input
+
+standard_unary_functions = [
+    'set', 'neg', 'abs',
+    'sqr', 'sqrt', 'rec_sqrt', 'cbrt',
+    'log', 'log2', 'log10',
+    'exp', 'exp2', 'exp10',
+    'cos', 'sin', 'tan',
+    'sec', 'csc', 'cot',
+    'acos', 'asin', 'atan',
+    'cosh', 'sinh', 'tanh',
+    'sech', 'csch', 'coth',
+    'acosh', 'asinh', 'atanh',
+    'log1p', 'expm1',
+    'eint', 'li2',
+    'gamma', 'lngamma', 'lgamma',
+    'zeta',
+    'erf', 'erfc',
+    'j0', 'j1', 'y0', 'y1',
+    ]
+
+# standard functions taking two mpfr_t objects as input
+
+standard_binary_functions = [
+    'add', 'sub', 'mul', 'div', 'pow',
+    'dim', 'atan2', 'agm', 'hypot',
+    ]
+
+standard_ternary_functions = [
+    'fma', 'fms',
+    ]
+
+standard_functions = \
+    [(name, []) for name in standard_constants] + \
+    [(name, [pympfr]) for name in standard_unary_functions] + \
+    [(name, [pympfr]*2) for name in standard_binary_functions] + \
+    [(name, [pympfr]*3) for name in standard_ternary_functions]
+
+for fn, args in standard_functions:
+    mpfr_fn = getattr(mpfr, 'mpfr_' + fn)
+    mpfr_fn.argtypes = [pympfr] + args + [RoundingMode]
