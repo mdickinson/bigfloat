@@ -180,10 +180,6 @@ class BigFloat(object):
         self._value = value
         return self
 
-
-        
-
-
     def __new__(cls, value):
         """Create BigFloat from integer, float, string or another BigFloat.
 
