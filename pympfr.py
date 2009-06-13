@@ -506,7 +506,7 @@ standard_ternary_functions = [
 # more standard functions, with argument types
 additional_standard_functions = [
     ('set_d', [ctypes.c_double]),
-    ('set_str2', [c_char_p, Base, RoundingMode]),
+    ('set_str2', [ctypes.c_char_p, Base]),
 ]
 
 standard_functions = \
