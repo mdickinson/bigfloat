@@ -90,7 +90,6 @@ _SHORT_ENUMS = False
 #
 # In addition, we define:
 #
-#   mpfr_sign_t: type used for representing the sign
 #   mpfr_limb_t: internal type used for the digits
 
 if __GMP_MP_SIZE_T_INT == 1:
@@ -99,8 +98,6 @@ if __GMP_MP_SIZE_T_INT == 1:
 else:
     mpfr_prec_t = ctypes.c_ulong
     mpfr_exp_t = ctypes.c_long
-
-mpfr_sign_t = ctypes.c_int
 
 if __GMP_SHORT_LIMB_DEFINED:
     mpfr_limb_t = ctypes.c_uint
@@ -117,7 +114,7 @@ else:
 class __mpfr_struct(ctypes.Structure):
     _fields_ = [
         ("_mpfr_prec", mpfr_prec_t),
-        ("_mpfr_sign", mpfr_sign_t),
+        ("_mpfr_sign", ctypes.c_int),
         ("_mpfr_exp", mpfr_exp_t),
         ("_mpfr_d", ctypes.POINTER(mpfr_limb_t))
         ]

@@ -2,12 +2,17 @@
 
 # BigFloats are treated as immutable.
 
+# XXX: this module defines functions 'abs' and 'set', which shadow the
+# builtins.  Don't do 'from bigfloat import *' if you don't want to clobber
+# these functions.
+
 import sys
 
 from pympfr import pympfr
 from pympfr import mpfr
 from pympfr import GMP_RNDN, GMP_RNDZ, GMP_RNDU, GMP_RNDD
 from pympfr import MPFR_PREC_MIN
+from pympfr import standard_functions
 
 try:
     DBL_PRECISION = sys.float_info.mant_dig
@@ -24,9 +29,10 @@ bit_length_correction = {
     '8': 0, '9': 0, 'a': 0, 'b': 0, 'c': 0, 'd': 0, 'e': 0, 'f': 0,
     }
     
-def bit_length(n):
+# the abs builtin is shadowed by the MPFR abs function later on
+def bit_length(n, _abs=abs):
     """Bit length of an integer"""
-    hex_n = '%x' % abs(n)
+    hex_n = '%x' % _abs(n)
     return 4 * len(hex_n) - bit_length_correction[hex_n[0]]
 
 def format_finite(digits, dot_pos):
@@ -90,7 +96,10 @@ class Context(object):
     def __exit__(self, *args):
         popcontext()
 
-DefaultContext = Context(precision=53, rounding_mode=GMP_RNDN)
+# some useful contexts
+
+def StandardContext(precision):
+    return Context(precision=precision, rounding_mode=GMP_RNDN)
 
 
 # thread local variables:
@@ -100,7 +109,7 @@ DefaultContext = Context(precision=53, rounding_mode=GMP_RNDN)
 import threading
 
 local = threading.local()
-local.__bigfloat_context__ = DefaultContext
+local.__bigfloat_context__ = StandardContext(53)
 local.__context_stack__ = []
 
 def getcontext(_local = local):
@@ -135,7 +144,19 @@ def wrap_standard_function(f):
         return BigFloat._from_pympfr(bf)
     return wrapped_f
 
-add = wrap_standard_function(mpfr.mpfr_add)
+def wrap_predicate(f):
+    def wrapped_f(*args):
+        context = getcontext()
+        argtypes = f.argtypes
+        if len(args) != len(argtypes):
+            raise TypeError("Wrong number of arguments")
+        converted_args = []
+        for arg, arg_t in zip(args, argtypes):
+            if arg_t is pympfr:
+                arg = BigFloat.implicit_convert(arg)._value
+            converted_args.append(arg)
+        return f(*converted_args)
+    return wrapped_f
 
 def reverse_args(f):
     def reversed_f(self, other):
@@ -159,6 +180,10 @@ class BigFloat(object):
         self._value = value
         return self
 
+
+        
+
+
     def __new__(cls, value):
         """Create BigFloat from integer, float, string or another BigFloat.
 
@@ -166,24 +191,16 @@ class BigFloat(object):
 
         """
 
-        context = getcontext()
-        bf = pympfr(precision=context.precision)
         if isinstance(value, float):
-            mpfr.mpfr_set_d(bf, value, context.rounding_mode)
-
+            return set_d(value)
         elif isinstance(value, basestring):
-            mpfr.mpfr_set_str2(bf, value.strip(), 10, context.rounding_mode)
-
+            return set_str2(value.strip(), 10)
         elif isinstance(value, (int, long)):
-            mpfr.mpfr_set_str2(bf, '%x' % value, 16, context.rounding_mode)
-
+            return set_str2('%x' % value, 16)
         elif isinstance(value, BigFloat):
-            mpfr.mpfr_set(bf, value._value, context.rounding_mode)
-
+            return set(value)
         else:
             raise TypeError("Can't convert argument to BigFloat")
-
-        return cls._from_pympfr(bf)
 
     # alternative constructor, that does exact conversions
     @classmethod
@@ -209,8 +226,33 @@ class BigFloat(object):
                 precision = value.precision
 
         # use Default context, with given precision
-        with DefaultContext.new_precision(precision):
+        with StandardContext(precision):
             return BigFloat(value)
+
+    def __int__(self):
+        """BigFloat -> int.
+
+        Rounds using round-towards-zero, regardless of current
+        rounding mode.
+
+        """
+        # convert via hex string; rounding mode doesn't matter here,
+        # since conversion should be exact
+        if not self.is_finite:
+            raise ValueError("Can't convert infinity or nan to integer")
+
+        e, digits = self._value.get_str(16, 0, GMP_RNDN)
+        digits = digits.lstrip('-').rstrip('0')
+        n = int(digits, 16)
+        e = e-len(digits) << 2
+        if e >= 0:
+            n <<= e
+        else:
+            n >>= -e
+        return int(-n) if self.is_negative else int(n)
+
+    def __long__(self):
+        return long(int(self))
 
     def __float__(self):
         """BigFloat -> float.
@@ -252,13 +294,21 @@ class BigFloat(object):
     __rsub__ = reverse_args(__sub__)
     __rmul__ = reverse_args(__mul__)
     __rtruediv__ = reverse_args(__truediv__)
-    __rpow__ = wrap_standard_function(__pow__)
+    __rpow__ = reverse_args(__pow__)
 
     # unary arithmetic operations
     __abs__ = wrap_standard_function(mpfr.mpfr_abs)
     __pos__ = wrap_standard_function(mpfr.mpfr_set)
     __neg__ = wrap_standard_function(mpfr.mpfr_neg)
 
+    # rich comparisons
+    __eq__ = wrap_predicate(mpfr.mpfr_equal_p)
+    __le__ = wrap_predicate(mpfr.mpfr_lessequal_p)
+    __lt__ = wrap_predicate(mpfr.mpfr_less_p)
+    __ge__ = wrap_predicate(mpfr.mpfr_greaterequal_p)
+    __gt__ = wrap_predicate(mpfr.mpfr_greater_p)
+    def __ne__(self, other):
+        return not self == other
 
     @property
     def precision(self):
@@ -299,3 +349,6 @@ class BigFloat(object):
                             "to BigFloat" % (arg, type(arg)))
 
 
+for fn, _ in standard_functions:
+    mpfr_fn = getattr(mpfr, 'mpfr_' + fn)
+    globals()[fn] = wrap_standard_function(mpfr_fn)
