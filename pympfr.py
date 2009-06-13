@@ -415,8 +415,9 @@ mpfr.mpfr_free_str.restype = None
 
 # 5.6 Comparison Functions
 
-# also includes signbit from section 5.12
-for unary_predicate in ['nan_p', 'inf_p', 'number_p', 'zero_p', 'signbit']:
+# also includes signbit from section 5.12, and integer_p from section 5.10
+for unary_predicate in ['nan_p', 'inf_p', 'number_p', 'zero_p',
+                        'signbit', 'integer_p']:
     mpfr_predicate = getattr(mpfr, 'mpfr_' + unary_predicate)
     mpfr_predicate.argtypes = [pympfr]
     mpfr_predicate.restype = bool
@@ -490,6 +491,8 @@ standard_unary_functions = [
     'zeta',
     'erf', 'erfc',
     'j0', 'j1', 'y0', 'y1',
+    'rint_ceil', 'rint_floor', 'rint_round', 'rint_trunc',
+    'frac',
     ]
 
 # standard functions taking two mpfr_t objects as input
@@ -497,6 +500,7 @@ standard_unary_functions = [
 standard_binary_functions = [
     'add', 'sub', 'mul', 'div', 'pow',
     'dim', 'atan2', 'agm', 'hypot',
+    'fmod', 'remainder',
     ]
 
 standard_ternary_functions = [
