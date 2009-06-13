@@ -146,6 +146,15 @@ class RoundingMode(object):
             raise ValueError("Invalid rounding mode")
         return mpfr_rnd_t(value)
 
+# Base (i.e., radix) class, used for conversions to and from string
+
+class Base(object):
+    @classmethod
+    def from_param(cls, value):
+        if not 2 <= value <= 36:
+            raise ValueError("base b should satisfy 2 <= b <= 36")
+        return ctypes.c_int(value)
+
 # This is the main class, implemented as a wrapper around mpfr_t.
 
 class pympfr(object):
@@ -351,18 +360,36 @@ mpfr.mpfr_get_prec.restype = mpfr_prec_t
 
 mpfr.mpfr_strtofr.argtypes = [pympfr, ctypes.c_char_p,
                               ctypes.POINTER(ctypes.c_char_p),
-                              ctypes.c_int, RoundingMode]
-mpfr.mpfr_strtofr.restype = ctypes.c_int
+                              Base, RoundingMode]
 
 def strtofr(x, s, base, rounding_mode):
-    """Set value of x from string s."""
+    """Set value of x from string s.
+
+    Returns a pair (t, n) giving the ternary value t and
+    the number n of characters consumed.  If n == 0
+    the the input string was invalid;  in this case x is
+    set to 0.
+
+    """
+    if not 2 <= base <= 36:
+        raise ValueError("base should satsify 2 <= base <= 36")
     startptr = ctypes.c_char_p(s)
     endptr = ctypes.c_char_p()
     ternary = mpfr.mpfr_strtofr(x, startptr, ctypes.byref(endptr), base, rounding_mode)
-    # get number of digits consumed
-    ndigits = ctypes.cast(endptr, ctypes.c_void_p).value - \
-        ctypes.cast(startptr, ctypes.c_void_p).value
-    return ternary, ndigits
+    return ternary, endptr.value
+
+# mpfr_set_str2 has the form of a standard function.  It's like
+# mpfr_set_str, but raises a Python exception for failure, and
+# otherwise returns a ternary value.
+def mpfr_set_str2(x, s, base, rounding_mode):
+    if s != s.strip():
+        raise ValueError("not a valid numeric string")
+    ternary, remainder = strtofr(x, s, base, rounding_mode)
+    if remainder:
+        raise ValueError("not a valid numeric string")
+    return ternary
+
+mpfr.mpfr_set_str2 = mpfr_set_str2
 
 # We don't implement the MPFR assignments from C integer types, C long
 # double, C decimal64, GMP rationals, or GMP floats.
@@ -379,7 +406,7 @@ mpfr.mpfr_get_d.restype = ctypes.c_double
 # declare mpfr_get_str.restype as POINTER(c_char) to avoid the
 # automatic c_char_p -> string unboxing.
 mpfr.mpfr_get_str.argtypes = [ctypes.c_char_p, ctypes.POINTER(mpfr_exp_t),
-                              ctypes.c_int, ctypes.c_size_t,
+                              Base, ctypes.c_size_t,
                               pympfr, RoundingMode]
 mpfr.mpfr_get_str.restype = ctypes.POINTER(ctypes.c_char)
 
@@ -477,9 +504,9 @@ standard_ternary_functions = [
     ]
 
 # more standard functions, with argument types
-
 additional_standard_functions = [
     ('set_d', [ctypes.c_double]),
+    ('set_str2', [c_char_p, Base, RoundingMode]),
 ]
 
 standard_functions = \
