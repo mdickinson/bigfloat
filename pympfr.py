@@ -52,6 +52,11 @@ def format_finite(digits, dot_pos):
     return digits
 
 ################################################################################
+# Locate and load the library
+
+mpfr = ctypes.cdll.LoadLibrary(ctypes.util.find_library('mpfr'))
+
+################################################################################
 # Platform dependent values
 
 # To do: get these values directly by parsing or processing gmp.h
@@ -168,8 +173,14 @@ class pympfr(object):
             mpfr.mpfr_init2(value, precision)
         self._as_parameter_ = value
 
+    # keep a reference to mpfr_clear.  Previously, the clear method
+    # included the line 'mpfr.mpfr_clear(self)', but this can give a
+    # (harmless, but ugly) NameError on interpreter shutdown if the
+    # global variable 'mpfr' is removed before __del__ is called on
+    # pympfr instances.
+    clear_method = mpfr.mpfr_clear
     def clear(self):
-        mpfr.mpfr_clear(self)
+        self.clear_method(self)
         del self._as_parameter_
 
     def as_float(self, rounding_mode):
@@ -305,8 +316,6 @@ GMP_RNDN, GMP_RNDZ, GMP_RNDU, GMP_RNDD = range(4)
 
 ################################################################################
 # Wrap functions from the library
-
-mpfr = ctypes.cdll.LoadLibrary(ctypes.util.find_library('mpfr'))
 
 # 5.1 Initialization Functions
 
