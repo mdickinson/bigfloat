@@ -131,9 +131,9 @@ class Context(object):
 # some useful contexts
 
 DefaultContext = Context(precision=53,
-                         rounding_mode = GMP_RNDN,
-                         emax = mpfr.mpfr_get_emax_max(),
-                         emin = mpfr.mpfr_get_emin_min(),
+                         rounding_mode=GMP_RNDN,
+                         emax=mpfr.mpfr_get_emax_max(),
+                         emin=mpfr.mpfr_get_emin_min(),
                          subnormalize=False)
 
 double_precision = Context(precision=53,
