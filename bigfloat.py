@@ -203,7 +203,7 @@ def IEEEContext(bitwidth):
 half_precision = IEEEContext(16)
 single_precision = IEEEContext(32)
 double_precision = IEEEContext(64)
-quad_precision = IEEEContext(128)
+quadruple_precision = IEEEContext(128)
 
 # thread local variables:
 #   __bigfloat_context__: current context
