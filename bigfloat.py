@@ -14,7 +14,7 @@ __all__ = [
 
     # contexts
     'Context', 'getcontext', 'setcontext', 'DefaultContext',
-    
+
     # functions that generate a new context from the current one
     'precision', 'rounding',
 
@@ -49,7 +49,7 @@ bit_length_correction = {
     '0': 4, '1': 3, '2': 2, '3': 2, '4': 1, '5': 1, '6': 1, '7': 1,
     '8': 0, '9': 0, 'a': 0, 'b': 0, 'c': 0, 'd': 0, 'e': 0, 'f': 0,
     }
-    
+
 # the abs builtin is shadowed by the MPFR abs function later on
 def bit_length(n, _abs=abs):
     """Bit length of an integer"""
@@ -484,3 +484,4 @@ for fn, argtypes in predicates:
     pyfn_name = name_translation.get(fn, fn)
     globals()[pyfn_name] = wrap_predicate(mpfr_fn)
     __all__.append(pyfn_name)
+
