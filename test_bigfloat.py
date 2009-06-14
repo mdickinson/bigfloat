@@ -29,7 +29,8 @@ class BigFloatTests(unittest.TestCase):
                        '1e456',
                        '+nan',
                        'inf',
-                       '-inf']
+                       '-inf',
+                       u'-451.001']
         test_precisions = [2, 20, 53, 2000]
         for value in test_values:
             for p in test_precisions:
