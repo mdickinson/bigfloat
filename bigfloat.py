@@ -17,6 +17,11 @@ __all__ = [
     
     'precision', 'rounding',
 
+    # rounding modes;  two sets of names are exported, for convenience
+    'tonearest', 'tozero', 'toinf', 'toneginf',
+    'RoundTiesToEven', 'RoundTowardZero',
+    'RoundTowardPositive', 'RoundTowardNegative',
+
 ]
 
 # note that __all__ is dynamically modified later on to add standard
