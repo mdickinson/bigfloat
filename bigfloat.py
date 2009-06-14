@@ -130,12 +130,11 @@ class Context(object):
 
 # some useful contexts
 
-def StandardContext(precision):
-    return Context(precision=precision,
-                   rounding_mode=GMP_RNDN,
-                   emax = mpfr.mpfr_get_emax_max(),
-                   emin = mpfr.mpfr_get_emin_min(),
-                   subnormalize = False)
+DefaultContext = Context(precision=53,
+                         rounding_mode = GMP_RNDN,
+                         emax = mpfr.mpfr_get_emax_max(),
+                         emin = mpfr.mpfr_get_emin_min(),
+                         subnormalize=False)
 
 double_precision = Context(precision=53,
                            rounding_mode = GMP_RNDN,
@@ -150,7 +149,7 @@ double_precision = Context(precision=53,
 import threading
 
 local = threading.local()
-local.__bigfloat_context__ = StandardContext(53)
+local.__bigfloat_context__ = DefaultContext
 local.__context_stack__ = []
 
 def getcontext(_local = local):
@@ -268,7 +267,7 @@ class BigFloat(object):
                 raise TypeError("Can't convert argument %s of type %s to BigFloat" % (value, type(value)))
 
         # use Default context, with given precision
-        with StandardContext(precision):
+        with DefaultContext(precision = precision):
             return BigFloat(value)
 
     def __int__(self):
