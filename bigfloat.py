@@ -136,11 +136,37 @@ DefaultContext = Context(precision=53,
                          emin=mpfr.mpfr_get_emin_min(),
                          subnormalize=False)
 
-double_precision = Context(precision=53,
-                           rounding_mode = GMP_RNDN,
-                           emax = 1024,
-                           emin = -1073,
-                           subnormalize = True)
+# dictionary giving precision as a function of storage width for the
+# standard binary formats described in IEEE 754-2008.
+IEEE_standard_precision = {
+    16: 11,  # binary16, 'half precision'
+    32: 24,  # binary32, 'single precision'
+    64: 53,  # binary64, 'double precision'
+    128: 113 # binary128, 'quadruple precision'
+    }
+    
+def IEEEContext(bitwidth):
+    if bitwidth in IEEE_standard_precision:
+        precision = IEEE_standard_precision[bitwidth]
+    elif bitwidth >= 128 and bitwidth % 32 == 0:
+        with DefaultContext(emin=-1, subnormalize=True):
+            # compute log2(bitwidth) rounded to the nearest quarter
+            l = log2(bitwidth)
+        precision = 13 + bitwidth - int(4*l)
+    else:
+        raise ValueError("non-standard bitwidth: bitwidth should "
+                         "be 16, 32, 64, 128, or k*32 for some k >= 4")
+    emax = 1 << bitwidth - precision - 1
+    return Context(precision=precision,
+                   rounding_mode=GMP_RNDN,
+                   emax=emax,
+                   emin=4-emax-precision,
+                   subnormalize=True)
+
+half_precision = IEEEContext(16)
+single_precision = IEEEContext(32)
+double_precision = IEEEContext(64)
+quad_precision = IEEEContext(128)
 
 # thread local variables:
 #   __bigfloat_context__: current context
