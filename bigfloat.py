@@ -444,12 +444,21 @@ class BigFloat(object):
             raise TypeError("Unable to convert argument %s of type %s "
                             "to BigFloat" % (arg, type(arg)))
 
+# dictionary translating MPFR function names (excluding the 'mpfr_'
+# prefix) to Python function names
+
+name_translation = {
+    'set': 'pos',
+}
+
 for fn, argtypes in standard_functions:
     mpfr_fn = getattr(mpfr, 'mpfr_' + fn)
-    globals()[fn] = wrap_standard_function(mpfr_fn)
-    __all__.append(fn)
+    pyfn_name = name_translation.get(fn, fn)
+    globals()[pyfn_name] = wrap_standard_function(mpfr_fn)
+    __all__.append(pyfn_name)
 
 for fn, argtypes in predicates:
     mpfr_fn = getattr(mpfr, 'mpfr_' + fn)
-    globals()[fn] = wrap_predicate(mpfr_fn)
-    __all__.append(fn)
+    pyfn_name = name_translation.get(fn, fn)
+    globals()[pyfn_name] = wrap_predicate(mpfr_fn)
+    __all__.append(pyfn_name)
