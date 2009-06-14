@@ -80,11 +80,11 @@ class Context(object):
     # of a Context private, to discourage users from trying to set the
     # attributes directly.
 
-    def __new__(cls, precision, rounding_mode,
+    def __new__(cls, precision, rounding,
                 emax, emin, subnormalize):
         self = object.__new__(cls)
         self._precision = precision
-        self._rounding_mode = rounding_mode
+        self._rounding = rounding
         self._emax = emax
         self._emin = emin
         self._subnormalize = subnormalize
@@ -95,8 +95,8 @@ class Context(object):
         return self._precision
 
     @property
-    def rounding_mode(self):
-        return self._rounding_mode
+    def rounding(self):
+        return self._rounding
 
     @property
     def emax(self):
@@ -113,7 +113,7 @@ class Context(object):
     def as_dict(self):
         return {
             'precision' : self.precision,
-            'rounding_mode' : self.rounding_mode,
+            'rounding' : self.rounding,
             'emax' : self.emax,
             'emin' : self.emin,
             'subnormalize' : self.subnormalize
@@ -128,9 +128,9 @@ class Context(object):
         return Context(**self_dict)
 
     def __repr__(self):
-        return ("Context(precision=%s, rounding_mode=%s, " +
+        return ("Context(precision=%s, rounding=%s, " +
                 "emax=%s, emin=%s, subnormalize=%s)") % (
-            self.precision, self.rounding_mode,
+            self.precision, self.rounding,
             self.emax, self.emin, self.subnormalize)
 
     __str__ = __repr__
@@ -144,7 +144,7 @@ class Context(object):
 # some useful contexts
 
 DefaultContext = Context(precision=53,
-                         rounding_mode=tonearest,
+                         rounding=tonearest,
                          emax=mpfr.mpfr_get_emax_max(),
                          emin=mpfr.mpfr_get_emin_min(),
                          subnormalize=False)
@@ -167,7 +167,7 @@ def IEEEContext(bitwidth):
 
     emax = 1 << bitwidth - precision - 1
     return Context(precision=precision,
-                   rounding_mode=tonearest,
+                   rounding=tonearest,
                    emax=emax,
                    emin=4-emax-precision,
                    subnormalize=True)
@@ -215,11 +215,11 @@ def wrap_standard_function(f):
             if arg_t is pympfr:
                 arg = BigFloat.implicit_convert(arg)._value
             converted_args.append(arg)
-        converted_args.append(context.rounding_mode)
+        converted_args.append(context.rounding)
         bf = pympfr(precision=context.precision)
         ternary = f(bf, *converted_args)
         if context.subnormalize:
-            ternary = mpfr.mpfr_subnormalize(bf, ternary, context.rounding_mode)
+            ternary = mpfr.mpfr_subnormalize(bf, ternary, context.rounding)
         return BigFloat._from_pympfr(bf)
     return wrapped_f
 
