@@ -19,7 +19,6 @@ __all__ = [
     'precision', 'rounding',
 
     # rounding modes;  two sets of names are exported, for convenience
-    'tonearest', 'tozero', 'toinf', 'toneginf',
     'RoundTiesToEven', 'RoundTowardZero',
     'RoundTowardPositive', 'RoundTowardNegative',
 
@@ -32,7 +31,6 @@ import sys
 
 from pympfr import pympfr
 from pympfr import mpfr
-from pympfr import tonearest, tozero, toinf, toneginf
 from pympfr import RoundTiesToEven, RoundTowardZero
 from pympfr import RoundTowardPositive, RoundTowardNegative
 from pympfr import MPFR_PREC_MIN, MPFR_PREC_MAX
@@ -170,7 +168,7 @@ class Context(object):
 # some useful contexts
 
 DefaultContext = Context(precision=53,
-                         rounding=tonearest,
+                         rounding=RoundTiesToEven,
                          emax=mpfr.mpfr_get_emax_max(),
                          emin=mpfr.mpfr_get_emin_min(),
                          subnormalize=False)
@@ -193,7 +191,7 @@ def IEEEContext(bitwidth):
 
     emax = 1 << bitwidth - precision - 1
     return Context(precision=precision,
-                   rounding=tonearest,
+                   rounding=RoundTiesToEven,
                    emax=emax,
                    emin=4-emax-precision,
                    subnormalize=True)
@@ -353,7 +351,7 @@ class BigFloat(object):
         if not self.is_finite:
             raise ValueError("Can't convert infinity or nan to integer")
 
-        e, digits = self._value.get_str(16, 0, tonearest)
+        e, digits = self._value.get_str(16, 0, RoundTiesToEven)
         digits = digits.lstrip('-').rstrip('0')
         n = int(digits, 16)
         e = e-len(digits) << 2
@@ -372,13 +370,13 @@ class BigFloat(object):
         Rounds using RoundTiesToEven, regardless of current rounding mode.
 
         """
-        return mpfr.mpfr_get_d(self._value, tonearest)
+        return mpfr.mpfr_get_d(self._value, RoundTiesToEven)
 
     def __repr__(self):
         if self.is_zero:
             num = '0'
         elif self.is_finite:
-            expt, digits = self._value.get_str(10, 0, tonearest)
+            expt, digits = self._value.get_str(10, 0, RoundTiesToEven)
             num = format_finite(digits.lstrip('-'), expt)
         elif self.is_inf:
             num = 'Infinity'
@@ -467,10 +465,10 @@ class BigFloat(object):
                             "to BigFloat" % (arg, type(arg)))
 
 # dictionary translating MPFR function names (excluding the 'mpfr_'
-# prefix) to Python function names
+# prefix) to Python function names.
 
 name_translation = {
-    'set': 'pos',
+    'set': 'pos',  # avoid clobbering 'set' builtin
 }
 
 for fn, argtypes in standard_functions:
