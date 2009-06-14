@@ -13,7 +13,7 @@ __all__ = [
     'BigFloat',
 
     # contexts
-    'Context', 'getcontext', 'setcontext',
+    'Context', 'getcontext', 'setcontext', 'DefaultContext',
     
 ]
 
@@ -444,11 +444,12 @@ class BigFloat(object):
             raise TypeError("Unable to convert argument %s of type %s "
                             "to BigFloat" % (arg, type(arg)))
 
-
 for fn, argtypes in standard_functions:
     mpfr_fn = getattr(mpfr, 'mpfr_' + fn)
     globals()[fn] = wrap_standard_function(mpfr_fn)
+    __all__.append(fn)
 
 for fn, argtypes in predicates:
     mpfr_fn = getattr(mpfr, 'mpfr_' + fn)
     globals()[fn] = wrap_predicate(mpfr_fn)
+    __all__.append(fn)
