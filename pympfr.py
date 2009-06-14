@@ -11,8 +11,10 @@ __all__ = [
     # constants giving limits on the precision
     'MPFR_PREC_MIN', 'MPFR_PREC_MAX',
 
-    # rounding modes
-    'GMP_RNDN', 'GMP_RNDZ', 'GMP_RNDU', 'GMP_RNDD',
+    # rounding modes;  two sets of names are exported, for convenience
+    'tonearest', 'tozero', 'toinf', 'toneginf',
+    'RoundTiesToEven', 'RoundTowardZero',
+    'RoundTowardPositive', 'RoundTowardNegative',
 
     # lists of standard functions and predicates
     'standard_functions', 'predicates',
@@ -139,15 +141,24 @@ class Precision(object):
                 "[{0}, {1}]".format(MPFR_PREC_MIN, MPFR_PREC_MAX))
         return mpfr_prec_t(value)
 
+
+# Rounding modes
+tonearest = RoundTiesToEven = 'RoundTiesToEven'
+tozero = RoundTowardZero = 'RoundTowardZero'
+toinf = RoundTowardPositive = 'RoundTowardPositive'
+toneginf = RoundTowardNegative = 'RoundTowardNegative'
+rounding_mode_dict = {tonearest: 0, tozero: 1, toinf: 2, toneginf: 3}
+
 # Rounding mode class is used for automatically validating the
 # rounding mode before passing it to the MPFR library.
 
 class RoundingMode(object):
     @classmethod
     def from_param(cls, value):
-        if not value in [GMP_RNDN, GMP_RNDZ, GMP_RNDU, GMP_RNDD]:
+        try:
+            return mpfr_rnd_t(rounding_mode_dict[value])
+        except KeyError:
             raise ValueError("Invalid rounding mode")
-        return mpfr_rnd_t(value)
 
 # Base (i.e., radix) class, used for conversions to and from string
 
@@ -207,7 +218,7 @@ class pympfr(object):
             return 0, 1
 
         # convert to a hex string, and from there to a fraction
-        e, digits = self.get_str(16, 0, GMP_RNDN)
+        e, digits = self.get_str(16, 0, tonearest)
         digits = digits.lstrip('-').rstrip('0')
 
         # find number of trailing 0 bits in last hex digit
@@ -232,7 +243,7 @@ class pympfr(object):
         if self.is_zero:
             num = '0'
         elif self.is_finite:
-            expt, digits = self.get_str(10, 0, GMP_RNDN)
+            expt, digits = self.get_str(10, 0, tonearest)
             num = format_finite(digits.lstrip('-'), expt)
         elif self.is_inf:
             num = 'Infinity'
@@ -319,9 +330,6 @@ class pympfr(object):
 # limits on precision
 MPFR_PREC_MIN = 2
 MPFR_PREC_MAX = mpfr_prec_t(-1).value >> 1
-
-# rounding modes
-GMP_RNDN, GMP_RNDZ, GMP_RNDU, GMP_RNDD = range(4)
 
 ################################################################################
 # Wrap functions from the library

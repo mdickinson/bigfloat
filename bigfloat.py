@@ -6,12 +6,25 @@
 # shadow the builtin functions of those names.  Don't do 'from
 # bigfloat import *' if you don't want to clobber these functions.
 
+# Names to export when someone does 'from bigfloat import *'
+
+__all__ = [
+    # main class
+    'BigFloat',
+
+    # contexts
+    'Context', 'getcontext', 'setcontext',
+    
+]
+
 import sys
 
 from pympfr import pympfr
 from pympfr import mpfr
-from pympfr import GMP_RNDN, GMP_RNDZ, GMP_RNDU, GMP_RNDD
-from pympfr import MPFR_PREC_MIN
+from pympfr import tonearest, tozero, toinf, toneginf
+from pympfr import RoundTiesToEven, RoundTowardZero
+from pympfr import RoundTowardPositive, RoundTowardNegative
+from pympfr import MPFR_PREC_MIN, MPFR_PREC_MAX
 from pympfr import standard_functions, predicates
 
 try:
@@ -131,7 +144,7 @@ class Context(object):
 # some useful contexts
 
 DefaultContext = Context(precision=53,
-                         rounding_mode=GMP_RNDN,
+                         rounding_mode=tonearest,
                          emax=mpfr.mpfr_get_emax_max(),
                          emin=mpfr.mpfr_get_emin_min(),
                          subnormalize=False)
@@ -154,7 +167,7 @@ def IEEEContext(bitwidth):
 
     emax = 1 << bitwidth - precision - 1
     return Context(precision=precision,
-                   rounding_mode=GMP_RNDN,
+                   rounding_mode=tonearest,
                    emax=emax,
                    emin=4-emax-precision,
                    subnormalize=True)
@@ -295,8 +308,7 @@ class BigFloat(object):
     def __int__(self):
         """BigFloat -> int.
 
-        Rounds using round-towards-zero, regardless of current
-        rounding mode.
+        Rounds using RoundTowardZero, regardless of current rounding mode.
 
         """
         # convert via hex string; rounding mode doesn't matter here,
@@ -304,7 +316,7 @@ class BigFloat(object):
         if not self.is_finite:
             raise ValueError("Can't convert infinity or nan to integer")
 
-        e, digits = self._value.get_str(16, 0, GMP_RNDN)
+        e, digits = self._value.get_str(16, 0, tonearest)
         digits = digits.lstrip('-').rstrip('0')
         n = int(digits, 16)
         e = e-len(digits) << 2
@@ -320,17 +332,16 @@ class BigFloat(object):
     def __float__(self):
         """BigFloat -> float.
 
-        Rounds using round-half-to-even, regardless of current
-        rounding mode.
+        Rounds using RoundTiesToEven, regardless of current rounding mode.
 
         """
-        return mpfr.mpfr_get_d(self._value, GMP_RNDN)
+        return mpfr.mpfr_get_d(self._value, tonearest)
 
     def __repr__(self):
         if self.is_zero:
             num = '0'
         elif self.is_finite:
-            expt, digits = self._value.get_str(10, 0, GMP_RNDN)
+            expt, digits = self._value.get_str(10, 0, tonearest)
             num = format_finite(digits.lstrip('-'), expt)
         elif self.is_inf:
             num = 'Infinity'
