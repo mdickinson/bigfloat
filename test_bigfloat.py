@@ -1,4 +1,5 @@
 import unittest
+import operator
 from bigfloat import *
 
 class BigFloatTests(unittest.TestCase):
@@ -47,7 +48,7 @@ class BigFloatTests(unittest.TestCase):
         # add a few extra values at other precisions
         with precision(200):
             test_values.append(const_catalan())
-        with precision(5):
+        with precision(15):
             test_values.append(sqrt(3))
         test_precisions = [2, 20, 53, 2000]
         for value in test_values:
@@ -57,6 +58,30 @@ class BigFloatTests(unittest.TestCase):
                     self.assertEqual(type(bf), BigFloat)
                     self.assertEqual(bf.precision, p)
 
+    def test_binary_operations(self):
+        # check that BigFloats can be combined with themselves,
+        # and with integers and floats, using the 6 standard
+        # arithmetic operators:  +, -, *, /, **, %
+
+        x = BigFloat('17.29')
+        other_values = [2, 3L, 1.234, BigFloat('0.678')]
+        test_precisions = [2, 20, 53, 2000]
+        # note that division using '/' should work (giving true division)
+        # whether or not 'from __future__ import division' is enabled.
+        # So we test both operator.div and operator.truediv.
+        operations = [operator.add, operator.mul, operator.div,
+                      operator.sub, operator.pow, operator.truediv,
+                      operator.mod]
+        for value in other_values:
+            for p in test_precisions:
+                with precision(p):
+                    for op in operations:
+                        bf = op(x, value)
+                        self.assertEqual(type(bf), BigFloat)
+                        self.assertEqual(bf.precision, p)
+                        bf = op(value, x)
+                        self.assertEqual(type(bf), BigFloat)
+                        self.assertEqual(bf.precision, p)
 
 
     def test_subnormalization(self):
