@@ -1,4 +1,7 @@
 __all__ = [
+    # mpfr library
+    'mpfr',
+
     # pympfr class: thin wrapper around mpfr_t type
     'pympfr',
 
@@ -11,8 +14,8 @@ __all__ = [
     # rounding modes
     'GMP_RNDN', 'GMP_RNDZ', 'GMP_RNDU', 'GMP_RNDD',
 
-    # the two comparisons that aren't covered by the usual operators
-    'lessgreater', 'unordered',
+    # lists of standard functions and predicates
+    'standard_functions', 'predicates',
 
     ]
 
@@ -413,22 +416,6 @@ mpfr.mpfr_get_str.restype = ctypes.POINTER(ctypes.c_char)
 mpfr.mpfr_free_str.argtypes = [ctypes.POINTER(ctypes.c_char)]
 mpfr.mpfr_free_str.restype = None
 
-# 5.6 Comparison Functions
-
-# also includes signbit from section 5.12, and integer_p from section 5.10
-for unary_predicate in ['nan_p', 'inf_p', 'number_p', 'zero_p',
-                        'signbit', 'integer_p']:
-    mpfr_predicate = getattr(mpfr, 'mpfr_' + unary_predicate)
-    mpfr_predicate.argtypes = [pympfr]
-    mpfr_predicate.restype = bool
-
-for binary_predicate in ['greater_p', 'greaterequal_p',
-                         'less_p', 'lessequal_p',
-                         'lessgreater_p', 'equal_p', 'unordered_p']:
-    mpfr_predicate = getattr(mpfr, 'mpfr_' + binary_predicate)
-    mpfr_predicate.argtypes = [pympfr, pympfr]
-    mpfr_predicate.restype = bool
-
 # 5.12 Miscellaneous Functions
 
 mpfr.mpfr_nexttoward.argtypes = [pympfr, pympfr]
@@ -441,9 +428,6 @@ mpfr.mpfr_nexttoward.restype = None
 
 set_default_precision = mpfr.mpfr_set_default_prec
 get_default_precision = mpfr.mpfr_get_default_prec
-
-lessgreater = mpfr.mpfr_lessgreater_p
-unordered = mpfr.mpfr_unordered_p
 
 def rewrap(f):
     def wrapped_f(*args):
@@ -523,3 +507,23 @@ standard_functions = \
 for fn, args in standard_functions:
     mpfr_fn = getattr(mpfr, 'mpfr_' + fn)
     mpfr_fn.argtypes = [pympfr] + args + [RoundingMode]
+
+unary_predicates = [
+    'nan_p', 'inf_p', 'number_p', 'zero_p',
+    'signbit', 'integer_p'
+    ]
+
+binary_predicates = [
+    'greater_p', 'greaterequal_p',
+    'less_p', 'lessequal_p',
+    'lessgreater_p', 'equal_p', 'unordered_p'
+    ]
+
+predicates = \
+    [(name, [pympfr]) for name in unary_predicates] + \
+    [(name, [pympfr]*2) for name in binary_predicates]
+    
+for pred, args in predicates:
+    mpfr_pred = getattr(mpfr, 'mpfr_' + pred)
+    mpfr_pred.argtypes = args
+    mpfr_pred.restype = bool
