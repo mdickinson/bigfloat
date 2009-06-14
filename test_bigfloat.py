@@ -39,6 +39,25 @@ class BigFloatTests(unittest.TestCase):
                     self.assertEqual(type(bf), BigFloat)
                     self.assertEqual(bf.precision, p)
 
+    def test_creation_from_BigFloat(self):
+        test_values = [BigFloat(1.0),
+                       BigFloat('nan'),
+                       BigFloat('inf'),
+                       const_pi()]
+        # add a few extra values at other precisions
+        with precision(200):
+            test_values.append(const_catalan())
+        with precision(5):
+            test_values.append(sqrt(3))
+        test_precisions = [2, 20, 53, 2000]
+        for value in test_values:
+            for p in test_precisions:
+                with precision(p):
+                    bf = BigFloat(value)
+                    self.assertEqual(type(bf), BigFloat)
+                    self.assertEqual(bf.precision, p)
+
+
 
     def test_subnormalization(self):
         # check that subnormalization doesn't result in

@@ -311,7 +311,7 @@ class BigFloat(object):
         elif isinstance(value, (int, long)):
             return set_str2('%x' % value, 16)
         elif isinstance(value, BigFloat):
-            return set(value)
+            return pos(value)
         else:
             raise TypeError("Can't convert argument %s of type %s to BigFloat" % (value, type(value)))
 
