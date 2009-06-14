@@ -18,7 +18,7 @@ __all__ = [
     # functions that generate a new context from the current one
     'precision', 'rounding',
 
-    # rounding modes;  two sets of names are exported, for convenience
+    # rounding modes
     'RoundTiesToEven', 'RoundTowardZero',
     'RoundTowardPositive', 'RoundTowardNegative',
 
