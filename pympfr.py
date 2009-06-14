@@ -423,6 +423,33 @@ mpfr.mpfr_nexttoward.restype = None
 
 # for mpfr_signbit:  see section 5.6
 
+# 5.13 Exception Related Functions
+
+mpfr.mpfr_get_emin.argtypes = []
+mpfr.mpfr_get_emin.restype = mpfr_exp_t
+
+mpfr.mpfr_get_emax.argtypes = []
+mpfr.mpfr_get_emax.restype = mpfr_exp_t
+
+mpfr.mpfr_set_emin.argtypes = [mpfr_exp_t]
+mpfr.mpfr_set_emax.argtypes = [mpfr_exp_t]
+
+mpfr.mpfr_get_emin_min.argtypes = []
+mpfr.mpfr_get_emin_min.restype = mpfr_exp_t
+
+mpfr.mpfr_get_emin_max.argtypes = []
+mpfr.mpfr_get_emin_max.restype = mpfr_exp_t
+
+mpfr.mpfr_get_emax_min.argtypes = []
+mpfr.mpfr_get_emax_min.restype = mpfr_exp_t
+
+mpfr.mpfr_get_emax_max.argtypes = []
+mpfr.mpfr_get_emax_max.restype = mpfr_exp_t
+
+mpfr.mpfr_check_range.argtypes = [pympfr, ctypes.c_int, RoundingMode]
+
+mpfr.mpfr_subnormalize.argtypes = [pympfr, ctypes.c_int, RoundingMode]
+
 ################################################################################
 # Functions to be exported at the module level
 
