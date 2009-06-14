@@ -2,9 +2,9 @@
 
 # BigFloats are treated as immutable.
 
-# XXX: this module defines functions 'abs' and 'set', which shadow the
-# builtins.  Don't do 'from bigfloat import *' if you don't want to clobber
-# these functions.
+# XXX: this module defines functions 'abs', 'pow' and 'set', which
+# shadow the builtin functions of those names.  Don't do 'from
+# bigfloat import *' if you don't want to clobber these functions.
 
 import sys
 
@@ -12,7 +12,7 @@ from pympfr import pympfr
 from pympfr import mpfr
 from pympfr import GMP_RNDN, GMP_RNDZ, GMP_RNDU, GMP_RNDD
 from pympfr import MPFR_PREC_MIN
-from pympfr import standard_functions
+from pympfr import standard_functions, predicates
 
 try:
     DBL_PRECISION = sys.float_info.mant_dig
@@ -22,10 +22,7 @@ except AttributeError:
     DBL_PRECISION = 53
 
 bit_length_correction = {
-    '0': 4,
-    '1': 3,
-    '2': 2, '3': 2,
-    '4': 1, '5': 1, '6': 1, '7': 1,
+    '0': 4, '1': 3, '2': 2, '3': 2, '4': 1, '5': 1, '6': 1, '7': 1,
     '8': 0, '9': 0, 'a': 0, 'b': 0, 'c': 0, 'd': 0, 'e': 0, 'f': 0,
     }
     
@@ -66,29 +63,57 @@ def format_finite(digits, dot_pos):
 # Note that context objects are immutable
 
 class Context(object):
-    def __new__(cls, precision, rounding_mode):
+    # Contexts are supposed to be immutable.  We make the attributes
+    # of a Context private, to discourage users from trying to set the
+    # attributes directly.
+
+    def __new__(cls, precision, rounding_mode,
+                emax, emin, subnormalize):
         self = object.__new__(cls)
         self._precision = precision
         self._rounding_mode = rounding_mode
+        self._emax = emax
+        self._emin = emin
+        self._subnormalize = subnormalize
         return self
 
     @property
     def precision(self):
         return self._precision
 
-    def new_precision(self, precision):
-        return Context(precision=precision,
-                       rounding_mode = self.rounding_mode)
-
-    def __repr__(self):
-        return "Context(precision=%s, rounding_mode=%s)" % (
-            self.precision, self.rounding_mode)
-
-    __str__ = __repr__
-
     @property
     def rounding_mode(self):
         return self._rounding_mode
+
+    @property
+    def emax(self):
+        return self._emax
+
+    @property
+    def emin(self):
+        return self._emin
+
+    @property
+    def subnormalize(self):
+        return self._subnormalize
+
+    # to do: simply make Contents callable, with e.g.,
+    # mycontext(precision = 400) returning a copy of
+    # the current context with the precision changed to 400
+    def new_precision(self, precision):
+        return Context(precision=precision,
+                       rounding_mode = self.rounding_mode,
+                       emax=self.emax,
+                       emin=self.emin,
+                       subnormalize=self.subnormalize)
+
+    def __repr__(self):
+        return ("Context(precision=%s, rounding_mode=%s, " +
+                "emax=%s, emin=%s, subnormalize=%s)") % (
+            self.precision, self.rounding_mode,
+            self.emax, self.emin, self.subnormalize)
+
+    __str__ = __repr__
 
     def __enter__(self):
         pushcontext(self)
@@ -99,8 +124,17 @@ class Context(object):
 # some useful contexts
 
 def StandardContext(precision):
-    return Context(precision=precision, rounding_mode=GMP_RNDN)
+    return Context(precision=precision,
+                   rounding_mode=GMP_RNDN,
+                   emax = mpfr.mpfr_get_emax_max(),
+                   emin = mpfr.mpfr_get_emin_min(),
+                   subnormalize = False)
 
+double_precision = Context(precision=53,
+                           rounding_mode = GMP_RNDN,
+                           emax = 1024,
+                           emin = -1073,
+                           subnormalize = True)
 
 # thread local variables:
 #   __bigfloat_context__: current context
@@ -117,6 +151,8 @@ def getcontext(_local = local):
 
 def setcontext(context, _local = local):
     _local.__bigfloat_context__ = context
+    mpfr.mpfr_set_emin(context.emin)
+    mpfr.mpfr_set_emax(context.emax)
 
 def pushcontext(context, _local = local):
     _local.__context_stack__.append(getcontext())
@@ -141,6 +177,8 @@ def wrap_standard_function(f):
         converted_args.append(context.rounding_mode)
         bf = pympfr(precision=context.precision)
         ternary = f(bf, *converted_args)
+        if context.subnormalize:
+            ternary = mpfr.mpfr_subnormalize(bf, ternary, context.rounding_mode)
         return BigFloat._from_pympfr(bf)
     return wrapped_f
 
@@ -186,7 +224,6 @@ class BigFloat(object):
         Uses the current precision and rounding mode.
 
         """
-
         if isinstance(value, float):
             return set_d(value)
         elif isinstance(value, basestring):
@@ -196,7 +233,7 @@ class BigFloat(object):
         elif isinstance(value, BigFloat):
             return set(value)
         else:
-            raise TypeError("Can't convert argument to BigFloat")
+            raise TypeError("Can't convert argument %s of type %s to BigFloat" % (value, type(value)))
 
     # alternative constructor, that does exact conversions
     @classmethod
@@ -220,6 +257,8 @@ class BigFloat(object):
                 precision = max(bit_length(value), MPFR_PREC_MIN)
             elif isinstance(value, BigFloat):
                 precision = value.precision
+            else:
+                raise TypeError("Can't convert argument %s of type %s to BigFloat" % (value, type(value)))
 
         # use Default context, with given precision
         with StandardContext(precision):
@@ -282,15 +321,17 @@ class BigFloat(object):
     __add__ = wrap_standard_function(mpfr.mpfr_add)
     __sub__ = wrap_standard_function(mpfr.mpfr_sub)
     __mul__ = wrap_standard_function(mpfr.mpfr_mul)
-    __truediv__ = wrap_standard_function(mpfr.mpfr_div)
+    __div__ = __truediv__ = wrap_standard_function(mpfr.mpfr_div)
     __pow__ = wrap_standard_function(mpfr.mpfr_pow)
+    __mod__ = wrap_standard_function(mpfr.mpfr_fmod)
 
     # and their reverse
     __radd__ = reverse_args(__add__)
     __rsub__ = reverse_args(__sub__)
     __rmul__ = reverse_args(__mul__)
-    __rtruediv__ = reverse_args(__truediv__)
+    __rdiv__ = __rtruediv__ = reverse_args(__truediv__)
     __rpow__ = reverse_args(__pow__)
+    __rmod__ = reverse_args(__mod__)
 
     # unary arithmetic operations
     __abs__ = wrap_standard_function(mpfr.mpfr_abs)
@@ -305,6 +346,9 @@ class BigFloat(object):
     __gt__ = wrap_predicate(mpfr.mpfr_greater_p)
     def __ne__(self, other):
         return not self == other
+
+    def __nonzero__(self):
+        return not is_zero_p(self)
 
     @property
     def precision(self):
@@ -347,6 +391,10 @@ class BigFloat(object):
                             "to BigFloat" % (arg, type(arg)))
 
 
-for fn, _ in standard_functions:
+for fn, argtypes in standard_functions:
     mpfr_fn = getattr(mpfr, 'mpfr_' + fn)
     globals()[fn] = wrap_standard_function(mpfr_fn)
+
+for fn, argtypes in predicates:
+    mpfr_fn = getattr(mpfr, 'mpfr_' + fn)
+    globals()[fn] = wrap_predicate(mpfr_fn)
