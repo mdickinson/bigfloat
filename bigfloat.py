@@ -97,15 +97,22 @@ class Context(object):
     def subnormalize(self):
         return self._subnormalize
 
-    # to do: simply make Contents callable, with e.g.,
-    # mycontext(precision = 400) returning a copy of
-    # the current context with the precision changed to 400
-    def new_precision(self, precision):
-        return Context(precision=precision,
-                       rounding_mode = self.rounding_mode,
-                       emax=self.emax,
-                       emin=self.emin,
-                       subnormalize=self.subnormalize)
+    def as_dict(self):
+        return {
+            'precision' : self.precision,
+            'rounding_mode' : self.rounding_mode,
+            'emax' : self.emax,
+            'emin' : self.emin,
+            'subnormalize' : self.subnormalize
+            }
+
+    def __call__(self, **kw):
+        """Return copy of this context, updated with the given
+        keyword parameters."""
+
+        self_dict = self.as_dict()
+        self_dict.update(kw)
+        return Context(**self_dict)
 
     def __repr__(self):
         return ("Context(precision=%s, rounding_mode=%s, " +
