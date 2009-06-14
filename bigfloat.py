@@ -141,6 +141,21 @@ class Context(object):
     def __exit__(self, *args):
         popcontext()
 
+    def max_finite(self):
+        """Largest finite positive value representable in this context."""
+        return (1 - exp2(-self.precision)) * exp2(self.emax)
+
+    def min_finite(self):
+        """Smallest finite positive value representable in this context."""
+        return exp2(self.emin-1)
+
+    def min_normal(self):
+        """Smallest normal positive value representable in this context."""
+        if self.subnormalize:
+            return exp2(self.emin+self.precision-2)
+        else:
+            return exp2(self.emin-1)
+
 # some useful contexts
 
 DefaultContext = Context(precision=53,
