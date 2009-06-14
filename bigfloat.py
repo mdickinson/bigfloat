@@ -18,6 +18,10 @@ __all__ = [
     # functions that generate a new context from the current one
     'precision', 'rounding',
 
+    # contexts corresponding to IEEE 754 binary interchange formats
+    'IEEEContext', 'half_precision', 'single_precision',
+    'double_precision', 'quadruple_precision',
+
     # rounding modes
     'RoundTiesToEven', 'RoundTowardZero',
     'RoundTowardPositive', 'RoundTowardNegative',
