@@ -169,6 +169,30 @@ class Base(object):
             raise ValueError("base b should satisfy 2 <= b <= 36")
         return ctypes.c_int(value)
 
+# UnsignedLong behaves like c_ulong, but raises an exception on
+# overflow instead of wrapping
+
+ULONG_MAX = ctypes.c_ulong(-1).value
+
+class UnsignedLong(object):
+    @classmethod
+    def from_param(cls, value):
+        if not 0 <= value <= ULONG_MAX:
+            raise ValueError("value too large to fit in a C unsigned long")
+        return ctypes.c_ulong(value)
+
+# and Long is similar
+
+LONG_MAX = ULONG_MAX >> 1
+LONG_MIN = -1-LONG_MAX
+
+class Long(object):
+    @classmethod
+    def from_param(cls, value):
+        if not LONG_MIN <= value <= LONG_MAX:
+            raise ValueError("value too large to fit in a C long")
+        return ctypes.c_long(value)
+
 # This is the main class, implemented as a wrapper around mpfr_t.
 
 class pympfr(object):
@@ -530,6 +554,10 @@ standard_ternary_functions = [
 additional_standard_functions = [
     ('set_d', [ctypes.c_double]),
     ('set_str2', [ctypes.c_char_p, Base]),
+    ('mul_2ui', [pympfr, UnsignedLong]),
+    ('mul_2si', [pympfr, Long]),
+    ('div_2ui', [pympfr, UnsignedLong]),
+    ('div_2si', [pympfr, Long]),
 ]
 
 standard_functions = \
