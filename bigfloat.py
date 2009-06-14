@@ -2,7 +2,7 @@
 
 # BigFloats are treated as immutable.
 
-# XXX: this module defines functions 'abs', 'pow' and 'set', which
+# XXX: this module defines functions 'abs' and 'pow' which
 # shadow the builtin functions of those names.  Don't do 'from
 # bigfloat import *' if you don't want to clobber these functions.
 
@@ -15,7 +15,12 @@ __all__ = [
     # contexts
     'Context', 'getcontext', 'setcontext', 'DefaultContext',
     
+    'precision', 'rounding',
+
 ]
+
+# note that __all__ is dynamically modified later on to add standard
+# functions and predicates
 
 import sys
 
@@ -218,6 +223,17 @@ def popcontext(_local = local):
     setcontext(_local.__context_stack__.pop())
 
 del threading, local
+
+def precision(prec):
+    """Return new context equal to the current context, but with
+    the given precision."""
+    return getcontext()(precision=prec)
+
+def rounding(rnd):
+    """Return new context equal to current context but with
+    given rounding mode."""
+    return getcontext()(rounding=rnd)
+
 
 def wrap_standard_function(f):
     def wrapped_f(*args):
