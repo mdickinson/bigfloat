@@ -544,6 +544,7 @@ standard_binary_functions = [
     'add', 'sub', 'mul', 'div', 'pow',
     'dim', 'atan2', 'agm', 'hypot',
     'fmod', 'remainder',
+    'max', 'min',
     ]
 
 standard_ternary_functions = [
