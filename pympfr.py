@@ -454,8 +454,11 @@ mpfr.mpfr_set_nan.restype = None
 # mpfr_set_zero is an extension to MPFR, with similar semantics to
 # mpfr_set_inf.
 
+# XXX: It might be better to be consistent about signs: eliminate one
+# of Bool and Sign.
+
 def mpfr_set_zero(x, sign):
-    mpfr.mpfr_set_ui(x, 0)
+    mpfr.mpfr_set_ui(x, 0, RoundTiesToEven)
     mpfr.mpfr_setsign(x, x, sign < 0, RoundTiesToEven)
 mpfr_set_zero.argtypes = [pympfr, Sign]
 mpfr_set_zero.restype = None
@@ -590,6 +593,8 @@ standard_ternary_functions = [
 
 # more standard functions, with argument types
 additional_standard_functions = [
+    ('set_ui', [UnsignedLong]),
+    ('set_si', [Long]),
     ('set_d', [ctypes.c_double]),
     ('set_str2', [ctypes.c_char_p, Base]),
     ('mul_2ui', [pympfr, UnsignedLong]),
