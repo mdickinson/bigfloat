@@ -203,15 +203,6 @@ class Bool(object):
     def from_param(cls, value):
         return ctypes.c_int(bool(value))
 
-# normalize a value intended to be an MPFR sign, as used
-# for example by the mpfr_set_inf function.  All nonnegative
-# values are mapped to 1;  negative values are mapped to -1.
-
-class Sign(object):
-    @classmethod
-    def from_param(cls, value):
-        return ctypes.c_int(1 if value >= 0 else -1)
-
 # This is the main class, implemented as a wrapper around mpfr_t.
 
 class pympfr(object):
@@ -445,25 +436,44 @@ def mpfr_set_str2(x, s, base, rounding_mode):
 
 mpfr.mpfr_set_str2 = mpfr_set_str2
 
-mpfr.mpfr_set_inf.argtypes = [pympfr, Sign]
+mpfr.mpfr_set_inf.argtypes = [pympfr, ctypes.c_int]
 mpfr.mpfr_set_inf.restype = None
+
+# MPFR uses two different conventions for signs, probably for
+# historical reasons: some functions use a nonzero c_int to mean
+# negative and zero c_int to mean positive (e.g., mpfr_signbit,
+# mpfr_setsign), and some use a nonnegative c_int to mean positive and
+# a negative c_int to mean negative (e.g., mpfr_set_inf).
+
+# In pympfr we try to consistently use True for the sign of a negative
+# number (or negative zero, or nan with its sign bit set) and False
+# for the sign of a positive number (or positive zero, or nan without
+# its sign bit set).
+
+# Here we rewrap mpfr_set_inf to use the above convention.
+
+def mpfr_set_inf2(x, negative):
+    negative = Bool.from_param(negative)
+    mpfr.mpfr_set_inf(x, -1 if negative else 1)
+
+mpfr.mpfr_set_inf2 = mpfr_set_inf2
+mpfr.mpfr_set_inf2.argtypes = [pympfr, Bool]
+mpfr.mpfr_set_inf2.restype = None
 
 mpfr.mpfr_set_nan.argtypes = [pympfr]
 mpfr.mpfr_set_nan.restype = None
 
-# mpfr_set_zero is an extension to MPFR, with similar semantics to
-# mpfr_set_inf.
+# mpfr_set_zero2 is an extension to MPFR, with similar semantics to
+# mpfr_set_inf2.
 
-# XXX: It might be better to be consistent about signs: eliminate one
-# of Bool and Sign.
-
-def mpfr_set_zero(x, sign):
+def mpfr_set_zero2(x, negative):
+    negative = Bool.from_param(negative)
     mpfr.mpfr_set_ui(x, 0, RoundTiesToEven)
-    mpfr.mpfr_setsign(x, x, sign < 0, RoundTiesToEven)
+    mpfr.mpfr_setsign(x, x, negative, RoundTiesToEven)
 
-mpfr.mpfr_set_zero = mpfr_set_zero
-mpfr.mpfr_set_zero.argtypes = [pympfr, Sign]
-mpfr.mpfr_set_zero.restype = None
+mpfr.mpfr_set_zero2 = mpfr_set_zero2
+mpfr.mpfr_set_zero2.argtypes = [pympfr, Bool]
+mpfr.mpfr_set_zero2.restype = None
 
 # We don't implement the MPFR assignments from C integer types, C long
 # double, C decimal64, GMP rationals, or GMP floats.
