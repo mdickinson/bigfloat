@@ -109,7 +109,7 @@ if __GMP_SHORT_LIMB_DEFINED:
 elif _LONG_LONG_LIMB_DEFINED:
     mpfr_limb_t = ctypes.c_ulonglong
 else:
-    mpfr_limb_t = ctypes.c_long
+    mpfr_limb_t = ctypes.c_ulong
 
 if _SHORT_ENUMS:
     mpfr_rnd_t = ctypes.c_byte
