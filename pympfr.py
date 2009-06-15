@@ -116,10 +116,12 @@ if _SHORT_ENUMS:
 else:
     mpfr_rnd_t = ctypes.c_int
 
+mpfr_sign_t = ctypes.c_int
+
 class __mpfr_struct(ctypes.Structure):
     _fields_ = [
         ("_mpfr_prec", mpfr_prec_t),
-        ("_mpfr_sign", ctypes.c_int),
+        ("_mpfr_sign", mpfr_sign_t),
         ("_mpfr_exp", mpfr_exp_t),
         ("_mpfr_d", ctypes.POINTER(mpfr_limb_t))
         ]
@@ -545,6 +547,7 @@ standard_binary_functions = [
     'dim', 'atan2', 'agm', 'hypot',
     'fmod', 'remainder',
     'max', 'min',
+    'copysign',
     ]
 
 standard_ternary_functions = [
@@ -559,6 +562,7 @@ additional_standard_functions = [
     ('mul_2si', [pympfr, Long]),
     ('div_2ui', [pympfr, UnsignedLong]),
     ('div_2si', [pympfr, Long]),
+    ('setsign', [pympfr, ctypes.c_int]),
 ]
 
 standard_functions = \
