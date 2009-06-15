@@ -381,13 +381,13 @@ mpfr.mpfr_set_default_prec.argtypes = [Precision]
 mpfr.mpfr_set_default_prec.restype = None
 
 mpfr.mpfr_get_default_prec.argtypes = []
-mpfr.mpfr_get_default_prec.restype = mpfr_prec_t
+mpfr.mpfr_get_default_prec.restype = int
 
 mpfr.mpfr_set_prec.argtypes = [pympfr, Precision]
 mpfr.mpfr_set_prec.restype = None
 
 mpfr.mpfr_get_prec.argtypes = [pympfr]
-mpfr.mpfr_get_prec.restype = mpfr_prec_t
+mpfr.mpfr_get_prec.restype = int
 
 # 5.2 Assignment Functions
 
