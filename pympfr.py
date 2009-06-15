@@ -451,6 +451,17 @@ mpfr.mpfr_set_inf.restype = None
 mpfr.mpfr_set_nan.argtypes = [pympfr]
 mpfr.mpfr_set_nan.restype = None
 
+# mpfr_set_zero is an extension to MPFR, with similar semantics to
+# mpfr_set_inf.
+
+def mpfr_set_zero(x, sign):
+    mpfr.mpfr_set_ui(x, 0)
+    mpfr.mpfr_setsign(x, x, sign < 0, RoundTiesToEven)
+mpfr_set_zero.argtypes = [pympfr, Sign]
+mpfr_set_zero.restype = None
+
+mpfr.mpfr_set_zero = mpfr_set_zero
+
 # We don't implement the MPFR assignments from C integer types, C long
 # double, C decimal64, GMP rationals, or GMP floats.
 
