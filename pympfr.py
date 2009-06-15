@@ -195,6 +195,13 @@ class Long(object):
             raise ValueError("value too large to fit in a C long")
         return ctypes.c_long(value)
 
+# Bool represents a boolean parameter, passed as a c_int.
+
+class Bool(object):
+    @classmethod
+    def from_param(cls, value):
+        return ctypes.c_int(bool(value))
+
 # This is the main class, implemented as a wrapper around mpfr_t.
 
 class pympfr(object):
@@ -562,7 +569,7 @@ additional_standard_functions = [
     ('mul_2si', [pympfr, Long]),
     ('div_2ui', [pympfr, UnsignedLong]),
     ('div_2si', [pympfr, Long]),
-    ('setsign', [pympfr, ctypes.c_int]),
+    ('setsign', [pympfr, Bool]),
 ]
 
 standard_functions = \
