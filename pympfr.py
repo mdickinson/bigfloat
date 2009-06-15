@@ -196,11 +196,21 @@ class Long(object):
         return ctypes.c_long(value)
 
 # Bool represents a boolean parameter, passed as a c_int.
+# True values map to 1, False values to 0.
 
 class Bool(object):
     @classmethod
     def from_param(cls, value):
         return ctypes.c_int(bool(value))
+
+# normalize a value intended to be an MPFR sign, as used
+# for example by the mpfr_set_inf function.  All nonnegative
+# values are mapped to 1;  negative values are mapped to -1.
+
+class Sign(object):
+    @classmethod
+    def from_param(cls, value):
+        return ctypes.c_int(1 if value >= 0 else -1)
 
 # This is the main class, implemented as a wrapper around mpfr_t.
 
@@ -434,6 +444,12 @@ def mpfr_set_str2(x, s, base, rounding_mode):
     return ternary
 
 mpfr.mpfr_set_str2 = mpfr_set_str2
+
+mpfr.mpfr_set_inf.argtypes = [pympfr, Sign]
+mpfr.mpfr_set_inf.restype = None
+
+mpfr.mpfr_set_nan.argtypes = [pympfr]
+mpfr.mpfr_set_nan.restype = None
 
 # We don't implement the MPFR assignments from C integer types, C long
 # double, C decimal64, GMP rationals, or GMP floats.
