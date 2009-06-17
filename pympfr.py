@@ -483,8 +483,8 @@ def mpfr_set_str2(x, s, base, rounding_mode):
 
 mpfr.mpfr_set_str2 = mpfr_set_str2
 
-mpfr.mpfr_set_inf.argtypes = [pympfr, ctypes.c_int]
-mpfr.mpfr_set_inf.restype = None
+mpfr.mpfr_set_nan.argtypes = [pympfr]
+mpfr.mpfr_set_nan.restype = None
 
 # MPFR uses two different conventions for signs, probably for
 # historical reasons: some functions use a nonzero c_int to mean
@@ -499,57 +499,123 @@ mpfr.mpfr_set_inf.restype = None
 
 # Here we rewrap mpfr_set_inf to use the above convention.
 
-def mpfr_set_inf2(x, negative):
+mpfr.mpfr_set_inf.argtypes = [pympfr, ctypes.c_int]
+mpfr.mpfr_set_inf.restype = None
+def mpfr_set_inf(x, negative, _mpfr_set_inf = mpfr.mpfr_set_inf):
     negative = Bool.from_param(negative)
-    mpfr.mpfr_set_inf(x, -1 if negative else 1)
+    _mpfr_set_inf(x, -1 if negative else 1)
 
-mpfr.mpfr_set_inf2 = mpfr_set_inf2
-mpfr.mpfr_set_inf2.argtypes = [pympfr, Bool]
-mpfr.mpfr_set_inf2.restype = None
+mpfr.mpfr_set_inf = mpfr_set_inf
+mpfr.mpfr_set_inf.argtypes = [pympfr, Bool]
+mpfr.mpfr_set_inf.restype = None
 
-mpfr.mpfr_set_nan.argtypes = [pympfr]
-mpfr.mpfr_set_nan.restype = None
+# mpfr_set_zero is an extension to MPFR, with similar semantics to
+# mpfr_set_inf.
 
-# mpfr_set_zero2 is an extension to MPFR, with similar semantics to
-# mpfr_set_inf2.
-
-def mpfr_set_zero2(x, negative):
+def mpfr_set_zero(x, negative):
     negative = Bool.from_param(negative)
     mpfr.mpfr_set_ui(x, 0, RoundTiesToEven)
     mpfr.mpfr_setsign(x, x, negative, RoundTiesToEven)
 
-mpfr.mpfr_set_zero2 = mpfr_set_zero2
-mpfr.mpfr_set_zero2.argtypes = [pympfr, Bool]
-mpfr.mpfr_set_zero2.restype = None
+mpfr.mpfr_set_zero = mpfr_set_zero
+mpfr.mpfr_set_zero.argtypes = [pympfr, Bool]
+mpfr.mpfr_set_zero.restype = None
 
-def mpfr_set_maxfinite(x, sign):
+# mpfr_set_maxfinite sets x to the largest nonzero finite value
+
+def mpfr_set_maxfinite(x, negative):
     """Set x to the largest finite nonzero number with the given
     sign."""
     if mpfr.mpfr_get_emin() > mpfr.mpfr_get_emax():
         raise ValueError("emin > emax: no nonzero finite numbers exist")
-    mpfr.mpfr_set_inf2(x, False)
+    mpfr.mpfr_set_inf(x, False)
     mpfr.mpfr_nextbelow(x)
-    mpfr.mpfr_setsign(x, x, sign, RoundTiesToEven)
+    mpfr.mpfr_setsign(x, x, negative, RoundTiesToEven)
     return
 
 mpfr.mpfr_set_maxfinite = mpfr_set_maxfinite
 mpfr.mpfr_set_maxfinite.argtypes = [pympfr, Bool]
 mpfr.mpfr_set_maxfinite.restype = None
 
-def mpfr_set_minfinite(x, sign):
+# mpfr_set_minfinite sets x to the smallest nonzero finite value
+
+def mpfr_set_minfinite(x, negative):
     "Set x to the smallest finite nonzero number with the given sign."""
 
     if mpfr.mpfr_get_emin() > mpfr.mpfr_get_emax():
         raise ValueError("emin > emax: no nonzero finite numbers exist")
-    mpfr.mpfr_set_zero2(x, False)
+    mpfr.mpfr_set_zero(x, False)
     mpfr.mpfr_nextabove(x)
-    mpfr.mpfr_setsign(x, x, sign, RoundTiesToEven)
+    mpfr.mpfr_setsign(x, x, negative, RoundTiesToEven)
     return
 
 mpfr.mpfr_set_minfinite = mpfr_set_minfinite
 mpfr.mpfr_set_minfinite.argtypes = [pympfr, Bool]
 mpfr.mpfr_set_minfinite.restype = None
 
+# mpfr_set_huge sets x as though set to something much larger than
+# the largest representable value, using the given rounding mode.
+# It returns the appropriate ternary value.
+
+def mpfr_set_huge(x, negative, rnd):
+    # are we rounding towards zero?
+    if rnd == RoundTowardZero:
+        toward_zero = True
+    elif rnd == RoundTiesToEven:
+        toward_zero = False
+    elif rnd == RoundTowardPositive:
+        toward_zero = negative
+    elif rnd == RoundTowardNegative:
+        toward_zero = not negative
+    else:
+        raise ValueError("unknown rounding mode")
+
+    if toward_zero:
+        mpfr.mpfr_set_maxfinite(x, negative)
+        inex = -1
+    else:
+        mpfr.mpfr_set_inf(x, negative)
+        inex = 1
+
+    if negative:
+        inex = -inex
+
+    mpfr.mpfr_set_overflow()
+    mpfr.mpfr_set_inexflag()
+    return inex
+
+mpfr.mpfr_set_huge = mpfr_set_huge
+mpfr.mpfr_set_huge.argtypes = [pympfr, Bool, RoundingMode]
+
+def mpfr_set_tiny(x, negative, rnd):
+    # are we rounding towards zero?
+    if rnd == RoundTowardZero:
+        toward_zero = True
+    elif rnd == RoundTiesToEven:
+        toward_zero = True
+    elif rnd == RoundTowardPositive:
+        toward_zero = negative
+    elif rnd == RoundTowardNegative:
+        toward_zero = not negative
+    else:
+        raise ValueError("unknown rounding mode")
+
+    if toward_zero:
+        mpfr_set_zero(x, negative)
+        inex = -1
+    else:
+        mpfr_set_minfinite(x, negative)
+        inex = 1
+
+    if negative:
+        inex = -inex
+
+    mpfr.mpfr_set_underflow()
+    mpfr.mpfr_set_inexflag()
+    return inex
+
+mpfr.mpfr_set_tiny = mpfr_set_tiny
+mpfr.mpfr_set_tiny.argtypes = [pympfr, Bool, RoundingMode]
 
 # We don't implement the MPFR assignments from C integer types, C long
 # double, C decimal64, GMP rationals, or GMP floats.
@@ -616,6 +682,21 @@ mpfr.mpfr_get_emax_max.restype = mpfr_exp_t
 mpfr.mpfr_check_range.argtypes = [pympfr, ctypes.c_int, RoundingMode]
 
 mpfr.mpfr_subnormalize.argtypes = [pympfr, ctypes.c_int, RoundingMode]
+
+flags = ['underflow', 'overflow', 'nanflag', 'inexflag', 'erangeflag']
+for f in flags:
+    clear_fn = getattr(mpfr, 'mpfr_clear_' + f)
+    clear_fn.argtypes = []
+    clear_fn.restype = None
+    set_fn = getattr(mpfr, 'mpfr_set_' + f)
+    set_fn.argtypes = []
+    set_fn.restype = None
+    test_fn = getattr(mpfr, 'mpfr_' + f + '_p')
+    test_fn.argtypes = []
+    test_fn.restype = bool
+
+mpfr.mpfr_clear_flags.argtypes = []
+mpfr.mpfr_clear_flags.restype = None
 
 ################################################################################
 # Functions to be exported at the module level
