@@ -539,7 +539,7 @@ def relaxed_exponent_bounds():
         mpfr.mpfr_set_emax(old_emax)
         mpfr.mpfr_set_emin(old_emin)
 
-def mpfr_set_maxnormal(x, sign):
+def mpfr_set_maxfinite(x, sign):
     """Set x to the largest finite nonzero number with the given
     sign."""
     if mpfr.mpfr_get_emin() > mpfr.mpfr_get_emax():
@@ -549,11 +549,11 @@ def mpfr_set_maxnormal(x, sign):
     mpfr.mpfr_setsign(x, x, sign, RoundTiesToEven)
     return
 
-mpfr.mpfr_set_maxnormal = mpfr_set_maxnormal
-mpfr.mpfr_set_maxnormal.argtypes = [pympfr, Bool]
-mpfr.mpfr_set_maxnormal.restype = None
+mpfr.mpfr_set_maxfinite = mpfr_set_maxfinite
+mpfr.mpfr_set_maxfinite.argtypes = [pympfr, Bool]
+mpfr.mpfr_set_maxfinite.restype = None
 
-def mpfr_set_minnormal(x, sign):
+def mpfr_set_minfinite(x, sign):
     "Set x to the smallest finite nonzero number with the given sign."""
 
     if mpfr.mpfr_get_emin() > mpfr.mpfr_get_emax():
@@ -563,9 +563,9 @@ def mpfr_set_minnormal(x, sign):
     mpfr.mpfr_setsign(x, x, sign, RoundTiesToEven)
     return
 
-mpfr.mpfr_set_minnormal = mpfr_set_minnormal
-mpfr.mpfr_set_minnormal.argtypes = [pympfr, Bool]
-mpfr.mpfr_set_minnormal.restype = None
+mpfr.mpfr_set_minfinite = mpfr_set_minfinite
+mpfr.mpfr_set_minfinite.argtypes = [pympfr, Bool]
+mpfr.mpfr_set_minfinite.restype = None
 
 
 # We don't implement the MPFR assignments from C integer types, C long

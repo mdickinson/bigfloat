@@ -1,9 +1,11 @@
 # Pythonic wrapper for MPFR library
 
+# To do: relaxed_exponents context manager.
+
 # BigFloats are treated as immutable.
 
-# XXX: this module defines functions 'abs' and 'pow' which
-# shadow the builtin functions of those names.  Don't do 'from
+# XXX: this module defines functions 'abs' and 'pow', 'max' and 'min'
+# which shadow the builtin functions of those names.  Don't do 'from
 # bigfloat import *' if you don't want to clobber these functions.
 
 # Names to export when someone does 'from bigfloat import *'
@@ -39,6 +41,8 @@ from pympfr import RoundTiesToEven, RoundTowardZero
 from pympfr import RoundTowardPositive, RoundTowardNegative
 from pympfr import MPFR_PREC_MIN, MPFR_PREC_MAX
 from pympfr import standard_functions, predicates
+
+builtin_max = max
 
 try:
     DBL_PRECISION = sys.float_info.mant_dig
@@ -332,9 +336,9 @@ class BigFloat(object):
             if precision is not None:
                 raise TypeError("precision argument should not be specified except when converting from a string")
             if isinstance(value, float):
-                precision = max(DBL_PRECISION, MPFR_PREC_MIN)
+                precision = builtin_max(DBL_PRECISION, MPFR_PREC_MIN)
             elif isinstance(value, (int, long)):
-                precision = max(bit_length(value), MPFR_PREC_MIN)
+                precision = builtin_max(bit_length(value), MPFR_PREC_MIN)
             elif isinstance(value, BigFloat):
                 precision = value.precision
             else:
@@ -410,6 +414,14 @@ class BigFloat(object):
     __rdiv__ = __rtruediv__ = reverse_args(__truediv__)
     __rpow__ = reverse_args(__pow__)
     __rmod__ = reverse_args(__mod__)
+
+    # shifts are equivalent to multiplication or division by the
+    # appropriate power of 2.
+    def __lshift__(self, n):
+        return mul_2ui(self, n) if n >= 0 else div_2ui(self, -n)
+
+    def __rshift__(self, n):
+        return div_2ui(self, n) if n >= 0 else mul_2ui(self, -n)
 
     # unary arithmetic operations
     __abs__ = wrap_standard_function(mpfr.mpfr_abs)

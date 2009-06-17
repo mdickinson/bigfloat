@@ -18,6 +18,33 @@ def semiconvergents(x):
 
 def logn2(n, p):
     """Best p-bit lower and upper bounds for log(2)/log(n), as Fractions."""
+
+    down, up = RoundTowardNegative, RoundTowardPositive
+
+    extra = 10
+    while True:
+        with precision(p+extra):
+            with rounding(up):
+                log2upper = log2(n)
+            with rounding(down):
+                log2lower = log2(n)
+
+        with rounding(down):
+            lower = 1/log2upper
+        with rounding(up):
+            upper = 1/log2lower
+
+
+
+
+    with rounding(down):
+        with precision(p+extra):
+            log2lower = log2(n)
+
+ upper = log2(n)
+    with rounding(up): upper = 1/upper
+
+
     lower, upper, lower_copy = map(pympfr, [p]*3)
     y = pympfr(p + 10)
     one = pympfr()
