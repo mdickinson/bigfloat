@@ -60,10 +60,11 @@ def format_finite(digits, dot_pos):
 ################################################################################
 # Locate and load the library
 
-#mpfr = ctypes.cdll.LoadLibrary(ctypes.util.find_library('mpfr'))
-
+mpfr_library_name = ctypes.util.find_library('mpfr')
 # temporary hack to make this work with mpfr from macports
-mpfr = ctypes.cdll.LoadLibrary('/opt/local/lib/libmpfr.dylib')
+if mpfr_library_name is None:
+    mpfr_library_name = '/opt/local/lib/libmpfr.dylib'
+mpfr = ctypes.cdll.LoadLibrary(mpfr_library_name)
 
 ################################################################################
 # Platform dependent values
