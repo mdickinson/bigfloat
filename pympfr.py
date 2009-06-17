@@ -1,3 +1,8 @@
+from __future__ import with_statement  # necessary for Python 2.5
+from contextlib import contextmanager
+import ctypes
+import ctypes.util
+
 __all__ = [
     # mpfr library
     'mpfr',
@@ -22,8 +27,6 @@ __all__ = [
     ]
 
 
-import ctypes
-import ctypes.util
 
 ################################################################################
 # Some utility functions, that have little to do with mpfr.
@@ -59,7 +62,10 @@ def format_finite(digits, dot_pos):
 ################################################################################
 # Locate and load the library
 
-mpfr = ctypes.cdll.LoadLibrary(ctypes.util.find_library('mpfr'))
+#mpfr = ctypes.cdll.LoadLibrary(ctypes.util.find_library('mpfr'))
+
+# temporary hack to make this work with mpfr from macports
+mpfr = ctypes.cdll.LoadLibrary('/opt/local/lib/libmpfr.dylib')
 
 ################################################################################
 # Platform dependent values
@@ -86,6 +92,42 @@ _SHORT_ENUMS = False
 ################################################################################
 # Types
 
+# Wrappers for some ctypes integer types that check for overflow rather
+# than wrapping.  Use these for argument types instead of c_int, c_long, etc.
+
+# constants: this assumes that if the range of an unsigned integer
+# type is [0, 2**n) then the range of the corresponding signed integer
+# type is [-2**(n-1), 2**(n-1)).  This assumption isn't supported by
+# the C standards.  It would be better to extract these values directly
+# from ctypes, somehow.
+UINT_MAX = ctypes.c_uint(-1).value
+INT_MAX = UINT_MAX >> 1
+INT_MIN = -1-INT_MAX
+ULONG_MAX = ctypes.c_ulong(-1).value
+LONG_MAX = ULONG_MAX >> 1
+LONG_MIN = -1-LONG_MAX
+
+class Int(object):
+    @classmethod
+    def from_param(cls, value):
+        if not INT_MIN <= value <= INT_MAX:
+            raise ValueError("value too large to fit in a C int")
+        return ctypes.c_int(value)
+
+class UnsignedLong(object):
+    @classmethod
+    def from_param(cls, value):
+        if not 0 <= value <= ULONG_MAX:
+            raise ValueError("value too large to fit in a C unsigned long")
+        return ctypes.c_ulong(value)
+
+class Long(object):
+    @classmethod
+    def from_param(cls, value):
+        if not LONG_MIN <= value <= LONG_MAX:
+            raise ValueError("value too large to fit in a C long")
+        return ctypes.c_long(value)
+
 # These 4 types are used directly by the public MPFR functions:
 #
 #   mpfr_prec_t: type used for representing a precision
@@ -100,9 +142,11 @@ _SHORT_ENUMS = False
 if __GMP_MP_SIZE_T_INT == 1:
     mpfr_prec_t = ctypes.c_uint
     mpfr_exp_t = ctypes.c_int
+    Exponent = Int  # use this in argtypes for arguments expecting an mpfr_exp_t
 else:
     mpfr_prec_t = ctypes.c_ulong
     mpfr_exp_t = ctypes.c_long
+    Exponent = Long
 
 if __GMP_SHORT_LIMB_DEFINED:
     mpfr_limb_t = ctypes.c_uint
@@ -365,6 +409,11 @@ class pympfr(object):
 MPFR_PREC_MIN = 2
 MPFR_PREC_MAX = mpfr_prec_t(-1).value >> 1
 
+# standard exponent limits, copied from mpfr.h
+
+MPFR_EMAX_DEFAULT = (1<<30)-1
+MPFR_EMIN_DEFAULT = -MPFR_EMAX_DEFAULT
+
 ################################################################################
 # Wrap functions from the library
 
@@ -475,6 +524,50 @@ mpfr.mpfr_set_zero2 = mpfr_set_zero2
 mpfr.mpfr_set_zero2.argtypes = [pympfr, Bool]
 mpfr.mpfr_set_zero2.restype = None
 
+# Context manager to temporarily relax emax and emin to their
+# widest possible bounds.
+
+@contextmanager
+def relaxed_exponent_bounds():
+    old_emax = mpfr.mpfr_get_emax()
+    old_emin = mpfr.mpfr_get_emin()
+    mpfr.mpfr_set_emax(mpfr.mpfr_get_emax_max())
+    mpfr.mpfr_set_emin(mpfr.mpfr_get_emin_min())
+    try:
+        yield
+    finally:
+        mpfr.mpfr_set_emax(old_emax)
+        mpfr.mpfr_set_emin(old_emin)
+
+def mpfr_set_maxnormal(x, sign):
+    """Set x to the largest finite nonzero number with the given
+    sign."""
+    if mpfr.mpfr_get_emin() > mpfr.mpfr_get_emax():
+        raise ValueError("emin > emax: no nonzero finite numbers exist")
+    mpfr.mpfr_set_inf2(x, False)
+    mpfr.mpfr_nextbelow(x)
+    mpfr.mpfr_setsign(x, x, sign, RoundTiesToEven)
+    return
+
+mpfr.mpfr_set_maxnormal = mpfr_set_maxnormal
+mpfr.mpfr_set_maxnormal.argtypes = [pympfr, Bool]
+mpfr.mpfr_set_maxnormal.restype = None
+
+def mpfr_set_minnormal(x, sign):
+    "Set x to the smallest finite nonzero number with the given sign."""
+
+    if mpfr.mpfr_get_emin() > mpfr.mpfr_get_emax():
+        raise ValueError("emin > emax: no nonzero finite numbers exist")
+    mpfr.mpfr_set_zero2(x, False)
+    mpfr.mpfr_nextabove(x)
+    mpfr.mpfr_setsign(x, x, sign, RoundTiesToEven)
+    return
+
+mpfr.mpfr_set_minnormal = mpfr_set_minnormal
+mpfr.mpfr_set_minnormal.argtypes = [pympfr, Bool]
+mpfr.mpfr_set_minnormal.restype = None
+
+
 # We don't implement the MPFR assignments from C integer types, C long
 # double, C decimal64, GMP rationals, or GMP floats.
 
@@ -502,7 +595,17 @@ mpfr.mpfr_free_str.restype = None
 mpfr.mpfr_nexttoward.argtypes = [pympfr, pympfr]
 mpfr.mpfr_nexttoward.restype = None
 
-# for mpfr_signbit:  see section 5.6
+mpfr.mpfr_nextabove.argtypes = [pympfr]
+mpfr.mpfr_nextabove.restype = None
+
+mpfr.mpfr_nextbelow.argtypes = [pympfr]
+mpfr.mpfr_nextbelow.restype = None
+
+mpfr.mpfr_set_exp.argtypes = [pympfr, Exponent]
+mpfr.mpfr_set_exp.restype = bool
+
+mpfr.mpfr_get_exp.argtypes = [pympfr]
+mpfr.mpfr_get_exp.restype = mpfr_exp_t
 
 # 5.13 Exception Related Functions
 
@@ -512,8 +615,8 @@ mpfr.mpfr_get_emin.restype = mpfr_exp_t
 mpfr.mpfr_get_emax.argtypes = []
 mpfr.mpfr_get_emax.restype = mpfr_exp_t
 
-mpfr.mpfr_set_emin.argtypes = [mpfr_exp_t]
-mpfr.mpfr_set_emax.argtypes = [mpfr_exp_t]
+mpfr.mpfr_set_emin.argtypes = [Exponent]
+mpfr.mpfr_set_emax.argtypes = [Exponent]
 
 mpfr.mpfr_get_emin_min.argtypes = []
 mpfr.mpfr_get_emin_min.restype = mpfr_exp_t
