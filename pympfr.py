@@ -1,5 +1,3 @@
-from __future__ import with_statement  # necessary for Python 2.5
-from contextlib import contextmanager
 import ctypes
 import ctypes.util
 
@@ -523,21 +521,6 @@ def mpfr_set_zero2(x, negative):
 mpfr.mpfr_set_zero2 = mpfr_set_zero2
 mpfr.mpfr_set_zero2.argtypes = [pympfr, Bool]
 mpfr.mpfr_set_zero2.restype = None
-
-# Context manager to temporarily relax emax and emin to their
-# widest possible bounds.
-
-@contextmanager
-def relaxed_exponent_bounds():
-    old_emax = mpfr.mpfr_get_emax()
-    old_emin = mpfr.mpfr_get_emin()
-    mpfr.mpfr_set_emax(mpfr.mpfr_get_emax_max())
-    mpfr.mpfr_set_emin(mpfr.mpfr_get_emin_min())
-    try:
-        yield
-    finally:
-        mpfr.mpfr_set_emax(old_emax)
-        mpfr.mpfr_set_emin(old_emin)
 
 def mpfr_set_maxfinite(x, sign):
     """Set x to the largest finite nonzero number with the given
