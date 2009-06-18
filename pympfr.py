@@ -8,9 +8,6 @@ __all__ = [
     # pympfr class: thin wrapper around mpfr_t type
     'pympfr',
 
-    # global functions for getting and setting default precision
-    'get_default_precision', 'set_default_precision',
-
     # constants giving limits on the precision
     'MPFR_PREC_MIN', 'MPFR_PREC_MAX',
 
@@ -91,14 +88,17 @@ _SHORT_ENUMS = False
 ################################################################################
 # Types
 
-# Wrappers for some ctypes integer types that check for overflow rather
-# than wrapping.  Use these for argument types instead of c_int, c_long, etc.
+# Under ctypes, Python integers are converted to C integer types by
+# wrapping (i.e., reducing modulo some power of 2).  Usually this
+# isn't the behaviour we want.  So here are wrappers for some ctypes
+# integer types that check for overflow rather than wrapping.  Use
+# these for argument types instead of c_int, c_long, etc.
 
-# constants: this assumes that if the range of an unsigned integer
+# Constants: these assume that if the range of an unsigned integer
 # type is [0, 2**n) then the range of the corresponding signed integer
 # type is [-2**(n-1), 2**(n-1)).  This assumption isn't supported by
-# the C standards.  It would be better to extract these values directly
-# from ctypes, somehow.
+# the C standards, but I believe that it applies to all platforms that
+# libffi (and hence ctypes) works on.
 UINT_MAX = ctypes.c_uint(-1).value
 INT_MAX = UINT_MAX >> 1
 INT_MIN = -1-INT_MAX
@@ -447,6 +447,37 @@ mpfr.mpfr_get_prec.restype = int
 
 # 5.2 Assignment Functions
 
+# mpfr_set, mpfr_set_ui, mpfr_set_si, mpfr_set_d are standard
+# functions, dealt with below.
+
+# mpfr_set_uj, mpfr_set_sj, mpfr_set_ld, mpfr_set_decimal64, mpfr_set_z,
+# mpfr_set_q and mpfr_set_f are not make available.
+
+
+
+# mpfr_set_ui_2exp and mpfr_set_si_2exp are standard functions
+
+
+
+
+# mpfr_set_l is a Python analogue of mpfr_set_ui/mpfr_set_si/mpfr_set_z
+# that accepts a Python integer as second argument.
+
+def mpfr_set_l(rop, op, rnd):
+    """Set the pympfr variable rop to the value of the Python integer
+    op, rounding toward direction rnd.  Returns the usual ternary value."""
+
+    if not isinstance(op, (int, long)):
+        raise TypeError("second argument to mpfr_set_l should be a Python integer")
+
+    if LONG_MIN <= op <= LONG_MAX:
+        return mpfr.mpfr_set_si(rop, op, rnd)
+    else:
+        return mpfr.mpfr_set_str2(rop, '%x' % op, 16, rnd)
+        
+mpfr.mpfr_set_l = mpfr_set_l
+mpfr.mpfr_set_l.argtypes = [pympfr, long, RoundingMode]
+
 # need to wrap mpfr_strtofr specially: the Python version returns a
 # pair consisting of the ternary value and the number of characters
 # consumed.
@@ -702,9 +733,6 @@ mpfr.mpfr_clear_flags.restype = None
 ################################################################################
 # Functions to be exported at the module level
 
-set_default_precision = mpfr.mpfr_set_default_prec
-get_default_precision = mpfr.mpfr_get_default_prec
-
 def rewrap(f):
     def wrapped_f(*args):
         return f(*args)
@@ -774,6 +802,8 @@ additional_standard_functions = [
     ('set_ui', [UnsignedLong]),
     ('set_si', [Long]),
     ('set_d', [ctypes.c_double]),
+    ('set_ui_2exp', [UnsignedLong, Exponent]),
+    ('set_si_2exp', [Long, Exponent]),
     ('set_str2', [ctypes.c_char_p, Base]),
     ('mul_2ui', [pympfr, UnsignedLong]),
     ('mul_2si', [pympfr, Long]),
