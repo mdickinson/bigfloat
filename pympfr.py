@@ -26,11 +26,11 @@ __all__ = [
 ################################################################################
 # Locate and load the library
 
-mpfr_library_name = ctypes.util.find_library('mpfr')
+_mpfr_library_name = ctypes.util.find_library('mpfr')
 # temporary hack to make this work with mpfr from macports
-if mpfr_library_name is None:
-    mpfr_library_name = '/opt/local/lib/libmpfr.dylib'
-mpfr = ctypes.cdll.LoadLibrary(mpfr_library_name)
+if _mpfr_library_name is None:
+    _mpfr_library_name = '/opt/local/lib/libmpfr.dylib'
+mpfr = ctypes.cdll.LoadLibrary(_mpfr_library_name)
 
 ################################################################################
 # Platform dependent values
@@ -227,10 +227,13 @@ class UMpfr(object):
 
 class IMpfr(object):
     @classmethod
-    def from_param(cls, value):
-        if not isinstance(value, Mpfr):
+    def from_param(cls, value, _Mpfr=Mpfr):
+        # this function can end up being called (via Mpfr.__del__) at
+        # interpreter shutdown time, possibly after the module global
+        # 'Mpfr' has been deleted.  Hence the _Mpfr hack.
+        if not isinstance(value, _Mpfr):
             raise TypeError("Expecting argument of type Mpfr")
-        if not value._initialized:
+        if not hasattr(value, '_initialized'):
             raise ValueError("Mpfr instance is not initialized")
         return value
 
@@ -244,7 +247,7 @@ def set_init(result, func, args):
 
 def clear_init(result, func, args):
     mpfr_instance = args[0]
-    assert mpfr_instance._initialized
+    assert hasattr(mpfr_instance, '_initialized')
     del mpfr_instance._initialized
 
 def set_init_on_success(result, func, args):
@@ -620,12 +623,24 @@ def strtofr2(rop, s, base, rounding_mode):
     return ternary, endptr.value
 
 ################################################################################
-# For ease of debugging, give the Mpfr class a crude but usable __repr__.
+# A couple of extra niceties to make the Mpfr class easier to use.
 
-def _mpfr_repr(self):
+# First, we monkeypatch the Mpfr class to give it a crude but usable
+# string representation.
+
+def _mpfr_str(self):
     negative, digits, exp = get_str2(self, 10, 0, RoundTiesToEven)
     if '@NaN@' not in digits and '@Inf@' not in digits:
         digits = '0.' + digits + 'E' + str(exp)
     return ('-' if negative else '') + digits
 
-Mpfr.__repr__ = Mpfr.__str__ = _mpfr_repr
+Mpfr.__repr__ = Mpfr.__str__ = _mpfr_str
+
+# Add a __del__ method to ensure that Mpfr instances are automatically
+# cleared before they're garbage collected.
+
+def _mpfr_del(self, _clear_fn = mpfr.mpfr_clear):
+    if hasattr(self, '_initialized'):
+        _clear_fn(self)
+
+Mpfr.__del__ = _mpfr_del
