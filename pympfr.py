@@ -168,6 +168,8 @@ _rounding_mode_dict = {
     RoundTowardNegative: 3,
 }
 
+_inv_rounding_mode_dict = dict((v, k) for k, v in _rounding_mode_dict.items())
+
 # Rounding mode class is used for automatically validating the
 # rounding mode before passing it to the MPFR library.
 
@@ -259,6 +261,9 @@ def error_on_failure(result, func, args):
     if result:
         raise ValueError("call failed")
     return result
+
+def convert_to_rounding_mode(result, func, args):
+    return _inv_rounding_mode_dict[result]
 
 ################################################################################
 # Limits, and other constants
@@ -385,14 +390,26 @@ mpfr_functions = [
      Ternary),
     # integer_p is a standard predicate
 
-    # 5.11 +:  to do;  there's stuff missing from everything below...
+    # 5.11 Rounding Related Functions
+    ('set_default_rounding_mode', [RoundingMode], None),
+    ('get_default_rounding_mode', [], mpfr_rnd_t, convert_to_rounding_mode),
+    ('prec_round', [IMpfr, Precision, RoundingMode], Ternary),
+    ('can_round', [IMpfr, Exponent, RoundingMode, RoundingMode, Precision],
+     bool),
+    ('print_rnd_mode', [RoundingMode], ctypes.c_char_p),
 
     # 5.12 Miscellaneous Functions
     ('nexttoward', [IMpfr, IMpfr], None),
     ('nextabove', [IMpfr], None),
     ('nextbelow', [IMpfr], None),
-    ('set_exp', [IMpfr, Exponent], ctypes.c_int, error_on_failure),
+    # min and max are standard functions; see below
+    # urandomb not supported
     ('get_exp', [IMpfr], mpfr_exp_t),
+    ('set_exp', [IMpfr, Exponent], ctypes.c_int, error_on_failure),
+    # signbit is a standard predicate
+    # setsign and copysign are standard functions
+    ('get_version', [], ctypes.c_char_p),
+    ('get_patches', [], ctypes.c_char_p),
 
     # 5.13 Exception Related Functions
     ('get_emin', [], mpfr_exp_t),
@@ -407,6 +424,10 @@ mpfr_functions = [
     ('subnormalize', [IMpfr, ctypes.c_int, RoundingMode], Ternary),
 
     ('clear_flags', [], None),
+
+    # 5.14 Compatibility With MPF
+    # 5.15 Custom Interface
+    # Functions from 5.14 and 5.15 not wrapped.
     ]
 
 # additional functions for flags
