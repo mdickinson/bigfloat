@@ -19,7 +19,7 @@ __all__ = [
     'standard_functions', 'predicates',
 
     # extra functions that aren't part of the mpfr library proper
-    'set_str2', 'get_str2', 'strtofr2',
+    'set_str2', 'get_str2', 'strtofr2', 'remquo',
 
     ]
 
@@ -337,7 +337,7 @@ mpfr_functions = [
     ('fits_sshort_p', [IMpfr, RoundingMode], bool),
 
     # 5.5 Basic Arithmetic Functions
-    # Most of these are standard functions, declared below.
+    # All of these are standard functions, declared below.
     # Functions involved GMP mpz_t and mpq_t types aren't wrapped.
 
     # 5.6 Comparison Functions
@@ -360,13 +360,33 @@ mpfr_functions = [
     ('sin_cos', [IMpfr, IMpfr, IMpfr, RoundingMode], Ternary),
     ('sinh_cosh', [IMpfr, IMpfr, IMpfr, RoundingMode], Ternary),
     ('free_cache', [], None),
+
     # we don't wrap mpfr_sum at the moment
 
     # 5.8 Input and Output Functions
     # 5.9 Formatted Output Functions
     # we don't currently wrap any functions in these two sections
 
-    # 5.10 +:  to do;  there's stuff missing from everything below...
+    # 5.10 Integer and Remainder Related Functions
+    # note that 'rint' is *not* a standard function: the rounding
+    # mode determines the actual operation, not the method of
+    # rounding the result.
+    ('rint', [IMpfr, IMpfr, RoundingMode], Ternary),
+    ('ceil', [IMpfr, IMpfr], Ternary),
+    ('floor', [IMpfr, IMpfr], Ternary),
+    ('round', [IMpfr, IMpfr], Ternary),
+    ('trunc', [IMpfr, IMpfr], Ternary),
+
+    # rint_ceil, rint_floor, rint_round, rint_trunc are standard
+    # frac is standard
+    ('modf', [IMpfr, IMpfr, IMpfr, RoundingMode], Ternary),
+    # fmod, remainder are standard
+    ('remquo', [IMpfr, ctypes.POINTER(Long), IMpfr, IMpfr, RoundingMode],
+     Ternary)
+    # integer_p is a standard predicate
+
+
+    # 5.11 +:  to do;  there's stuff missing from everything below...
 
     # 5.12 Miscellaneous Functions
     ('nexttoward', [IMpfr, IMpfr], None),
@@ -621,6 +641,14 @@ def strtofr2(rop, s, base, rounding_mode):
     ternary = mpfr.mpfr_strtofr(rop, startptr, ctypes.byref(endptr),
                                 base, rounding_mode)
     return ternary, endptr.value
+
+def remquo(r, x, y, rnd):
+    """Set r to the value of x-ny, and also return low bits of quotient n.
+
+    Returns a pair (ternary, q)."""
+    q = ctypes.c_long()
+    ternary = mpfr.mpfr_remquo(r, ctypes.byref(q), x, y, rnd)
+    return ternary, q
 
 ################################################################################
 # A couple of extra niceties to make the Mpfr class easier to use.
