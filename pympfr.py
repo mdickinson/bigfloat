@@ -223,9 +223,9 @@ class UMpfr(object):
             raise ValueError("Mpfr instance is already initialized")
         return value
 
-# Type Mpfr represents an initialized Mpfr instance
+# Type IMpfr represents an initialized Mpfr instance
 
-class Mpfr(object):
+class IMpfr(object):
     @classmethod
     def from_param(cls, value):
         if not isinstance(value, Mpfr):
@@ -275,7 +275,7 @@ MPFR_EMIN_DEFAULT = -MPFR_EMAX_DEFAULT
 # 5.1 Initialization Functions
 
 # Only the initialization functions take arguments of type UMpfr.  All
-# other functions use type Mpfr instead.  The reason is that the Mpfr
+# other functions use type IMpfr instead.  The reason is that the IMpfr
 # type implements a check that the underlying Mpfr instance is
 # already initialized, but mpfr_init and mpfr_init2 expect to receive
 # uninitialized instances.
@@ -284,12 +284,12 @@ mpfr_functions = [
 
     # 5.1: Initialization Functions
     ('init2', [UMpfr, Precision], None, set_init),
-    ('clear', [Mpfr], None, clear_init),
+    ('clear', [IMpfr], None, clear_init),
     ('init', [UMpfr], None, set_init),
     ('set_default_prec', [Precision], None),
     ('get_default_prec', [], mpfr_prec_t),
-    ('set_prec', [Mpfr, Precision], None),
-    ('get_prec', [Mpfr], mpfr_prec_t),
+    ('set_prec', [IMpfr, Precision], None),
+    ('get_prec', [IMpfr], mpfr_prec_t),
 
     # 5.2 Assignment Functions
 
@@ -303,13 +303,13 @@ mpfr_functions = [
 
     # use of mpfr_set_str is not recommended, since it doesn't return
     # the ternary value.  Use set_str2 (defined below) instead.
-    ('set_str', [Mpfr, ctypes.c_char_p, Base, RoundingMode], ctypes.c_int,
+    ('set_str', [IMpfr, ctypes.c_char_p, Base, RoundingMode], ctypes.c_int,
      error_on_failure),
-    ('strtofr', [Mpfr, ctypes.c_char_p, ctypes.POINTER(ctypes.c_char_p), 
+    ('strtofr', [IMpfr, ctypes.c_char_p, ctypes.POINTER(ctypes.c_char_p), 
                  Base, RoundingMode], Ternary),
-    ('set_inf', [Mpfr, Sign], None),
-    ('set_nan', [Mpfr], None),
-    ('swap', [Mpfr, Mpfr], None),
+    ('set_inf', [IMpfr, Sign], None),
+    ('set_nan', [IMpfr], None),
+    ('swap', [IMpfr, IMpfr], None),
 
     # 5.3 Combined Initialization and Assignment Functions
     # Apart from init_set_str, these are all macros
@@ -317,45 +317,45 @@ mpfr_functions = [
      ctypes.c_int, set_init_on_success),
 
     # 5.4 Conversion Functions
-    ('get_d', [Mpfr, RoundingMode], ctypes.c_double),
-    ('get_d_2exp', [ctypes.POINTER(ctypes.c_long), Mpfr, RoundingMode],
+    ('get_d', [IMpfr, RoundingMode], ctypes.c_double),
+    ('get_d_2exp', [ctypes.POINTER(ctypes.c_long), IMpfr, RoundingMode],
      ctypes.c_double),
-    ('get_si', [Mpfr, RoundingMode], ctypes.c_long),
-    ('get_ui', [Mpfr, RoundingMode], ctypes.c_ulong),
+    ('get_si', [IMpfr, RoundingMode], ctypes.c_long),
+    ('get_ui', [IMpfr, RoundingMode], ctypes.c_ulong),
     ('get_str', [ctypes.POINTER(ctypes.c_char), ctypes.POINTER(mpfr_exp_t),
-                 Base, Size_t, Mpfr, RoundingMode],
+                 Base, Size_t, IMpfr, RoundingMode],
      ctypes.POINTER(ctypes.c_char)),
     ('free_str', [ctypes.POINTER(ctypes.c_char)], None),
-    ('fits_ulong_p', [Mpfr, RoundingMode], bool),
-    ('fits_slong_p', [Mpfr, RoundingMode], bool),
-    ('fits_uint_p', [Mpfr, RoundingMode], bool),
-    ('fits_sint_p', [Mpfr, RoundingMode], bool),
-    ('fits_ushort_p', [Mpfr, RoundingMode], bool),
-    ('fits_sshort_p', [Mpfr, RoundingMode], bool),
+    ('fits_ulong_p', [IMpfr, RoundingMode], bool),
+    ('fits_slong_p', [IMpfr, RoundingMode], bool),
+    ('fits_uint_p', [IMpfr, RoundingMode], bool),
+    ('fits_sint_p', [IMpfr, RoundingMode], bool),
+    ('fits_ushort_p', [IMpfr, RoundingMode], bool),
+    ('fits_sshort_p', [IMpfr, RoundingMode], bool),
 
     # 5.5 Basic Arithmetic Functions
     # Most of these are standard functions, declared below.
     # Functions involved GMP mpz_t and mpq_t types aren't wrapped.
 
     # 5.6 Comparison Functions
-    ('cmp', [Mpfr, Mpfr], Ternary),
-    ('cmp_ui', [Mpfr, UnsignedLong], Ternary),
-    ('cmp_si', [Mpfr, Long], Ternary),
-    ('cmp_d', [Mpfr, ctypes.c_double], Ternary),
-    ('cmp_ui_2exp', [Mpfr, UnsignedLong, Exponent], Ternary),
-    ('cmp_si_2exp', [Mpfr, Long, Exponent], Ternary),
-    ('cmpabs', [Mpfr, Mpfr], Ternary),
+    ('cmp', [IMpfr, IMpfr], Ternary),
+    ('cmp_ui', [IMpfr, UnsignedLong], Ternary),
+    ('cmp_si', [IMpfr, Long], Ternary),
+    ('cmp_d', [IMpfr, ctypes.c_double], Ternary),
+    ('cmp_ui_2exp', [IMpfr, UnsignedLong, Exponent], Ternary),
+    ('cmp_si_2exp', [IMpfr, Long, Exponent], Ternary),
+    ('cmpabs', [IMpfr, IMpfr], Ternary),
     
     # nan_p, inf_p, number_p, zero_p are standard predicates, declared below
-    ('sgn', [Mpfr], Ternary),
+    ('sgn', [IMpfr], Ternary),
 
     # remaining functions are again standard predicates, declared below
 
     # 5.7 Special Functions
 
     # Most of these are standard functions, declared below.
-    ('sin_cos', [Mpfr, Mpfr, Mpfr, RoundingMode], Ternary),
-    ('sinh_cosh', [Mpfr, Mpfr, Mpfr, RoundingMode], Ternary),
+    ('sin_cos', [IMpfr, IMpfr, IMpfr, RoundingMode], Ternary),
+    ('sinh_cosh', [IMpfr, IMpfr, IMpfr, RoundingMode], Ternary),
     ('free_cache', [], None),
     # we don't wrap mpfr_sum at the moment
 
@@ -366,11 +366,11 @@ mpfr_functions = [
     # 5.10 +:  to do;  there's stuff missing from everything below...
 
     # 5.12 Miscellaneous Functions
-    ('nexttoward', [Mpfr, Mpfr], None),
-    ('nextabove', [Mpfr], None),
-    ('nextbelow', [Mpfr], None),
-    ('set_exp', [Mpfr, Exponent], ctypes.c_int, error_on_failure),
-    ('get_exp', [Mpfr], mpfr_exp_t),
+    ('nexttoward', [IMpfr, IMpfr], None),
+    ('nextabove', [IMpfr], None),
+    ('nextbelow', [IMpfr], None),
+    ('set_exp', [IMpfr, Exponent], ctypes.c_int, error_on_failure),
+    ('get_exp', [IMpfr], mpfr_exp_t),
 
     # 5.13 Exception Related Functions
     ('get_emin', [], mpfr_exp_t),
@@ -381,8 +381,8 @@ mpfr_functions = [
     ('get_emin_max', [], mpfr_exp_t),
     ('get_emax_min', [], mpfr_exp_t),
     ('get_emax_max', [], mpfr_exp_t),
-    ('check_range', [Mpfr, ctypes.c_int, RoundingMode], Ternary),
-    ('subnormalize', [Mpfr, ctypes.c_int, RoundingMode], Ternary),
+    ('check_range', [IMpfr, ctypes.c_int, RoundingMode], Ternary),
+    ('subnormalize', [IMpfr, ctypes.c_int, RoundingMode], Ternary),
 
     ('clear_flags', [], None),
     ]
@@ -466,50 +466,50 @@ additional_standard_functions = [
     ('set_si_2exp', [Long, Exponent]),
 
     # 5.5 Basic Arithmetic Functions
-    ('add_ui', [Mpfr, UnsignedLong]),
-    ('add_si', [Mpfr, Long]),
-    ('add_d', [Mpfr, ctypes.c_double]),
-    ('ui_sub', [UnsignedLong, Mpfr]),
-    ('sub_ui', [Mpfr, UnsignedLong]),
-    ('si_sub', [Long, Mpfr]),
-    ('sub_si', [Mpfr, Long]),
-    ('d_sub', [ctypes.c_double, Mpfr]),
-    ('sub_d', [Mpfr, ctypes.c_double]),
-    ('mul_ui', [Mpfr, UnsignedLong]),
-    ('mul_si', [Mpfr, Long]),
-    ('mul_d', [Mpfr, ctypes.c_double]),
-    ('ui_div', [UnsignedLong, Mpfr]),
-    ('div_ui', [Mpfr, UnsignedLong]),
-    ('si_div', [Long, Mpfr]),
-    ('div_si', [Mpfr, Long]),
-    ('d_div', [ctypes.c_double, Mpfr]),
-    ('div_d', [Mpfr, ctypes.c_double]),
+    ('add_ui', [IMpfr, UnsignedLong]),
+    ('add_si', [IMpfr, Long]),
+    ('add_d', [IMpfr, ctypes.c_double]),
+    ('ui_sub', [UnsignedLong, IMpfr]),
+    ('sub_ui', [IMpfr, UnsignedLong]),
+    ('si_sub', [Long, IMpfr]),
+    ('sub_si', [IMpfr, Long]),
+    ('d_sub', [ctypes.c_double, IMpfr]),
+    ('sub_d', [IMpfr, ctypes.c_double]),
+    ('mul_ui', [IMpfr, UnsignedLong]),
+    ('mul_si', [IMpfr, Long]),
+    ('mul_d', [IMpfr, ctypes.c_double]),
+    ('ui_div', [UnsignedLong, IMpfr]),
+    ('div_ui', [IMpfr, UnsignedLong]),
+    ('si_div', [Long, IMpfr]),
+    ('div_si', [IMpfr, Long]),
+    ('d_div', [ctypes.c_double, IMpfr]),
+    ('div_d', [IMpfr, ctypes.c_double]),
     ('sqrt_ui', [UnsignedLong]),
-    ('root', [Mpfr, UnsignedLong]),
-    ('pow_ui', [Mpfr, UnsignedLong]),
-    ('pow_si', [Mpfr, Long]),
+    ('root', [IMpfr, UnsignedLong]),
+    ('pow_ui', [IMpfr, UnsignedLong]),
+    ('pow_si', [IMpfr, Long]),
     ('ui_pow_ui', [UnsignedLong, UnsignedLong]),
-    ('ui_pow', [UnsignedLong, Mpfr]),
-    ('mul_2ui', [Mpfr, UnsignedLong]),
-    ('mul_2si', [Mpfr, Long]),
-    ('div_2ui', [Mpfr, UnsignedLong]),
-    ('div_2si', [Mpfr, Long]),
+    ('ui_pow', [UnsignedLong, IMpfr]),
+    ('mul_2ui', [IMpfr, UnsignedLong]),
+    ('mul_2si', [IMpfr, Long]),
+    ('div_2ui', [IMpfr, UnsignedLong]),
+    ('div_2si', [IMpfr, Long]),
 
     # 5.7 Special Functions
     ('fac_ui', [UnsignedLong]),
     ('zeta_ui', [UnsignedLong]),
-    ('jn', [Long, Mpfr]),
-    ('yn', [Long, Mpfr]),
+    ('jn', [Long, IMpfr]),
+    ('yn', [Long, IMpfr]),
 
     # 5.12 Miscellaneous Functions
-    ('setsign', [Mpfr, Bool]),
+    ('setsign', [IMpfr, Bool]),
 ]
 
 standard_functions = \
     [(name, []) for name in standard_constants] + \
-    [(name, [Mpfr]) for name in standard_unary_functions] + \
-    [(name, [Mpfr]*2) for name in standard_binary_functions] + \
-    [(name, [Mpfr]*3) for name in standard_ternary_functions] + \
+    [(name, [IMpfr]) for name in standard_unary_functions] + \
+    [(name, [IMpfr]*2) for name in standard_binary_functions] + \
+    [(name, [IMpfr]*3) for name in standard_ternary_functions] + \
     additional_standard_functions
 
 unary_predicates = [
@@ -524,11 +524,11 @@ binary_predicates = [
     ]
 
 predicates = \
-    [(name, [Mpfr]) for name in unary_predicates] + \
-    [(name, [Mpfr]*2) for name in binary_predicates]
+    [(name, [IMpfr]) for name in unary_predicates] + \
+    [(name, [IMpfr]*2) for name in binary_predicates]
     
 for fn, args in standard_functions:
-    mpfr_functions.append((fn, [Mpfr] + args + [RoundingMode], Ternary))
+    mpfr_functions.append((fn, [IMpfr] + args + [RoundingMode], Ternary))
 
 for pred, args in predicates:
     mpfr_functions.append((pred, args, bool))
