@@ -381,10 +381,9 @@ mpfr_functions = [
     # frac is standard
     ('modf', [IMpfr, IMpfr, IMpfr, RoundingMode], Ternary),
     # fmod, remainder are standard
-    ('remquo', [IMpfr, ctypes.POINTER(Long), IMpfr, IMpfr, RoundingMode],
-     Ternary)
+    ('remquo', [IMpfr, ctypes.POINTER(ctypes.c_long), IMpfr, IMpfr, RoundingMode],
+     Ternary),
     # integer_p is a standard predicate
-
 
     # 5.11 +:  to do;  there's stuff missing from everything below...
 
