@@ -549,25 +549,24 @@ for t in mpfr_functions:
 
 # mpfr_init_set_* are macros; here are corresponding Python functions
 
-def init_set(rop, op, rnd):
+def _init_set(rop, op, rnd):
     mpfr.mpfr_init(rop)
     return mpfr.mpfr_set(rop, op, rnd)
 
-def init_set_ui(rop, op, rnd):
+def _init_set_ui(rop, op, rnd):
     mpfr.mpfr_init(rop)
     return mpfr.mpfr_set_ui(rop, op, rnd)
 
-def init_set_si(rop, op, rnd):
+def _init_set_si(rop, op, rnd):
     mpfr.mpfr_init(rop)
     return mpfr.mpfr_set_si(rop, op, rnd)
 
-def init_set_d(rop, op, rnd):
+def _init_set_d(rop, op, rnd):
     mpfr.mpfr_init(rop)
     return mpfr.mpfr_set_d(rop, op, rnd)
 
-for macro in ['init_set', 'init_set_ui', 'init_set_si', 'init_set_d']:
-    name = 'mpfr_' + macro
-    setattr(mpfr, name, globals()[macro])
+for macro in ['_init_set', '_init_set_ui', '_init_set_si', '_init_set_d']:
+    setattr(mpfr, 'mpfr' + macro, globals()[macro])
 
 ################################################################################
 # Python wrappers for some of the functions that are awkward to use directly
@@ -621,11 +620,12 @@ def strtofr2(rop, s, base, rounding_mode):
     return ternary, endptr.value
 
 ################################################################################
-# For ease of debugging, give the Mpfr class a usable __repr__.  This function
-# shouldn't be exported.
+# For ease of debugging, give the Mpfr class a crude but usable __repr__.
 
 def _mpfr_repr(self):
     negative, digits, exp = get_str2(self, 10, 0, RoundTiesToEven)
-    return ('-' if negative else '') + '0.' + digits + 'E' + str(exp)
+    if '@NaN@' not in digits and '@Inf@' not in digits:
+        digits = '0.' + digits + 'E' + str(exp)
+    return ('-' if negative else '') + digits
 
-Mpfr.__repr__ = _mpfr_repr
+Mpfr.__repr__ = Mpfr.__str__ = _mpfr_repr
