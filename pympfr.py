@@ -2,57 +2,26 @@ import ctypes
 import ctypes.util
 
 __all__ = [
-    # mpfr library
+    # mpfr library, giving access to the various Python-wrapped MPFR functions
     'mpfr',
 
-    # pympfr class: thin wrapper around mpfr_t type
-    'pympfr',
+    # class implementing the floats themselves (corresponds to mpfr_t)
+    'Mpfr',
 
     # constants giving limits on the precision
     'MPFR_PREC_MIN', 'MPFR_PREC_MAX',
 
-    # rounding modes;  two sets of names are exported, for convenience
-    'tonearest', 'tozero', 'toinf', 'toneginf',
+    # rounding modes
     'RoundTiesToEven', 'RoundTowardZero',
     'RoundTowardPositive', 'RoundTowardNegative',
 
     # lists of standard functions and predicates
     'standard_functions', 'predicates',
 
+    # extra functions that aren't part of the mpfr library proper
+    'set_str2', 'get_str2', 'strtofr2',
+
     ]
-
-
-
-################################################################################
-# Some utility functions, that have little to do with mpfr.
-
-def format_finite(digits, dot_pos):
-    """Given a (possibly empty) string of digits and an integer
-    dot_pos indicating the position of the decimal point relative to
-    the start of that string, output a formatted numeric string with
-    the same value and same implicit exponent."""
-
-    # strip leading zeros
-    olddigits = digits
-    digits = digits.lstrip('0')
-    dot_pos -= len(olddigits) - len(digits)
-
-    # value is 0.digits * 10**dot_pos
-    use_exponent = dot_pos <= -4 or dot_pos > len(digits)
-    if use_exponent:
-        exp = dot_pos-1 if digits else dot_pos
-        dot_pos -= exp
-
-    # left pad with zeros, insert decimal point, and add exponent
-    if dot_pos <= 0:
-        digits = '0'*(1-dot_pos) + digits
-        dot_pos += 1-dot_pos
-    assert 1 <= dot_pos <= len(digits)
-    if dot_pos < len(digits):
-        digits = digits[:dot_pos] + '.' + digits[dot_pos:]
-    if use_exponent:
-        digits += "e{0:+}".format(exp)
-    return digits
 
 ################################################################################
 # Locate and load the library
@@ -86,23 +55,14 @@ _LONG_LONG_LIMB_DEFINED = False
 _SHORT_ENUMS = False
 
 ################################################################################
-# Types
+# Substitutes for ctypes integer types that do overflow checking instead
+# of simply wrapping.
 
-# Under ctypes, Python integers are converted to C integer types by
-# wrapping (i.e., reducing modulo some power of 2).  Usually this
-# isn't the behaviour we want.  So here are wrappers for some ctypes
-# integer types that check for overflow rather than wrapping.  Use
-# these for argument types instead of c_int, c_long, etc.
-
-# Constants: these assume that if the range of an unsigned integer
-# type is [0, 2**n) then the range of the corresponding signed integer
-# type is [-2**(n-1), 2**(n-1)).  This assumption isn't supported by
-# the C standards, but I believe that it applies to all platforms that
-# libffi (and hence ctypes) works on.
 UINT_MAX = ctypes.c_uint(-1).value
+ULONG_MAX = ctypes.c_ulong(-1).value
+SIZE_T_MAX = ctypes.c_size_t(-1).value
 INT_MAX = UINT_MAX >> 1
 INT_MIN = -1-INT_MAX
-ULONG_MAX = ctypes.c_ulong(-1).value
 LONG_MAX = ULONG_MAX >> 1
 LONG_MIN = -1-LONG_MAX
 
@@ -127,12 +87,22 @@ class Long(object):
             raise ValueError("value too large to fit in a C long")
         return ctypes.c_long(value)
 
+class Size_t(object):
+    @classmethod
+    def from_param(cls, value):
+        if not 0 <= value <= SIZE_T_MAX:
+            raise ValueError("value too large to fit in a C size_t")
+        return ctypes.c_size_t(value)
+
+################################################################################
+# Types
+
 # These 4 types are used directly by the public MPFR functions:
 #
 #   mpfr_prec_t: type used for representing a precision
-#   mpfr_exp_t: type used for representing exponents of mpfr_t instances
+#   mpfr_exp_t: type used for representing exponents of Mpfr instances
 #   mpfr_rnd_t: type used for rounding modes
-#   mpfr_t: type used for mpfr floating-point variables
+#   Mpfr: type used for mpfr floating-point variables
 #
 # In addition, we define:
 #
@@ -169,7 +139,7 @@ class __mpfr_struct(ctypes.Structure):
         ("_mpfr_d", ctypes.POINTER(mpfr_limb_t))
         ]
 
-mpfr_t = __mpfr_struct * 1
+Mpfr = __mpfr_struct * 1
 
 # Precision class used for automatic range checking of precisions.
 # Arguments of type mpfr_prec_t should use the Precision class.
@@ -179,20 +149,24 @@ mpfr_t = __mpfr_struct * 1
 class Precision(object):
     @classmethod
     def from_param(cls, value):
-        if not isinstance(value, (int, long)):
-            raise TypeError("precision should be an integer")
         if not MPFR_PREC_MIN <= value <= MPFR_PREC_MAX:
             raise TypeError("precision should be in the range "
                 "[{0}, {1}]".format(MPFR_PREC_MIN, MPFR_PREC_MAX))
         return mpfr_prec_t(value)
 
 
-# Rounding modes
-tonearest = RoundTiesToEven = 'RoundTiesToEven'
-tozero = RoundTowardZero = 'RoundTowardZero'
-toinf = RoundTowardPositive = 'RoundTowardPositive'
-toneginf = RoundTowardNegative = 'RoundTowardNegative'
-rounding_mode_dict = {tonearest: 0, tozero: 1, toinf: 2, toneginf: 3}
+# Rounding mode constants
+RoundTiesToEven = 'RoundTiesToEven'
+RoundTowardZero = 'RoundTowardZero'
+RoundTowardPositive = 'RoundTowardPositive'
+RoundTowardNegative = 'RoundTowardNegative'
+
+_rounding_mode_dict = {
+    RoundTiesToEven: 0,
+    RoundTowardZero: 1,
+    RoundTowardPositive: 2,
+    RoundTowardNegative: 3,
+}
 
 # Rounding mode class is used for automatically validating the
 # rounding mode before passing it to the MPFR library.
@@ -201,7 +175,7 @@ class RoundingMode(object):
     @classmethod
     def from_param(cls, value):
         try:
-            return mpfr_rnd_t(rounding_mode_dict[value])
+            return mpfr_rnd_t(_rounding_mode_dict[value])
         except KeyError:
             raise ValueError("Invalid rounding mode")
 
@@ -214,192 +188,74 @@ class Base(object):
             raise ValueError("base b should satisfy 2 <= b <= 36")
         return ctypes.c_int(value)
 
-# UnsignedLong behaves like c_ulong, but raises an exception on
-# overflow instead of wrapping
-
-ULONG_MAX = ctypes.c_ulong(-1).value
-
-class UnsignedLong(object):
-    @classmethod
-    def from_param(cls, value):
-        if not 0 <= value <= ULONG_MAX:
-            raise ValueError("value too large to fit in a C unsigned long")
-        return ctypes.c_ulong(value)
-
-# and Long is similar
-
-LONG_MAX = ULONG_MAX >> 1
-LONG_MIN = -1-LONG_MAX
-
-class Long(object):
-    @classmethod
-    def from_param(cls, value):
-        if not LONG_MIN <= value <= LONG_MAX:
-            raise ValueError("value too large to fit in a C long")
-        return ctypes.c_long(value)
-
 # Bool represents a boolean parameter, passed as a c_int.
-# True values map to 1, False values to 0.
+# Values that are true (in the Python sense) are mapped to c_int(1);
+# values that are false are mapped to c_int(0).
 
 class Bool(object):
     @classmethod
     def from_param(cls, value):
-        return ctypes.c_int(bool(value))
+        return ctypes.c_int(1 if value else 0)
 
-# This is the main class, implemented as a wrapper around mpfr_t.
+# Sign is used for a c_int argument representing a sign
 
-class pympfr(object):
+class Sign(object):
     @classmethod
     def from_param(cls, value):
-        if not isinstance(value, cls):
-            raise TypeError
-        if not hasattr(value, '_as_parameter_'):
-            raise ValueError("value is not initialized")
-        return value._as_parameter_
+        return ctypes.c_int(1 if value >= 0 else -1)
 
-    def __init__(self, precision=None):
-        # if reinitializing, clear first
-        if hasattr(self, '_as_parameter_'):
-            raise TypeError("can't reinitialize a previously "
-                            "initialized pympfr instance")
+def Ternary(x):
+    if x > 0:
+        return 1
+    elif x < 0:
+        return -1
+    else:
+        return 0
 
-        value = mpfr_t()
-        if precision is None:
-            mpfr.mpfr_init(value)
-        else:
-            mpfr.mpfr_init2(value, precision)
-        self._as_parameter_ = value
+# Type UMpfr represents an uninitialized Mpfr instance
 
-    # keep a reference to mpfr_clear.  Previously, the clear method
-    # included the line 'mpfr.mpfr_clear(self)', but this can give a
-    # (harmless, but ugly) NameError on interpreter shutdown if the
-    # global variable 'mpfr' is removed before __del__ is called on
-    # pympfr instances.
-    clear_method = mpfr.mpfr_clear
-    def clear(self):
-        self.clear_method(self)
-        del self._as_parameter_
+class UMpfr(object):
+    @classmethod
+    def from_param(cls, value):
+        if not isinstance(value, Mpfr):
+            raise TypeError("Expecting argument of type Mpfr")
+        if hasattr(value, '_initialized'):
+            raise ValueError("Mpfr instance is already initialized")
+        return value
 
-    def as_float(self, rounding_mode):
-        """Convert to a Python float, using the given rounding mode"""
-        return mpfr.mpfr_get_d(self, rounding_mode)
+# Type Mpfr represents an initialized Mpfr instance
 
-    def as_integer_ratio(self):
-        """Return pair n, d of integers such that the value of self is exactly
-        equal to n/d, n and d are relatively prime, and d >= 1."""
+class Mpfr(object):
+    @classmethod
+    def from_param(cls, value):
+        if not isinstance(value, Mpfr):
+            raise TypeError("Expecting argument of type Mpfr")
+        if not value._initialized:
+            raise ValueError("Mpfr instance is not initialized")
+        return value
 
-        if not self.is_finite:
-            raise ValueError("Can't express infinity or nan as "
-                             "an integer ratio")
-        elif self.is_zero:
-            return 0, 1
+################################################################################
+# Various useful errcheck functions
 
-        # convert to a hex string, and from there to a fraction
-        e, digits = self.get_str(16, 0, tonearest)
-        digits = digits.lstrip('-').rstrip('0')
+def set_init(result, func, args):
+    mpfr_instance = args[0]
+    assert not hasattr(mpfr_instance, '_initialized')
+    mpfr_instance._initialized=True
 
-        # find number of trailing 0 bits in last hex digit
-        v = int(digits[-1], 16)
-        v &= -v
-        n, d = int(digits, 16)//v, 1
-        e = (e-len(digits) << 2) + {1: 0, 2: 1, 4: 2, 8: 3}[v]
+def clear_init(result, func, args):
+    mpfr_instance = args[0]
+    assert mpfr_instance._initialized
+    del mpfr_instance._initialized
 
-        # number now has value n * 2**e, and n is odd
-        if e >= 0:
-            n <<= e
-        else:
-            d <<= -e
+def set_init_on_success(result, func, args):
+    if result:
+        raise ValueError("Initialization call failed")
+    set_init(result, func, args)
 
-        return (-n if self.is_negative else n), d
-
-    def __del__(self):
-        if hasattr(self, '_as_parameter_'):
-            self.clear()
-
-    def __repr__(self):
-        if self.is_zero:
-            num = '0'
-        elif self.is_finite:
-            expt, digits = self.get_str(10, 0, tonearest)
-            num = format_finite(digits.lstrip('-'), expt)
-        elif self.is_inf:
-            num = 'Infinity'
-        else:
-            assert self.is_nan
-            num = 'NaN'
-
-        if self.is_negative:
-            num = '-' + num
-        return "pympfr('{0}', precision={1})".format(num, self.precision)
-
-    __str__ = __repr__
-
-    def get_str(self, base, ndigits, rounding_mode):
-        """Convert self to a string in the given base, 2 <= base <= 36.
-
-        The input parameter ndigits gives the number of significant
-        digits required.  If ndigits is 0, this function produces a
-        number of digits that depends on the precision.
-
-        """
-        if not 2 <= base <= 36:
-            raise ValueError("base must be an integer between 2 and 36 inclusive")
-        if ndigits < 0:
-            raise ValueError("n should be a nonnegative integer")
-
-        exp = mpfr_exp_t()
-        p = mpfr.mpfr_get_str(None, ctypes.pointer(exp),
-                              base, ndigits, self, rounding_mode)
-        result = ctypes.cast(p, ctypes.c_char_p).value
-        mpfr.mpfr_free_str(p)
-        return exp.value, result
-
-    @property
-    def precision(self):
-        return mpfr.mpfr_get_prec(self)
-
-    @precision.setter
-    def precision(self, precision):
-        mpfr.mpfr_set_prec(self, precision)
-
-    @property
-    def is_zero(self):
-        return mpfr.mpfr_zero_p(self)
-
-    @property
-    def is_finite(self):
-        return mpfr.mpfr_number_p(self)
-
-    @property
-    def is_inf(self):
-        return mpfr.mpfr_inf_p(self)
-
-    @property
-    def is_nan(self):
-        return mpfr.mpfr_nan_p(self)
-
-    @property
-    def is_negative(self):
-        return mpfr.mpfr_signbit(self)
-
-    # comparisons
-    def __eq__(self, other):
-        return mpfr.mpfr_equal_p(self, other)
-
-    def __ne__(self, other):
-        return not self == other
-
-    def __le__(self, other):
-        return mpfr.mpfr_lessequal_p(self, other)
-
-    def __ge__(self, other):
-        return mpfr.mpfr_greaterequal_p(self, other)
-
-    def __lt__(self, other):
-        return mpfr.mpfr_less_p(self, other)
-
-    def __gt__(self, other):
-        return mpfr.mpfr_greater_p(self, other)
+def error_on_failure(result, func, args):
+    if result:
+        raise ValueError("call failed")
+    return result
 
 ################################################################################
 # Limits, and other constants
@@ -418,328 +274,127 @@ MPFR_EMIN_DEFAULT = -MPFR_EMAX_DEFAULT
 
 # 5.1 Initialization Functions
 
-# Only the functions mpfr_init and mpfr_init2 take arguments of type
-# mpfr_t.  All other functions use type pympfr instead.  The reason is
-# that the pympfr type implements a check that the underlying mpfr_t
-# instance is already initialized; for mpfr_init and mpfr_init2 that
-# check isn't valid, of course.
-
-mpfr.mpfr_init2.argtypes = [mpfr_t, Precision]
-mpfr.mpfr_init2.restype = None
-
-mpfr.mpfr_clear.argtypes = [pympfr]
-mpfr.mpfr_clear.restype = None
-
-mpfr.mpfr_init.argtypes = [mpfr_t]
-mpfr.mpfr_init.restype = None
-
-mpfr.mpfr_set_default_prec.argtypes = [Precision]
-mpfr.mpfr_set_default_prec.restype = None
-
-mpfr.mpfr_get_default_prec.argtypes = []
-mpfr.mpfr_get_default_prec.restype = int
-
-mpfr.mpfr_set_prec.argtypes = [pympfr, Precision]
-mpfr.mpfr_set_prec.restype = None
-
-mpfr.mpfr_get_prec.argtypes = [pympfr]
-mpfr.mpfr_get_prec.restype = int
-
-# 5.2 Assignment Functions
-
-# mpfr_set, mpfr_set_ui, mpfr_set_si, mpfr_set_d are standard
-# functions, dealt with below.
-
-# mpfr_set_uj, mpfr_set_sj, mpfr_set_ld, mpfr_set_decimal64, mpfr_set_z,
-# mpfr_set_q and mpfr_set_f are not make available.
-
-
-
-# mpfr_set_ui_2exp and mpfr_set_si_2exp are standard functions
-
-
-
-
-# mpfr_set_l is a Python analogue of mpfr_set_ui/mpfr_set_si/mpfr_set_z
-# that accepts a Python integer as second argument.
-
-def mpfr_set_l(rop, op, rnd):
-    """Set the pympfr variable rop to the value of the Python integer
-    op, rounding toward direction rnd.  Returns the usual ternary value."""
-
-    if not isinstance(op, (int, long)):
-        raise TypeError("second argument to mpfr_set_l should be a Python integer")
-
-    if LONG_MIN <= op <= LONG_MAX:
-        return mpfr.mpfr_set_si(rop, op, rnd)
-    else:
-        return mpfr.mpfr_set_str2(rop, '%x' % op, 16, rnd)
-        
-mpfr.mpfr_set_l = mpfr_set_l
-mpfr.mpfr_set_l.argtypes = [pympfr, long, RoundingMode]
-
-# need to wrap mpfr_strtofr specially: the Python version returns a
-# pair consisting of the ternary value and the number of characters
-# consumed.
-
-mpfr.mpfr_strtofr.argtypes = [pympfr, ctypes.c_char_p,
-                              ctypes.POINTER(ctypes.c_char_p),
-                              Base, RoundingMode]
-
-def strtofr(x, s, base, rounding_mode):
-    """Set value of x from string s.
-
-    Returns a pair (t, n) giving the ternary value t and
-    the number n of characters consumed.  If n == 0
-    the the input string was invalid;  in this case x is
-    set to 0.
-
-    """
-    if not 2 <= base <= 36:
-        raise ValueError("base should satsify 2 <= base <= 36")
-    startptr = ctypes.c_char_p(s)
-    endptr = ctypes.c_char_p()
-    ternary = mpfr.mpfr_strtofr(x, startptr, ctypes.byref(endptr), base, rounding_mode)
-    return ternary, endptr.value
-
-# mpfr_set_str2 has the form of a standard function.  It's like
-# mpfr_set_str, but raises a Python exception for failure, and
-# otherwise returns a ternary value.
-def mpfr_set_str2(x, s, base, rounding_mode):
-    if s != s.strip():
-        raise ValueError("not a valid numeric string")
-    ternary, remainder = strtofr(x, s, base, rounding_mode)
-    if remainder:
-        raise ValueError("not a valid numeric string")
-    return ternary
-
-mpfr.mpfr_set_str2 = mpfr_set_str2
-
-mpfr.mpfr_set_nan.argtypes = [pympfr]
-mpfr.mpfr_set_nan.restype = None
-
-# MPFR uses two different conventions for signs, probably for
-# historical reasons: some functions use a nonzero c_int to mean
-# negative and zero c_int to mean positive (e.g., mpfr_signbit,
-# mpfr_setsign), and some use a nonnegative c_int to mean positive and
-# a negative c_int to mean negative (e.g., mpfr_set_inf).
-
-# In pympfr we try to consistently use True for the sign of a negative
-# number (or negative zero, or nan with its sign bit set) and False
-# for the sign of a positive number (or positive zero, or nan without
-# its sign bit set).
-
-# Here we rewrap mpfr_set_inf to use the above convention.
-
-mpfr.mpfr_set_inf.argtypes = [pympfr, ctypes.c_int]
-mpfr.mpfr_set_inf.restype = None
-def mpfr_set_inf(x, negative, _mpfr_set_inf = mpfr.mpfr_set_inf):
-    negative = Bool.from_param(negative)
-    _mpfr_set_inf(x, -1 if negative else 1)
-
-mpfr.mpfr_set_inf = mpfr_set_inf
-mpfr.mpfr_set_inf.argtypes = [pympfr, Bool]
-mpfr.mpfr_set_inf.restype = None
-
-# mpfr_set_zero is an extension to MPFR, with similar semantics to
-# mpfr_set_inf.
-
-def mpfr_set_zero(x, negative):
-    negative = Bool.from_param(negative)
-    mpfr.mpfr_set_ui(x, 0, RoundTiesToEven)
-    mpfr.mpfr_setsign(x, x, negative, RoundTiesToEven)
-
-mpfr.mpfr_set_zero = mpfr_set_zero
-mpfr.mpfr_set_zero.argtypes = [pympfr, Bool]
-mpfr.mpfr_set_zero.restype = None
-
-# mpfr_set_maxfinite sets x to the largest nonzero finite value
-
-def mpfr_set_maxfinite(x, negative):
-    """Set x to the largest finite nonzero number with the given
-    sign."""
-    if mpfr.mpfr_get_emin() > mpfr.mpfr_get_emax():
-        raise ValueError("emin > emax: no nonzero finite numbers exist")
-    mpfr.mpfr_set_inf(x, False)
-    mpfr.mpfr_nextbelow(x)
-    mpfr.mpfr_setsign(x, x, negative, RoundTiesToEven)
-    return
-
-mpfr.mpfr_set_maxfinite = mpfr_set_maxfinite
-mpfr.mpfr_set_maxfinite.argtypes = [pympfr, Bool]
-mpfr.mpfr_set_maxfinite.restype = None
-
-# mpfr_set_minfinite sets x to the smallest nonzero finite value
-
-def mpfr_set_minfinite(x, negative):
-    "Set x to the smallest finite nonzero number with the given sign."""
-
-    if mpfr.mpfr_get_emin() > mpfr.mpfr_get_emax():
-        raise ValueError("emin > emax: no nonzero finite numbers exist")
-    mpfr.mpfr_set_zero(x, False)
-    mpfr.mpfr_nextabove(x)
-    mpfr.mpfr_setsign(x, x, negative, RoundTiesToEven)
-    return
-
-mpfr.mpfr_set_minfinite = mpfr_set_minfinite
-mpfr.mpfr_set_minfinite.argtypes = [pympfr, Bool]
-mpfr.mpfr_set_minfinite.restype = None
-
-# mpfr_set_huge sets x as though set to something much larger than
-# the largest representable value, using the given rounding mode.
-# It returns the appropriate ternary value.
-
-def mpfr_set_huge(x, negative, rnd):
-    # are we rounding towards zero?
-    if rnd == RoundTowardZero:
-        toward_zero = True
-    elif rnd == RoundTiesToEven:
-        toward_zero = False
-    elif rnd == RoundTowardPositive:
-        toward_zero = negative
-    elif rnd == RoundTowardNegative:
-        toward_zero = not negative
-    else:
-        raise ValueError("unknown rounding mode")
-
-    if toward_zero:
-        mpfr.mpfr_set_maxfinite(x, negative)
-        inex = -1
-    else:
-        mpfr.mpfr_set_inf(x, negative)
-        inex = 1
-
-    if negative:
-        inex = -inex
-
-    mpfr.mpfr_set_overflow()
-    mpfr.mpfr_set_inexflag()
-    return inex
-
-mpfr.mpfr_set_huge = mpfr_set_huge
-mpfr.mpfr_set_huge.argtypes = [pympfr, Bool, RoundingMode]
-
-def mpfr_set_tiny(x, negative, rnd):
-    # are we rounding towards zero?
-    if rnd == RoundTowardZero:
-        toward_zero = True
-    elif rnd == RoundTiesToEven:
-        toward_zero = True
-    elif rnd == RoundTowardPositive:
-        toward_zero = negative
-    elif rnd == RoundTowardNegative:
-        toward_zero = not negative
-    else:
-        raise ValueError("unknown rounding mode")
-
-    if toward_zero:
-        mpfr_set_zero(x, negative)
-        inex = -1
-    else:
-        mpfr_set_minfinite(x, negative)
-        inex = 1
-
-    if negative:
-        inex = -inex
-
-    mpfr.mpfr_set_underflow()
-    mpfr.mpfr_set_inexflag()
-    return inex
-
-mpfr.mpfr_set_tiny = mpfr_set_tiny
-mpfr.mpfr_set_tiny.argtypes = [pympfr, Bool, RoundingMode]
-
-# We don't implement the MPFR assignments from C integer types, C long
-# double, C decimal64, GMP rationals, or GMP floats.
-
-# To do:  implement assignment from a Python int, using mpfr_set_z.
-
-# for mpfr_set, mpfr_set_d see standard functions below
-
-# 5.4 Conversion Functions
-
-mpfr.mpfr_get_d.argtypes = [pympfr, RoundingMode]
-mpfr.mpfr_get_d.restype = ctypes.c_double
-
-# declare mpfr_get_str.restype as POINTER(c_char) to avoid the
-# automatic c_char_p -> string unboxing.
-mpfr.mpfr_get_str.argtypes = [ctypes.c_char_p, ctypes.POINTER(mpfr_exp_t),
-                              Base, ctypes.c_size_t,
-                              pympfr, RoundingMode]
-mpfr.mpfr_get_str.restype = ctypes.POINTER(ctypes.c_char)
-
-mpfr.mpfr_free_str.argtypes = [ctypes.POINTER(ctypes.c_char)]
-mpfr.mpfr_free_str.restype = None
-
-# 5.12 Miscellaneous Functions
-
-mpfr.mpfr_nexttoward.argtypes = [pympfr, pympfr]
-mpfr.mpfr_nexttoward.restype = None
-
-mpfr.mpfr_nextabove.argtypes = [pympfr]
-mpfr.mpfr_nextabove.restype = None
-
-mpfr.mpfr_nextbelow.argtypes = [pympfr]
-mpfr.mpfr_nextbelow.restype = None
-
-mpfr.mpfr_set_exp.argtypes = [pympfr, Exponent]
-mpfr.mpfr_set_exp.restype = bool
-
-mpfr.mpfr_get_exp.argtypes = [pympfr]
-mpfr.mpfr_get_exp.restype = mpfr_exp_t
-
-# 5.13 Exception Related Functions
-
-mpfr.mpfr_get_emin.argtypes = []
-mpfr.mpfr_get_emin.restype = mpfr_exp_t
-
-mpfr.mpfr_get_emax.argtypes = []
-mpfr.mpfr_get_emax.restype = mpfr_exp_t
-
-mpfr.mpfr_set_emin.argtypes = [Exponent]
-mpfr.mpfr_set_emax.argtypes = [Exponent]
-
-mpfr.mpfr_get_emin_min.argtypes = []
-mpfr.mpfr_get_emin_min.restype = mpfr_exp_t
-
-mpfr.mpfr_get_emin_max.argtypes = []
-mpfr.mpfr_get_emin_max.restype = mpfr_exp_t
-
-mpfr.mpfr_get_emax_min.argtypes = []
-mpfr.mpfr_get_emax_min.restype = mpfr_exp_t
-
-mpfr.mpfr_get_emax_max.argtypes = []
-mpfr.mpfr_get_emax_max.restype = mpfr_exp_t
-
-mpfr.mpfr_check_range.argtypes = [pympfr, ctypes.c_int, RoundingMode]
-
-mpfr.mpfr_subnormalize.argtypes = [pympfr, ctypes.c_int, RoundingMode]
-
+# Only the initialization functions take arguments of type UMpfr.  All
+# other functions use type Mpfr instead.  The reason is that the Mpfr
+# type implements a check that the underlying Mpfr instance is
+# already initialized, but mpfr_init and mpfr_init2 expect to receive
+# uninitialized instances.
+
+mpfr_functions = [
+
+    # 5.1: Initialization Functions
+    ('init2', [UMpfr, Precision], None, set_init),
+    ('clear', [Mpfr], None, clear_init),
+    ('init', [UMpfr], None, set_init),
+    ('set_default_prec', [Precision], None),
+    ('get_default_prec', [], mpfr_prec_t),
+    ('set_prec', [Mpfr, Precision], None),
+    ('get_prec', [Mpfr], mpfr_prec_t),
+
+    # 5.2 Assignment Functions
+
+    # mpfr_set, mpfr_set_ui, mpfr_set_si, mpfr_set_d,
+    # mpfr_set_ui_2exp, mpfr_set_si_2exp, are standard functions,
+    # dealt with below.
+
+    # mpfr_set_uj, mpfr_set_sj, mpfr_set_ld, mpfr_set_decimal64,
+    # mpfr_set_z, mpfr_set_q, mpfr_set_f, mpfr_set_uj_2exp,
+    # mpfr_set_sj_2exp, are not made available.
+
+    # use of mpfr_set_str is not recommended, since it doesn't return
+    # the ternary value.  Use set_str2 (defined below) instead.
+    ('set_str', [Mpfr, ctypes.c_char_p, Base, RoundingMode], ctypes.c_int,
+     error_on_failure),
+    ('strtofr', [Mpfr, ctypes.c_char_p, ctypes.POINTER(ctypes.c_char_p), 
+                 Base, RoundingMode], Ternary),
+    ('set_inf', [Mpfr, Sign], None),
+    ('set_nan', [Mpfr], None),
+    ('swap', [Mpfr, Mpfr], None),
+
+    # 5.3 Combined Initialization and Assignment Functions
+    # Apart from init_set_str, these are all macros
+    ('init_set_str', [UMpfr, ctypes.c_char_p, Base, RoundingMode],
+     ctypes.c_int, set_init_on_success),
+
+    # 5.4 Conversion Functions
+    ('get_d', [Mpfr, RoundingMode], ctypes.c_double),
+    ('get_d_2exp', [ctypes.POINTER(ctypes.c_long), Mpfr, RoundingMode],
+     ctypes.c_double),
+    ('get_si', [Mpfr, RoundingMode], ctypes.c_long),
+    ('get_ui', [Mpfr, RoundingMode], ctypes.c_ulong),
+    ('get_str', [ctypes.POINTER(ctypes.c_char), ctypes.POINTER(mpfr_exp_t),
+                 Base, Size_t, Mpfr, RoundingMode],
+     ctypes.POINTER(ctypes.c_char)),
+    ('free_str', [ctypes.POINTER(ctypes.c_char)], None),
+    ('fits_ulong_p', [Mpfr, RoundingMode], bool),
+    ('fits_slong_p', [Mpfr, RoundingMode], bool),
+    ('fits_uint_p', [Mpfr, RoundingMode], bool),
+    ('fits_sint_p', [Mpfr, RoundingMode], bool),
+    ('fits_ushort_p', [Mpfr, RoundingMode], bool),
+    ('fits_sshort_p', [Mpfr, RoundingMode], bool),
+
+    # 5.5 Basic Arithmetic Functions
+    # Most of these are standard functions, declared below.
+    # Functions involved GMP mpz_t and mpq_t types aren't wrapped.
+
+    # 5.6 Comparison Functions
+    ('cmp', [Mpfr, Mpfr], Ternary),
+    ('cmp_ui', [Mpfr, UnsignedLong], Ternary),
+    ('cmp_si', [Mpfr, Long], Ternary),
+    ('cmp_d', [Mpfr, ctypes.c_double], Ternary),
+    ('cmp_ui_2exp', [Mpfr, UnsignedLong, Exponent], Ternary),
+    ('cmp_si_2exp', [Mpfr, Long, Exponent], Ternary),
+    ('cmpabs', [Mpfr, Mpfr], Ternary),
+    
+    # nan_p, inf_p, number_p, zero_p are standard predicates, declared below
+    ('sgn', [Mpfr], Ternary),
+
+    # remaining functions are again standard predicates, declared below
+
+    # 5.7 Special Functions
+
+    # Most of these are standard functions, declared below.
+    ('sin_cos', [Mpfr, Mpfr, Mpfr, RoundingMode], Ternary),
+    ('sinh_cosh', [Mpfr, Mpfr, Mpfr, RoundingMode], Ternary),
+    ('free_cache', [], None),
+    # we don't wrap mpfr_sum at the moment
+
+    # 5.8 Input and Output Functions
+    # 5.9 Formatted Output Functions
+    # we don't currently wrap any functions in these two sections
+
+    # 5.10 +:  to do;  there's stuff missing from everything below...
+
+    # 5.12 Miscellaneous Functions
+    ('nexttoward', [Mpfr, Mpfr], None),
+    ('nextabove', [Mpfr], None),
+    ('nextbelow', [Mpfr], None),
+    ('set_exp', [Mpfr, Exponent], ctypes.c_int, error_on_failure),
+    ('get_exp', [Mpfr], mpfr_exp_t),
+
+    # 5.13 Exception Related Functions
+    ('get_emin', [], mpfr_exp_t),
+    ('get_emax', [], mpfr_exp_t),
+    ('set_emin', [Exponent], ctypes.c_int, error_on_failure),
+    ('set_emax', [Exponent], ctypes.c_int, error_on_failure),
+    ('get_emin_min', [], mpfr_exp_t),
+    ('get_emin_max', [], mpfr_exp_t),
+    ('get_emax_min', [], mpfr_exp_t),
+    ('get_emax_max', [], mpfr_exp_t),
+    ('check_range', [Mpfr, ctypes.c_int, RoundingMode], Ternary),
+    ('subnormalize', [Mpfr, ctypes.c_int, RoundingMode], Ternary),
+
+    ('clear_flags', [], None),
+    ]
+
+# additional functions for flags
 flags = ['underflow', 'overflow', 'nanflag', 'inexflag', 'erangeflag']
 for f in flags:
-    clear_fn = getattr(mpfr, 'mpfr_clear_' + f)
-    clear_fn.argtypes = []
-    clear_fn.restype = None
-    set_fn = getattr(mpfr, 'mpfr_set_' + f)
-    set_fn.argtypes = []
-    set_fn.restype = None
-    test_fn = getattr(mpfr, 'mpfr_' + f + '_p')
-    test_fn.argtypes = []
-    test_fn.restype = bool
-
-mpfr.mpfr_clear_flags.argtypes = []
-mpfr.mpfr_clear_flags.restype = None
-
-################################################################################
-# Functions to be exported at the module level
-
-def rewrap(f):
-    def wrapped_f(*args):
-        return f(*args)
-    return wrapped_f
-
-pympfr.set_d = rewrap(mpfr.mpfr_set_d)
-pympfr.set = rewrap(mpfr.mpfr_set)
+    mpfr_functions.append(('clear_' + f, [], None))
+for f in flags:
+    mpfr_functions.append(('set_' + f, [], None))
+for f in flags:
+    mpfr_functions.append((f+'_p', [], bool))
 
 ################################################################################
 # Standard arithmetic and mathematical functions
@@ -747,11 +402,13 @@ pympfr.set = rewrap(mpfr.mpfr_set)
 # A large number of MPFR's functions take a standard form: a
 # *standard* function is one that takes some number of arguments,
 # including a rounding mode, and returns the result in an existing
-# variable of type mpfr_t, along with a ternary value.  For all such
+# variable of type Mpfr, along with a ternary value.  For all such
 # functions:
 #
-#   - the first argument has type mpfr_t, and receives the result
+#   - the first argument has type Mpfr, and receives the result
 #   - the last argument is the rounding mode
+#   - all arguments except the first are unmodified by the call,
+#     and the current value of the first argument is not used.
 #   - the return value has type int, and gives the ternary value
 #
 # In this section we provide details about these functions.
@@ -760,7 +417,7 @@ standard_constants = [
     'const_log2', 'const_pi', 'const_euler', 'const_catalan',
     ]
 
-# standard functions taking a single mpfr_t as input
+# standard functions taking a single Mpfr instance as input
 
 standard_unary_functions = [
     'set', 'neg', 'abs',
@@ -783,7 +440,7 @@ standard_unary_functions = [
     'frac',
     ]
 
-# standard functions taking two mpfr_t objects as input
+# standard functions taking two Mpfr instances as input
 
 standard_binary_functions = [
     'add', 'sub', 'mul', 'div', 'pow',
@@ -793,35 +450,67 @@ standard_binary_functions = [
     'copysign',
     ]
 
+# and three Mpfr instances...
+
 standard_ternary_functions = [
     'fma', 'fms',
     ]
 
 # more standard functions, with argument types
 additional_standard_functions = [
+    # 5.2 Assignment Functions
     ('set_ui', [UnsignedLong]),
     ('set_si', [Long]),
     ('set_d', [ctypes.c_double]),
     ('set_ui_2exp', [UnsignedLong, Exponent]),
     ('set_si_2exp', [Long, Exponent]),
-    ('set_str2', [ctypes.c_char_p, Base]),
-    ('mul_2ui', [pympfr, UnsignedLong]),
-    ('mul_2si', [pympfr, Long]),
-    ('div_2ui', [pympfr, UnsignedLong]),
-    ('div_2si', [pympfr, Long]),
-    ('setsign', [pympfr, Bool]),
+
+    # 5.5 Basic Arithmetic Functions
+    ('add_ui', [Mpfr, UnsignedLong]),
+    ('add_si', [Mpfr, Long]),
+    ('add_d', [Mpfr, ctypes.c_double]),
+    ('ui_sub', [UnsignedLong, Mpfr]),
+    ('sub_ui', [Mpfr, UnsignedLong]),
+    ('si_sub', [Long, Mpfr]),
+    ('sub_si', [Mpfr, Long]),
+    ('d_sub', [ctypes.c_double, Mpfr]),
+    ('sub_d', [Mpfr, ctypes.c_double]),
+    ('mul_ui', [Mpfr, UnsignedLong]),
+    ('mul_si', [Mpfr, Long]),
+    ('mul_d', [Mpfr, ctypes.c_double]),
+    ('ui_div', [UnsignedLong, Mpfr]),
+    ('div_ui', [Mpfr, UnsignedLong]),
+    ('si_div', [Long, Mpfr]),
+    ('div_si', [Mpfr, Long]),
+    ('d_div', [ctypes.c_double, Mpfr]),
+    ('div_d', [Mpfr, ctypes.c_double]),
+    ('sqrt_ui', [UnsignedLong]),
+    ('root', [Mpfr, UnsignedLong]),
+    ('pow_ui', [Mpfr, UnsignedLong]),
+    ('pow_si', [Mpfr, Long]),
+    ('ui_pow_ui', [UnsignedLong, UnsignedLong]),
+    ('ui_pow', [UnsignedLong, Mpfr]),
+    ('mul_2ui', [Mpfr, UnsignedLong]),
+    ('mul_2si', [Mpfr, Long]),
+    ('div_2ui', [Mpfr, UnsignedLong]),
+    ('div_2si', [Mpfr, Long]),
+
+    # 5.7 Special Functions
+    ('fac_ui', [UnsignedLong]),
+    ('zeta_ui', [UnsignedLong]),
+    ('jn', [Long, Mpfr]),
+    ('yn', [Long, Mpfr]),
+
+    # 5.12 Miscellaneous Functions
+    ('setsign', [Mpfr, Bool]),
 ]
 
 standard_functions = \
     [(name, []) for name in standard_constants] + \
-    [(name, [pympfr]) for name in standard_unary_functions] + \
-    [(name, [pympfr]*2) for name in standard_binary_functions] + \
-    [(name, [pympfr]*3) for name in standard_ternary_functions] + \
+    [(name, [Mpfr]) for name in standard_unary_functions] + \
+    [(name, [Mpfr]*2) for name in standard_binary_functions] + \
+    [(name, [Mpfr]*3) for name in standard_ternary_functions] + \
     additional_standard_functions
-
-for fn, args in standard_functions:
-    mpfr_fn = getattr(mpfr, 'mpfr_' + fn)
-    mpfr_fn.argtypes = [pympfr] + args + [RoundingMode]
 
 unary_predicates = [
     'nan_p', 'inf_p', 'number_p', 'zero_p',
@@ -835,10 +524,108 @@ binary_predicates = [
     ]
 
 predicates = \
-    [(name, [pympfr]) for name in unary_predicates] + \
-    [(name, [pympfr]*2) for name in binary_predicates]
+    [(name, [Mpfr]) for name in unary_predicates] + \
+    [(name, [Mpfr]*2) for name in binary_predicates]
     
+for fn, args in standard_functions:
+    mpfr_functions.append((fn, [Mpfr] + args + [RoundingMode], Ternary))
+
 for pred, args in predicates:
-    mpfr_pred = getattr(mpfr, 'mpfr_' + pred)
-    mpfr_pred.argtypes = args
-    mpfr_pred.restype = bool
+    mpfr_functions.append((pred, args, bool))
+
+# set argtypes, restype, errcheck for all functions
+for t in mpfr_functions:
+    mpfr_fn = getattr(mpfr, 'mpfr_' + t[0])
+    if len(t) == 3:
+        mpfr_fn.argtypes, mpfr_fn.restype = t[1:]
+    else:
+        assert len(t) == 4
+        mpfr_fn.argtypes, mpfr_fn.restype, mpfr_fn.errcheck = t[1:]
+
+################################################################################
+# Some of the MPFR documented functions are implemented as macros, and hence
+# aren't available from the libmpfr file.  Here are Python substitutes for
+# those functions.
+
+# mpfr_init_set_* are macros; here are corresponding Python functions
+
+def init_set(rop, op, rnd):
+    mpfr.mpfr_init(rop)
+    return mpfr.mpfr_set(rop, op, rnd)
+
+def init_set_ui(rop, op, rnd):
+    mpfr.mpfr_init(rop)
+    return mpfr.mpfr_set_ui(rop, op, rnd)
+
+def init_set_si(rop, op, rnd):
+    mpfr.mpfr_init(rop)
+    return mpfr.mpfr_set_si(rop, op, rnd)
+
+def init_set_d(rop, op, rnd):
+    mpfr.mpfr_init(rop)
+    return mpfr.mpfr_set_d(rop, op, rnd)
+
+for macro in ['init_set', 'init_set_ui', 'init_set_si', 'init_set_d']:
+    name = 'mpfr_' + macro
+    setattr(mpfr, name, globals()[macro])
+
+################################################################################
+# Python wrappers for some of the functions that are awkward to use directly
+
+def set_str2(rop, s, base, rnd):
+    """Set value of rop from the string s, using given base and rounding mode.
+
+    If s is a valid string for the given base, set the Mpfr variable
+    rop from s, rounding in the direction given by 'rnd', and return
+    the usual ternary value.
+
+    If s is not a valid string for the given base, raise ValueError.
+
+    """
+    if s == s.strip():
+        ternary, remainder = strtofr2(rop, s, base, rounding_mode)
+        if not remainder:
+            return ternary
+    raise ValueError("not a valid numeric string")
+
+def get_str2(rop, base, ndigits, rounding_mode):
+    """Convert rop to a string in the given base, 2 <= base <= 36.
+
+    The input parameter ndigits gives the number of significant
+    digits required.  If ndigits is 0, this function produces a
+    number of digits that depends on the precision.
+
+    """
+    exp = mpfr_exp_t()
+    p = mpfr.mpfr_get_str(None, ctypes.pointer(exp),
+                          base, ndigits, rop, rounding_mode)
+    result = ctypes.cast(p, ctypes.c_char_p).value
+    mpfr.mpfr_free_str(p)
+
+    negative = result.startswith('-')
+    if negative:
+        result = result[1:]
+    return negative, result, exp.value
+
+def strtofr2(rop, s, base, rounding_mode):
+    """Set value of rop from string s.
+
+    Returns a pair (t, n) giving the ternary value t and
+    the characters that weren't parsed.
+    """
+
+    startptr = ctypes.c_char_p(s)
+    endptr = ctypes.c_char_p()
+    ternary = mpfr.mpfr_strtofr(rop, startptr, ctypes.byref(endptr),
+                                base, rounding_mode)
+    return ternary, endptr.value
+
+################################################################################
+# For ease of debugging, give the Mpfr class a usable __repr__.  This function
+# shouldn't be exported.
+
+def _mpfr_repr(self):
+    negative, digits, exp = get_str2(self, 10, 0, RoundTiesToEven)
+    return ('-' if negative else '') + '0.' + digits + 'E' + str(exp)
+
+Mpfr.__repr__ = _mpfr_repr
