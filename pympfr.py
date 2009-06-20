@@ -19,7 +19,7 @@ __all__ = [
     'standard_functions', 'predicates',
 
     # extra functions that aren't part of the mpfr library proper
-    'set_str2', 'get_str2', 'strtofr2', 'remquo',
+    'set_str2', 'get_str2', 'strtofr2', 'remquo2',
 
     ]
 
@@ -422,7 +422,7 @@ mpfr_functions = [
     ('get_emax_max', [], mpfr_exp_t),
     ('check_range', [IMpfr, ctypes.c_int, RoundingMode], Ternary),
     ('subnormalize', [IMpfr, ctypes.c_int, RoundingMode], Ternary),
-
+    # for flag set, clear and test functions see below
     ('clear_flags', [], None),
 
     # 5.14 Compatibility With MPF
@@ -430,7 +430,7 @@ mpfr_functions = [
     # Functions from 5.14 and 5.15 not wrapped.
     ]
 
-# additional functions for flags
+# additional functions for flags in section 13
 flags = ['underflow', 'overflow', 'nanflag', 'inexflag', 'erangeflag']
 for f in flags:
     mpfr_functions.append(('clear_' + f, [], None))
@@ -662,7 +662,7 @@ def strtofr2(rop, s, base, rounding_mode):
                                 base, rounding_mode)
     return ternary, endptr.value
 
-def remquo(r, x, y, rnd):
+def remquo2(r, x, y, rnd):
     """Set r to the value of x-ny, and also return low bits of quotient n.
 
     Returns a pair (ternary, q)."""
