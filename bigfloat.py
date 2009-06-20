@@ -35,12 +35,12 @@ __all__ = [
 
 import sys
 
-from pympfr import pympfr
+from pympfr import Mpfr, IMpfr
 from pympfr import mpfr
 from pympfr import RoundTiesToEven, RoundTowardZero
 from pympfr import RoundTowardPositive, RoundTowardNegative
 from pympfr import MPFR_PREC_MIN, MPFR_PREC_MAX
-from pympfr import standard_functions, predicates
+from pympfr import standard_functions, predicates, extra_standard_functions
 
 builtin_max = max
 
@@ -247,23 +247,24 @@ def rounding(rnd):
     return getcontext()(rounding=rnd)
 
 
-def wrap_standard_function(f):
+def wrap_standard_function(f, argtypes):
     def wrapped_f(*args):
         context = getcontext()
-        argtypes = f.argtypes[1:-1]
+        rounding = context.rounding
         if len(args) != len(argtypes):
             raise TypeError("Wrong number of arguments")
         converted_args = []
         for arg, arg_t in zip(args, argtypes):
-            if arg_t is pympfr:
+            if arg_t is IMpfr:
                 arg = BigFloat.implicit_convert(arg)._value
             converted_args.append(arg)
-        converted_args.append(context.rounding)
-        bf = pympfr(precision=context.precision)
+        converted_args.append(rounding)
+        bf = Mpfr()
+        mpfr.mpfr_init2(bf, context.precision)
         ternary = f(bf, *converted_args)
         if context.subnormalize:
-            ternary = mpfr.mpfr_subnormalize(bf, ternary, context.rounding)
-        return BigFloat._from_pympfr(bf)
+            ternary = mpfr.mpfr_subnormalize(bf, ternary, rounding)
+        return BigFloat._from_Mpfr(bf)
     return wrapped_f
 
 def wrap_predicate(f):
@@ -274,7 +275,7 @@ def wrap_predicate(f):
             raise TypeError("Wrong number of arguments")
         converted_args = []
         for arg, arg_t in zip(args, argtypes):
-            if arg_t is pympfr:
+            if arg_t is IMpfr:
                 arg = BigFloat.implicit_convert(arg)._value
             converted_args.append(arg)
         return f(*converted_args)
@@ -287,17 +288,17 @@ def reverse_args(f):
 
 class BigFloat(object):
     @classmethod
-    def _from_pympfr(cls, value):
+    def _from_Mpfr(cls, value):
         # this is the true initialization function;  any creation
         # of a BigFloat instance goes through this function.
         #
-        # value should be a pympfr instance; recall that pympfr
-        # instances are mutable, but there should be no possibility of
+        # value should be an Mpfr instance; recall that Mpfr instances
+        # are mutable, but there should be no possibility of
         # accidental future modifications to value.  It's up to the
-        # caller of _from_pympfr to ensure this, by making a copy if
+        # caller of _from_Mpfr to ensure this, by making a copy if
         # necessary.
-        if not isinstance(value, pympfr):
-            raise TypeError("value should be a pympfr instance")
+        if not isinstance(value, Mpfr):
+            raise TypeError("value should be a Mpfr instance")
         self = object.__new__(cls)
         self._value = value
         return self
@@ -359,15 +360,14 @@ class BigFloat(object):
         if not self.is_finite:
             raise ValueError("Can't convert infinity or nan to integer")
 
-        e, digits = self._value.get_str(16, 0, RoundTiesToEven)
-        digits = digits.lstrip('-').rstrip('0')
+        negative, digits, e = mpfr.mpfr_get_str2(self._value, 16, 0, RoundTiesToEven)
         n = int(digits, 16)
-        e = e-len(digits) << 2
+        e = 4*(e-len(digits))
         if e >= 0:
             n <<= e
         else:
             n >>= -e
-        return int(-n) if self.is_negative else int(n)
+        return int(-n) if negative else int(n)
 
     def __long__(self):
         return long(int(self))
@@ -412,12 +412,14 @@ class BigFloat(object):
         if self.is_zero:
             num = '0'
         elif self.is_finite:
-            expt, digits = self._value.get_str(10, 0, RoundTiesToEven)
-            num = format_finite(digits.lstrip('-'), expt)
+            negative, digits, e = mpfr.mpfr_get_str2(self._value, 10, 0, RoundTiesToEven)
+            num = format_finite(digits, e)
         elif self.is_inf:
+            negative = self.is_negative
             num = 'Infinity'
         else:
             assert self.is_nan
+            negative = False
             num = 'NaN'
 
         if self.is_negative:
@@ -428,18 +430,19 @@ class BigFloat(object):
     __str__ = __repr__
 
     # binary arithmetic operations
-    __add__ = wrap_standard_function(mpfr.mpfr_add)
-    __sub__ = wrap_standard_function(mpfr.mpfr_sub)
-    __mul__ = wrap_standard_function(mpfr.mpfr_mul)
-    __div__ = __truediv__ = wrap_standard_function(mpfr.mpfr_div)
-    __pow__ = wrap_standard_function(mpfr.mpfr_pow)
-    __mod__ = wrap_standard_function(mpfr.mpfr_fmod)
+    __add__ = wrap_standard_function(mpfr.mpfr_add, [IMpfr, IMpfr])
+    __sub__ = wrap_standard_function(mpfr.mpfr_sub, [IMpfr, IMpfr])
+    __mul__ = wrap_standard_function(mpfr.mpfr_mul, [IMpfr, IMpfr])
+    __div__ = __truediv__ = wrap_standard_function(mpfr.mpfr_div, [IMpfr, IMpfr])
+    __pow__ = wrap_standard_function(mpfr.mpfr_pow, [IMpfr, IMpfr])
+    __mod__ = wrap_standard_function(mpfr.mpfr_fmod, [IMpfr, IMpfr])
 
     # and their reverse
     __radd__ = reverse_args(__add__)
     __rsub__ = reverse_args(__sub__)
     __rmul__ = reverse_args(__mul__)
-    __rdiv__ = __rtruediv__ = reverse_args(__truediv__)
+    __rdiv__ = reverse_args(__div__)
+    __rtruediv__ = reverse_args(__truediv__)
     __rpow__ = reverse_args(__pow__)
     __rmod__ = reverse_args(__mod__)
 
@@ -452,9 +455,9 @@ class BigFloat(object):
         return div_2ui(self, n) if n >= 0 else mul_2ui(self, -n)
 
     # unary arithmetic operations
-    __abs__ = wrap_standard_function(mpfr.mpfr_abs)
-    __pos__ = wrap_standard_function(mpfr.mpfr_set)
-    __neg__ = wrap_standard_function(mpfr.mpfr_neg)
+    __abs__ = wrap_standard_function(mpfr.mpfr_abs, [IMpfr])
+    __pos__ = wrap_standard_function(mpfr.mpfr_set, [IMpfr])
+    __neg__ = wrap_standard_function(mpfr.mpfr_neg, [IMpfr])
 
     # rich comparisons
     __eq__ = wrap_predicate(mpfr.mpfr_equal_p)
@@ -470,7 +473,7 @@ class BigFloat(object):
 
     @property
     def precision(self):
-        return self._value.precision
+        return mpfr.mpfr_get_prec(self._value)
 
     @property
     def is_zero(self):
@@ -515,10 +518,10 @@ name_translation = {
     'set': 'pos',  # avoid clobbering 'set' builtin
 }
 
-for fn, argtypes in standard_functions:
+for fn, argtypes in standard_functions + extra_standard_functions:
     mpfr_fn = getattr(mpfr, 'mpfr_' + fn)
     pyfn_name = name_translation.get(fn, fn)
-    globals()[pyfn_name] = wrap_standard_function(mpfr_fn)
+    globals()[pyfn_name] = wrap_standard_function(mpfr_fn, argtypes)
     __all__.append(pyfn_name)
 
 for fn, argtypes in predicates:

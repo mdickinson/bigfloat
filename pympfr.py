@@ -16,10 +16,10 @@ __all__ = [
     'RoundTowardPositive', 'RoundTowardNegative',
 
     # lists of standard functions and predicates
-    'standard_functions', 'predicates',
+    'standard_functions', 'predicates', 'extra_standard_functions',
 
     # extra functions that aren't part of the mpfr library proper
-    'set_str2', 'get_str2', 'strtofr2', 'remquo2',
+    'strtofr2', 'remquo2',
 
     ]
 
@@ -555,6 +555,13 @@ standard_functions = \
     [(name, [IMpfr]*3) for name in standard_ternary_functions] + \
     additional_standard_functions
 
+# Additional standard functions that aren't in MPFR itself, but are
+# defined by this module.
+
+extra_standard_functions = [
+    ('set_str2', [ctypes.c_char_p, Base]),
+    ]
+
 unary_predicates = [
     'nan_p', 'inf_p', 'number_p', 'zero_p',
     'signbit', 'integer_p'
@@ -625,10 +632,12 @@ def set_str2(rop, s, base, rnd):
 
     """
     if s == s.strip():
-        ternary, remainder = strtofr2(rop, s, base, rounding_mode)
+        ternary, remainder = strtofr2(rop, s, base, rnd)
         if not remainder:
             return ternary
     raise ValueError("not a valid numeric string")
+
+mpfr.mpfr_set_str2 = set_str2
 
 def get_str2(rop, base, ndigits, rounding_mode):
     """Convert rop to a string in the given base, 2 <= base <= 36.
@@ -648,6 +657,8 @@ def get_str2(rop, base, ndigits, rounding_mode):
     if negative:
         result = result[1:]
     return negative, result, exp.value
+
+mpfr.mpfr_get_str2 = get_str2
 
 def strtofr2(rop, s, base, rounding_mode):
     """Set value of rop from string s.
