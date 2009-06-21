@@ -38,6 +38,20 @@ that an arithmetic operation between (for example) an integer and a
 BigFloat will only involve a single round, at the end of the
 operation.
 
+Here are some notes on particular arithmetic operations.
+
+* The unary + and - operations round to the current context, just like
+  the binary operations.  So +x is not a no-op.  This can be useful
+  for rounding the result of an extended computation with extra
+  precision or relaxed exponent bounds back to the current context.
+
+  The same caveat applies to the builtin abs function when applied to
+  a BigFloat.
+
+* The remainder x % y has the sign of x, not the sign of y.  In this
+  it differs from Python floats and integers.
+
+
 Similarly, comparisons between BigFloats and integers or BigFloats and
 floats work as expected.
 
@@ -52,7 +66,8 @@ floats work as expected.
    :class:`BigFloat` instance.  In all cases the given value is
    rounded to the format (precision, exponent limits and
    subnormalization) given by the current context, using the rounding
-   mode specified by the current context.
+   mode specified by the current context.  The integer 0 is always
+   converted to positive zero.
 
    .. method:: exact(value, precision=None)
 
