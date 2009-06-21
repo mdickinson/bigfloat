@@ -144,6 +144,8 @@ class BigFloatTests(unittest.TestCase):
                 y = BigFloat.exact(x)
                 self.assertEqual(x, y)
 
+        self.assertRaises(TypeError, BigFloat.exact, BigFloat(23), 100)
+
     def test_binary_operations(self):
         # check that BigFloats can be combined with themselves,
         # and with integers and floats, using the 6 standard
