@@ -1,0 +1,9 @@
+Implement __hash__ method for BigFloats
+---------------------------------------
+  This is a little tricky:
+    - if the BigFloat is an integer, its hash should match that of the integer
+    - if the BigFloat is exactly representable as a float, its hash should match
+      that of the float
+    - equal BigFloats (e.g., with different precisions but the same value)
+      should hash equal.  Perhaps compute the hex string representation,
+      remove trailing zeros, and get the hash of the result?
