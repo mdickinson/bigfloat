@@ -246,6 +246,10 @@ def rounding(rnd):
     given rounding mode."""
     return getcontext()(rounding=rnd)
 
+def exponent_limits(emin, emax):
+    """Return new context equal to current context but with
+    the given exponent limits."""
+    return getcontext()(emin=emin, emax=emax)
 
 def wrap_standard_function(f, argtypes):
     def wrapped_f(*args):
