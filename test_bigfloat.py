@@ -171,6 +171,37 @@ class BigFloatTests(unittest.TestCase):
                         self.assertEqual(type(bf), BigFloat)
                         self.assertEqual(bf.precision, p)
 
+    def test_unary_operations(self):
+        # test __pos__, __neg__ and __abs__
+
+        # unary operations should round to the current context
+        with precision(150):
+            x = sqrt(2)
+
+        test_precisions = [2, 20, 53, 2000]
+        for p in test_precisions:
+            with precision(p):
+                posx = +x
+                self.assertEqual(posx.precision, p)
+                if p < 150:
+                    self.assertNotEqual(x, posx)
+                else:
+                    self.assertEqual(x, posx)
+
+                negx = -x
+                self.assertEqual(negx.precision, p)
+                if p < 150:
+                    self.assertNotEqual(x, -negx)
+                else:
+                    self.assertEqual(x, -negx)
+
+                absx = __builtins__.abs(x)
+                self.assertEqual(absx.precision, p)
+                if p < 150:
+                    self.assertNotEqual(x, absx)
+                else:
+                    self.assertEqual(x, absx)
+
 
     def test_subnormalization(self):
         # check that subnormalization doesn't result in
