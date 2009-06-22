@@ -93,4 +93,4 @@ conversion of the integer or float to a BigFloat before comparing.
      precision argument must be given.  The string is converted using
      the given precision and the RoundTiesToEven rounding mode.
 
-
+     This method should never affect the current flags.

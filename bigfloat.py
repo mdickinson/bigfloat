@@ -433,13 +433,18 @@ class BigFloat(object):
 
         # use Default context, with given precision
         with saved_flags():
-            set_flagstate(set())
+            set_flagstate(set())  # clear all flags
             with DefaultContext(precision = precision):
                 result = BigFloat(value)
             if test_flag(Overflow):
                 raise ValueError("value too large to represent as a BigFloat")
             if test_flag(Underflow):
                 raise ValueError("value too small to represent as a BigFloat")
+            if test_flag(Inexact) and not isinstance(value, basestring):
+                # since this is supposed to be an exact conversion, the
+                # inexact flag should never be set except when convertin
+                # from a string.
+                assert False, "This shouldn't ever happen"
 
         return result
 
