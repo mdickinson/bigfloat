@@ -60,7 +60,7 @@ class BigFloatTests(unittest.TestCase):
         with rounding(RoundTowardPositive):
             upper = BigFloat('1.1')
         self.assert_(lower < upper)
-            
+
     def test_creation_from_BigFloat(self):
         test_values = [BigFloat(1.0),
                        BigFloat('nan'),
@@ -78,6 +78,16 @@ class BigFloatTests(unittest.TestCase):
                     bf = BigFloat(value)
                     self.assertEqual(type(bf), BigFloat)
                     self.assertEqual(bf.precision, p)
+
+    def test_exact_context_independent(self):
+        with exponent_limits(0, 0):
+            x = BigFloat.exact(123456)
+        self.assertEqual(x, 123456)
+
+    def test_exponent_limits(self):
+        with exponent_limits(-1000, 0):
+            x = add(123, 456)
+        self.assertEqual(x, BigFloat('infinity'))
 
     def test_exact_creation_from_integer(self):
         test_values = [-23, 0, 100, 7**100, -23L, 0L, 100L]
@@ -201,7 +211,6 @@ class BigFloatTests(unittest.TestCase):
                     self.assertNotEqual(x, absx)
                 else:
                     self.assertEqual(x, absx)
-
 
     def test_subnormalization(self):
         # check that subnormalization doesn't result in
