@@ -61,6 +61,12 @@ class BigFloatTests(unittest.TestCase):
             upper = BigFloat('1.1')
         self.assert_(lower < upper)
 
+        self.assert_(nan_p(BigFloat('nan')))
+        self.assert_(inf_p(BigFloat('inf')))
+        self.assert_(not signbit(BigFloat('inf')))
+        self.assert_(inf_p(BigFloat('-inf')))
+        self.assert_(signbit(BigFloat('-inf')))
+
     def test_creation_from_BigFloat(self):
         test_values = [BigFloat(1.0),
                        BigFloat('nan'),
@@ -224,6 +230,15 @@ class BigFloatTests(unittest.TestCase):
             self.assertEqual(BigFloat('3e-324'), pow(2, -1074))
             self.assertEqual(BigFloat('7.4e-324'), pow(2, -1074))
             self.assertEqual(BigFloat('7.5e-324'), pow(2, -1073))
+
+    def test_str(self):
+        # check special values
+        self.assertEqual(str(BigFloat(0)), '0')
+        self.assertEqual(str(-BigFloat(0)), '-0')
+        self.assertEqual(str(BigFloat('inf')), 'Infinity')
+        self.assertEqual(str(BigFloat('-inf')), '-Infinity')
+        self.assertEqual(str(BigFloat('nan')), 'NaN')
+
 
 def test_main():
     unittest.main()
