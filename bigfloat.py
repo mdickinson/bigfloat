@@ -436,7 +436,7 @@ class BigFloat(object):
         """
         # convert via hex string; rounding mode doesn't matter here,
         # since conversion should be exact
-        if not self.is_finite:
+        if not isfinite(self):
             raise ValueError("Can't convert infinity or nan to integer")
 
         negative, digits, e = mpfr.mpfr_get_str2(self._value, 16, 0, RoundTiesToEven)
@@ -488,16 +488,16 @@ class BigFloat(object):
         return (-n if self.is_negative else n), d
 
     def __str__(self):
-        if self.is_zero:
-            return '-0' if self.is_negative else '0'
-        elif self.is_finite:
+        if iszero(self):
+            return '-0' if isnegative(self) else '0'
+        elif isfinite(self):
             negative, digits, e = mpfr.mpfr_get_str2(self._value, 10, 0,
                                                      RoundTiesToEven)
             return format_finite(negative, digits, e)
-        elif self.is_inf:
-            return '-Infinity' if self.is_negative else 'Infinity'
+        elif isinf(self):
+            return '-Infinity' if isnegative(self) else 'Infinity'
         else:
-            assert self.is_nan
+            assert isnan(self)
             return 'NaN'
 
     def __repr__(self):
@@ -514,31 +514,11 @@ class BigFloat(object):
         return not self == other
 
     def __nonzero__(self):
-        return not is_zero_p(self)
+        return not iszero(self)
 
     @property
     def precision(self):
         return mpfr.mpfr_get_prec(self._value)
-
-    @property
-    def is_zero(self):
-        return mpfr.mpfr_zero_p(self._value)
-
-    @property
-    def is_finite(self):
-        return mpfr.mpfr_number_p(self._value)
-
-    @property
-    def is_inf(self):
-        return mpfr.mpfr_inf_p(self._value)
-
-    @property
-    def is_nan(self):
-        return mpfr.mpfr_nan_p(self._value)
-
-    @property
-    def is_negative(self):
-        return mpfr.mpfr_signbit(self._value)
 
     @classmethod
     def implicit_convert(cls, arg):
@@ -561,6 +541,11 @@ class BigFloat(object):
 
 name_translation = {
     'set': 'pos',  # avoid clobbering 'set' builtin
+    'nan_p' : 'isnan',  # to match math module
+    'inf_p' : 'isinf',  # ditto
+    'zero_p' : 'iszero',
+    'number_p' : 'isfinite',
+    'signbit' : 'isnegative',
 }
 
 for fn, argtypes in standard_functions + extra_standard_functions:

@@ -61,11 +61,16 @@ class BigFloatTests(unittest.TestCase):
             upper = BigFloat('1.1')
         self.assert_(lower < upper)
 
-        self.assert_(nan_p(BigFloat('nan')))
-        self.assert_(inf_p(BigFloat('inf')))
-        self.assert_(not signbit(BigFloat('inf')))
-        self.assert_(inf_p(BigFloat('-inf')))
-        self.assert_(signbit(BigFloat('-inf')))
+        self.assert_(isnan(BigFloat('nan')))
+        self.assert_(isinf(BigFloat('inf')))
+        self.assert_(not isnegative(BigFloat('inf')))
+        self.assert_(isinf(BigFloat('-inf')))
+        self.assert_(isnegative(BigFloat('-inf')))
+        self.assert_(iszero(BigFloat('0')))
+        self.assert_(not isnegative(BigFloat('0')))
+        self.assert_(iszero(BigFloat('-0')))
+        self.assert_(isnegative(BigFloat('-0')))
+
 
     def test_creation_from_BigFloat(self):
         test_values = [BigFloat(1.0),
@@ -217,6 +222,15 @@ class BigFloatTests(unittest.TestCase):
                     self.assertNotEqual(x, absx)
                 else:
                     self.assertEqual(x, absx)
+
+    def test_bool(self):
+        self.assertEqual(bool(BigFloat(0)), False)
+        self.assertEqual(bool(BigFloat('-0')), False)
+        self.assertEqual(bool(BigFloat(1.0)), True)
+        self.assertEqual(bool(BigFloat(-123)), True)
+        self.assertEqual(bool(BigFloat('nan')), True)
+        self.assertEqual(bool(BigFloat('inf')), True)
+        self.assertEqual(bool(BigFloat('-inf')), True)
 
     def test_subnormalization(self):
         # check that subnormalization doesn't result in
