@@ -504,14 +504,6 @@ class BigFloat(object):
         return "BigFloat.exact('{0}', precision={1})".format(
             str(self), self.precision)
 
-    # shifts are equivalent to multiplication or division by the
-    # appropriate power of 2.
-    def __lshift__(self, n):
-        return mul_2ui(self, n) if n >= 0 else div_2ui(self, -n)
-
-    def __rshift__(self, n):
-        return div_2ui(self, n) if n >= 0 else mul_2ui(self, -n)
-
     # rich comparisons
     __eq__ = wrap_predicate(mpfr.mpfr_equal_p)
     __le__ = wrap_predicate(mpfr.mpfr_lessequal_p)
