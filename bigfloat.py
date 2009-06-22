@@ -117,7 +117,7 @@ def bit_length(n, _abs=abs):
     hex_n = '%x' % _abs(n)
     return 4 * len(hex_n) - bit_length_correction[hex_n[0]]
 
-def format_finite(digits, dot_pos):
+def format_finite(negative, digits, dot_pos):
     """Given a (possibly empty) string of digits and an integer
     dot_pos indicating the position of the decimal point relative to
     the start of that string, output a formatted numeric string with
@@ -143,7 +143,7 @@ def format_finite(digits, dot_pos):
         digits = digits[:dot_pos] + '.' + digits[dot_pos:]
     if use_exponent:
         digits += "e{0:+}".format(exp)
-    return digits
+    return '-' + digits if negative else digits
 
 # Note that context objects are immutable
 
@@ -487,26 +487,22 @@ class BigFloat(object):
 
         return (-n if self.is_negative else n), d
 
-    def __repr__(self):
+    def __str__(self):
         if self.is_zero:
-            num = '0'
+            return '-0' if self.is_negative else '0'
         elif self.is_finite:
-            negative, digits, e = mpfr.mpfr_get_str2(self._value, 10, 0, RoundTiesToEven)
-            num = format_finite(digits, e)
+            negative, digits, e = mpfr.mpfr_get_str2(self._value, 10, 0,
+                                                     RoundTiesToEven)
+            return format_finite(negative, digits, e)
         elif self.is_inf:
-            negative = self.is_negative
-            num = 'Infinity'
+            return '-Infinity' if self.is_negative else 'Infinity'
         else:
             assert self.is_nan
-            negative = False
-            num = 'NaN'
+            return 'NaN'
 
-        if self.is_negative:
-            num = '-' + num
+    def __repr__(self):
         return "BigFloat.exact('{0}', precision={1})".format(
-            num, self.precision)
-
-    __str__ = __repr__
+            str(self), self.precision)
 
     # binary arithmetic operations
     __add__ = wrap_standard_function(mpfr.mpfr_add, [IMpfr, IMpfr])
