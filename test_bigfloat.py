@@ -145,7 +145,6 @@ class BigFloatTests(unittest.TestCase):
         self.assert_(is_zero(BigFloat('-0')))
         self.assert_(is_negative(BigFloat('-0')))
 
-
     def test_creation_from_BigFloat(self):
         test_values = [BigFloat(1.0),
                        BigFloat('nan'),
@@ -168,6 +167,32 @@ class BigFloatTests(unittest.TestCase):
         with exponent_limits(0, 0):
             x = BigFloat.exact(123456)
         self.assertEqual(x, 123456)
+
+    def test_exact_overflow(self):
+        # exact conversion should raise ValueError for values that are
+        # too large or too small to represent.  (Clearly, floats can
+        # never be too large or too small, and integers can't ever
+        # be too small.  Here we test with strings.)
+        too_large = '1e%d' % (EMAX_MAX//3)
+        too_small = '1e%d' % (EMIN_MIN//3)
+        too_large_neg = '-1e%d' % (EMAX_MAX//3)
+        too_small_neg = '-1e%d' % (EMIN_MIN//3)
+        self.assertRaises(ValueError, BigFloat.exact, too_large, 53)
+        self.assertRaises(ValueError, BigFloat.exact, too_small, 53)
+
+        # the exception raising goes via flag detection.  Check that
+        # it's independent of the currently-set flags.
+
+        # Set some flags...
+        div(0, 0) # nan flag
+        div(1, 0)
+        pow(2, 2**100) # overflow flag
+        pow(2, -2**100) # underflow flag
+        sqrt(2) # inexact flag
+
+        assertEqual(BigFloat.exact(12345), 12345)
+        assertEqual(BigFloat.exact(1e-72), 1e-72)
+
 
     def test_exponent_limits(self):
         with exponent_limits(-1000, 0):
