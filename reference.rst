@@ -45,15 +45,18 @@ Here are some notes on particular arithmetic operations.
   for rounding the result of an extended computation with extra
   precision or relaxed exponent bounds back to the current context.
 
-  The same caveat applies to the builtin abs function when applied to
-  a BigFloat.
+* Similarly, the builtin abs function rounds to the current context,
+  using the context rounding mode.
 
 * The remainder x % y has the sign of x, not the sign of y.  In this
   it differs from Python floats and integers.
 
+* The floor division operator x // y and the builtin divmod function
+  are not implemented for BigFloat instances.
 
-Similarly, comparisons between BigFloats and integers or BigFloats and
-floats work as expected.
+Comparisons between BigFloats and integers or BigFloats and floats
+also work as expected, performing an implicit exact conversion of the
+integer or float to a BigFloat before comparing.
 
 
 .. class:: BigFloat(value)
