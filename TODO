@@ -30,3 +30,8 @@ Better method for handling emax and emin
   For example, BigFloat.exact should not be affected by the settings
   of emax and emin.  They probably are, currently.
 
+Rationalize string formatting
+-----------------------------
+  Use only '%'-style formatting, or format-style formatting,
+  throughout.  It's probably going to have to be '%'-style formatting
+  if we want things to be compatible with Python 2.5.
