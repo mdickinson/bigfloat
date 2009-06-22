@@ -536,6 +536,59 @@ class BigFloat(object):
             raise TypeError("Unable to convert argument %s of type %s "
                             "to BigFloat" % (arg, type(arg)))
 
+################################################################################
+# Flags
+#
+# MPFR has 5 flags available, one of which we shouldn't encounter in
+# normal use.  We need functions to save and restore the current flag
+# state.
+
+Inexact = 'Inexact'
+Overflow = 'Overflow'
+Underflow = 'Underflow'
+NanFlag ='NanFlag'
+
+all_flags = set([Inexact, Overflow, Underflow, NanFlag])
+
+flag_translate = {
+    'underflow' : Underflow,
+    'overflow' : Overflow,
+    'nanflag' : NanFlag,
+    'inexflag' : Inexact,
+}
+
+clear_flag_fns = dict((v, getattr(mpfr, 'mpfr_clear_' + k))
+                      for k, v in flag_translate.items())
+set_flag_fns = dict((v, getattr(mpfr, 'mpfr_set_' + k))
+                    for k, v in flag_translate.items())
+test_flag_fns = dict((v, getattr(mpfr, 'mpfr_' + k + '_p'))
+                     for k, v in flag_translate.items())
+
+def test_flag(f):
+    return test_flag_fns[f]()
+
+def set_flag(f):
+    return set_flag_fns[f]()
+
+def clear_flag(f):
+    return clear_flag_fns[f]()
+
+
+def get_flagstate():
+    return set(f for f in all_flags if test_flag(f))
+
+def set_flagstate(flagset):
+    # set all flags in the given flag set;  clear all flags not
+    # in the given flag set.
+    if not flagset <= all_flags:
+        raise ValueError("unrecognized flags in flagset")
+
+    for f in flagset:
+        set_flag(f)
+    for f in all_flags-flagset:
+        clear_flag(f)
+
+
 # dictionary translating MPFR function names (excluding the 'mpfr_'
 # prefix) to Python function names.
 

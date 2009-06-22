@@ -441,12 +441,12 @@ mpfr_functions = [
     ]
 
 # additional functions for flags in section 13
-flags = ['underflow', 'overflow', 'nanflag', 'inexflag', 'erangeflag']
-for f in flags:
+mpfr_flags = ['underflow', 'overflow', 'nanflag', 'inexflag', 'erangeflag']
+for f in mpfr_flags:
     mpfr_functions.append(('clear_' + f, [], None))
-for f in flags:
+for f in mpfr_flags:
     mpfr_functions.append(('set_' + f, [], None))
-for f in flags:
+for f in mpfr_flags:
     mpfr_functions.append((f+'_p', [], bool))
 
 ################################################################################
