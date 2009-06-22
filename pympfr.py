@@ -586,7 +586,7 @@ binary_predicates = [
 predicates = \
     [(name, [IMpfr]) for name in unary_predicates] + \
     [(name, [IMpfr]*2) for name in binary_predicates]
-    
+
 for fn, args in standard_functions:
     mpfr_functions.append((fn, [IMpfr] + args + [RoundingMode], Ternary))
 
