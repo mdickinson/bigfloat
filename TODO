@@ -7,3 +7,26 @@ Implement __hash__ method for BigFloats
     - equal BigFloats (e.g., with different precisions but the same value)
       should hash equal.  Perhaps compute the hex string representation,
       remove trailing zeros, and get the hash of the result?
+
+Implement floordiv method for BigFloats
+---------------------------------------
+  x // y should behave as with any other operation or function, though
+  the sign convention should match that of x % y:  that is, x // y
+  should be the result of rounding the quotient towards zero.
+
+  As with any function that produces a single MPFR result, it's enough
+  to be able to compute with rounding mode RoundTowardZero and to be
+  able to detect exactness.  It's the second part that's tricky here:
+  floor(x / y) is exactly n iff n <= x // y < n + 1.  Since n may be
+  something huge, n + 1 shouldn't be computed exactly (since this
+  might involved billions of bits); instead we need to find an
+  indirect way of doing this comparison.
+
+
+Better method for handling emax and emin
+----------------------------------------
+  Consider setting emax and emin only within the function wrapping.
+
+  For example, BigFloat.exact should not be affected by the settings
+  of emax and emin.  They probably are, currently.
+
