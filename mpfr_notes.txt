@@ -29,3 +29,13 @@ guaranteed to work correcly.
 
 3. mpfr_init_set, ... mpfr_init_set_f are macros.  Please document this.
 (mpfr_init_set_str appears not to be a macro)
+XXX.  It *is* documented!
+
+4. Using set_emax and set_emin:  the warning about making sure that all
+current variables are within the exponent bounds seems a little extreme (
+and in practice, unusable), but it appears to be true that some functions
+and operations (e.g., addition) assume that arguments are within bounds.
+
+The way to get around this seems to be to do all computations with
+unbounded exponent range, and then just set emax and emin before doing
+check_range.
