@@ -504,23 +504,6 @@ class BigFloat(object):
         return "BigFloat.exact('{0}', precision={1})".format(
             str(self), self.precision)
 
-    # binary arithmetic operations
-    __add__ = wrap_standard_function(mpfr.mpfr_add, [IMpfr, IMpfr])
-    __sub__ = wrap_standard_function(mpfr.mpfr_sub, [IMpfr, IMpfr])
-    __mul__ = wrap_standard_function(mpfr.mpfr_mul, [IMpfr, IMpfr])
-    __div__ = __truediv__ = wrap_standard_function(mpfr.mpfr_div, [IMpfr, IMpfr])
-    __pow__ = wrap_standard_function(mpfr.mpfr_pow, [IMpfr, IMpfr])
-    __mod__ = wrap_standard_function(mpfr.mpfr_fmod, [IMpfr, IMpfr])
-
-    # and their reverse
-    __radd__ = reverse_args(__add__)
-    __rsub__ = reverse_args(__sub__)
-    __rmul__ = reverse_args(__mul__)
-    __rdiv__ = reverse_args(__div__)
-    __rtruediv__ = reverse_args(__truediv__)
-    __rpow__ = reverse_args(__pow__)
-    __rmod__ = reverse_args(__mod__)
-
     # shifts are equivalent to multiplication or division by the
     # appropriate power of 2.
     def __lshift__(self, n):
@@ -528,11 +511,6 @@ class BigFloat(object):
 
     def __rshift__(self, n):
         return div_2ui(self, n) if n >= 0 else mul_2ui(self, -n)
-
-    # unary arithmetic operations
-    __abs__ = wrap_standard_function(mpfr.mpfr_abs, [IMpfr])
-    __pos__ = wrap_standard_function(mpfr.mpfr_set, [IMpfr])
-    __neg__ = wrap_standard_function(mpfr.mpfr_neg, [IMpfr])
 
     # rich comparisons
     __eq__ = wrap_predicate(mpfr.mpfr_equal_p)
@@ -605,3 +583,23 @@ for fn, argtypes in predicates:
     globals()[pyfn_name] = wrap_predicate(mpfr_fn)
     __all__.append(pyfn_name)
 
+# unary arithmetic operations
+BigFloat.__pos__ = pos
+BigFloat.__neg__ = neg
+BigFloat.__abs__ = abs
+
+# binary arithmetic operations
+BigFloat.__add__ = add
+BigFloat.__sub__ = sub
+BigFloat.__mul__ = mul
+BigFloat.__div__ = BigFloat.__truediv__ = div
+BigFloat.__pow__ = pow
+BigFloat.__mod__ = fmod
+
+# and their reverse operations
+BigFloat.__radd__ = reverse_args(add)
+BigFloat.__rsub__ = reverse_args(sub)
+BigFloat.__rmul__ = reverse_args(mul)
+BigFloat.__rdiv__ = BigFloat.__rtruediv__ = reverse_args(div)
+BigFloat.__rpow__ = reverse_args(pow)
+BigFloat.__rmod__ = reverse_args(fmod)
