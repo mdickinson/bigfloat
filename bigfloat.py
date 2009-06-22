@@ -532,9 +532,8 @@ class BigFloat(object):
         return "BigFloat.exact('{0}', precision={1})".format(
             str(self), self.precision)
 
-    # rich comparisons
     def __ne__(self, other):
-        return not self == other
+        return not is_equal(self, other)
 
     def __nonzero__(self):
         return not is_zero(self)
@@ -626,12 +625,26 @@ def saved_flags():
 # prefix) to Python function names.
 
 name_translation = {
-    'set': 'pos',  # avoid clobbering 'set' builtin
+    # avoid clobbering set builtin
+    'set': 'pos',
+
+    # predicates
     'nan_p' : 'is_nan',
     'inf_p' : 'is_inf',
     'zero_p' : 'is_zero',
     'number_p' : 'is_finite',
+    'integer_p' : 'is_integer',
     'signbit' : 'is_negative',
+
+    # comparisons
+    'equal_p' : 'is_equal',
+    'greater_p' : 'is_greater',
+    'less_p' : 'is_less',
+    'lessequal_p' : 'is_lessequal',
+    'greaterequal_p' : 'is_greaterequal',
+    'unordered_p' : 'is_unordered',
+    'lessgreater_p' : 'is_lessgreater',
+
 }
 
 for fn, argtypes in standard_functions + extra_standard_functions:
@@ -667,8 +680,9 @@ BigFloat.__rdiv__ = BigFloat.__rtruediv__ = reverse_args(div)
 BigFloat.__rpow__ = reverse_args(pow)
 BigFloat.__rmod__ = reverse_args(fmod)
 
-BigFloat.__eq__ = equal_p
-BigFloat.__le__ = lessequal_p
-BigFloat.__lt__ = less_p
-BigFloat.__ge__ = greaterequal_p
-BigFloat.__gt__ = greater_p
+# comparisons
+BigFloat.__eq__ = is_equal
+BigFloat.__le__ = is_lessequal
+BigFloat.__lt__ = is_less
+BigFloat.__ge__ = is_greaterequal
+BigFloat.__gt__ = is_greater

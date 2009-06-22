@@ -64,6 +64,22 @@ operations, comparisons between BigFloats and integers or BigFloats
 and floats also work as expected, performing an implicit exact
 conversion of the integer or float to a BigFloat before comparing.
 
+All comparisons except != are available as module-level functions,
+with the following names:
+
+* is_equal
+* is_less
+* is_greater
+* is_lessequal
+* is_greaterequal
+
+In addition, there are two more comparison functions that don't
+correspond to any of the Python comparison operators.
+
+* is_unordered
+* is_lessgreater
+
+
 
 .. class:: BigFloat(value)
 
