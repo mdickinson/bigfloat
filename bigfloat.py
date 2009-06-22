@@ -1,7 +1,5 @@
 # Pythonic wrapper for MPFR library
 
-# To do: relaxed_exponents context manager.
-
 # BigFloats are treated as immutable.
 
 # XXX: this module defines functions 'abs' and 'pow', 'max' and 'min'
@@ -18,7 +16,7 @@ __all__ = [
     'Context', 'getcontext', 'setcontext', 'DefaultContext',
 
     # functions that generate a new context from the current one
-    'precision', 'rounding',
+    'precision', 'rounding', 'exponent_limits',
 
     # contexts corresponding to IEEE 754 binary interchange formats
     'IEEEContext', 'half_precision', 'single_precision',
@@ -40,7 +38,10 @@ from pympfr import mpfr
 from pympfr import RoundTiesToEven, RoundTowardZero
 from pympfr import RoundTowardPositive, RoundTowardNegative
 from pympfr import MPFR_PREC_MIN, MPFR_PREC_MAX
+from pympfr import MPFR_EMIN_MAX, MPFR_EMIN_MIN, MPFR_EMIN_DEFAULT
+from pympfr import MPFR_EMAX_MAX, MPFR_EMAX_MIN, MPFR_EMAX_DEFAULT
 from pympfr import standard_functions, predicates, extra_standard_functions
+from pympfr import eminmax
 
 builtin_max = max
 
@@ -50,6 +51,49 @@ except AttributeError:
     # Python 2.5 and earlier don't have sys.float_info; assume IEEE
     # 754 doubles
     DBL_PRECISION = 53
+
+# Dealing with exponent limits
+# ----------------------------
+# The MPFR documentation for mpfr_set_emin and mpfr_set_emax says:
+#
+#   "If the user changes the exponent range, it is her/his
+#   responsibility to check that all current floating-point variables
+#   are in the new allowed range (for example using mpfr_check_range),
+#   otherwise the subsequent behavior will be undefined, in the sense
+#   of the ISO C standard."
+#
+# Some MPFR operations and functions (including at least mpfr_add and
+# mpfr_nexttoward) appear to assume that input arguments have
+# exponents within the current [emin, emax] range.
+#
+# This assumption is inconsistent with the way that we'd like the
+# bigfloat module to operate: a standard operation on BigFloats
+# shouldn't care if the inputs to the operation are outside the
+# current context; it should only worry about forcing the output into
+# the format specified by the current context.  So we adopt the
+# following approach:
+#
+#   We define constants EMAX_MAX and EMIN_MIN representing the min
+#   and max values we'll allow for both emin and emax.  When the
+#   module is imported, emax and emin are set to these values.
+#
+#   After this, the MPFR stored emax and emin aren't touched when the
+#   context is changed; but for each standard operation or function,
+#   the function is performed with emax=EMAX_MAX and emin=EMIN_MIN.
+#   *Then* the exponents are changed, and mpfr_check_range is called
+#   (also mpfr_subnormalize if necessary), and the exponents are
+#   restored to their original state.
+#
+#   Any BigFloat instance that's created *must* have exponent in the
+#   range [EMIN_MIN, EMAX_MAX] (unless it's a zero, infinity or nan).
+#   Also, for the sake of sanity, it's not permitted for emin to exceed
+#   emax.
+
+EMAX_MAX = MPFR_EMAX_DEFAULT
+EMIN_MIN = MPFR_EMIN_DEFAULT
+
+mpfr.mpfr_set_emin(EMIN_MIN)
+mpfr.mpfr_set_emax(EMAX_MAX)
 
 bit_length_correction = {
     '0': 4, '1': 3, '2': 2, '3': 2, '4': 1, '5': 1, '6': 1, '7': 1,
@@ -177,8 +221,8 @@ class Context(object):
 
 DefaultContext = Context(precision=53,
                          rounding=RoundTiesToEven,
-                         emax=mpfr.mpfr_get_emax_max(),
-                         emin=mpfr.mpfr_get_emin_min(),
+                         emax=EMAX_MAX,
+                         emin=EMIN_MIN,
                          subnormalize=False)
 
 # Contexts corresponding to IEEE 754-2008 binary interchange formats
@@ -224,8 +268,6 @@ def getcontext(_local = local):
 
 def setcontext(context, _local = local):
     _local.__bigfloat_context__ = context
-    mpfr.mpfr_set_emin(context.emin)
-    mpfr.mpfr_set_emax(context.emax)
 
 def pushcontext(context, _local = local):
     _local.__context_stack__.append(getcontext())
@@ -246,9 +288,22 @@ def rounding(rnd):
     given rounding mode."""
     return getcontext()(rounding=rnd)
 
-def exponent_limits(emin, emax):
+def exponent_limits(emin=None, emax=None):
     """Return new context equal to current context but with
-    the given exponent limits."""
+    the given exponent limits.
+
+    emin and emax default to EMIN_MIN and EMAX_MAX.  Thus exponent
+    limits can be relaxed to their most lenient values by calling
+    exponent_limits().
+
+    """
+    if emin is None:
+        emin = EMIN_MIN
+    if emax is None:
+        emax = EMAX_MAX
+    if not EMIN_MIN <= emin <= emax <= EMAX_MAX:
+        raise ValueError("exponent bounds emin and emax should satisfy "
+                         "%d <= emin <= emax <= %d" % (EMIN_MIN, EMAX_MAX))
     return getcontext()(emin=emin, emax=emax)
 
 def wrap_standard_function(f, argtypes):
@@ -266,8 +321,10 @@ def wrap_standard_function(f, argtypes):
         bf = Mpfr()
         mpfr.mpfr_init2(bf, context.precision)
         ternary = f(bf, *converted_args)
-        if context.subnormalize:
-            ternary = mpfr.mpfr_subnormalize(bf, ternary, rounding)
+        with eminmax(context.emin, context.emax):
+            ternary = mpfr.mpfr_check_range(bf, ternary, rounding)
+            if context.subnormalize:
+                ternary = mpfr.mpfr_subnormalize(bf, ternary, rounding)
         return BigFloat._from_Mpfr(bf)
     return wrapped_f
 
@@ -336,10 +393,13 @@ class BigFloat(object):
         # figure out precision to use
         if isinstance(value, basestring):
             if precision is None:
-                raise TypeError("precision must be supplied when converting from a string")
+                raise TypeError("precision must be supplied when "
+                                "converting from a string")
         else:
             if precision is not None:
-                raise TypeError("precision argument should not be specified except when converting from a string")
+                raise TypeError("precision argument should not be "
+                                "specified except when converting "
+                                "from a string")
             if isinstance(value, float):
                 precision = builtin_max(DBL_PRECISION, MPFR_PREC_MIN)
             elif isinstance(value, (int, long)):

@@ -1,3 +1,5 @@
+from __future__ import with_statement
+from contextlib import contextmanager
 import ctypes
 import ctypes.util
 
@@ -11,6 +13,10 @@ __all__ = [
     # constants giving limits on the precision
     'MPFR_PREC_MIN', 'MPFR_PREC_MAX',
 
+    # constants giving emin and emax values
+    'MPFR_EMIN_DEFAULT', 'MPFR_EMIN_MIN', 'MPFR_EMIN_MAX',
+    'MPFR_EMAX_DEFAULT', 'MPFR_EMAX_MIN', 'MPFR_EMAX_MAX',
+
     # rounding modes
     'RoundTiesToEven', 'RoundTowardZero',
     'RoundTowardPositive', 'RoundTowardNegative',
@@ -20,6 +26,9 @@ __all__ = [
 
     # extra functions that aren't part of the mpfr library proper
     'strtofr2', 'remquo2',
+
+    # context manager for temporarily changing exponent bounds
+    'eminmax',
 
     ]
 
@@ -276,6 +285,7 @@ MPFR_PREC_MAX = mpfr_prec_t(-1).value >> 1
 
 MPFR_EMAX_DEFAULT = (1<<30)-1
 MPFR_EMIN_DEFAULT = -MPFR_EMAX_DEFAULT
+
 
 ################################################################################
 # Wrap functions from the library
@@ -618,6 +628,13 @@ def _init_set_d(rop, op, rnd):
 for macro in ['_init_set', '_init_set_ui', '_init_set_si', '_init_set_d']:
     setattr(mpfr, 'mpfr' + macro, globals()[macro])
 
+# more constants
+
+MPFR_EMIN_MIN = mpfr.mpfr_get_emin_min()
+MPFR_EMIN_MAX = mpfr.mpfr_get_emin_max()
+MPFR_EMAX_MIN = mpfr.mpfr_get_emax_min()
+MPFR_EMAX_MAX = mpfr.mpfr_get_emax_max()
+
 ################################################################################
 # Python wrappers for some of the functions that are awkward to use directly
 
@@ -703,3 +720,18 @@ def _mpfr_del(self, _clear_fn = mpfr.mpfr_clear):
         _clear_fn(self)
 
 Mpfr.__del__ = _mpfr_del
+
+################################################################################
+# Context manager to give an easy way to change emin and emax temporarily.
+
+@contextmanager
+def eminmax(emin, emax):
+    old_emin = mpfr.mpfr_get_emin()
+    old_emax = mpfr.mpfr_get_emax()
+    mpfr.mpfr_set_emin(emin)
+    mpfr.mpfr_set_emax(emax)
+    try:
+        yield
+    finally:
+        mpfr.mpfr_set_emin(old_emin)
+        mpfr.mpfr_set_emax(old_emax)
