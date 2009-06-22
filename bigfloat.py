@@ -33,8 +33,13 @@ __all__ = [
     'PRECISION_MIN', 'PRECISION_MAX',
 
     # flags
-    'all_flags', 'test_flag', 'set_flag', 'clear_flag',
-    'set_flagstate', 'get_flagstate',
+    'Inexact', 'Overflow', 'Underflow', 'NanFlag',
+
+    # functions to test, set and clear individual flags
+    'test_flag', 'set_flag', 'clear_flag',
+
+    # and to get and set the entire flag state
+    'set_flagstate', 'get_flagstate', 'all_flags',
 
 ]
 
@@ -528,11 +533,6 @@ class BigFloat(object):
             str(self), self.precision)
 
     # rich comparisons
-    __eq__ = wrap_predicate(mpfr.mpfr_equal_p)
-    __le__ = wrap_predicate(mpfr.mpfr_lessequal_p)
-    __lt__ = wrap_predicate(mpfr.mpfr_less_p)
-    __ge__ = wrap_predicate(mpfr.mpfr_greaterequal_p)
-    __gt__ = wrap_predicate(mpfr.mpfr_greater_p)
     def __ne__(self, other):
         return not self == other
 
@@ -666,3 +666,9 @@ BigFloat.__rmul__ = reverse_args(mul)
 BigFloat.__rdiv__ = BigFloat.__rtruediv__ = reverse_args(div)
 BigFloat.__rpow__ = reverse_args(pow)
 BigFloat.__rmod__ = reverse_args(fmod)
+
+BigFloat.__eq__ = equal_p
+BigFloat.__le__ = lessequal_p
+BigFloat.__lt__ = less_p
+BigFloat.__ge__ = greaterequal_p
+BigFloat.__gt__ = greater_p
