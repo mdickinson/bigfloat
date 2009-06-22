@@ -52,7 +52,7 @@ Here are some notes on particular arithmetic operations.
   it differs from Python floats and integers.
 
 * The floor division operator x // y and the builtin divmod function
-  are not implemented for BigFloat instances.
+  are not currently implemented for BigFloat instances.
 
 Comparisons between BigFloats and integers or BigFloats and floats
 also work as expected, performing an implicit exact conversion of the
