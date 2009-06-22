@@ -54,9 +54,15 @@ Here are some notes on particular arithmetic operations.
 * The floor division operator x // y and the builtin divmod function
   are not currently implemented for BigFloat instances.
 
-Comparisons between BigFloats and integers or BigFloats and floats
-also work as expected, performing an implicit exact conversion of the
-integer or float to a BigFloat before comparing.
+Comparisons
+-----------
+
+The comparison operators should work as expected.  Note that any
+comparison involving a NaN always returns False, with the exception of
+the != comparison, which always returns True.  As with the arithmetic
+operations, comparisons between BigFloats and integers or BigFloats
+and floats also work as expected, performing an implicit exact
+conversion of the integer or float to a BigFloat before comparing.
 
 
 .. class:: BigFloat(value)
