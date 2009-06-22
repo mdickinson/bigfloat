@@ -26,6 +26,12 @@ __all__ = [
     'RoundTiesToEven', 'RoundTowardZero',
     'RoundTowardPositive', 'RoundTowardNegative',
 
+    # absolute limits on exponents
+    'EMAX_MAX', 'EMIN_MIN',
+
+    # limits on precision
+    'PRECISION_MIN', 'PRECISION_MAX',
+
 ]
 
 # note that __all__ is dynamically modified later on to add standard
@@ -73,9 +79,11 @@ except AttributeError:
 # the format specified by the current context.  So we adopt the
 # following approach:
 #
-#   We define constants EMAX_MAX and EMIN_MIN representing the min
-#   and max values we'll allow for both emin and emax.  When the
-#   module is imported, emax and emin are set to these values.
+#   We define constants EMAX_MAX and EMIN_MIN representing the min and
+#   max values we'll allow for both emin and emax (these aren't
+#   necessarily the same as the values returned by mpfr_emin_min and
+#   mpfr_emax_max).  When the module is imported, emax and emin are
+#   set to these values.
 #
 #   After this, the MPFR stored emax and emin aren't touched when the
 #   context is changed; but for each standard operation or function,
@@ -94,6 +102,9 @@ EMIN_MIN = MPFR_EMIN_DEFAULT
 
 mpfr.mpfr_set_emin(EMIN_MIN)
 mpfr.mpfr_set_emax(EMAX_MAX)
+
+PRECISION_MIN = MPFR_PREC_MIN
+PRECISION_MAX = MPFR_PREC_MAX
 
 bit_length_correction = {
     '0': 4, '1': 3, '2': 2, '3': 2, '4': 1, '5': 1, '6': 1, '7': 1,
@@ -143,6 +154,13 @@ class Context(object):
 
     def __new__(cls, precision, rounding,
                 emax, emin, subnormalize):
+        if not PRECISION_MIN <= precision <= PRECISION_MAX:
+            raise ValueError("Precision p should satisfy %d <= p <= %d." %
+                             (PRECISION_MIN, PRECISION_MAX))
+        if not EMIN_MIN <= emin <= emax <= EMAX_MAX:
+            raise ValueError("exponent bounds emin and emax should satisfy "
+                             "%d <= emin <= emax <= %d" % (EMIN_MIN, EMAX_MAX))
+
         self = object.__new__(cls)
         self._precision = precision
         self._rounding = rounding
@@ -294,16 +312,13 @@ def exponent_limits(emin=None, emax=None):
 
     emin and emax default to EMIN_MIN and EMAX_MAX.  Thus exponent
     limits can be relaxed to their most lenient values by calling
-    exponent_limits().
+    exponent_limits() with no arguments.
 
     """
     if emin is None:
         emin = EMIN_MIN
     if emax is None:
         emax = EMAX_MAX
-    if not EMIN_MIN <= emin <= emax <= EMAX_MAX:
-        raise ValueError("exponent bounds emin and emax should satisfy "
-                         "%d <= emin <= emax <= %d" % (EMIN_MIN, EMAX_MAX))
     return getcontext()(emin=emin, emax=emax)
 
 def wrap_standard_function(f, argtypes):
@@ -401,9 +416,9 @@ class BigFloat(object):
                                 "specified except when converting "
                                 "from a string")
             if isinstance(value, float):
-                precision = builtin_max(DBL_PRECISION, MPFR_PREC_MIN)
+                precision = builtin_max(DBL_PRECISION, PRECISION_MIN)
             elif isinstance(value, (int, long)):
-                precision = builtin_max(bit_length(value), MPFR_PREC_MIN)
+                precision = builtin_max(bit_length(value), PRECISION_MIN)
             elif isinstance(value, BigFloat):
                 precision = value.precision
             else:
