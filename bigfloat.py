@@ -32,11 +32,16 @@ __all__ = [
     # limits on precision
     'PRECISION_MIN', 'PRECISION_MAX',
 
+    # flags
+    'all_flags', 'test_flag', 'set_flag', 'clear_flag',
+    'set_flagstate', 'get_flagstate',
+
 ]
 
 # note that __all__ is dynamically modified later on to add standard
 # functions and predicates
 
+from contextlib import contextmanager
 import sys
 
 from pympfr import Mpfr, IMpfr
@@ -427,8 +432,17 @@ class BigFloat(object):
                                 "to BigFloat" % (value, type(value)))
 
         # use Default context, with given precision
-        with DefaultContext(precision = precision):
-            return BigFloat(value)
+        with saved_flags():
+            set_flagstate(set())
+            with DefaultContext(precision = precision):
+                result = BigFloat(value)
+            if test_flag(Overflow):
+                raise ValueError("value too large to represent as a BigFloat")
+            if test_flag(Underflow):
+                raise ValueError("value too small to represent as a BigFloat")
+
+        return result
+
 
     def __int__(self):
         """BigFloat -> int.
@@ -592,6 +606,16 @@ def set_flagstate(flagset):
     for f in all_flags-flagset:
         clear_flag(f)
 
+@contextmanager
+def saved_flags():
+    """Save current flags for the duration of a with block.  Restore
+    those original flags after the block completes."""
+
+    old_flags = get_flagstate()
+    try:
+        yield
+    finally:
+        set_flagstate(old_flags)
 
 # dictionary translating MPFR function names (excluding the 'mpfr_'
 # prefix) to Python function names.

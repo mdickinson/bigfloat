@@ -183,16 +183,16 @@ class BigFloatTests(unittest.TestCase):
         # the exception raising goes via flag detection.  Check that
         # it's independent of the currently-set flags.
 
-        # Set some flags...
-        div(0, 0) # nan flag
-        div(1, 0)
-        pow(2, 2**100) # overflow flag
-        pow(2, -2**100) # underflow flag
-        sqrt(2) # inexact flag
+        # Set all flags...
+        set_flagstate(all_flags)
+        self.assertEqual(BigFloat.exact(12345), 12345)
+        self.assertEqual(BigFloat.exact(1e-72), 1e-72)
 
-        assertEqual(BigFloat.exact(12345), 12345)
-        assertEqual(BigFloat.exact(1e-72), 1e-72)
-
+        # check that flags aren't affected by a BigFloat.exact call
+        set_flagstate(set())
+        BigFloat.exact('123.45', precision=200)  # shouldn't set inexact flag
+        flags = get_flagstate()
+        self.assertEqual(flags, set())
 
     def test_exponent_limits(self):
         with exponent_limits(-1000, 0):
