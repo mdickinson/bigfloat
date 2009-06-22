@@ -61,15 +61,15 @@ class BigFloatTests(unittest.TestCase):
             upper = BigFloat('1.1')
         self.assert_(lower < upper)
 
-        self.assert_(isnan(BigFloat('nan')))
-        self.assert_(isinf(BigFloat('inf')))
-        self.assert_(not isnegative(BigFloat('inf')))
-        self.assert_(isinf(BigFloat('-inf')))
-        self.assert_(isnegative(BigFloat('-inf')))
-        self.assert_(iszero(BigFloat('0')))
-        self.assert_(not isnegative(BigFloat('0')))
-        self.assert_(iszero(BigFloat('-0')))
-        self.assert_(isnegative(BigFloat('-0')))
+        self.assert_(is_nan(BigFloat('nan')))
+        self.assert_(is_inf(BigFloat('inf')))
+        self.assert_(not is_negative(BigFloat('inf')))
+        self.assert_(is_inf(BigFloat('-inf')))
+        self.assert_(is_negative(BigFloat('-inf')))
+        self.assert_(is_zero(BigFloat('0')))
+        self.assert_(not is_negative(BigFloat('0')))
+        self.assert_(is_zero(BigFloat('-0')))
+        self.assert_(is_negative(BigFloat('-0')))
 
 
     def test_creation_from_BigFloat(self):

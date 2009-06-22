@@ -436,7 +436,7 @@ class BigFloat(object):
         """
         # convert via hex string; rounding mode doesn't matter here,
         # since conversion should be exact
-        if not isfinite(self):
+        if not is_finite(self):
             raise ValueError("Can't convert infinity or nan to integer")
 
         negative, digits, e = mpfr.mpfr_get_str2(self._value, 16, 0, RoundTiesToEven)
@@ -488,16 +488,16 @@ class BigFloat(object):
         return (-n if self.is_negative else n), d
 
     def __str__(self):
-        if iszero(self):
-            return '-0' if isnegative(self) else '0'
-        elif isfinite(self):
+        if is_zero(self):
+            return '-0' if is_negative(self) else '0'
+        elif is_finite(self):
             negative, digits, e = mpfr.mpfr_get_str2(self._value, 10, 0,
                                                      RoundTiesToEven)
             return format_finite(negative, digits, e)
-        elif isinf(self):
-            return '-Infinity' if isnegative(self) else 'Infinity'
+        elif is_inf(self):
+            return '-Infinity' if is_negative(self) else 'Infinity'
         else:
-            assert isnan(self)
+            assert is_nan(self)
             return 'NaN'
 
     def __repr__(self):
@@ -514,7 +514,7 @@ class BigFloat(object):
         return not self == other
 
     def __nonzero__(self):
-        return not iszero(self)
+        return not is_zero(self)
 
     @property
     def precision(self):
@@ -541,11 +541,11 @@ class BigFloat(object):
 
 name_translation = {
     'set': 'pos',  # avoid clobbering 'set' builtin
-    'nan_p' : 'isnan',  # to match math module
-    'inf_p' : 'isinf',  # ditto
-    'zero_p' : 'iszero',
-    'number_p' : 'isfinite',
-    'signbit' : 'isnegative',
+    'nan_p' : 'is_nan',
+    'inf_p' : 'is_inf',
+    'zero_p' : 'is_zero',
+    'number_p' : 'is_finite',
+    'signbit' : 'is_negative',
 }
 
 for fn, argtypes in standard_functions + extra_standard_functions:
