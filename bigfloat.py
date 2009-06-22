@@ -394,7 +394,8 @@ class BigFloat(object):
         elif isinstance(value, BigFloat):
             return pos(value)
         else:
-            raise TypeError("Can't convert argument %s of type %s to BigFloat" % (value, type(value)))
+            raise TypeError("Can't convert argument %s of type %s "
+                            "to BigFloat" % (value, type(value)))
 
     # alternative constructor, that does exact conversions
     @classmethod
@@ -422,7 +423,8 @@ class BigFloat(object):
             elif isinstance(value, BigFloat):
                 precision = value.precision
             else:
-                raise TypeError("Can't convert argument %s of type %s to BigFloat" % (value, type(value)))
+                raise TypeError("Can't convert argument %s of type %s "
+                                "to BigFloat" % (value, type(value)))
 
         # use Default context, with given precision
         with DefaultContext(precision = precision):
@@ -439,7 +441,8 @@ class BigFloat(object):
         if not is_finite(self):
             raise ValueError("Can't convert infinity or nan to integer")
 
-        negative, digits, e = mpfr.mpfr_get_str2(self._value, 16, 0, RoundTiesToEven)
+        negative, digits, e = mpfr.mpfr_get_str2(self._value, 16, 0,
+                                                 RoundTiesToEven)
         n = int(digits, 16)
         e = 4*(e-len(digits))
         if e >= 0:
@@ -460,9 +463,10 @@ class BigFloat(object):
         return mpfr.mpfr_get_d(self._value, RoundTiesToEven)
 
     def as_integer_ratio(self):
-        """Return pair n, d of integers such that the value of self is exactly
-        equal to n/d, n and d are relatively prime, and d >= 1."""
+        """Return pair n, d of integers such that the value of self is
+        exactly equal to n/d, n and d are relatively prime, and d >= 1.
 
+        """
         if not self.is_finite:
             raise ValueError("Can't express infinity or nan as "
                              "an integer ratio")
@@ -536,7 +540,7 @@ class BigFloat(object):
             raise TypeError("Unable to convert argument %s of type %s "
                             "to BigFloat" % (arg, type(arg)))
 
-################################################################################
+###############################################################################
 # Flags
 #
 # MPFR has 5 flags available, one of which we shouldn't encounter in
