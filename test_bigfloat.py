@@ -17,6 +17,80 @@ class BigFloatTests(unittest.TestCase):
         else:
             self.assertEqual(x, y)
 
+    def test_comparisons(self):
+        # here's a list of lists of values; within each sublist all
+        # entries have the same value;  sublists are ordered by increasing value
+        values = [
+            [BigFloat('-Infinity'), float('-inf')],
+            [-1L, -1, -1.0, BigFloat(-1.0)],
+            [0L, 0, 0.0, -0.0, BigFloat(0.0), BigFloat(-0.0)],
+            [BigFloat('4e-324')],
+            [4e-324],
+            [1e-320, BigFloat(1e-320)],
+            [1L, 1, 1.0, BigFloat(1.0)],
+            [BigFloat(2**53+1)],
+            [2**53+1],
+            [BigFloat('Infinity'), float('inf')],
+            ]
+
+        nans = [BigFloat('nan'), -BigFloat('-nan'), float('nan'), -float('nan')]
+
+        LT_PAIRS = []
+        EQ_PAIRS = []
+        GT_PAIRS = []
+        UN_PAIRS = []
+        for i, v1 in enumerate(values):
+            for x in v1:
+                for j, v2 in enumerate(values):
+                    for y in v2:
+                        if i < j:
+                            LT_PAIRS.append((x, y))
+                        elif i == j:
+                            EQ_PAIRS.append((x, y))
+                        else:
+                            GT_PAIRS.append((x, y))
+
+        for i, v1 in enumerate(values):
+            for x in v1:
+                for n in nans:
+                    UN_PAIRS.append((x, n))
+                    UN_PAIRS.append((n, x))
+        for n1 in nans:
+            for n2 in nans:
+                UN_PAIRS.append((n1, n2))
+
+        for x, y in LT_PAIRS:
+            self.assertEqual(x < y, True)
+            self.assertEqual(x <= y, True)
+            self.assertEqual(x != y, True)
+            self.assertEqual(x > y, False)
+            self.assertEqual(x >= y, False)
+            self.assertEqual(x == y, False)
+
+        for x, y in EQ_PAIRS:
+            self.assertEqual(x <= y, True)
+            self.assertEqual(x >= y, True)
+            self.assertEqual(x == y, True)
+            self.assertEqual(x < y, False)
+            self.assertEqual(x > y, False)
+            self.assertEqual(x != y, False)
+
+        for x, y in GT_PAIRS:
+            self.assertEqual(x > y, True)
+            self.assertEqual(x >= y, True)
+            self.assertEqual(x != y, True)
+            self.assertEqual(x < y, False)
+            self.assertEqual(x <= y, False)
+            self.assertEqual(x == y, False)
+
+        for x, y in UN_PAIRS:
+            self.assertEqual(x < y, False)
+            self.assertEqual(x <= y, False)
+            self.assertEqual(x > y, False)
+            self.assertEqual(x >= y, False)
+            self.assertEqual(x == y, False)
+            self.assertEqual(x != y, True)
+
     def test_creation_from_integer(self):
         test_values = [-23, 0, 100, 7**100, -23L, 0L, 100L]
         test_precisions = [2, 20, 53, 2000]
