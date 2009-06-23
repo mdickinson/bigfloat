@@ -527,7 +527,7 @@ class BigFloat(object):
             return 'NaN'
 
     def __repr__(self):
-        return "BigFloat.exact('{0}', precision={1})".format(
+        return "BigFloat.exact('%s', precision=%d)" % (
             str(self), self.precision)
 
     def __ne__(self, other):
