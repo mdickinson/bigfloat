@@ -154,7 +154,7 @@ def format_finite(negative, digits, dot_pos):
     if dot_pos < len(digits):
         digits = digits[:dot_pos] + '.' + digits[dot_pos:]
     if use_exponent:
-        digits += "e{0:+}".format(exp)
+        digits += "e%+d" % exp
     return '-' + digits if negative else digits
 
 # Note that context objects are immutable
