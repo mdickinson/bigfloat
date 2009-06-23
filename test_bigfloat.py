@@ -1,3 +1,5 @@
+from __future__ import with_statement # for Python 2.5
+
 import unittest
 import operator
 from bigfloat import *
@@ -11,11 +13,14 @@ class BigFloatTests(unittest.TestCase):
         if not (isinstance(x, float) and isinstance(y, float)):
             raise ValueError("Expected x and y to be floats "
                              "in assertIdenticalFloat")
-        if math.isnan(x) or math.isnan(y):
-            if not math.isnan(x) and math.isnan(y):
+        if x != x or y != y: # if either x or y is a nan...
+            if x == x or y == y:  # and one of x and y is not a nan...
                 self.fail("One of x and y is a nan, but the other is not.")
         elif x == y == 0.0:
-            if not math.copysign(1.0, x) == math.copysign(1.0, y):
+            # check signs are the same.  Can't use copysign since that
+            # isn't available until Python 2.6;  comparing stringified
+            # versions should work on most platforms.
+            if str(x) != str(y):
                 self.fail("Zeros have different signs")
         else:
             self.assertEqual(x, y)
@@ -25,7 +30,7 @@ class BigFloatTests(unittest.TestCase):
         test_precisions = [2, 10, 23, 24, 52, 53, 54, 100]
         fns = [add, sub, mul, div, pow, mod]
         values = [2, 3L, 1.234, BigFloat('0.678'), BigFloat('nan'),
-                  0.0, float('inf'), True]
+                  float('0.0'), float('inf'), True]
 
         # functions should accept operands of any integer, float or BigFloat type.
         for v in values:
@@ -109,7 +114,7 @@ class BigFloatTests(unittest.TestCase):
             self.assertEqual(is_finite(x), False)
             self.assertEqual(is_integer(x), False)
 
-        for x in [0, 0L, 0.0, -0.0, BigFloat(0.0), BigFloat(-0.0)]:
+        for x in [0, 0L, float('0.0'), float('-0.0'), BigFloat('0.0'), BigFloat('-0.0')]:
             self.assertEqual(is_nan(x), False)
             self.assertEqual(is_inf(x), False)
             self.assertEqual(is_zero(x), True)
@@ -130,11 +135,11 @@ class BigFloatTests(unittest.TestCase):
             self.assertEqual(is_integer(x), False)
 
         # test is_negative
-        for x in [float('-inf'), -0.0, BigFloat('-inf'), BigFloat('-0.0'),
+        for x in [float('-inf'), float('-0.0'), BigFloat('-inf'), BigFloat('-0.0'),
                   BigFloat(-2.3), -31, -1L]:
             self.assertEqual(is_negative(x), True)
 
-        for x in [float('inf'), BigFloat('inf'), 0.0, 0, 0L, 2L, 123,
+        for x in [float('inf'), BigFloat('inf'), float('0.0'), 0, 0L, 2L, 123,
                   BigFloat(1.23)]:
             self.assertEqual(is_negative(x), False)
 
@@ -145,7 +150,7 @@ class BigFloatTests(unittest.TestCase):
         values = [
             [BigFloat('-Infinity'), float('-inf')],
             [-1L, -1, -1.0, BigFloat(-1.0)],
-            [0L, 0, 0.0, -0.0, BigFloat(0.0), BigFloat(-0.0)],
+            [0L, 0, float('0.0'), float('-0.0'), BigFloat('0.0'), BigFloat('-0.0')],
             [BigFloat('4e-324')],
             [4e-324],
             [1e-320, BigFloat(1e-320)],
@@ -232,7 +237,7 @@ class BigFloatTests(unittest.TestCase):
                     self.assertEqual(bf.precision, p)
 
     def test_creation_from_float(self):
-        test_values = [-12.3456, -0.0, 0.0, 5e-310, -1e308,
+        test_values = [-12.3456, float('-0.0'), float('0.0'), 5e-310, -1e308,
                         float('nan'), float('inf'), float('-inf')]
         test_precisions = [2, 20, 53, 2000]
         for value in test_values:
@@ -346,7 +351,7 @@ class BigFloatTests(unittest.TestCase):
         self.assertRaises(TypeError, BigFloat.exact, -13L, precision=53)
 
     def test_exact_creation_from_float(self):
-        test_values = [-12.3456, -0.0, 0.0, 5e-310, -1e308,
+        test_values = [-12.3456, float('-0.0'), float('0.0'), 5e-310, -1e308,
                         float('nan'), float('inf'), float('-inf')]
         test_precisions = [2, 20, 53, 2000]
         for value in test_values:

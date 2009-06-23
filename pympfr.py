@@ -1,4 +1,5 @@
-from __future__ import with_statement
+from __future__ import with_statement  # for Python 2.5
+
 from contextlib import contextmanager
 import ctypes
 import ctypes.util

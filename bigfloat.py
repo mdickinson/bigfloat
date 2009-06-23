@@ -6,6 +6,8 @@
 # which shadow the builtin functions of those names.  Don't do 'from
 # bigfloat import *' if you don't want to clobber these functions.
 
+from __future__ import with_statement  # for Python 2.5
+
 # Names to export when someone does 'from bigfloat import *'
 
 __all__ = [
@@ -450,9 +452,10 @@ class BigFloat(object):
                 raise ValueError("value too small to represent as a BigFloat")
             if test_flag(Inexact) and not isinstance(value, basestring):
                 # since this is supposed to be an exact conversion, the
-                # inexact flag should never be set except when convertin
+                # inexact flag should never be set except when converting
                 # from a string.
-                assert False, "This shouldn't ever happen"
+                assert False, ("Inexact conversion in BigFloat.exact. "
+                               "This shouldn't ever happen.  Please report.")
 
         return result
 
