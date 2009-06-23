@@ -367,6 +367,36 @@ class BigFloatTests(unittest.TestCase):
         self.assertEqual(int(BigFloat('-2.99999')), -2)
         self.assertEqual(int(BigFloat(-5.0)), -5)
 
+        self.assertEqual(int(BigFloat('0.0')), 0)
+        self.assertEqual(int(BigFloat('-0.0')), 0)
+
+        self.assertRaises(ValueError, int, BigFloat('inf'))
+        self.assertRaises(ValueError, int, BigFloat('-inf'))
+        self.assertRaises(ValueError, int, BigFloat('nan'))
+
+    def test_integer_ratio(self):
+
+        ir = BigFloat.as_integer_ratio
+
+        test_values = [
+            (sqrt(BigFloat(2), rounding=RoundTowardPositive), (6369051672525773, 4503599627370496)),
+            (sqrt(BigFloat(2), rounding=RoundTowardNegative), (1592262918131443, 1125899906842624)),
+            (const_pi(), (884279719003555L, 281474976710656L)),
+            (BigFloat('2.0'), (2, 1)),
+            (BigFloat('0.5'), (1, 2)),
+            (BigFloat('-1.125'), (-9, 8)),
+            ]
+
+        for arg, expected in test_values:
+            self.assertEqual(ir(arg), expected)
+
+        self.assertEqual(ir(BigFloat('0.0')), (0, 1))
+        self.assertEqual(ir(BigFloat('-0.0')), (0, 1))
+
+        self.assertRaises(ValueError, ir, BigFloat('inf'))
+        self.assertRaises(ValueError, ir, BigFloat('-inf'))
+        self.assertRaises(ValueError, ir, BigFloat('nan'))
+
     def test_str(self):
         # check special values
         self.assertEqual(str(BigFloat(0)), '0')
