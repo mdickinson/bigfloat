@@ -143,19 +143,27 @@ use of the current context, and do not affect the state of the flags.
    mode specified by the current context.  The integer 0 is always
    converted to positive zero.
 
-   .. method:: exact(value, precision=None)
+   .. method:: exact(cls, value, precision=None)
 
-     Construct a new :class:`BigFloat` instance from an integer,
-     string, float or another :class:`BigFloat` instance, doing an
-     exact conversion where possible.  Unlike the usual BigFloat
-     constructor, this alternative constructor makes no use of the
-     current context.
+      A classmethod to construct a new :class:`BigFloat` instance from
+      an integer, string, float or another :class:`BigFloat` instance,
+      doing an exact conversion where possible.  Unlike the usual
+      BigFloat constructor, this alternative constructor makes no use
+      of the current context and will not affect the current flags.
 
-     If value is an integer, float or BigFloat, then the precision
-     keyword must not be given, and the conversion is exact.  The
-     resulting BigFloat has a precision sufficiently large to hold the
-     converted value exactly.  If value is a string, then the
-     precision argument must be given.  The string is converted using
-     the given precision and the RoundTiesToEven rounding mode.
+      If value is an integer, float or BigFloat, then the precision
+      keyword must not be given, and the conversion is exact.  The
+      resulting BigFloat has a precision sufficiently large to hold the
+      converted value exactly.  If value is a string, then the
+      precision argument must be given.  The string is converted using
+      the given precision and the RoundTiesToEven rounding mode.
 
-     This method should never affect the current flags.
+   .. method:: as_integer_ratio(self)
+
+      Return a pair (n, d) of integers such that n and d are
+      relatively prime, d is positive, and the value of self is
+      exactly n/d.
+
+      If self is an infinity or nan then ValueError is raised.  Both
+      negative and positive zeros are converted to (0, 1).
+
