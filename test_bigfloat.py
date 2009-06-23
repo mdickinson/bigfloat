@@ -3,6 +3,9 @@ import operator
 from bigfloat import *
 import math
 
+all_rounding_modes = [RoundTowardZero, RoundTowardNegative,
+                      RoundTowardPositive, RoundTiesToEven]
+
 class BigFloatTests(unittest.TestCase):
     def assertIdenticalFloat(self, x, y):
         if not (isinstance(x, float) and isinstance(y, float)):
@@ -16,6 +19,44 @@ class BigFloatTests(unittest.TestCase):
                 self.fail("Zeros have different signs")
         else:
             self.assertEqual(x, y)
+
+    def test_arithmetic_functions(self):
+        # test add, mul, div, sub, pow, mod
+        test_precisions = [2, 10, 23, 24, 52, 53, 54, 100]
+        fns = [add, sub, mul, div, pow, mod]
+        values = [2, 3L, 1.234, BigFloat('0.678'), BigFloat('nan'),
+                  0.0, float('inf'), True]
+
+        # functions should accept operands of any integer, float or BigFloat type.
+        for v in values:
+            for w in values:
+                for p in test_precisions:
+                    with precision(p):
+                        for fn in fns:
+                            # test without rounding mode
+                            res = fn(v, w)
+                            self.assertEqual(type(res), BigFloat)
+                            self.assertEqual(res.precision, p)
+                            # test with rounding mode
+                            for rnd in all_rounding_modes:
+                                res = fn(v, w, rounding=rnd)
+                                self.assertEqual(type(res), BigFloat)
+                                self.assertEqual(res.precision, p)
+
+        # should be able to specify rounding mode directly,
+        # and it overrides the current context rounding mode
+        for p in test_precisions:
+            with precision(p):
+                for rnd in all_rounding_modes:
+                    with rounding(rnd):
+                        x = div(1, 3, rounding=RoundTowardPositive)
+                        y = div(1, 3, rounding=RoundTowardNegative)
+                        self.assert_(y < x)
+                        x3 = mul(3, x, rounding=RoundTowardPositive)
+                        y3 = mul(y, 3, rounding=RoundTowardNegative)
+                        self.assert_(y3 < 1 < x3)
+
+
 
     def test_binary_operations(self):
         # check that BigFloats can be combined with themselves,
@@ -347,8 +388,7 @@ class BigFloatTests(unittest.TestCase):
 
     def test_exact_creation_from_BigFloat(self):
         for test_precision in [2, 20, 53, 2000]:
-            for test_rounding in [RoundTowardZero, RoundTowardNegative,
-                                  RoundTowardPositive, RoundTiesToEven]:
+            for test_rounding in all_rounding_modes:
                 with precision(test_precision):
                     with rounding(test_rounding):
                         x = sqrt(2)
@@ -356,6 +396,20 @@ class BigFloatTests(unittest.TestCase):
                 self.assertEqual(x, y)
 
         self.assertRaises(TypeError, BigFloat.exact, BigFloat(23), 100)
+
+    def test_float(self):
+        # test conversion to float
+        with precision(200):
+            x = BigFloat(2**100+1)/2**100
+            y = BigFloat(2**100-1)/2**100
+
+        self.assertNotEqual(x, y)
+
+        # rounding mode shouldn't affect conversion
+        for rnd in all_rounding_modes:
+            with rounding(rnd):
+                self.assertEqual(float(x), 1.)
+                self.assertEqual(float(y), 1.)
 
     def test_int(self):
         # test conversion to int
