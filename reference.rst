@@ -54,6 +54,20 @@ Here are some notes on particular arithmetic operations.
 * The floor division operator x // y and the builtin divmod function
   are not currently implemented for BigFloat instances.
 
+For each arithmetic operation there's a corresponding module-level
+function.  This function also accepts a keyword argument 'rounding',
+which can be used to override the rounding mode of the current
+context.  For example::
+
+   >>> div(2, 3, rounding=RoundTowardPositive)
+   BigFloat.exact('0.66666666666666674', precision=53)
+   >>> div(2, 3, rounding=RoundTowardNegative)
+   BigFloat.exact('0.66666666666666663', precision=53)
+
+This can be handy for places where you only want to alter the rounding
+mode for a single function call or operation.
+
+
 Comparisons
 -----------
 
@@ -78,6 +92,16 @@ correspond to any of the Python comparison operators.
 
 * is_unordered
 * is_lessgreater
+
+Number classification functions
+-------------------------------
+
+* is_nan
+* is_inf
+* is_zero
+* is_finite
+* is_integer
+* is_negative
 
 
 

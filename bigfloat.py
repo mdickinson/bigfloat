@@ -332,9 +332,12 @@ def exponent_limits(emin=None, emax=None):
     return getcontext()(emin=emin, emax=emax)
 
 def wrap_standard_function(f, argtypes):
-    def wrapped_f(*args):
+    def wrapped_f(*args, **kwargs):
         context = getcontext()
-        rounding = context.rounding
+        if 'rounding' in kwargs:
+            rounding = kwargs['rounding']
+        else:
+            rounding = context.rounding
         if len(args) != len(argtypes):
             raise TypeError("Wrong number of arguments")
         converted_args = []
