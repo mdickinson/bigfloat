@@ -536,7 +536,7 @@ class BigFloat(object):
             str(self), self.precision)
 
     def __ne__(self, other):
-        return not is_equal(self, other)
+        return not (self == other)
 
     def __nonzero__(self):
         return not is_zero(self)
@@ -625,7 +625,8 @@ def saved_flags():
         set_flagstate(old_flags)
 
 # dictionary translating MPFR function names (excluding the 'mpfr_'
-# prefix) to Python function names.
+# prefix) to Python function names.  Names that don't start with '_' will
+# be added to __all__.
 
 name_translation = {
     # avoid clobbering set builtin
@@ -640,13 +641,13 @@ name_translation = {
     'signbit' : 'is_negative',
 
     # comparisons
-    'equal_p' : 'is_equal',
-    'greater_p' : 'is_greater',
-    'less_p' : 'is_less',
-    'lessequal_p' : 'is_lessequal',
-    'greaterequal_p' : 'is_greaterequal',
-    'unordered_p' : 'is_unordered',
-    'lessgreater_p' : 'is_lessgreater',
+    'equal_p' : '_is_equal',
+    'greater_p' : '_is_greater',
+    'less_p' : '_is_less',
+    'lessequal_p' : '_is_lessequal',
+    'greaterequal_p' : '_is_greaterequal',
+    'unordered_p' : 'unordered',
+    'lessgreater_p' : 'lessgreater',
 
 }
 
@@ -654,13 +655,15 @@ for fn, argtypes in standard_functions + extra_standard_functions:
     mpfr_fn = getattr(mpfr, 'mpfr_' + fn)
     pyfn_name = name_translation.get(fn, fn)
     globals()[pyfn_name] = wrap_standard_function(mpfr_fn, argtypes)
-    __all__.append(pyfn_name)
+    if not pyfn_name.startswith('_'):
+        __all__.append(pyfn_name)
 
 for fn, argtypes in predicates:
     mpfr_fn = getattr(mpfr, 'mpfr_' + fn)
     pyfn_name = name_translation.get(fn, fn)
     globals()[pyfn_name] = wrap_predicate(mpfr_fn)
-    __all__.append(pyfn_name)
+    if not pyfn_name.startswith('_'):
+        __all__.append(pyfn_name)
 
 # unary arithmetic operations
 BigFloat.__pos__ = pos
@@ -684,8 +687,8 @@ BigFloat.__rpow__ = reverse_args(pow)
 BigFloat.__rmod__ = reverse_args(fmod)
 
 # comparisons
-BigFloat.__eq__ = is_equal
-BigFloat.__le__ = is_lessequal
-BigFloat.__lt__ = is_less
-BigFloat.__ge__ = is_greaterequal
-BigFloat.__gt__ = is_greater
+BigFloat.__eq__ = _is_equal
+BigFloat.__le__ = _is_lessequal
+BigFloat.__lt__ = _is_less
+BigFloat.__ge__ = _is_greaterequal
+BigFloat.__gt__ = _is_greater

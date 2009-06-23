@@ -66,8 +66,8 @@ class BigFloatTests(unittest.TestCase):
             self.assertEqual(x > y, False)
             self.assertEqual(x >= y, False)
             self.assertEqual(x == y, False)
-            self.assertEqual(is_lessgreater(x, y), True)
-            self.assertEqual(is_unordered(x, y), False)
+            self.assertEqual(lessgreater(x, y), True)
+            self.assertEqual(unordered(x, y), False)
 
         for x, y in EQ_PAIRS:
             self.assertEqual(x <= y, True)
@@ -76,8 +76,8 @@ class BigFloatTests(unittest.TestCase):
             self.assertEqual(x < y, False)
             self.assertEqual(x > y, False)
             self.assertEqual(x != y, False)
-            self.assertEqual(is_lessgreater(x, y), False)
-            self.assertEqual(is_unordered(x, y), False)
+            self.assertEqual(lessgreater(x, y), False)
+            self.assertEqual(unordered(x, y), False)
 
         for x, y in GT_PAIRS:
             self.assertEqual(x > y, True)
@@ -86,8 +86,8 @@ class BigFloatTests(unittest.TestCase):
             self.assertEqual(x < y, False)
             self.assertEqual(x <= y, False)
             self.assertEqual(x == y, False)
-            self.assertEqual(is_lessgreater(x, y), True)
-            self.assertEqual(is_unordered(x, y), False)
+            self.assertEqual(lessgreater(x, y), True)
+            self.assertEqual(unordered(x, y), False)
 
         for x, y in UN_PAIRS:
             self.assertEqual(x < y, False)
@@ -96,8 +96,8 @@ class BigFloatTests(unittest.TestCase):
             self.assertEqual(x >= y, False)
             self.assertEqual(x == y, False)
             self.assertEqual(x != y, True)
-            self.assertEqual(is_lessgreater(x, y), False)
-            self.assertEqual(is_unordered(x, y), True)
+            self.assertEqual(lessgreater(x, y), False)
+            self.assertEqual(unordered(x, y), True)
 
     def test_creation_from_integer(self):
         test_values = [-23, 0, 100, 7**100, -23L, 0L, 100L]

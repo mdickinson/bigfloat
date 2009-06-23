@@ -78,20 +78,19 @@ operations, comparisons between BigFloats and integers or BigFloats
 and floats also work as expected, performing an implicit exact
 conversion of the integer or float to a BigFloat before comparing.
 
-All comparisons except != are available as module-level functions,
-with the following names:
+There are two additional comparison functions that don't correspond to
+any of the Python comparison operators.
 
-* is_equal
-* is_less
-* is_greater
-* is_lessequal
-* is_greaterequal
+.. function:: lessgreater(x, y)
 
-In addition, there are two more comparison functions that don't
-correspond to any of the Python comparison operators.
+   Return True if either x < y or x > y, and False otherwise.
+   lessgreater(x, y) differs from x != y in the case where either x or
+   y is a NaN: in that case, lessgreater(x, y) will return False,
+   while x != y will return True.
 
-* is_unordered
-* is_lessgreater
+.. function:: unordered(x, y)
+
+   Return True if either x or y is a NaN, and False otherwise.
 
 Number classification functions
 -------------------------------
