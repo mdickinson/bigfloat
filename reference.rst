@@ -67,6 +67,37 @@ context.  For example::
 This can be handy for places where you only want to alter the rounding
 mode for a single function call or operation.
 
+These module-level functions are also useful when you don't
+necessarily know whether the input arguments are integers, floats or
+BigFloats and you want to ensure that the result is a BigFloat, or
+that there's no loss of precision during argument conversion.  Consider
+the following::
+
+   >>> x = 10.**16  # exactly representable as a Python float
+   >>> y = 10**16-1 # Python integer
+   >>> x - y
+   0.0
+   >>> BigFloat(x) - BigFloat(y)
+   BigFloat.exact('0', precision=53)
+   >>> sub(x, y)
+   BigFloat.exact('1.0000000000000000', precision=53)
+
+In the first subtraction, y is implicity converted from an integer to
+a Python float before the operation;  this conversion loses precision,
+so the result of the subtraction is inaccurate.
+
+The second subtraction is similar: both x and y are explicitly
+converted to BigFloat instances, and while x can be converted exactly,
+y cannot at the current context precision.  So again the conversion
+loses precision and the result of the subtraction is innaccurate.
+
+In the third case both arguments x and y are converted with no loss of
+precision, and the subtraction gives the correct result.
+
+The module-level functions are :func:`add`, :func:`sub', :func:`mul`,
+:func:`div`, :func:`pow` and :func:`mod`.  Note that :func:`pow`
+shadows the builtin :func:`pow` function, and that :func:`div`
+corresponds to true division.
 
 Comparisons
 -----------
@@ -91,6 +122,17 @@ any of the Python comparison operators.
 .. function:: unordered(x, y)
 
    Return True if either x or y is a NaN, and False otherwise.
+
+Conversions
+-----------
+
+Conversion of a BigFloat to an integer using the :func:`int` builtin
+function always truncates (rounds towards zero), regardless of the
+current context rounding mode.
+
+Conversion of a BigFloat to a float using the :func:`float` builtin
+function always rounds to the nearest floating-point number,
+regardless of the current context rounding mode.
 
 Number classification functions
 -------------------------------
