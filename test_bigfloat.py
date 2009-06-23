@@ -56,15 +56,13 @@ class BigFloatTests(unittest.TestCase):
                         y3 = mul(y, 3, rounding=RoundTowardNegative)
                         self.assert_(y3 < 1 < x3)
 
-
-
     def test_binary_operations(self):
         # check that BigFloats can be combined with themselves,
         # and with integers and floats, using the 6 standard
         # arithmetic operators:  +, -, *, /, **, %
 
         x = BigFloat('17.29')
-        other_values = [2, 3L, 1.234, BigFloat('0.678')]
+        other_values = [2, 3L, 1.234, BigFloat('0.678'), False]
         test_precisions = [2, 20, 53, 2000]
         # note that division using '/' should work (giving true division)
         # whether or not 'from __future__ import division' is enabled.
