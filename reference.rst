@@ -95,12 +95,38 @@ any of the Python comparison operators.
 Number classification functions
 -------------------------------
 
-* is_nan
-* is_inf
-* is_zero
-* is_finite
-* is_integer
-* is_negative
+The following functions all accept a single BigFloat instance (or a
+float, or an integer) and return a boolean value.  They make no
+use of the current context, and do not affect the state of the flags.
+
+.. function:: is_nan(x)
+
+   Return True if x is a NaN and False otherwise.
+
+.. function:: is_inf(x)
+
+   Return True if x is an infinity (either positive or negative), and False
+   otherwise.
+
+.. function:: is_zero(x)
+
+   Return True if x is a zero (either positive zero or negative zero),
+   and False otherwise.
+
+.. function:: is_finite(x)
+
+   Return True if x is not an infinity or NaN, and False otherwise.
+
+.. function:: is_negative(x)
+
+   Return True if the sign bit of x is set, and False otherwise.  Note that
+   this function is misnamed:  is_negative(-0.0) returns True, even though
+   -0.0 is not, strictly speaking, negative.
+
+.. function:: is_integer(x)
+
+   Return True if x is an exact integer and False otherwise.
+
 
 
 

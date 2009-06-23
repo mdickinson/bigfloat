@@ -17,6 +17,53 @@ class BigFloatTests(unittest.TestCase):
         else:
             self.assertEqual(x, y)
 
+    def test_classifications(self):
+        # test classification functions
+
+        for x in [float('nan'), BigFloat('nan'), float('-nan'), -BigFloat('nan')]:
+            self.assertEqual(is_nan(x), True)
+            self.assertEqual(is_inf(x), False)
+            self.assertEqual(is_zero(x), False)
+            self.assertEqual(is_finite(x), False)
+            self.assertEqual(is_integer(x), False)
+
+        for x in [float('inf'), float('-inf'), BigFloat('inf'), BigFloat('-inf')]:
+            self.assertEqual(is_nan(x), False)
+            self.assertEqual(is_inf(x), True)
+            self.assertEqual(is_zero(x), False)
+            self.assertEqual(is_finite(x), False)
+            self.assertEqual(is_integer(x), False)
+
+        for x in [0, 0L, 0.0, -0.0, BigFloat(0.0), BigFloat(-0.0)]:
+            self.assertEqual(is_nan(x), False)
+            self.assertEqual(is_inf(x), False)
+            self.assertEqual(is_zero(x), True)
+            self.assertEqual(is_finite(x), True)
+            self.assertEqual(is_integer(x), True)
+
+        for x in [2, -31L, 24.0, -5.13, BigFloat('1e-1000'), BigFloat('-2.34e1000')]:
+            self.assertEqual(is_nan(x), False)
+            self.assertEqual(is_inf(x), False)
+            self.assertEqual(is_zero(x), False)
+            self.assertEqual(is_finite(x), True)
+
+        # test is_integer for finite nonzero values
+        for x in [2, -31L, 24.0, BigFloat('1e100'), sqrt(BigFloat('2e100'))]:
+            self.assertEqual(is_integer(x), True)
+
+        for x in [2.1, BigFloat(-1.345), sqrt(BigFloat(2))]:
+            self.assertEqual(is_integer(x), False)
+
+        # test is_negative
+        for x in [float('-inf'), -0.0, BigFloat('-inf'), BigFloat('-0.0'),
+                  BigFloat(-2.3), -31, -1L]:
+            self.assertEqual(is_negative(x), True)
+
+        for x in [float('inf'), BigFloat('inf'), 0.0, 0, 0L, 2L, 123,
+                  BigFloat(1.23)]:
+            self.assertEqual(is_negative(x), False)
+
+
     def test_comparisons(self):
         # here's a list of lists of values; within each sublist all
         # entries have the same value;  sublists are ordered by increasing value
