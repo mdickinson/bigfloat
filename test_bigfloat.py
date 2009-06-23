@@ -456,11 +456,24 @@ class BigFloatTests(unittest.TestCase):
 
     def test_str(self):
         # check special values
-        self.assertEqual(str(BigFloat(0)), '0')
-        self.assertEqual(str(-BigFloat(0)), '-0')
+        self.assertEqual(str(BigFloat('0.0')), '0')
+        self.assertEqual(str(BigFloat('-0.0')), '-0')
         self.assertEqual(str(BigFloat('inf')), 'Infinity')
         self.assertEqual(str(BigFloat('-inf')), '-Infinity')
         self.assertEqual(str(BigFloat('nan')), 'NaN')
+
+        self.assertEqual(str(BigFloat('1e100')), '1.0000000000000000e+100')
+
+        # check switch from fixed-point to exponential notation
+        self.assertEqual(str(BigFloat('1e-5')), '1.0000000000000001e-5')
+        self.assertEqual(str(BigFloat('9.999e-5')), '9.9989999999999996e-5')
+        self.assertEqual(str(BigFloat('1e-4')), '0.00010000000000000000')
+        self.assertEqual(str(BigFloat('1e14')), '100000000000000.00')
+        self.assertEqual(str(BigFloat('1e15')), '1000000000000000.0')
+        self.assertEqual(str(BigFloat('1e16')), '10000000000000000')
+        self.assertEqual(str(BigFloat('9.999e16')), '99990000000000000')
+        self.assertEqual(str(BigFloat('1e17')), '1.0000000000000000e+17')
+
 
     def test_subnormalization(self):
         # check that subnormalization doesn't result in
