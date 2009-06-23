@@ -343,7 +343,7 @@ def wrap_standard_function(f, argtypes):
         converted_args = []
         for arg, arg_t in zip(args, argtypes):
             if arg_t is IMpfr:
-                arg = BigFloat.implicit_convert(arg)._value
+                arg = BigFloat._implicit_convert(arg)._value
             converted_args.append(arg)
         converted_args.append(rounding)
         bf = Mpfr()
@@ -365,7 +365,7 @@ def wrap_predicate(f):
         converted_args = []
         for arg, arg_t in zip(args, argtypes):
             if arg_t is IMpfr:
-                arg = BigFloat.implicit_convert(arg)._value
+                arg = BigFloat._implicit_convert(arg)._value
             converted_args.append(arg)
         return f(*converted_args)
     return wrapped_f
@@ -547,7 +547,7 @@ class BigFloat(object):
         return mpfr.mpfr_get_prec(self._value)
 
     @classmethod
-    def implicit_convert(cls, arg):
+    def _implicit_convert(cls, arg):
         """Implicit conversion used for binary operations, comparisons,
         functions, etc.  Return value should be an instance of
         BigFloat."""
@@ -633,6 +633,9 @@ name_translation = {
     # avoid clobbering set builtin
     'set': 'pos',
 
+    # rename 'fmod' to 'mod', to correspond with the operation
+    'fmod' : 'mod',
+
     # predicates
     'nan_p' : 'is_nan',
     'inf_p' : 'is_inf',
@@ -677,7 +680,7 @@ BigFloat.__sub__ = sub
 BigFloat.__mul__ = mul
 BigFloat.__div__ = BigFloat.__truediv__ = div
 BigFloat.__pow__ = pow
-BigFloat.__mod__ = fmod
+BigFloat.__mod__ = mod
 
 # and their reverse operations
 BigFloat.__radd__ = reverse_args(add)
@@ -685,7 +688,7 @@ BigFloat.__rsub__ = reverse_args(sub)
 BigFloat.__rmul__ = reverse_args(mul)
 BigFloat.__rdiv__ = BigFloat.__rtruediv__ = reverse_args(div)
 BigFloat.__rpow__ = reverse_args(pow)
-BigFloat.__rmod__ = reverse_args(fmod)
+BigFloat.__rmod__ = reverse_args(mod)
 
 # comparisons
 BigFloat.__eq__ = _is_equal
