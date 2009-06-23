@@ -8,6 +8,9 @@ import math
 all_rounding_modes = [RoundTowardZero, RoundTowardNegative,
                       RoundTowardPositive, RoundTiesToEven]
 
+class ContextTests(unittest.TestCase):
+    pass
+
 class BigFloatTests(unittest.TestCase):
     def assertIdenticalFloat(self, x, y):
         if not (isinstance(x, float) and isinstance(y, float)):
@@ -21,6 +24,40 @@ class BigFloatTests(unittest.TestCase):
             # isn't available until Python 2.6;  comparing stringified
             # versions should work on most platforms.
             if str(x) != str(y):
+                self.fail("Zeros have different signs")
+        else:
+            self.assertEqual(x, y)
+
+    def assertIdenticalBigFloat(self, x, y):
+        """Fail unless BigFloats x and y are identical.
+
+        x and y are considered identical if they have the
+        same precision, and:
+
+        - both x and y are nans, or
+        - neither x nor y is a nan, x == y, and if x and y
+          are both zero then their signs match.
+
+        """
+        # Note that any two nans with the same precision are always
+        # regarded as identical, even though it's sometimes possible to
+        # distinguish nans with different signs (for example, using
+        # copysign).
+
+        if not (isinstance(x, BigFloat) and isinstance(y, BigFloat)):
+            raise ValueError("Expected x and y to be BigFloat instances "
+                             "in assertIdenticalBigFloat")
+
+        # precisions should match
+        if x.precision != y.precision:
+            self.fail("Precisions of x and y differ.")
+
+        if is_nan(x) or is_nan(y):
+            if not is_nan(x) or not is_nan(y):
+                self.fail("One of x and y is a nan, but the other is not.")
+        elif is_zero(x) and is_zero(y):
+            # check signs are identical
+            if is_negative(x) != is_negative(y):
                 self.fail("Zeros have different signs")
         else:
             self.assertEqual(x, y)
@@ -453,6 +490,25 @@ class BigFloatTests(unittest.TestCase):
         self.assertRaises(ValueError, ir, BigFloat('inf'))
         self.assertRaises(ValueError, ir, BigFloat('-inf'))
         self.assertRaises(ValueError, ir, BigFloat('nan'))
+
+    def test_repr(self):
+        # eval(repr(x)) should recover the BigFloat x, with
+        # the same precision and value.
+
+        test_values = [const_pi(), BigFloat(12345),
+                       BigFloat('inf'), BigFloat('-inf'), BigFloat('nan'),
+                       BigFloat('0'), BigFloat('-0')]
+        with precision(5):
+            test_values.append(BigFloat(-1729))
+        with precision(200):
+            test_values.append(sqrt(3))
+
+        for x in test_values:
+            # current precision shouldn't affect the repr or the eval
+            for p in [2, 30, 53, 100, 1000]:
+                with precision(p):
+                    self.assertIdenticalBigFloat(eval(repr(x)), x)
+
 
     def test_str(self):
         # check special values
