@@ -1,6 +1,200 @@
 Reference
 =========
 
+Context objects
+---------------
+
+A :class:`Context` object is a simple immutable object that packages together
+attributes describing a floating-point format, together with a rounding mode.
+
+.. class:: Context(precision, rounding, emax, emin, subnormalize)
+
+   Create a new Context object with the given attributes.  The
+   arguments correspond to the attributes of the :class:`Context`
+   object, described below.  :class:`Context` instances should be
+   treated as immutable, and all attributes are read-only.
+
+   .. attribute:: precision
+
+      Precision of the floating-point format, given in bits.
+
+   .. attribute:: emax
+
+      Maximum exponent allowed for this format.  The largest
+      representable finite number representable in the context self is
+      (1-2**-self.precision) * 2**self.emax.
+
+   .. attribute:: emin
+
+      Minimum exponent allowed for this format.  The smallest representable
+      positive number in the format is 0.5 * 2**emin.
+
+   .. attribute:: subnormalize
+
+      A boolean value, True if the format has gradual underflow, and
+      False otherwise.  With gradual underflow, all finite floating-point
+      numbers have a value that's an integer multiple of 2**(emin-1).
+
+   .. attribute:: rounding
+
+      The rounding mode of this Context.
+
+   :class:`Context` instances are callable, accepting a set of keyword
+   arguments that are used to update the attributes of the Context.
+   This gives a convenient way to obtain a modification of an existing
+   context::
+
+      >>> double_precision
+      Context(precision=53, rounding=RoundTiesToEven, emax=1024, emin=-1073, subnormalize=True)
+      >>> double_precision(precision=64)
+      Context(precision=64, rounding=RoundTiesToEven, emax=1024, emin=-1073, subnormalize=True)
+
+
+
+The bigfloat module defines a number of predefined :class:`Context`s.
+
+.. data:: DefaultContext
+
+   The context that's in use when the bigfloat module is first
+   imported.  It has precision of 53, large exponent bounds, no
+   subnormalization, and the RoundTiesToEven rounding mode.
+
+.. data:: half_precision
+.. data:: single_precision
+.. data:: double_precision
+.. data:: quadruple_precision
+
+   These :class:`Context`s correspond to the binary16, binary32, binary64 and
+   binary128 interchange formats described in IEEE 754-2008 (section 3.6).
+
+.. function:: IEEEContext(bitwidth)
+
+   If bitwidth is one of 16, 32, 64, or a multiple of 32 that's not
+   less than 128, return the IEEE binary interchange format with the
+   given bit width.  See section 3.6 of IEEE 754-2008 for details.
+
+
+Creating new contexts
+---------------------
+
+
+
+The current context
+-------------------
+
+There can be many Context objects in existence at one time, but
+there's only ever one *current context*.  The current context is given
+by a thread-local :class:`Context` instance.  Whenever any arithmetic
+operation or function computation is performed, the current context is
+consulted to determine:
+
+* The format that the result of the operation or function should take, and
+
+* The rounding mode to use when computing the result, except when this
+  rounding mode has been directly overridden by giving the 'rounding'
+  keyword argument to a function call.
+
+There are two ways to change the current context.  The direct way to
+get and set the current context is to use the :func:`getcontext` and
+:func:`setcontext` functions.
+
+.. function:: getcontext()
+
+   Return a copy of the current context.
+
+.. function:: setcontext(context)
+
+   Set the current context to the given context.
+
+A neater way to make a temporary change to the current context is to
+use a with statement.  Every :class:`Context` instance can be used
+directly in a with statement, and changes the current context for the
+duration of the block following the with statement, restoring the
+previous context when the block is exited.  For example::
+
+>>> with single_precision:
+...     sqrt(2)
+... 
+BigFloat.exact('1.41421354', precision=24)
+>>> with quadruple_precision:
+...     sqrt(2)
+... 
+BigFloat.exact('1.41421356237309504880168872420969798', precision=113)
+
+Here, single_precision and quadruple_precision are predefined
+:class:`Context` instances that describe the IEEE 754 binary32 and
+binary128 floating-point formats.
+
+A number of convenience functions are provided for changing only
+one aspect of the current context.
+
+.. function:: precision(p)
+
+   Return a copy of the current context with the precision changed to p.
+   Example usage::
+
+      >>> with precision(100):
+      ...     sqrt(2)
+      ... 
+      BigFloat.exact('1.4142135623730950488016887242092', precision=100)
+
+      >>> with precision(20):
+      ...     const_pi()
+      ... 
+      BigFloat.exact('3.1415939', precision=20)
+
+.. function:: rounding(rnd)
+
+   Return a copy of the current context with the rounding mode changed
+   to rnd.  Example usage::
+
+      >>> with rounding(RoundTowardNegative):
+      ...     lower_bound = log2(10)
+      ... 
+      >>> with rounding(RoundTowardPositive):
+      ...     upper_bound = log2(10)
+      ... 
+      >>> lower_bound
+      BigFloat.exact('3.3219280948873622', precision=53)
+      >>> upper_bound
+      BigFloat.exact('3.3219280948873626', precision=53)
+
+.. function:: extra_precision(p)
+
+   Return a copy of the current context with the precision increased
+   by p.
+
+      >>> getcontext().precision
+      53
+      >>> extra_precision(10).precision
+      63
+      >>> with extra_precision(20):
+      ...     gamma(1.5)
+      ... 
+      BigFloat.exact('0.88622692545275801364912', precision=73)
+
+.. function:: exponent_limits(emin=None, emax=None, subnormalize=False)
+
+   Return a copy of the current context with given exponent
+   limits. emin and emax default to the smallest and largest possible
+   values, respectively.  When called with no arguments, this function
+   can be convenient for temporarily relaxing exponents to avoid
+   underflow or overflow during intermediate calculations::
+
+      >>> with double_precision:
+      ...     log(pow(2, 1234))   # intermediate power overflows
+      ... 
+      BigFloat.exact('Infinity', precision=53)
+      >>> with double_precision:
+      ...     with exponent_limits():
+      ...         log(pow(2, 1234))
+      ... 
+      BigFloat.exact('855.34362081097254', precision=53)
+
+
+
+
+   
 BigFloat objects
 ----------------
 
