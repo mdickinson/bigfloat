@@ -18,7 +18,7 @@ __all__ = [
     'Context', 'getcontext', 'setcontext', 'DefaultContext',
 
     # functions that generate a new context from the current one
-    'precision', 'rounding', 'exponent_limits',
+    'precision', 'rounding', 'exponent_limits', 'extra_precision',
 
     # contexts corresponding to IEEE 754 binary interchange formats
     'IEEEContext', 'half_precision', 'single_precision',
@@ -318,7 +318,7 @@ def rounding(rnd):
     given rounding mode."""
     return getcontext()(rounding=rnd)
 
-def exponent_limits(emin=None, emax=None):
+def exponent_limits(emin=None, emax=None, subnormalize=False):
     """Return new context equal to current context but with
     the given exponent limits.
 
@@ -331,7 +331,13 @@ def exponent_limits(emin=None, emax=None):
         emin = EMIN_MIN
     if emax is None:
         emax = EMAX_MAX
-    return getcontext()(emin=emin, emax=emax)
+    return getcontext()(emin=emin, emax=emax, subnormalize=subnormalize)
+
+def extra_precision(p):
+    """Return new context equal to the current context, but with
+    precision increased by p."""
+    c = getcontext()
+    return c(precision=c.precision+p)
 
 def wrap_standard_function(f, argtypes):
     def wrapped_f(*args, **kwargs):
