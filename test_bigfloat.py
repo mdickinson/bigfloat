@@ -17,8 +17,44 @@ class BigFloatTests(unittest.TestCase):
         else:
             self.assertEqual(x, y)
 
+    def test_binary_operations(self):
+        # check that BigFloats can be combined with themselves,
+        # and with integers and floats, using the 6 standard
+        # arithmetic operators:  +, -, *, /, **, %
+
+        x = BigFloat('17.29')
+        other_values = [2, 3L, 1.234, BigFloat('0.678')]
+        test_precisions = [2, 20, 53, 2000]
+        # note that division using '/' should work (giving true division)
+        # whether or not 'from __future__ import division' is enabled.
+        # So we test both operator.div and operator.truediv.
+        operations = [operator.add, operator.mul, operator.div,
+                      operator.sub, operator.pow, operator.truediv,
+                      operator.mod]
+        for value in other_values:
+            for p in test_precisions:
+                with precision(p):
+                    for op in operations:
+                        bf = op(x, value)
+                        self.assertEqual(type(bf), BigFloat)
+                        self.assertEqual(bf.precision, p)
+                        bf = op(value, x)
+                        self.assertEqual(type(bf), BigFloat)
+                        self.assertEqual(bf.precision, p)
+
+    def test_bool(self):
+        # test __nonzero__ / __bool__
+        self.assertEqual(bool(BigFloat(0)), False)
+        self.assertEqual(bool(BigFloat('-0')), False)
+        self.assertEqual(bool(BigFloat(1.0)), True)
+        self.assertEqual(bool(BigFloat(-123)), True)
+        self.assertEqual(bool(BigFloat('nan')), True)
+        self.assertEqual(bool(BigFloat('inf')), True)
+        self.assertEqual(bool(BigFloat('-inf')), True)
+
     def test_classifications(self):
-        # test classification functions
+        # test classification functions (is_nan, is_inf, is_zero,
+        # is_finite, is_integer, is_negative)
 
         for x in [float('nan'), BigFloat('nan'), float('-nan'), -BigFloat('nan')]:
             self.assertEqual(is_nan(x), True)
@@ -321,30 +357,36 @@ class BigFloatTests(unittest.TestCase):
 
         self.assertRaises(TypeError, BigFloat.exact, BigFloat(23), 100)
 
-    def test_binary_operations(self):
-        # check that BigFloats can be combined with themselves,
-        # and with integers and floats, using the 6 standard
-        # arithmetic operators:  +, -, *, /, **, %
+    def test_int(self):
+        # test conversion to int
+        self.assertEqual(int(BigFloat(13.7)), 13)
+        self.assertEqual(int(BigFloat(2.3)), 2)
+        self.assertEqual(int(BigFloat(1729)), 1729)
 
-        x = BigFloat('17.29')
-        other_values = [2, 3L, 1.234, BigFloat('0.678')]
-        test_precisions = [2, 20, 53, 2000]
-        # note that division using '/' should work (giving true division)
-        # whether or not 'from __future__ import division' is enabled.
-        # So we test both operator.div and operator.truediv.
-        operations = [operator.add, operator.mul, operator.div,
-                      operator.sub, operator.pow, operator.truediv,
-                      operator.mod]
-        for value in other_values:
-            for p in test_precisions:
-                with precision(p):
-                    for op in operations:
-                        bf = op(x, value)
-                        self.assertEqual(type(bf), BigFloat)
-                        self.assertEqual(bf.precision, p)
-                        bf = op(value, x)
-                        self.assertEqual(type(bf), BigFloat)
-                        self.assertEqual(bf.precision, p)
+        self.assertEqual(int(BigFloat(-1e-50)), 0)
+        self.assertEqual(int(BigFloat('-2.99999')), -2)
+        self.assertEqual(int(BigFloat(-5.0)), -5)
+
+    def test_str(self):
+        # check special values
+        self.assertEqual(str(BigFloat(0)), '0')
+        self.assertEqual(str(-BigFloat(0)), '-0')
+        self.assertEqual(str(BigFloat('inf')), 'Infinity')
+        self.assertEqual(str(BigFloat('-inf')), '-Infinity')
+        self.assertEqual(str(BigFloat('nan')), 'NaN')
+
+    def test_subnormalization(self):
+        # check that subnormalization doesn't result in
+        # double rounding
+        with double_precision:
+            self.assertEqual(div(2**53+1, 2**1128), pow(2, -1074))
+
+        # check that results are integer multiples of
+        # 2**-1074
+        with double_precision:
+            self.assertEqual(BigFloat('3e-324'), pow(2, -1074))
+            self.assertEqual(BigFloat('7.4e-324'), pow(2, -1074))
+            self.assertEqual(BigFloat('7.5e-324'), pow(2, -1073))
 
     def test_unary_operations(self):
         # test __pos__, __neg__ and __abs__
@@ -376,36 +418,6 @@ class BigFloatTests(unittest.TestCase):
                     self.assertNotEqual(x, absx)
                 else:
                     self.assertEqual(x, absx)
-
-    def test_bool(self):
-        self.assertEqual(bool(BigFloat(0)), False)
-        self.assertEqual(bool(BigFloat('-0')), False)
-        self.assertEqual(bool(BigFloat(1.0)), True)
-        self.assertEqual(bool(BigFloat(-123)), True)
-        self.assertEqual(bool(BigFloat('nan')), True)
-        self.assertEqual(bool(BigFloat('inf')), True)
-        self.assertEqual(bool(BigFloat('-inf')), True)
-
-    def test_subnormalization(self):
-        # check that subnormalization doesn't result in
-        # double rounding
-        with double_precision:
-            self.assertEqual(div(2**53+1, 2**1128), pow(2, -1074))
-
-        # check that results are integer multiples of
-        # 2**-1074
-        with double_precision:
-            self.assertEqual(BigFloat('3e-324'), pow(2, -1074))
-            self.assertEqual(BigFloat('7.4e-324'), pow(2, -1074))
-            self.assertEqual(BigFloat('7.5e-324'), pow(2, -1073))
-
-    def test_str(self):
-        # check special values
-        self.assertEqual(str(BigFloat(0)), '0')
-        self.assertEqual(str(-BigFloat(0)), '-0')
-        self.assertEqual(str(BigFloat('inf')), 'Infinity')
-        self.assertEqual(str(BigFloat('-inf')), '-Infinity')
-        self.assertEqual(str(BigFloat('nan')), 'NaN')
 
 
 def test_main():
