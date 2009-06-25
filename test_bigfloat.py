@@ -9,7 +9,71 @@ all_rounding_modes = [RoundTowardZero, RoundTowardNegative,
                       RoundTowardPositive, RoundTiesToEven]
 
 class ContextTests(unittest.TestCase):
-    pass
+    def test_attributes(self):
+        c = DefaultContext
+        self.assert_(isinstance(c.precision, (int, long)))
+        self.assert_(isinstance(c.emax, (int, long)))
+        self.assert_(isinstance(c.emin, (int, long)))
+        self.assert_(isinstance(c.subnormalize, bool))
+        self.assert_(c.rounding in all_rounding_modes)
+
+    def test_callable(self):
+        # check that self is callable
+        c = Context(emin = -123, emax=456, precision=1729,
+                    subnormalize=True, rounding=RoundTowardPositive)
+        d = c(precision=400)
+        self.assertEqual(d.precision, 400)
+        self.assertEqual(d.emax, c.emax)
+        self.assertEqual(d.emin, c.emin)
+        self.assertEqual(d.subnormalize, c.subnormalize)
+        self.assertEqual(d.rounding, c.rounding)
+
+        e = c(emax=16384, rounding=RoundTowardZero)
+        self.assertEqual(e.precision, c.precision)
+        self.assertEqual(e.emax, 16384)
+        self.assertEqual(e.emin, c.emin)
+        self.assertEqual(e.rounding, RoundTowardZero)
+        self.assertEqual(e.subnormalize, c.subnormalize)
+
+    def test_with(self):
+        # check use of contexts in with statements
+        c = Context(emin = -123, emax=456, precision=1729,
+                    subnormalize=True, rounding=RoundTowardPositive)
+        d = Context(emin = 0, emax=10585, precision=20,
+                    subnormalize=False, rounding=RoundTowardNegative)
+
+        with c:
+            # check nested with
+            with d:
+                self.assertEqual(getcontext().precision, d.precision)
+                self.assertEqual(getcontext().emin, d.emin)
+                self.assertEqual(getcontext().emax, d.emax)
+                self.assertEqual(getcontext().subnormalize, d.subnormalize)
+                self.assertEqual(getcontext().rounding, d.rounding)
+
+            # check context is restored on normal exit
+            self.assertEqual(getcontext().precision, c.precision)
+            self.assertEqual(getcontext().emin, c.emin)
+            self.assertEqual(getcontext().emax, c.emax)
+            self.assertEqual(getcontext().subnormalize, c.subnormalize)
+            self.assertEqual(getcontext().rounding, c.rounding)
+
+            # check context is restored on abnormal exit, and that exceptions
+            # raised within the with block are propagated
+            try:
+                with d:
+                    raise ValueError
+            except ValueError:
+                pass
+            else:
+                self.fail('ValueError not propagated from with block')
+
+            self.assertEqual(getcontext().precision, c.precision)
+            self.assertEqual(getcontext().emin, c.emin)
+            self.assertEqual(getcontext().emax, c.emax)
+            self.assertEqual(getcontext().subnormalize, c.subnormalize)
+            self.assertEqual(getcontext().rounding, c.rounding)
+
 
 class BigFloatTests(unittest.TestCase):
     def assertIdenticalFloat(self, x, y):
