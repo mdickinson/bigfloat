@@ -1,3 +1,18 @@
 The bigfloat module is a Python module providing arbitrary-precision
 correctly-rounded floating-point arithmetic.  It's implemented as a wrapper
 around the MPFR library (http://www.mpfr.org).
+
+To install, execute the command:
+
+python setup.py install
+
+from the bigfloat-0.1/ directory.
+
+This module requires Python 2.5 or later.  The MPFR and GMP libraries will
+need to be already installed on your system.
+
+If your MPFR library is located in an unusual place, or you have
+multiple MPFR libraries installed on your system and you want to
+specify which one to use, you may need to edit the bigfloat_config.py
+configuration file.  You may also need to edit this file if the MPFR
+or GMP libraries were built using a non-standard configuration.
