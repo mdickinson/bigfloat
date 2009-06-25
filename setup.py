@@ -5,9 +5,5 @@ setup(name='bigfloat',
       author='Mark Dickinson',
       author_email='dickinsm@gmail.com',
       url='http://www.mpfr.org',
-      py_modules=[
-        'bigfloat/bigfloat',
-        'bigfloat/bigfloat_config',
-        'bigfloat/pympfr'
-        ],
+      packages=['bigfloat'],
       )
