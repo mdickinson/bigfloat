@@ -4,5 +4,9 @@ setup(name='BigFloat',
       description='Arbitrary-precision floating-point arithmetic',
       author='Mark Dickinson',
       author_email='dickinsm@gmail.com',
-      py_modules=['bigfloat', 'bigfloat_config', 'pympfr'],
+      py_modules=[
+        'bigfloat/bigfloat',
+        'bigfloat/bigfloat_config',
+        'bigfloat/pympfr'
+        ],
       )
