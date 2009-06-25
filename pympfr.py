@@ -4,6 +4,8 @@ from contextlib import contextmanager
 import ctypes
 import ctypes.util
 
+import bigfloat_config
+
 __all__ = [
     # mpfr library, giving access to the various Python-wrapped MPFR functions
     'mpfr',
@@ -36,11 +38,22 @@ __all__ = [
 ################################################################################
 # Locate and load the library
 
-_mpfr_library_name = ctypes.util.find_library('mpfr')
-# temporary hack to make this work with mpfr from macports
-if _mpfr_library_name is None:
-    _mpfr_library_name = '/opt/local/lib/libmpfr.dylib'
+_locate_error_message = \
+"""Failed to find the MPFR library.  Please ensure that the MPFR
+library is installed on your system, and if necessary edit the
+'mpfr_library_location' entry in the bigfloat_config.py configuration
+file to give the location of the library."""
+
+# try the config file first
+_mpfr_library_name = getattr(bigfloat_config, 'mpfr_library_location', None)
+if not _mpfr_library_name:
+    # then try ctypes.find_library
+    _mpfr_library_name = ctypes.util.find_library('mpfr')
+    if _mpfr_library_name is None:
+        raise OSError(_locate_error_message)
+
 mpfr = ctypes.cdll.LoadLibrary(_mpfr_library_name)
+
 
 ################################################################################
 # Platform dependent values
@@ -49,20 +62,20 @@ mpfr = ctypes.cdll.LoadLibrary(_mpfr_library_name)
 # It might be possible to use cpp directly to do this, or to
 # compile and run a test program that outputs the values.
 
-# set to value of __GMP_MP_SIZE_T_INT in gmp.h (should be 0 or 1)
-__GMP_MP_SIZE_T_INT = 0
+# True if GMP uses C type 'int' for the mp_size_t and mp_exp_t types,
+# and False otherwise (GMP uses C type 'long' in this case).
+__GMP_MP_SIZE_T_INT = getattr(bigfloat_config, 'gmp_mp_size_t_int', False)
 
-# set to True if __GMP_SHORT_LIMB is defined in gmp.h
-__GMP_SHORT_LIMB_DEFINED = False
+# True if GMP uses C type 'short' for limbs; otherwise False
+__GMP_SHORT_LIMB_DEFINED = getattr(bigfloat_config, 'gmp_short_limb', False)
 
-# set to True if _LONG_LONG_LIMB is defined in gmp.h
-_LONG_LONG_LIMB_DEFINED = False
+# True if GMP uses C type 'long long' for limbs; otherwise False
+_LONG_LONG_LIMB_DEFINED = getattr(bigfloat_config, 'gmp_long_long_limb', False)
 
-# set to True if your system uses a type smaller than int for an enum
-# that includes negative values.  gcc usually uses int unless the
-# -fshort-enums is specified.  On some platforms, -fshort-enums is the
-# default.
-_SHORT_ENUMS = False
+# True if the MPFR library uses type 'signed char' for the enum
+# of rounding modes, and False if it uses type 'int'.  On most
+# platforms, 'int' is right.
+_SHORT_ENUMS = getattr(bigfloat_config, 'mpfr_short_enums', False)
 
 ################################################################################
 # Substitutes for ctypes integer types that do overflow checking instead
