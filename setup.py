@@ -1,9 +1,10 @@
 from distutils.core import setup
-setup(name='BigFloat',
+setup(name='bigfloat',
       version='0.1',
-      description='Arbitrary-precision floating-point arithmetic',
+      description='Python wrapper for MPFR arbitrary-precision floating-point library',
       author='Mark Dickinson',
       author_email='dickinsm@gmail.com',
+      url='http://www.mpfr.org',
       py_modules=[
         'bigfloat/bigfloat',
         'bigfloat/bigfloat_config',
