@@ -1,0 +1,3 @@
+The bigfloat module is a Python module providing arbitrary-precision
+correctly-rounded floating-point arithmetic.  It's implemented as a wrapper
+around the MPFR library (http://www.mpfr.org).
