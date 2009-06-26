@@ -15,7 +15,7 @@ __all__ = [
     # contexts
     'Context', 'getcontext', 'setcontext', 'DefaultContext',
 
-    # functions that generate a new context from the current one
+    # functions that generate a new context, possibly based on the current one
     'precision', 'extra_precision',
 
     # contexts corresponding to IEEE 754 binary interchange formats
@@ -26,10 +26,9 @@ __all__ = [
     'RoundTiesToEven', 'RoundTowardZero',
     'RoundTowardPositive', 'RoundTowardNegative',
 
-    # absolute limits on exponents
-    'EMAX_MAX', 'EMIN_MIN',
-
-    # limits on precision
+    # absolute limits on exponents and precision
+    'EMIN_MIN', 'EMIN_MAX',
+    'EMAX_MIN', 'EMAX_MAX',
     'PRECISION_MIN', 'PRECISION_MAX',
 
     # flags
