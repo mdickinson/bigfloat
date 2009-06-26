@@ -15,12 +15,15 @@ module.
 
 Features:
 
+ - correct rounding on all operations;  precisely defined semantics
+   compatible with the IEEE 754-2008 standard.
+
  - the main 'BigFloat' type interacts well with Python integers and
    floats.
 
- - support for emulating IEEE 754 arithmetic in any of the IEEE binary
-   interchange formats described in IEEE 754-2008.
-
+ - full support for emulating IEEE 754 arithmetic in any of the IEEE binary
+   interchange formats described in IEEE 754-2008.  Infinities, NaNs,
+   signed zeros, and subnormals are all supported.
 
 """,
       author='Mark Dickinson',

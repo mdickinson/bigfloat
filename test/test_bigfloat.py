@@ -7,6 +7,8 @@ import math
 
 all_rounding_modes = [RoundTowardZero, RoundTowardNegative,
                       RoundTowardPositive, RoundTiesToEven]
+all_rounding_mode_strings = ['RoundTowardZero', 'RoundTowardNegative',
+                      'RoundTowardPositive', 'RoundTiesToEven']
 
 class ContextTests(unittest.TestCase):
     def test_attributes(self):
@@ -15,32 +17,32 @@ class ContextTests(unittest.TestCase):
         self.assert_(isinstance(c.emax, (int, long)))
         self.assert_(isinstance(c.emin, (int, long)))
         self.assert_(isinstance(c.subnormalize, bool))
-        self.assert_(c.rounding in all_rounding_modes)
+        self.assert_(c.rounding in all_rounding_mode_strings)
 
-    def test_callable(self):
-        # check that self is callable
-        c = Context(emin = -123, emax=456, precision=1729,
-                    subnormalize=True, rounding=RoundTowardPositive)
-        d = c(precision=400)
-        self.assertEqual(d.precision, 400)
-        self.assertEqual(d.emax, c.emax)
-        self.assertEqual(d.emin, c.emin)
-        self.assertEqual(d.subnormalize, c.subnormalize)
-        self.assertEqual(d.rounding, c.rounding)
-
-        e = c(emax=16384, rounding=RoundTowardZero)
-        self.assertEqual(e.precision, c.precision)
-        self.assertEqual(e.emax, 16384)
-        self.assertEqual(e.emin, c.emin)
-        self.assertEqual(e.rounding, RoundTowardZero)
-        self.assertEqual(e.subnormalize, c.subnormalize)
+    #def test_callable(self):
+    #    # check that self is callable
+    #    c = Context(emin = -123, emax=456, precision=1729,
+    #                subnormalize=True, rounding=RoundTowardPositive)
+    #    d = c(precision=400)
+    #    self.assertEqual(d.precision, 400)
+    #    self.assertEqual(d.emax, c.emax)
+    #    self.assertEqual(d.emin, c.emin)
+    #    self.assertEqual(d.subnormalize, c.subnormalize)
+    #    self.assertEqual(d.rounding, c.rounding)
+    #
+    #    e = c(emax=16384, rounding=RoundTowardZero)
+    #    self.assertEqual(e.precision, c.precision)
+    #    self.assertEqual(e.emax, 16384)
+    #    self.assertEqual(e.emin, c.emin)
+    #    self.assertEqual(e.rounding, RoundTowardZero)
+    #    self.assertEqual(e.subnormalize, c.subnormalize)
 
     def test_with(self):
         # check use of contexts in with statements
         c = Context(emin = -123, emax=456, precision=1729,
-                    subnormalize=True, rounding=RoundTowardPositive)
+                    subnormalize=True, rounding='RoundTowardPositive')
         d = Context(emin = 0, emax=10585, precision=20,
-                    subnormalize=False, rounding=RoundTowardNegative)
+                    subnormalize=False, rounding='RoundTowardNegative')
 
         with c:
             # check nested with
@@ -74,6 +76,18 @@ class ContextTests(unittest.TestCase):
             self.assertEqual(getcontext().subnormalize, c.subnormalize)
             self.assertEqual(getcontext().rounding, c.rounding)
 
+    def test_IEEEContext(self):
+        self.assertEqual(IEEEContext(16), half_precision)
+        self.assertEqual(IEEEContext(32), single_precision)
+        self.assertEqual(IEEEContext(64), double_precision)
+        self.assertEqual(IEEEContext(128), quadruple_precision)
+
+        c = IEEEContext(256)
+        self.assertEqual(c.precision, 237)
+        self.assertEqual(c.emax, 262144)
+        self.assertEqual(c.emin, -262377)
+        self.assertEqual(c.subnormalize, True)
+        self.assertEqual(c.rounding, None)
 
 class BigFloatTests(unittest.TestCase):
     def assertIdenticalFloat(self, x, y):
@@ -145,7 +159,7 @@ class BigFloatTests(unittest.TestCase):
                             self.assertEqual(res.precision, p)
                             # test with rounding mode
                             for rnd in all_rounding_modes:
-                                res = fn(v, w, rounding=rnd)
+                                res = fn(v, w, context=rnd)
                                 self.assertEqual(type(res), BigFloat)
                                 self.assertEqual(res.precision, p)
 
@@ -154,12 +168,12 @@ class BigFloatTests(unittest.TestCase):
         for p in test_precisions:
             with precision(p):
                 for rnd in all_rounding_modes:
-                    with rounding(rnd):
-                        x = div(1, 3, rounding=RoundTowardPositive)
-                        y = div(1, 3, rounding=RoundTowardNegative)
+                    with rnd:
+                        x = div(1, 3, context=RoundTowardPositive)
+                        y = div(1, 3, context=RoundTowardNegative)
                         self.assert_(y < x)
-                        x3 = mul(3, x, rounding=RoundTowardPositive)
-                        y3 = mul(y, 3, rounding=RoundTowardNegative)
+                        x3 = mul(3, x, context=RoundTowardPositive)
+                        y3 = mul(y, 3, context=RoundTowardNegative)
                         self.assert_(y3 < 1 < x3)
 
     def test_binary_operations(self):
@@ -365,9 +379,9 @@ class BigFloatTests(unittest.TestCase):
                     self.assertEqual(bf.precision, p)
 
         # check that rounding mode affects the conversion
-        with rounding(RoundTowardNegative):
+        with RoundTowardNegative:
             lower = BigFloat('1.1')
-        with rounding(RoundTowardPositive):
+        with RoundTowardPositive:
             upper = BigFloat('1.1')
         self.assert_(lower < upper)
 
@@ -400,7 +414,7 @@ class BigFloatTests(unittest.TestCase):
                     self.assertEqual(bf.precision, p)
 
     def test_exact_context_independent(self):
-        with exponent_limits(0, 0):
+        with Context(emin=-1, emax=1):
             x = BigFloat.exact(123456)
         self.assertEqual(x, 123456)
 
@@ -431,7 +445,7 @@ class BigFloatTests(unittest.TestCase):
         self.assertEqual(flags, set())
 
     def test_exponent_limits(self):
-        with exponent_limits(-1000, 0):
+        with Context(emin=-1000, emax=0):
             x = add(123, 456)
         self.assertEqual(x, BigFloat('infinity'))
 
@@ -484,9 +498,9 @@ class BigFloatTests(unittest.TestCase):
                     self.assertEqual(bf.precision, p)
 
         # check that rounding-mode doesn't affect the conversion
-        with rounding(RoundTowardNegative):
+        with RoundTowardNegative:
             lower = BigFloat.exact('1.1', precision=20)
-        with rounding(RoundTowardPositive):
+        with RoundTowardPositive:
             upper = BigFloat.exact('1.1', precision=20)
         self.assertEqual(lower, upper)
 
@@ -494,7 +508,7 @@ class BigFloatTests(unittest.TestCase):
         for test_precision in [2, 20, 53, 2000]:
             for test_rounding in all_rounding_modes:
                 with precision(test_precision):
-                    with rounding(test_rounding):
+                    with test_rounding:
                         x = sqrt(2)
                 y = BigFloat.exact(x)
                 self.assertEqual(x, y)
@@ -511,7 +525,7 @@ class BigFloatTests(unittest.TestCase):
 
         # rounding mode shouldn't affect conversion
         for rnd in all_rounding_modes:
-            with rounding(rnd):
+            with rnd:
                 self.assertEqual(float(x), 1.)
                 self.assertEqual(float(y), 1.)
 
@@ -537,8 +551,8 @@ class BigFloatTests(unittest.TestCase):
         ir = BigFloat.as_integer_ratio
 
         test_values = [
-            (sqrt(BigFloat(2), rounding=RoundTowardPositive), (6369051672525773, 4503599627370496)),
-            (sqrt(BigFloat(2), rounding=RoundTowardNegative), (1592262918131443, 1125899906842624)),
+            (sqrt(BigFloat(2), context=RoundTowardPositive), (6369051672525773, 4503599627370496)),
+            (sqrt(BigFloat(2), context=RoundTowardNegative), (1592262918131443, 1125899906842624)),
             (const_pi(), (884279719003555L, 281474976710656L)),
             (BigFloat('2.0'), (2, 1)),
             (BigFloat('0.5'), (1, 2)),

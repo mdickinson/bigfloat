@@ -537,12 +537,13 @@ Comparisons
 The comparison operators should work as expected.  Note that any
 comparison involving a NaN always returns False, with the exception of
 the != comparison, which always returns True.  As with the arithmetic
-operations, comparisons between :class:`BigFloat`s and integers or :class:`BigFloat`s
-and floats also work as expected, performing an implicit exact
-conversion of the integer or float to a :class:`BigFloat` before comparing.
+operations, comparisons between :class:`BigFloat` objects and integers
+or :class:`BigFloat` objects and floats also work as expected,
+performing an implicit exact conversion of the integer or float to a
+:class:`BigFloat` before comparing.
 
-There are two additional comparison functions that don't correspond to
-any of the Python comparison operators.
+The module provides two additional comparison functions that don't
+correspond to any of the Python comparison operators.
 
 .. function:: lessgreater(x, y)
 

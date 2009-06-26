@@ -1,14 +1,12 @@
-# Pythonic wrapper for MPFR library
-
-# BigFloats are treated as immutable.
-
-# XXX: this module defines functions 'abs' and 'pow', 'max' and 'min'
-# which shadow the builtin functions of those names.  Don't do 'from
-# bigfloat import *' if you don't want to clobber these functions.
+# Python wrapper for MPFR library
 
 from __future__ import with_statement  # for Python 2.5
 
-# Names to export when someone does 'from bigfloat import *'
+# Names to export when someone does 'from bigfloat import *'.  The
+# __all__ variable is modified dynamically lower down.  Note that this
+# module defines functions 'abs' and 'pow', 'max' and 'min' which
+# shadow the builtin functions of those names.  Don't do 'from
+# bigfloat import *' if you don't want to clobber these functions.
 
 __all__ = [
     # main class
@@ -18,7 +16,7 @@ __all__ = [
     'Context', 'getcontext', 'setcontext', 'DefaultContext',
 
     # functions that generate a new context from the current one
-    'precision', 'rounding', 'exponent_limits', 'extra_precision',
+    'precision', 'extra_precision',
 
     # contexts corresponding to IEEE 754 binary interchange formats
     'IEEEContext', 'half_precision', 'single_precision',
@@ -53,15 +51,18 @@ import sys
 
 from pympfr import Mpfr, IMpfr
 from pympfr import mpfr
-from pympfr import RoundTiesToEven, RoundTowardZero
-from pympfr import RoundTowardPositive, RoundTowardNegative
+#from pympfr import RoundTiesToEven, RoundTowardZero
+#from pympfr import RoundTowardPositive, RoundTowardNegative
 from pympfr import MPFR_PREC_MIN, MPFR_PREC_MAX
 from pympfr import MPFR_EMIN_MAX, MPFR_EMIN_MIN, MPFR_EMIN_DEFAULT
 from pympfr import MPFR_EMAX_MAX, MPFR_EMAX_MIN, MPFR_EMAX_DEFAULT
 from pympfr import standard_functions, predicates, extra_standard_functions
 from pympfr import eminmax
 
-builtin_max = max
+# builtin max and min functions are shadowed by BigFloat max and min
+# functions later on
+_builtin_max = max
+_builtin_min = min
 
 try:
     DBL_PRECISION = sys.float_info.mant_dig
@@ -112,6 +113,9 @@ except AttributeError:
 EMAX_MAX = MPFR_EMAX_DEFAULT
 EMIN_MIN = MPFR_EMIN_DEFAULT
 
+EMAX_MIN = _builtin_max(MPFR_EMIN_DEFAULT, MPFR_EMAX_MIN)
+EMIN_MAX = _builtin_min(MPFR_EMAX_DEFAULT, MPFR_EMIN_MAX)
+
 mpfr.mpfr_set_emin(EMIN_MIN)
 mpfr.mpfr_set_emax(EMAX_MAX)
 
@@ -157,72 +161,108 @@ def format_finite(negative, digits, dot_pos):
         digits += "e%+d" % exp
     return '-' + digits if negative else digits
 
-# Note that context objects are immutable
+_Context_attributes = [
+    'precision',
+    'emin',
+    'emax',
+    'subnormalize',
+    'rounding',
+]
+
+_available_rounding_modes = [
+    'RoundTiesToEven',
+    'RoundTowardPositive',
+    'RoundTowardNegative',
+    'RoundTowardZero',
+]
 
 class Context(object):
     # Contexts are supposed to be immutable.  We make the attributes
-    # of a Context private, to discourage users from trying to set the
-    # attributes directly.
+    # of a Context private, and provide properties to access them in
+    # order to discourage users from trying to set the attributes
+    # directly.
 
-    def __new__(cls, precision, rounding,
-                emax, emin, subnormalize):
-        if not PRECISION_MIN <= precision <= PRECISION_MAX:
+    def __new__(cls, precision=None, emin=None, emax=None, subnormalize=None,
+                rounding=None):
+        if precision is not None and \
+                not (PRECISION_MIN <= precision <= PRECISION_MAX):
             raise ValueError("Precision p should satisfy %d <= p <= %d." %
                              (PRECISION_MIN, PRECISION_MAX))
-        if not EMIN_MIN <= emin <= emax <= EMAX_MAX:
-            raise ValueError("exponent bounds emin and emax should satisfy "
-                             "%d <= emin <= emax <= %d" % (EMIN_MIN, EMAX_MAX))
-
+        if emin is not None and not EMIN_MIN <= emin <= EMIN_MAX:
+            raise ValueError("exponent bound emin should satisfy "
+                             "%d <= emin <= %d" % (EMIN_MIN, EMIN_MAX))
+        if emax is not None and not EMAX_MIN <= emax <= EMAX_MAX:
+            raise ValueError("exponent bound emax should satisfy "
+                             "%d <= emax <= %d" % (EMAX_MIN, EMAX_MAX))
+        if rounding is not None and not rounding in _available_rounding_modes:
+            raise ValueError("unrecognised rounding mode")
+        if subnormalize is not None and not subnormalize in [False, True]:
+            raise ValueError("subnormalize should be either False or True")
         self = object.__new__(cls)
         self._precision = precision
-        self._rounding = rounding
-        self._emax = emax
         self._emin = emin
+        self._emax = emax
         self._subnormalize = subnormalize
+        self._rounding = rounding
         return self
+
+    def __or__(self, other):
+        """For contexts self and other, self | other is a new Context combining
+        self and other:  for attributes that are defined in both self and other,
+        the attribute from other takes precedence."""
+
+        return Context(
+            precision = (other.precision
+                         if other.precision is not None
+                         else self.precision),
+            emin = other.emin if other.emin is not None else self.emin,
+            emax = other.emax if other.emax is not None else self.emax,
+            subnormalize = (other.subnormalize
+                            if other.subnormalize is not None
+                            else self.subnormalize),
+            rounding = (other.rounding
+                        if other.rounding is not None
+                        else self.rounding),
+            )
+
+    def __eq__(self, other):
+        return (
+            self.precision == other.precision and
+            self.emin == other.emin and
+            self.emax == other.emax and
+            self.subnormalize == other.subnormalize and
+            self.rounding == other.rounding
+            )
 
     @property
     def precision(self):
         return self._precision
-
     @property
     def rounding(self):
         return self._rounding
-
-    @property
-    def emax(self):
-        return self._emax
-
     @property
     def emin(self):
         return self._emin
-
+    @property
+    def emax(self):
+        return self._emax
     @property
     def subnormalize(self):
         return self._subnormalize
 
-    def as_dict(self):
-        return {
-            'precision' : self.precision,
-            'rounding' : self.rounding,
-            'emax' : self.emax,
-            'emin' : self.emin,
-            'subnormalize' : self.subnormalize
-            }
-
-    def __call__(self, **kw):
-        """Return copy of this context, updated with the given
-        keyword parameters."""
-
-        self_dict = self.as_dict()
-        self_dict.update(kw)
-        return Context(**self_dict)
-
     def __repr__(self):
-        return ("Context(precision=%s, rounding=%s, " +
-                "emax=%s, emin=%s, subnormalize=%s)") % (
-            self.precision, self.rounding,
-            self.emax, self.emin, self.subnormalize)
+        args = []
+        if self.precision is not None:
+            args.append('precision=%r' % self.precision)
+        if self.emax is not None:
+            args.append('emax=%r' % self.emax)
+        if self.emin is not None:
+            args.append('emin=%r' % self.emin)
+        if self.subnormalize is not None:
+            args.append('subnormalize=%r' % self.subnormalize)
+        if self.rounding is not None:
+            args.append('rounding=%r' % self.rounding)
+        return 'Context(%s)' % ', '.join(args)
 
     __str__ = __repr__
 
@@ -235,10 +275,17 @@ class Context(object):
 # some useful contexts
 
 DefaultContext = Context(precision=53,
-                         rounding=RoundTiesToEven,
+                         rounding='RoundTiesToEven',
                          emax=EMAX_MAX,
                          emin=EMIN_MIN,
                          subnormalize=False)
+
+# provided rounding modes are implemented as contexts, so that
+# they can be used directly in with statements
+RoundTiesToEven = Context(rounding='RoundTiesToEven')
+RoundTowardPositive = Context(rounding='RoundTowardPositive')
+RoundTowardNegative = Context(rounding='RoundTowardNegative')
+RoundTowardZero = Context(rounding='RoundTowardZero')
 
 # Contexts corresponding to IEEE 754-2008 binary interchange formats
 # (see section 3.6 of the standard for details).
@@ -248,7 +295,7 @@ def IEEEContext(bitwidth):
         precision = {16: 11, 32: 24, 64: 53, 128: 113}[bitwidth]
     except KeyError:
         if bitwidth >= 128 and bitwidth % 32 == 0:
-            with DefaultContext(emin=-1, subnormalize=True):
+            with DefaultContext | Context(emin=-1, subnormalize=True):
                 # log2(bitwidth), rounded to the nearest quarter
                 l = log2(bitwidth)
             precision = 13 + bitwidth - int(4*l)
@@ -258,9 +305,8 @@ def IEEEContext(bitwidth):
 
     emax = 1 << bitwidth - precision - 1
     return Context(precision=precision,
-                   rounding=RoundTiesToEven,
-                   emax=emax,
                    emin=4-emax-precision,
+                   emax=emax,
                    subnormalize=True)
 
 half_precision = IEEEContext(16)
@@ -282,7 +328,11 @@ def getcontext(_local = local):
     return _local.__bigfloat_context__
 
 def setcontext(context, _local = local):
-    _local.__bigfloat_context__ = context
+    # attributes provided by 'context' override those in the current
+    # context; if 'context' doesn't specify a particular attribute,
+    # the attribute from the current context shows through
+    oldcontext = getcontext()
+    _local.__bigfloat_context__ = oldcontext | context
 
 def pushcontext(context, _local = local):
     _local.__context_stack__.append(getcontext())
@@ -294,43 +344,24 @@ def popcontext(_local = local):
 del threading, local
 
 def precision(prec):
-    """Return new context equal to the current context, but with
-    the given precision."""
-    return getcontext()(precision=prec)
+    """Return context specifying the given precision.
 
-def rounding(rnd):
-    """Return new context equal to current context but with
-    given rounding mode."""
-    return getcontext()(rounding=rnd)
-
-def exponent_limits(emin=None, emax=None, subnormalize=False):
-    """Return new context equal to current context but with
-    the given exponent limits.
-
-    emin and emax default to EMIN_MIN and EMAX_MAX.  Thus exponent
-    limits can be relaxed to their most lenient values by calling
-    exponent_limits() with no arguments.
+    precision(prec) is exactly equivalent to Context(precision=prec).
 
     """
-    if emin is None:
-        emin = EMIN_MIN
-    if emax is None:
-        emax = EMAX_MAX
-    return getcontext()(emin=emin, emax=emax, subnormalize=subnormalize)
+    return Context(precision=prec)
 
-def extra_precision(p):
+def extra_precision(prec):
     """Return new context equal to the current context, but with
-    precision increased by p."""
+    precision increased by prec."""
     c = getcontext()
-    return c(precision=c.precision+p)
+    return Context(precision=c.precision+prec)
 
 def wrap_standard_function(f, argtypes):
     def wrapped_f(*args, **kwargs):
         context = getcontext()
-        if 'rounding' in kwargs:
-            rounding = kwargs['rounding']
-        else:
-            rounding = context.rounding
+        if 'context' in kwargs:
+            context |= kwargs['context']
         if len(args) != len(argtypes):
             raise TypeError("Wrong number of arguments")
         converted_args = []
@@ -338,6 +369,7 @@ def wrap_standard_function(f, argtypes):
             if arg_t is IMpfr:
                 arg = BigFloat._implicit_convert(arg)._value
             converted_args.append(arg)
+        rounding = context.rounding
         converted_args.append(rounding)
         bf = Mpfr()
         mpfr.mpfr_init2(bf, context.precision)
@@ -423,9 +455,9 @@ class BigFloat(object):
                                 "specified except when converting "
                                 "from a string")
             if isinstance(value, float):
-                precision = builtin_max(DBL_PRECISION, PRECISION_MIN)
+                precision = _builtin_max(DBL_PRECISION, PRECISION_MIN)
             elif isinstance(value, (int, long)):
-                precision = builtin_max(bit_length(value), PRECISION_MIN)
+                precision = _builtin_max(bit_length(value), PRECISION_MIN)
             elif isinstance(value, BigFloat):
                 precision = value.precision
             else:
@@ -435,7 +467,7 @@ class BigFloat(object):
         # use Default context, with given precision
         with saved_flags():
             set_flagstate(set())  # clear all flags
-            with DefaultContext(precision = precision):
+            with DefaultContext | Context(precision = precision):
                 result = BigFloat(value)
             if test_flag(Overflow):
                 raise ValueError("value too large to represent as a BigFloat")
@@ -463,7 +495,7 @@ class BigFloat(object):
             raise ValueError("Can't convert infinity or nan to integer")
 
         negative, digits, e = mpfr.mpfr_get_str2(self._value, 16, 0,
-                                                 RoundTiesToEven)
+                                                 'RoundTiesToEven')
         n = int(digits, 16)
         e = 4*(e-len(digits))
         if e >= 0:
@@ -481,7 +513,7 @@ class BigFloat(object):
         Rounds using RoundTiesToEven, regardless of current rounding mode.
 
         """
-        return mpfr.mpfr_get_d(self._value, RoundTiesToEven)
+        return mpfr.mpfr_get_d(self._value, 'RoundTiesToEven')
 
     def as_integer_ratio(self):
         """Return pair n, d of integers such that the value of self is
@@ -496,7 +528,7 @@ class BigFloat(object):
 
         # convert to a hex string, and from there to a fraction
         negative, digits, e = mpfr.mpfr_get_str2(self._value, 16, 0,
-                                                 RoundTiesToEven)
+                                                 'RoundTiesToEven')
         digits = digits.rstrip('0')
 
         # find number of trailing 0 bits in last hex digit
@@ -518,7 +550,7 @@ class BigFloat(object):
             return '-0' if is_negative(self) else '0'
         elif is_finite(self):
             negative, digits, e = mpfr.mpfr_get_str2(self._value, 10, 0,
-                                                     RoundTiesToEven)
+                                                     'RoundTiesToEven')
             return format_finite(negative, digits, e)
         elif is_inf(self):
             return '-Infinity' if is_negative(self) else 'Infinity'
