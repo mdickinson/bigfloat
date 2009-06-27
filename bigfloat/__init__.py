@@ -58,10 +58,11 @@ from pympfr import MPFR_EMAX_MAX, MPFR_EMAX_MIN, MPFR_EMAX_DEFAULT
 from pympfr import standard_functions, predicates, extra_standard_functions
 from pympfr import eminmax
 
-# builtin max and min functions are shadowed by BigFloat max and min
-# functions later on
+# builtin max, min and pow functions are shadowed by BigFloat max, min
+# and pow functions later on
 _builtin_max = max
 _builtin_min = min
+_builtin_pow = pow
 
 try:
     DBL_PRECISION = sys.float_info.mant_dig
@@ -513,6 +514,36 @@ class BigFloat(object):
 
         """
         return mpfr.mpfr_get_d(self._value, 'RoundTiesToEven')
+
+    def __hash__(self):
+        # if self is exactly representable as a float, then its hash
+        # should match that of the float.  Note that this covers the
+        # case where self == 0.
+        if self == float(self) or is_nan(self):
+            return hash(float(self))
+
+        # now we must ensure that hash(self) == hash(int(self)) in the
+        # case where self is integral.  We use the (undocumented) fact
+        # that hash(n) == hash(m) for any two nonzero integers n and m
+        # that are congruent modulo 2**64-1 and have the same sign:
+        # see the source for long_hash in Objects/longobject.c.  An
+        # alternative would be to convert an integral self to an
+        # integer and take the hash of that, but that would be
+        # painfully slow for something like BigFloat('1e1000000000').
+        negative, digits, e = mpfr.mpfr_get_str2(self._value, 16, 0,
+                                                 'RoundTiesToEven')
+        e -= len(digits)
+        # The value of self is (-1)**negative * int(digits, 16) *
+        # 16**e.  Compute a strictly positive integer n such that n is
+        # congruent to abs(self) modulo 2**64-1 (e.g., in the sense
+        # that the numerator of n - abs(self) is divisible by
+        # 2**64-1).
+
+        if e >= 0:
+            n = int(digits, 16)*_builtin_pow(16, e, 2**64-1)
+        else:
+            n = int(digits, 16)*_builtin_pow(2**60, -e, 2**64-1)
+        return hash(-n if negative else n)
 
     def as_integer_ratio(self):
         """Return pair n, d of integers such that the value of self is

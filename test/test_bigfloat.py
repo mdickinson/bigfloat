@@ -529,6 +529,42 @@ class BigFloatTests(unittest.TestCase):
                 self.assertEqual(float(x), 1.)
                 self.assertEqual(float(y), 1.)
 
+    def test_hash(self):
+        # equal values should hash equal
+        pos0 = BigFloat('0')
+        neg0 = BigFloat('-0')
+        self.assertEqual(hash(pos0), hash(neg0))
+
+        # hash shouldn't depend on precision
+        with precision(200):
+            x1 = BigFloat(123456)
+        with precision(11):
+            x2 = BigFloat(123456)
+        with precision(53):
+            x3 = BigFloat(123456)
+        self.assertEqual(hash(x1), hash(x2))
+        self.assertEqual(hash(x1), hash(x3))
+
+        # check that hash(n) matches hash(BigFloat(n)) for integers n
+        for n in range(-50, 50):
+            self.assertEqual(hash(n), hash(BigFloat.exact(n)))
+
+        #   values near powers of 2
+        for e in [30, 31, 32, 33, 34, 62, 63, 64, 65, 66]:
+            for n in range(2**e-50, 2**e+50):
+                self.assertEqual(hash(n), hash(BigFloat.exact(n)))
+                self.assertEqual(hash(BigFloat(n)), hash(int(BigFloat(n))))
+
+        # check that hash values match those of floats
+        self.assertEqual(hash(BigFloat('inf')), hash(float('inf')))
+        self.assertEqual(hash(BigFloat('-inf')), hash(float('-inf')))
+        self.assertEqual(hash(BigFloat('0')), hash(float('0')))
+        self.assertEqual(hash(BigFloat('-0')), hash(float('-0')))
+        self.assertEqual(hash(BigFloat('1')), hash(float('1')))
+        self.assertEqual(hash(BigFloat('-1')), hash(float('-1')))
+        self.assertEqual(hash(BigFloat('1.625')), hash(float('1.625')))
+        self.assertEqual(hash(BigFloat.exact(1.1)), hash(1.1))
+
     def test_int(self):
         # test conversion to int
         self.assertEqual(int(BigFloat(13.7)), 13)
