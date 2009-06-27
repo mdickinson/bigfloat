@@ -15,5 +15,5 @@ Implement floordiv method for BigFloats
 Flags for subnormal numbers
 ---------------------------
 
-mpfr_subnormalize doesn't set the underflow and inexact flags
-appropriately;  we should do that.
+  mpfr_subnormalize doesn't set the underflow and inexact flags
+  appropriately;  we should do that.
