@@ -417,20 +417,24 @@ class BigFloat(object):
         self._value = value
         return self
 
-    def __new__(cls, value):
+    def __new__(cls, value, context=None):
         """Create BigFloat from integer, float, string or another BigFloat.
 
-        Uses the current precision and rounding mode.
+        Uses the current precision and rounding mode, unless an
+        alternative context is given.
 
         """
+        if context is None:
+            context = getcontext()
+
         if isinstance(value, float):
-            return set_d(value)
+            return set_d(value, context=context)
         elif isinstance(value, basestring):
-            return set_str2(value.strip(), 10)
+            return set_str2(value.strip(), 10, context=context)
         elif isinstance(value, (int, long)):
-            return set_str2('%x' % value, 16)
+            return set_str2('%x' % value, 16, context=context)
         elif isinstance(value, BigFloat):
-            return pos(value)
+            return pos(value, context=context)
         else:
             raise TypeError("Can't convert argument %s of type %s "
                             "to BigFloat" % (value, type(value)))

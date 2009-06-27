@@ -350,6 +350,10 @@ class BigFloatTests(unittest.TestCase):
                     bf = BigFloat(value)
                     self.assertEqual(type(bf), BigFloat)
                     self.assertEqual(bf.precision, p)
+                # check directly-supplied context
+                bf = BigFloat(value, precision(p))
+                self.assertEqual(type(bf), BigFloat)
+                self.assertEqual(bf.precision, p)
 
     def test_creation_from_float(self):
         test_values = [-12.3456, float('-0.0'), float('0.0'), 5e-310, -1e308,
@@ -361,6 +365,19 @@ class BigFloatTests(unittest.TestCase):
                     bf = BigFloat(value)
                     self.assertEqual(type(bf), BigFloat)
                     self.assertEqual(bf.precision, p)
+                # check directly-supplied context
+                bf = BigFloat(value, precision(p))
+                self.assertEqual(type(bf), BigFloat)
+                self.assertEqual(bf.precision, p)
+
+        # check directly-supplied rounding mode
+        lower = BigFloat(1.1, precision(24) | RoundTowardNegative)
+        upper = BigFloat(1.1, RoundTowardPositive | precision(24))
+        self.assert_(lower < upper)
+
+        # check directly-supplied exponent, subnormalize:
+        nearest_half = BigFloat(123.456, Context(emin=0, subnormalize=True))
+        self.assertEqual(nearest_half, 123.5)
 
     def test_creation_from_string(self):
         test_values = ['123.456',
@@ -377,12 +394,21 @@ class BigFloatTests(unittest.TestCase):
                     bf = BigFloat(value)
                     self.assertEqual(type(bf), BigFloat)
                     self.assertEqual(bf.precision, p)
+                # check directly-supplied context
+                bf = BigFloat(value, precision(p))
+                self.assertEqual(type(bf), BigFloat)
+                self.assertEqual(bf.precision, p)
 
         # check that rounding mode affects the conversion
         with RoundTowardNegative:
             lower = BigFloat('1.1')
         with RoundTowardPositive:
             upper = BigFloat('1.1')
+        self.assert_(lower < upper)
+
+        # alternative version, without with statements
+        lower = BigFloat('1.1', RoundTowardNegative)
+        upper = BigFloat('1.1', RoundTowardPositive)
         self.assert_(lower < upper)
 
         self.assert_(is_nan(BigFloat('nan')))
@@ -412,6 +438,10 @@ class BigFloatTests(unittest.TestCase):
                     bf = BigFloat(value)
                     self.assertEqual(type(bf), BigFloat)
                     self.assertEqual(bf.precision, p)
+                # check directly-supplied context
+                bf = BigFloat(value, precision(p))
+                self.assertEqual(type(bf), BigFloat)
+                self.assertEqual(bf.precision, p)
 
     def test_exact_context_independent(self):
         with Context(emin=-1, emax=1):
@@ -443,11 +473,6 @@ class BigFloatTests(unittest.TestCase):
         BigFloat.exact('123.45', precision=200)  # shouldn't set inexact flag
         flags = get_flagstate()
         self.assertEqual(flags, set())
-
-    def test_exponent_limits(self):
-        with Context(emin=-1000, emax=0):
-            x = add(123, 456)
-        self.assertEqual(x, BigFloat('infinity'))
 
     def test_exact_creation_from_integer(self):
         test_values = [-23, 0, 100, 7**100, -23L, 0L, 100L]
@@ -515,12 +540,18 @@ class BigFloatTests(unittest.TestCase):
 
         self.assertRaises(TypeError, BigFloat.exact, BigFloat(23), 100)
 
+    def test_exponent_limits(self):
+        with Context(emin=-1000, emax=0):
+            x = add(123, 456)
+        self.assertEqual(x, BigFloat('infinity'))
+
     def test_float(self):
         # test conversion to float
         with precision(200):
             x = BigFloat(2**100+1)/2**100
             y = BigFloat(2**100-1)/2**100
 
+        # just double check that they're not equal as BigFloats
         self.assertNotEqual(x, y)
 
         # rounding mode shouldn't affect conversion
