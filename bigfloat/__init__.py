@@ -13,7 +13,7 @@ __all__ = [
     'BigFloat',
 
     # contexts
-    'Context', 'getcontext', 'setcontext', 'DefaultContext',
+    'Context', 'getcontext', 'setcontext', 'DefaultContext', 'EmptyContext',
 
     # functions that generate a new context, possibly based on the current one
     'precision', 'extra_precision',
@@ -274,11 +274,16 @@ class Context(object):
 
 # some useful contexts
 
+# DefaultContext is the context that the module always starts with.
 DefaultContext = Context(precision=53,
                          rounding='RoundTiesToEven',
                          emax=EMAX_MAX,
                          emin=EMIN_MIN,
                          subnormalize=False)
+
+# EmptyContext is useful for situations where a context is
+# required, but no change to the current context is desirable
+EmptyContext = Context()
 
 # provided rounding modes are implemented as contexts, so that
 # they can be used directly in with statements
@@ -374,10 +379,27 @@ def wrap_standard_function(f, argtypes):
         bf = Mpfr()
         mpfr.mpfr_init2(bf, context.precision)
         ternary = f(bf, *converted_args)
+
+        # fit result to current context
         with eminmax(context.emin, context.emax):
             ternary = mpfr.mpfr_check_range(bf, ternary, rounding)
             if context.subnormalize:
+                # mpfr_subnormalize doesn't set underflow and
+                # subnormal flags, so we do that ourselves.  We choose
+                # to set the underflow flag for *all* cases where the
+                # 'after rounding' result is smaller than the smallest
+                # normal number, even if that result is exact.
+
+                # if bf is zero but ternary is nonzero, the underflow
+                # flag will already have been set by mpfr_check_range;
+                if (mpfr.mpfr_number_p(bf) and
+                    not mpfr.mpfr_zero_p(bf) and
+                    mpfr.mpfr_get_exp(bf) < context.precision-1+context.emin):
+                    mpfr.mpfr_set_underflow()
                 ternary = mpfr.mpfr_subnormalize(bf, ternary, rounding)
+                if ternary:
+                    mpfr.mpfr_set_inexflag()
+
         return BigFloat._from_Mpfr(bf)
     return wrapped_f
 
@@ -424,20 +446,43 @@ class BigFloat(object):
         alternative context is given.
 
         """
-        if context is None:
-            context = getcontext()
+        with (context if context is not None else EmptyContext):
+            if isinstance(value, float):
+                return set_d(value)
+            elif isinstance(value, basestring):
+                return set_str2(value.strip(), 10)
+            elif isinstance(value, (int, long)):
+                return set_str2('%x' % value, 16)
+            elif isinstance(value, BigFloat):
+                return pos(value)
+            else:
+                raise TypeError("Can't convert argument %s of type %s "
+                                "to BigFloat" % (value, type(value)))
 
-        if isinstance(value, float):
-            return set_d(value, context=context)
-        elif isinstance(value, basestring):
-            return set_str2(value.strip(), 10, context=context)
-        elif isinstance(value, (int, long)):
-            return set_str2('%x' % value, 16, context=context)
-        elif isinstance(value, BigFloat):
-            return pos(value, context=context)
-        else:
-            raise TypeError("Can't convert argument %s of type %s "
-                            "to BigFloat" % (value, type(value)))
+    @classmethod
+    def fromhex(cls, value, context=None):
+        with (context if context is not None else EmptyContext):
+            return set_str2(value, 16)
+
+    @staticmethod
+    def _fromhex_exact(value):
+        """Private function used in testing"""
+        # private low-level version of fromhex that always does an
+        # exact conversion.  Avoids using any heavy machinery
+        # (contexts, wrap_standard_function), since its main use is in
+        # the testing of that machinery.
+
+        # XXX Maybe we should move this function into test_bigfloat
+        bf = Mpfr()
+        mpfr.mpfr_init2(bf, len(value)*4)  # should be sufficient precision
+        ternary = mpfr.mpfr_set_str2(bf, value, 16, 'RoundTiesToEven')
+        if ternary:
+            # conversion should have been exact, except possibly if
+            # value overflows or underflows
+            raise ValueError("_fromhex_exact failed to do an exact "
+                             "conversion.  This shouldn't happen. "
+                             "Please report.")
+        return BigFloat._from_Mpfr(bf)
 
     # alternative constructor, that does exact conversions
     @classmethod
@@ -486,7 +531,6 @@ class BigFloat(object):
 
         return result
 
-
     def __int__(self):
         """BigFloat -> int.
 
@@ -519,35 +563,18 @@ class BigFloat(object):
         """
         return mpfr.mpfr_get_d(self._value, 'RoundTiesToEven')
 
-    def __hash__(self):
-        # if self is exactly representable as a float, then its hash
-        # should match that of the float.  Note that this covers the
-        # case where self == 0.
-        if self == float(self) or is_nan(self):
-            return hash(float(self))
+    def hex(self):
+        """Return a hexadecimal representation of a BigFloat."""
 
-        # now we must ensure that hash(self) == hash(int(self)) in the
-        # case where self is integral.  We use the (undocumented) fact
-        # that hash(n) == hash(m) for any two nonzero integers n and m
-        # that are congruent modulo 2**64-1 and have the same sign:
-        # see the source for long_hash in Objects/longobject.c.  An
-        # alternative would be to convert an integral self to an
-        # integer and take the hash of that, but that would be
-        # painfully slow for something like BigFloat('1e1000000000').
         negative, digits, e = mpfr.mpfr_get_str2(self._value, 16, 0,
                                                  'RoundTiesToEven')
-        e -= len(digits)
-        # The value of self is (-1)**negative * int(digits, 16) *
-        # 16**e.  Compute a strictly positive integer n such that n is
-        # congruent to abs(self) modulo 2**64-1 (e.g., in the sense
-        # that the numerator of n - abs(self) is divisible by
-        # 2**64-1).
+        result = '%s0x%s.%sp%+d' % (
+            '-' if negative else '',
+            digits[:1],
+            digits[1:],
+            4*(e-1))
+        return result
 
-        if e >= 0:
-            n = int(digits, 16)*_builtin_pow(16, e, 2**64-1)
-        else:
-            n = int(digits, 16)*_builtin_pow(2**60, -e, 2**64-1)
-        return hash(-n if negative else n)
 
     def as_integer_ratio(self):
         """Return pair n, d of integers such that the value of self is
@@ -595,6 +622,36 @@ class BigFloat(object):
     def __repr__(self):
         return "BigFloat.exact('%s', precision=%d)" % (
             str(self), self.precision)
+
+    def __hash__(self):
+        # if self is exactly representable as a float, then its hash
+        # should match that of the float.  Note that this covers the
+        # case where self == 0.
+        if self == float(self) or is_nan(self):
+            return hash(float(self))
+
+        # now we must ensure that hash(self) == hash(int(self)) in the
+        # case where self is integral.  We use the (undocumented) fact
+        # that hash(n) == hash(m) for any two nonzero integers n and m
+        # that are congruent modulo 2**64-1 and have the same sign:
+        # see the source for long_hash in Objects/longobject.c.  An
+        # alternative would be to convert an integral self to an
+        # integer and take the hash of that, but that would be
+        # painfully slow for something like BigFloat('1e1000000000').
+        negative, digits, e = mpfr.mpfr_get_str2(self._value, 16, 0,
+                                                 'RoundTiesToEven')
+        e -= len(digits)
+        # The value of self is (-1)**negative * int(digits, 16) *
+        # 16**e.  Compute a strictly positive integer n such that n is
+        # congruent to abs(self) modulo 2**64-1 (e.g., in the sense
+        # that the numerator of n - abs(self) is divisible by
+        # 2**64-1).
+
+        if e >= 0:
+            n = int(digits, 16)*_builtin_pow(16, e, 2**64-1)
+        else:
+            n = int(digits, 16)*_builtin_pow(2**60, -e, 2**64-1)
+        return hash(-n if negative else n)
 
     def __ne__(self, other):
         return not (self == other)

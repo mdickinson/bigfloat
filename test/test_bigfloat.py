@@ -8,88 +8,25 @@ import math
 all_rounding_modes = [RoundTowardZero, RoundTowardNegative,
                       RoundTowardPositive, RoundTiesToEven]
 all_rounding_mode_strings = ['RoundTowardZero', 'RoundTowardNegative',
-                      'RoundTowardPositive', 'RoundTiesToEven']
+                             'RoundTowardPositive', 'RoundTiesToEven']
 
-class ContextTests(unittest.TestCase):
-    def test_attributes(self):
-        c = DefaultContext
-        self.assert_(isinstance(c.precision, (int, long)))
-        self.assert_(isinstance(c.emax, (int, long)))
-        self.assert_(isinstance(c.emin, (int, long)))
-        self.assert_(isinstance(c.subnormalize, bool))
-        self.assert_(c.rounding in all_rounding_mode_strings)
+def identicalBigFloats(self, other):
+    """True if self and other are interchangable for practical purposes.
 
-    #def test_callable(self):
-    #    # check that self is callable
-    #    c = Context(emin = -123, emax=456, precision=1729,
-    #                subnormalize=True, rounding=RoundTowardPositive)
-    #    d = c(precision=400)
-    #    self.assertEqual(d.precision, 400)
-    #    self.assertEqual(d.emax, c.emax)
-    #    self.assertEqual(d.emin, c.emin)
-    #    self.assertEqual(d.subnormalize, c.subnormalize)
-    #    self.assertEqual(d.rounding, c.rounding)
-    #
-    #    e = c(emax=16384, rounding=RoundTowardZero)
-    #    self.assertEqual(e.precision, c.precision)
-    #    self.assertEqual(e.emax, 16384)
-    #    self.assertEqual(e.emin, c.emin)
-    #    self.assertEqual(e.rounding, RoundTowardZero)
-    #    self.assertEqual(e.subnormalize, c.subnormalize)
+    Return True if:
+      both self and other are nans, or
+      self and other are both zero, with the same sign, or
+      self and other are nonzero and equal
 
-    def test_with(self):
-        # check use of contexts in with statements
-        c = Context(emin = -123, emax=456, precision=1729,
-                    subnormalize=True, rounding='RoundTowardPositive')
-        d = Context(emin = 0, emax=10585, precision=20,
-                    subnormalize=False, rounding='RoundTowardNegative')
+    """
+    return is_nan(self) and is_nan(other) or \
+        self == other and is_negative(self) == is_negative(other)
 
-        with c:
-            # check nested with
-            with d:
-                self.assertEqual(getcontext().precision, d.precision)
-                self.assertEqual(getcontext().emin, d.emin)
-                self.assertEqual(getcontext().emax, d.emax)
-                self.assertEqual(getcontext().subnormalize, d.subnormalize)
-                self.assertEqual(getcontext().rounding, d.rounding)
-
-            # check context is restored on normal exit
-            self.assertEqual(getcontext().precision, c.precision)
-            self.assertEqual(getcontext().emin, c.emin)
-            self.assertEqual(getcontext().emax, c.emax)
-            self.assertEqual(getcontext().subnormalize, c.subnormalize)
-            self.assertEqual(getcontext().rounding, c.rounding)
-
-            # check context is restored on abnormal exit, and that exceptions
-            # raised within the with block are propagated
-            try:
-                with d:
-                    raise ValueError
-            except ValueError:
-                pass
-            else:
-                self.fail('ValueError not propagated from with block')
-
-            self.assertEqual(getcontext().precision, c.precision)
-            self.assertEqual(getcontext().emin, c.emin)
-            self.assertEqual(getcontext().emax, c.emax)
-            self.assertEqual(getcontext().subnormalize, c.subnormalize)
-            self.assertEqual(getcontext().rounding, c.rounding)
-
-    def test_IEEEContext(self):
-        self.assertEqual(IEEEContext(16), half_precision)
-        self.assertEqual(IEEEContext(32), single_precision)
-        self.assertEqual(IEEEContext(64), double_precision)
-        self.assertEqual(IEEEContext(128), quadruple_precision)
-
-        c = IEEEContext(256)
-        self.assertEqual(c.precision, 237)
-        self.assertEqual(c.emax, 262144)
-        self.assertEqual(c.emin, -262377)
-        self.assertEqual(c.subnormalize, True)
-        self.assertEqual(c.rounding, None)
 
 class BigFloatTests(unittest.TestCase):
+    def setUp(self):
+        setcontext(DefaultContext)
+
     def assertIdenticalFloat(self, x, y):
         if not (isinstance(x, float) and isinstance(y, float)):
             raise ValueError("Expected x and y to be floats "
@@ -720,6 +657,229 @@ class BigFloatTests(unittest.TestCase):
                 else:
                     self.assertEqual(x, absx)
 
+
+class ContextTests(unittest.TestCase):
+    def setUp(self):
+        setcontext(DefaultContext)
+
+    def test_attributes(self):
+        c = DefaultContext
+        self.assert_(isinstance(c.precision, (int, long)))
+        self.assert_(isinstance(c.emax, (int, long)))
+        self.assert_(isinstance(c.emin, (int, long)))
+        self.assert_(isinstance(c.subnormalize, bool))
+        self.assert_(c.rounding in all_rounding_mode_strings)
+
+    #def test_callable(self):
+    #    # check that self is callable
+    #    c = Context(emin = -123, emax=456, precision=1729,
+    #                subnormalize=True, rounding=RoundTowardPositive)
+    #    d = c(precision=400)
+    #    self.assertEqual(d.precision, 400)
+    #    self.assertEqual(d.emax, c.emax)
+    #    self.assertEqual(d.emin, c.emin)
+    #    self.assertEqual(d.subnormalize, c.subnormalize)
+    #    self.assertEqual(d.rounding, c.rounding)
+    #
+    #    e = c(emax=16384, rounding=RoundTowardZero)
+    #    self.assertEqual(e.precision, c.precision)
+    #    self.assertEqual(e.emax, 16384)
+    #    self.assertEqual(e.emin, c.emin)
+    #    self.assertEqual(e.rounding, RoundTowardZero)
+    #    self.assertEqual(e.subnormalize, c.subnormalize)
+
+    def test_with(self):
+        # check use of contexts in with statements
+        c = Context(emin = -123, emax=456, precision=1729,
+                    subnormalize=True, rounding='RoundTowardPositive')
+        d = Context(emin = 0, emax=10585, precision=20,
+                    subnormalize=False, rounding='RoundTowardNegative')
+
+        with c:
+            # check nested with
+            with d:
+                self.assertEqual(getcontext().precision, d.precision)
+                self.assertEqual(getcontext().emin, d.emin)
+                self.assertEqual(getcontext().emax, d.emax)
+                self.assertEqual(getcontext().subnormalize, d.subnormalize)
+                self.assertEqual(getcontext().rounding, d.rounding)
+
+            # check context is restored on normal exit
+            self.assertEqual(getcontext().precision, c.precision)
+            self.assertEqual(getcontext().emin, c.emin)
+            self.assertEqual(getcontext().emax, c.emax)
+            self.assertEqual(getcontext().subnormalize, c.subnormalize)
+            self.assertEqual(getcontext().rounding, c.rounding)
+
+            # check context is restored on abnormal exit, and that exceptions
+            # raised within the with block are propagated
+            try:
+                with d:
+                    raise ValueError
+            except ValueError:
+                pass
+            else:
+                self.fail('ValueError not propagated from with block')
+
+            self.assertEqual(getcontext().precision, c.precision)
+            self.assertEqual(getcontext().emin, c.emin)
+            self.assertEqual(getcontext().emax, c.emax)
+            self.assertEqual(getcontext().subnormalize, c.subnormalize)
+            self.assertEqual(getcontext().rounding, c.rounding)
+
+    def test_IEEEContext(self):
+        self.assertEqual(IEEEContext(16), half_precision)
+        self.assertEqual(IEEEContext(32), single_precision)
+        self.assertEqual(IEEEContext(64), double_precision)
+        self.assertEqual(IEEEContext(128), quadruple_precision)
+
+        c = IEEEContext(256)
+        self.assertEqual(c.precision, 237)
+        self.assertEqual(c.emax, 262144)
+        self.assertEqual(c.emin, -262377)
+        self.assertEqual(c.subnormalize, True)
+        self.assertEqual(c.rounding, None)
+
+class ABCTests(unittest.TestCase):
+    def setUp(self):
+        setcontext(DefaultContext)
+
+def process_lines(lines):
+    def test_fn(self):
+
+        for l in lines:
+            # any portion of the line after '#' is a comment; leading
+            # and trailing whitespace are ignored
+            comment_pos = l.find('#')
+            if comment_pos != -1:
+                l = l[:comment_pos]
+            l = l.strip()
+            if not l:
+                continue
+
+            # now we've got a line that should be processed; possibly
+            # a directive
+            if l.startswith('context '):
+                context = globals()[l[8:]]
+                setcontext(context)
+                continue
+
+            # not a directive, so it takes the form lhs -> rhs, where
+            # the lhs is a function name followed by arguments, and
+            # the rhs is an expected result followed by expected flags
+            lhs_pieces, rhs_pieces = map(str.split, l.split('->'))
+            fn = globals()[lhs_pieces[0]]
+            args = [BigFloat._fromhex_exact(arg) for arg in lhs_pieces[1:]]
+            expected_result = BigFloat._fromhex_exact(rhs_pieces[0])
+            expected_flags = set(globals()[flag] for flag in rhs_pieces[1:])
+
+            # reset flags, and compute result
+            set_flagstate(set())
+            actual_result = fn(*args)
+            actual_flags = get_flagstate()
+
+            # compare actual with expected results
+            self.assert_(identicalBigFloats(actual_result, expected_result))
+            self.assertEqual(actual_flags, expected_flags)
+
+    return test_fn
+
+
+ABCTests.test_pos = process_lines("""\
+context double_precision
+context RoundTiesToEven
+
+pos 0 -> 0
+pos -0 -> -0
+pos inf -> inf
+pos -inf -> -inf
+pos nan -> nan NanFlag
+
+# smallest representable positive value is 1p-1074
+# values in (0, 0.8p-1074] -> 0 Inexact Underflow
+
+# exactly representable with precision 53 and unbounded exponent,
+# but not exactly representable with precision 53 and bounded exponent
+pos 0.8p-1075 -> 0 Inexact Underflow
+pos 0.cp-1075 -> 0 Inexact Underflow
+pos 0.ffffffffffffp-1075 -> 0 Inexact Underflow
+
+# not exactly representable with precision 53 and unbounded exponent
+pos 0.ffffffffffffffffffffp-1075 -> 0 Inexact Underflow
+pos 1p-1075 -> 0 Inexact Underflow
+
+# values in (0.8p-1075, 1p-1074) -> 1p-1074 Inexact Underflow
+
+pos 1.00000000000000000001p-1075 -> 1p-1074 Inexact Underflow
+pos 1.000000001p-1075 -> 1p-1074 Inexact Underflow
+pos 1.8p-1075 -> 1p-1074 Inexact Underflow
+pos 0.ffffffffffff8p-1074 -> 1p-1074 Inexact Underflow
+pos 0.ffffffffffffffffffffp-1074 -> 1p-1074 Inexact Underflow
+
+# 1p-1074 exactly representable
+pos 1p-1074 -> 1p-1074 Underflow
+
+# values in (1p-1074, 1.8p-1074) -> 1p-1074 Inexact Underflow
+pos 1.7p-1074 -> 1p-1074 Inexact Underflow
+pos 1.7ffffffffffffp-1074 -> 1p-1074 Inexact Underflow
+pos 1.7ffffffffffff8p-1074 -> 1p-1074 Inexact Underflow
+
+# values in [1.8p-1074, 2p-1074) -> 2p-1074 Inexact Underflow
+pos 1.8p-1074 -> 2p-1074 Inexact Underflow
+pos 1.80000000000008p-1074 -> 2p-1074 Inexact Underflow
+pos 1.8000000000001p-1074 -> 2p-1074 Inexact Underflow
+pos 2p-1074 -> 2p-1074 Underflow
+
+# test round-half-to-even at some mid-range subnormal values
+pos 123456p-1074 -> 123456p-1074 Underflow
+pos 123456.7p-1074 -> 123456p-1074 Inexact Underflow
+pos 123456.7ffffffffffffp-1074 -> 123456p-1074 Inexact Underflow
+pos 123456.8p-1074 -> 123456p-1074 Inexact Underflow
+pos 123456.8000000000001p-1074 -> 123457p-1074 Inexact Underflow
+pos 123456.9p-1074 -> 123457p-1074 Inexact Underflow
+pos 123456.ap-1074 -> 123457p-1074 Inexact Underflow
+pos 123456.bp-1074 -> 123457p-1074 Inexact Underflow
+pos 123456.cp-1074 -> 123457p-1074 Inexact Underflow
+pos 123456.dp-1074 -> 123457p-1074 Inexact Underflow
+pos 123456.ep-1074 -> 123457p-1074 Inexact Underflow
+pos 123456.fp-1074 -> 123457p-1074 Inexact Underflow
+pos 123457.0p-1074 -> 123457p-1074 Underflow
+pos 123457.1p-1074 -> 123457p-1074 Inexact Underflow
+pos 123457.2p-1074 -> 123457p-1074 Inexact Underflow
+pos 123457.3p-1074 -> 123457p-1074 Inexact Underflow
+pos 123457.4p-1074 -> 123457p-1074 Inexact Underflow
+pos 123457.5p-1074 -> 123457p-1074 Inexact Underflow
+pos 123457.6p-1074 -> 123457p-1074 Inexact Underflow
+pos 123457.7p-1074 -> 123457p-1074 Inexact Underflow
+pos 123457.7fffffffp-1074 -> 123457p-1074 Inexact Underflow
+pos 123457.7fffffff8p-1074 -> 123457p-1074 Inexact Underflow
+pos 123457.8p-1074 -> 123458p-1074 Inexact Underflow
+pos 123457.800000008p-1074 -> 123458p-1074 Inexact Underflow
+pos 123457.80000001p-1074 -> 123458p-1074 Inexact Underflow
+pos 123457.9p-1074 -> 123458p-1074 Inexact Underflow
+
+# values near smallest representable normal value, 1p-1022
+pos 0.8p-1022 -> 0.8p-1022 Underflow
+
+# write e for 2**-53, t for 1p-1022, then:
+#
+#  (1-2e)t -> Underflow  # exactly representable
+#  ((1-2e)t, (1-e)t) -> (1-2e)t Inexact Underflow
+#  [(1-e)t, (1-e/2)t) -> t Inexact Underflow
+#  [(1-e/2)t, t) -> t Inexact  # no underflow!  after rounding at work
+
+pos 0.fffffffffffffp-1022 -> 0.fffffffffffffp-1022            Underflow
+pos 0.fffffffffffff00000000001p-1022 -> 0.fffffffffffffp-1022 Inexact Underflow
+pos 0.fffffffffffff4p-1022 -> 0.fffffffffffffp-1022           Inexact Underflow
+pos 0.fffffffffffff7ffffffffffp-1022 -> 0.fffffffffffffp-1022 Inexact Underflow
+pos 0.fffffffffffff8p-1022 -> 1p-1022                         Inexact Underflow
+pos 0.fffffffffffffbffffffffffp-1022 -> 1p-1022               Inexact Underflow
+pos 0.fffffffffffffcp-1022 -> 1p-1022                         Inexact
+pos 0.ffffffffffffffffffffffffp-1022 -> 1p-1022               Inexact
+pos 1p-1022 -> 1p-1022
+pos 1p+1024 -> Infinity Inexact Overflow
+
+""".split('\n'))
 
 def test_main():
     unittest.main()
