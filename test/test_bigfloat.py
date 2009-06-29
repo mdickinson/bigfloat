@@ -308,8 +308,8 @@ class BigFloatTests(unittest.TestCase):
                 self.assertEqual(bf.precision, p)
 
         # check directly-supplied rounding mode
-        lower = BigFloat(1.1, precision(24) | RoundTowardNegative)
-        upper = BigFloat(1.1, RoundTowardPositive | precision(24))
+        lower = BigFloat(1.1, precision(24) + RoundTowardNegative)
+        upper = BigFloat(1.1, RoundTowardPositive + precision(24))
         self.assert_(lower < upper)
 
         # check directly-supplied exponent, subnormalize:

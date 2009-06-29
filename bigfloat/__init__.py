@@ -3,33 +3,36 @@
 from __future__ import with_statement  # for Python 2.5
 
 # Names to export when someone does 'from bigfloat import *'.  The
-# __all__ variable is modified dynamically lower down.  Note that this
-# module defines functions 'abs' and 'pow', 'max' and 'min' which
-# shadow the builtin functions of those names.  Don't do 'from
-# bigfloat import *' if you don't want to clobber these functions.
+# __all__ variable is extended to include standard functions later on.
+# Note that this module defines functions 'abs' and 'pow', 'max' and
+# 'min' which shadow the builtin functions of those names.  Don't do
+# 'from bigfloat import *' if you don't want to clobber these
+# functions.
 
 __all__ = [
     # main class
     'BigFloat',
 
     # contexts
-    'Context', 'getcontext', 'setcontext', 'DefaultContext', 'EmptyContext',
+    'Context',
 
-    # functions that generate a new context, possibly based on the current one
-    'precision', 'extra_precision',
-
-    # contexts corresponding to IEEE 754 binary interchange formats
-    'IEEEContext', 'half_precision', 'single_precision',
-    'double_precision', 'quadruple_precision',
-
-    # rounding modes
-    'RoundTiesToEven', 'RoundTowardZero',
-    'RoundTowardPositive', 'RoundTowardNegative',
-
-    # absolute limits on exponents and precision
+    # limits on emin, emax and precision
     'EMIN_MIN', 'EMIN_MAX',
     'EMAX_MIN', 'EMAX_MAX',
     'PRECISION_MIN', 'PRECISION_MAX',
+
+    # context constants...
+    'DefaultContext', 'EmptyContext',
+    'half_precision', 'single_precision',
+    'double_precision', 'quadruple_precision',
+    'RoundTiesToEven', 'RoundTowardZero',
+    'RoundTowardPositive', 'RoundTowardNegative',
+
+    # ... and functions
+    'IEEEContext', 'precision', 'extra_precision',
+
+    # get and set current context
+    'getcontext', 'setcontext',
 
     # flags
     'Inexact', 'Overflow', 'Underflow', 'NanFlag',
@@ -39,37 +42,28 @@ __all__ = [
 
     # and to get and set the entire flag state
     'set_flagstate', 'get_flagstate', 'all_flags',
-
 ]
 
-# note that __all__ is dynamically modified later on to add standard
-# functions and predicates
+import sys as _sys
+import contextlib as _contextlib
 
-from contextlib import contextmanager
-import sys
+from pympfr import *
+from pympfr import IMpfr
 
-from pympfr import Mpfr, IMpfr
-from pympfr import mpfr
-#from pympfr import RoundTiesToEven, RoundTowardZero
-#from pympfr import RoundTowardPositive, RoundTowardNegative
-from pympfr import MPFR_PREC_MIN, MPFR_PREC_MAX
-from pympfr import MPFR_EMIN_MAX, MPFR_EMIN_MIN, MPFR_EMIN_DEFAULT
-from pympfr import MPFR_EMAX_MAX, MPFR_EMAX_MIN, MPFR_EMAX_DEFAULT
-from pympfr import standard_functions, predicates, extra_standard_functions
-from pympfr import eminmax
-
-# builtin max, min and pow functions are shadowed by BigFloat max, min
-# and pow functions later on
+# builtin abs, max, min and pow functions are shadowed by BigFloat
+# max, min and pow functions later on; keep a copy of the builtin
+# functions for later use
+_builtin_abs = abs
 _builtin_max = max
 _builtin_min = min
 _builtin_pow = pow
 
 try:
-    DBL_PRECISION = sys.float_info.mant_dig
+    DBL_PRECISION = _sys.float_info.mant_dig
 except AttributeError:
-    # Python 2.5 and earlier don't have sys.float_info; assume IEEE
-    # 754 doubles
-    DBL_PRECISION = 53
+    # Python 2.5 and earlier don't have sys.float_info; it's enough for
+    # DBL_PRECISION to be an upper bound.  64 bits should always be enough.
+    DBL_PRECISION = 64
 
 # Dealing with exponent limits
 # ----------------------------
@@ -92,23 +86,21 @@ except AttributeError:
 # the format specified by the current context.  So we adopt the
 # following approach:
 #
-#   We define constants EMAX_MAX and EMIN_MIN representing the min and
-#   max values we'll allow for both emin and emax (these aren't
-#   necessarily the same as the values returned by mpfr_emin_min and
-#   mpfr_emax_max).  When the module is imported, emax and emin are
-#   set to these values.
+# We define constants EMAX_MAX and EMIN_MIN representing the min and
+# max values we'll allow for both emin and emax (these aren't
+# necessarily the same as the values returned by mpfr_emin_min and
+# mpfr_emax_max).  When the module is imported, emax and emin are
+# set to these values.
 #
-#   After this, the MPFR stored emax and emin aren't touched when the
-#   context is changed; but for each standard operation or function,
-#   the function is performed with emax=EMAX_MAX and emin=EMIN_MIN.
-#   *Then* the exponents are changed, and mpfr_check_range is called
-#   (also mpfr_subnormalize if necessary), and the exponents are
-#   restored to their original state.
+# After this, the MPFR stored emax and emin aren't touched when the
+# context is changed; but for each standard operation or function, the
+# function is performed with emax=EMAX_MAX and emin=EMIN_MIN.  *Then*
+# the exponents are changed, mpfr_check_range is called (also
+# mpfr_subnormalize if necessary), and the exponents stored by MPFR
+# are restored to their original state.
 #
-#   Any BigFloat instance that's created *must* have exponent in the
-#   range [EMIN_MIN, EMAX_MAX] (unless it's a zero, infinity or nan).
-#   Also, for the sake of sanity, it's not permitted for emin to exceed
-#   emax.
+# Any BigFloat instance that's created *must* have exponent in the
+# range [EMIN_MIN, EMAX_MAX] (unless it's a zero, infinity or nan).
 
 EMAX_MAX = MPFR_EMAX_DEFAULT
 EMIN_MIN = MPFR_EMIN_DEFAULT
@@ -122,18 +114,16 @@ mpfr.mpfr_set_emax(EMAX_MAX)
 PRECISION_MIN = MPFR_PREC_MIN
 PRECISION_MAX = MPFR_PREC_MAX
 
-bit_length_correction = {
+_bit_length_correction = {
     '0': 4, '1': 3, '2': 2, '3': 2, '4': 1, '5': 1, '6': 1, '7': 1,
     '8': 0, '9': 0, 'a': 0, 'b': 0, 'c': 0, 'd': 0, 'e': 0, 'f': 0,
     }
-
-# the abs builtin is shadowed by the MPFR abs function later on
-def bit_length(n, _abs=abs):
+def _bit_length(n):
     """Bit length of an integer"""
-    hex_n = '%x' % _abs(n)
-    return 4 * len(hex_n) - bit_length_correction[hex_n[0]]
+    hex_n = '%x' % _builtin_abs(n)
+    return 4 * len(hex_n) - _bit_length_correction[hex_n[0]]
 
-def format_finite(negative, digits, dot_pos):
+def _format_finite(negative, digits, dot_pos):
     """Given a (possibly empty) string of digits and an integer
     dot_pos indicating the position of the decimal point relative to
     the start of that string, output a formatted numeric string with
@@ -206,10 +196,11 @@ class Context(object):
         self._rounding = rounding
         return self
 
-    def __or__(self, other):
-        """For contexts self and other, self | other is a new Context combining
-        self and other:  for attributes that are defined in both self and other,
-        the attribute from other takes precedence."""
+    def __add__(self, other):
+        """For contexts self and other, self + other is a new Context
+        combining self and other: for attributes that are defined in
+        both self and other, the attribute from other takes
+        precedence."""
 
         return Context(
             precision = (other.precision
@@ -300,7 +291,7 @@ def IEEEContext(bitwidth):
         precision = {16: 11, 32: 24, 64: 53, 128: 113}[bitwidth]
     except KeyError:
         if bitwidth >= 128 and bitwidth % 32 == 0:
-            with DefaultContext | Context(emin=-1, subnormalize=True):
+            with DefaultContext + Context(emin=-1, subnormalize=True):
                 # log2(bitwidth), rounded to the nearest quarter
                 l = log2(bitwidth)
             precision = 13 + bitwidth - int(4*l)
@@ -337,7 +328,7 @@ def setcontext(context, _local = local):
     # context; if 'context' doesn't specify a particular attribute,
     # the attribute from the current context shows through
     oldcontext = getcontext()
-    _local.__bigfloat_context__ = oldcontext | context
+    _local.__bigfloat_context__ = oldcontext + context
 
 def pushcontext(context, _local = local):
     _local.__context_stack__.append(getcontext())
@@ -362,11 +353,11 @@ def extra_precision(prec):
     c = getcontext()
     return Context(precision=c.precision+prec)
 
-def wrap_standard_function(f, argtypes):
+def _wrap_standard_function(f, argtypes):
     def wrapped_f(*args, **kwargs):
         context = getcontext()
         if 'context' in kwargs:
-            context |= kwargs['context']
+            context += kwargs['context']
         if len(args) != len(argtypes):
             raise TypeError("Wrong number of arguments")
         converted_args = []
@@ -469,7 +460,7 @@ class BigFloat(object):
         """Private function used in testing"""
         # private low-level version of fromhex that always does an
         # exact conversion.  Avoids using any heavy machinery
-        # (contexts, wrap_standard_function), since its main use is in
+        # (contexts, _wrap_standard_function), since its main use is in
         # the testing of that machinery.
 
         # XXX Maybe we should move this function into test_bigfloat
@@ -506,7 +497,7 @@ class BigFloat(object):
             if isinstance(value, float):
                 precision = _builtin_max(DBL_PRECISION, PRECISION_MIN)
             elif isinstance(value, (int, long)):
-                precision = _builtin_max(bit_length(value), PRECISION_MIN)
+                precision = _builtin_max(_bit_length(value), PRECISION_MIN)
             elif isinstance(value, BigFloat):
                 precision = value.precision
             else:
@@ -516,7 +507,7 @@ class BigFloat(object):
         # use Default context, with given precision
         with saved_flags():
             set_flagstate(set())  # clear all flags
-            with DefaultContext | Context(precision = precision):
+            with DefaultContext + Context(precision = precision):
                 result = BigFloat(value)
             if test_flag(Overflow):
                 raise ValueError("value too large to represent as a BigFloat")
@@ -612,7 +603,7 @@ class BigFloat(object):
         elif is_finite(self):
             negative, digits, e = mpfr.mpfr_get_str2(self._value, 10, 0,
                                                      'RoundTiesToEven')
-            return format_finite(negative, digits, e)
+            return _format_finite(negative, digits, e)
         elif is_inf(self):
             return '-Infinity' if is_negative(self) else 'Infinity'
         else:
@@ -731,7 +722,7 @@ def set_flagstate(flagset):
     for f in all_flags-flagset:
         clear_flag(f)
 
-@contextmanager
+@_contextlib.contextmanager
 def saved_flags():
     """Save current flags for the duration of a with block.  Restore
     those original flags after the block completes."""
@@ -750,7 +741,7 @@ name_translation = {
     # avoid clobbering set builtin
     'set': 'pos',
 
-    # rename 'fmod' to 'mod', to correspond with the operation
+    # rename 'fmod' to 'mod', to correspond with the Python binary operation
     'fmod' : 'mod',
 
     # predicates
@@ -770,12 +761,33 @@ name_translation = {
     'unordered_p' : 'unordered',
     'lessgreater_p' : 'lessgreater',
 
+    # suppress export of some standard functions
+    'add_d': '_add_d',
+    'add_ui': '_add_ui',
+    'add_si': '_add_si',
+    'sub_d': '_sub_d',
+    'sub_ui': '_sub_ui',
+    'sub_si': '_sub_si',
+    'd_sub': '_d_sub',
+    'ui_sub': '_ui_sub',
+    'si_sub': '_si_sub',
+    'mul_d': '_mul_d',
+    'mul_ui': '_mul_ui',
+    'mul_si': '_mul_si',
+    'div_d': '_div_d',
+    'div_ui': '_div_ui',
+    'div_si': '_div_si',
+    'd_div': '_d_div',
+    'ui_div': '_ui_div',
+    'si_div': '_si_div',
+    'sqrt_ui' : '_sqrt_ui',
+
 }
 
 for fn, argtypes in standard_functions + extra_standard_functions:
     mpfr_fn = getattr(mpfr, 'mpfr_' + fn)
     pyfn_name = name_translation.get(fn, fn)
-    globals()[pyfn_name] = wrap_standard_function(mpfr_fn, argtypes)
+    globals()[pyfn_name] = _wrap_standard_function(mpfr_fn, argtypes)
     if not pyfn_name.startswith('_'):
         __all__.append(pyfn_name)
 
