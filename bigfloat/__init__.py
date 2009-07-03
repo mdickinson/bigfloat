@@ -47,8 +47,8 @@ __all__ = [
 import sys as _sys
 import contextlib as _contextlib
 
+import pympfr as _pympfr
 from pympfr import *
-from pympfr import IMpfr
 
 # builtin abs, max, min and pow functions are shadowed by BigFloat
 # max, min and pow functions later on; keep a copy of the builtin
@@ -258,10 +258,10 @@ class Context(object):
     __str__ = __repr__
 
     def __enter__(self):
-        pushcontext(self)
+        _pushcontext(self)
 
     def __exit__(self, *args):
-        popcontext()
+        _popcontext()
 
 # some useful contexts
 
@@ -330,11 +330,11 @@ def setcontext(context, _local = local):
     oldcontext = getcontext()
     _local.__bigfloat_context__ = oldcontext + context
 
-def pushcontext(context, _local = local):
+def _pushcontext(context, _local = local):
     _local.__context_stack__.append(getcontext())
     setcontext(context)
 
-def popcontext(_local = local):
+def _popcontext(_local = local):
     setcontext(_local.__context_stack__.pop())
 
 del threading, local
@@ -362,7 +362,7 @@ def _wrap_standard_function(f, argtypes):
             raise TypeError("Wrong number of arguments")
         converted_args = []
         for arg, arg_t in zip(args, argtypes):
-            if arg_t is IMpfr:
+            if arg_t is _pympfr.IMpfr:
                 arg = BigFloat._implicit_convert(arg)._value
             converted_args.append(arg)
         rounding = context.rounding
@@ -394,7 +394,7 @@ def _wrap_standard_function(f, argtypes):
         return BigFloat._from_Mpfr(bf)
     return wrapped_f
 
-def wrap_predicate(f):
+def _wrap_predicate(f):
     def wrapped_f(*args):
         context = getcontext()
         argtypes = f.argtypes
@@ -402,7 +402,7 @@ def wrap_predicate(f):
             raise TypeError("Wrong number of arguments")
         converted_args = []
         for arg, arg_t in zip(args, argtypes):
-            if arg_t is IMpfr:
+            if arg_t is _pympfr.IMpfr:
                 arg = BigFloat._implicit_convert(arg)._value
             converted_args.append(arg)
         return f(*converted_args)
@@ -505,7 +505,7 @@ class BigFloat(object):
                                 "to BigFloat" % (value, type(value)))
 
         # use Default context, with given precision
-        with saved_flags():
+        with _saved_flags():
             set_flagstate(set())  # clear all flags
             with DefaultContext + Context(precision = precision):
                 result = BigFloat(value)
@@ -684,28 +684,28 @@ NanFlag ='NanFlag'
 
 all_flags = set([Inexact, Overflow, Underflow, NanFlag])
 
-flag_translate = {
+_flag_translate = {
     'underflow' : Underflow,
     'overflow' : Overflow,
     'nanflag' : NanFlag,
     'inexflag' : Inexact,
 }
 
-clear_flag_fns = dict((v, getattr(mpfr, 'mpfr_clear_' + k))
-                      for k, v in flag_translate.items())
-set_flag_fns = dict((v, getattr(mpfr, 'mpfr_set_' + k))
-                    for k, v in flag_translate.items())
-test_flag_fns = dict((v, getattr(mpfr, 'mpfr_' + k + '_p'))
-                     for k, v in flag_translate.items())
+_clear_flag_fns = dict((v, getattr(mpfr, 'mpfr_clear_' + k))
+                      for k, v in _flag_translate.items())
+_set_flag_fns = dict((v, getattr(mpfr, 'mpfr_set_' + k))
+                    for k, v in _flag_translate.items())
+_test_flag_fns = dict((v, getattr(mpfr, 'mpfr_' + k + '_p'))
+                     for k, v in _flag_translate.items())
 
 def test_flag(f):
-    return test_flag_fns[f]()
+    return _test_flag_fns[f]()
 
 def set_flag(f):
-    return set_flag_fns[f]()
+    return _set_flag_fns[f]()
 
 def clear_flag(f):
-    return clear_flag_fns[f]()
+    return _clear_flag_fns[f]()
 
 
 def get_flagstate():
@@ -723,7 +723,7 @@ def set_flagstate(flagset):
         clear_flag(f)
 
 @_contextlib.contextmanager
-def saved_flags():
+def _saved_flags():
     """Save current flags for the duration of a with block.  Restore
     those original flags after the block completes."""
 
@@ -784,19 +784,22 @@ name_translation = {
 
 }
 
-for fn, argtypes in standard_functions + extra_standard_functions:
-    mpfr_fn = getattr(mpfr, 'mpfr_' + fn)
-    pyfn_name = name_translation.get(fn, fn)
-    globals()[pyfn_name] = _wrap_standard_function(mpfr_fn, argtypes)
-    if not pyfn_name.startswith('_'):
-        __all__.append(pyfn_name)
+def _wrap_standard_functions():
+    for fn, argtypes in standard_functions + extra_standard_functions:
+        mpfr_fn = getattr(mpfr, 'mpfr_' + fn)
+        pyfn_name = name_translation.get(fn, fn)
+        globals()[pyfn_name] = _wrap_standard_function(mpfr_fn, argtypes)
+        if not pyfn_name.startswith('_'):
+            __all__.append(pyfn_name)
 
-for fn, argtypes in predicates:
-    mpfr_fn = getattr(mpfr, 'mpfr_' + fn)
-    pyfn_name = name_translation.get(fn, fn)
-    globals()[pyfn_name] = wrap_predicate(mpfr_fn)
-    if not pyfn_name.startswith('_'):
-        __all__.append(pyfn_name)
+    for fn, argtypes in predicates:
+        mpfr_fn = getattr(mpfr, 'mpfr_' + fn)
+        pyfn_name = name_translation.get(fn, fn)
+        globals()[pyfn_name] = _wrap_predicate(mpfr_fn)
+        if not pyfn_name.startswith('_'):
+            __all__.append(pyfn_name)
+
+_wrap_standard_functions()
 
 # unary arithmetic operations
 BigFloat.__pos__ = pos
@@ -825,3 +828,6 @@ BigFloat.__le__ = _is_lessequal
 BigFloat.__lt__ = _is_less
 BigFloat.__ge__ = _is_greaterequal
 BigFloat.__gt__ = _is_greater
+
+#_old__all__ = __all__
+#del __all__

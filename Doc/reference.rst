@@ -10,10 +10,10 @@ for multiple-precision floating-point reliable arithmetic.
 Introduction
 ------------
 
-MPFR is a portable library written in C for arbitrary-precision
-arithmetic on floating-point numbers. It provides precise control over
-precisions and rounding modes and gives correctly-rounded
-platform-independent results.
+MPFR is a portable C library for arbitrary-precision arithmetic on
+floating-point numbers.  It provides precise control over precisions
+and rounding modes and gives correctly-rounded platform-independent
+results.
 
 The :mod:`bigfloat` module provides a convenient and friendly Python
 interface to the operations and functions provided by MPFR.  The main
@@ -39,7 +39,7 @@ the current namespace, and clobbers some builtin Python functions:
 probably only want to import the classes and functions that you
 actually need.
 
-The most important type is the :class:`BigFloat` class; a
+The most important type is the :class:`BigFloat` class.  A
 :class:`BigFloat` instance can be created from an integer, a float or
 a string::
 
@@ -90,12 +90,10 @@ functions.  For example::
 Note that the arguments to all of these functions can be integers,
 floats, or BigFloats.  The results are always BigFloats.
 
-So far, a BigFloat instance looks and behaves very much like a Python
-float, except that the exponent range for BigFloats is much larger
-than that of floats.  But the MPFR library provides
-arbitrary-precision arithmetic: how do we get at this from Python?
-Python's with statement provides a good mechanism for making temporary
-changes to the precision::
+So far, all results have been rounded to a precision of 53 bits, the
+same as Python's float type uses on a typical platform.  Python's
+with statement provides a mechanism for making temporary changes
+to the precision::
 
    >>> with precision(200):
    ...     x = 1/BigFloat(98)
@@ -104,17 +102,9 @@ changes to the precision::
    BigFloat.exact('0.010204081632653061224489795918367346938775510204081632653061220', precision=200)
 
 Here we get a result with 200 bits of precision, or around 60 decimal
-digits.  Note that BigFloat instances are immutable: a change to the
-precision does not affect existing BigFloat instances; it only affects
-the choice of precision for newly-created BigFloats.
-
-A more permanent change can be effected by using the setcontext
-function.  After::
-
-   >>> setcontext(precision(113))
-
-any operation or function call on BigFloats will return a result with
-precision 113.
+digits.  All statements inside the with block would be executed with a
+precision of 200 bits; after the with block exits the previous
+precision is restored.
 
 Rounding modes can be controlled in a similar fashion.  There are four
 rounding modes: ``RoundTiesToEven``, ``RoundTowardPositive``,
@@ -122,11 +112,11 @@ rounding modes: ``RoundTiesToEven``, ``RoundTowardPositive``,
 that uses the ``RoundTowardPositive`` and ``RoundTowardNegative``
 rounding modes to compute upper and lower bounds for log10(2)::
 
-   >>> with rounding(RoundTowardPositive):
+   >>> with RoundTowardPositive:
    ...     upper_bound = log10(2)
    ...     exp_upper_bound = 10**upper_bound
    ... 
-   >>> with rounding(RoundTowardNegative):
+   >>> with RoundTowardNegative:
    ...     lower_bound = log10(2)
    ...     exp_lower_bound = 10**lower_bound
    ... 
@@ -135,16 +125,31 @@ rounding modes to compute upper and lower bounds for log10(2)::
    >>> exp_lower_bound < 2 < exp_upper_bound
    True
 
-Since it's common to want to change the rounding mode just for a
-single operation, each of the mathematical functions that the
-:mod:`bigfloat` module provides also accepts an optional ``rounding``
-keyword argument.  So we could have performed the above calculations
-more directly as follows::
+Note that BigFloat instances are immutable: a change to the precision
+or rounding mode does not affect existing BigFloat instances; it only
+affects the choice of precision for newly-created BigFloats.
 
-   >>> upper_bound = log10(2, rounding=RoundTowardPositive)
-   >>> exp_upper_bound = pow(10, upper_bound, rounding=RoundTowardPositive)
-   >>> lower_bound = log10(2, rounding=RoundTowardNegative)
-   >>> exp_lower_bound = pow(10, lower_bound, rounding=RoundTowardNegative)
+A more permanent change can be effected using the setcontext function.
+After::
+
+   >>> setcontext(precision(113))
+
+any operation or function call on BigFloats will return a result with
+precision 113.  Conversely, the getcontext() function shows the
+settings currently in use::
+
+   >>> getcontext()
+   Context(precision=113, emax=1073741823, emin=-1073741823, subnormalize=False, rounding='RoundTiesToEven')
+
+Precision and rounding mode can also be set on an
+operation-by-operation basis, by supplying the optional ``context``
+keyword argument to the individual operations.  The above calculations
+could also have been performed as follows::
+
+   >>> upper_bound = log10(2, RoundTowardPositive)
+   >>> exp_upper_bound = pow(10, upper_bound, RoundTowardPositive)
+   >>> lower_bound = log10(2, RoundTowardNegative)
+   >>> exp_lower_bound = pow(10, lower_bound, RoundTowardNegative)
    >>> exp_lower_bound < 2 < exp_upper_bound
    True
 
@@ -155,6 +160,35 @@ for ``+``, ``neg`` for unary minus, and so on.  (Here, ``pow`` is one
 of the :mod:`bigfloat` functions that we imported at the start of the
 session; it's not the usual builtin ``pow`` function.)
 
+The :mod:`bigfloat` module also provides four global flags: 'Inexact',
+'Overflow', 'Underflow', 'NanFlag', along with methods to set and test
+these flags::
+
+   >>> set_flagstate(set())  # clear all flags
+   >>> get_flagstate()
+   set([])
+   >>> exp(10**100)
+   BigFloat.exact('Infinity', precision=53)
+   >>> get_flagstate()
+   set(['Overflow', 'Inexact'])
+
+These flags show that overflow occurred, and that the given result
+(infinity) was inexact.  The flags are sticky: none of the standard
+operations ever clears a flag.
+
+   >>> sqrt(2)
+   BigFloat.exact('1.4142135623730951', precision=53)
+   >>> get_flagstate()  # overflow flag still set from the exp call
+   set(['Overflow', 'Inexact'])
+   >>> set_flagstate(set())  # clear all flags
+   >>> sqrt(2)
+   BigFloat.exact('1.4142135623730951', precision=53)
+   >>> get_flagstate()   # sqrt only sets the inexact flag
+   set(['Inexact'])
+
+The functions :func:`clear_flag`, :func:`set_flag` and
+:func:`test_flag` allow clearing, setting and testing of individual
+flags.
 
 Installation
 ------------

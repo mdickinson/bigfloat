@@ -740,6 +740,13 @@ class ContextTests(unittest.TestCase):
         self.assertEqual(c.subnormalize, True)
         self.assertEqual(c.rounding, None)
 
+class FlagTests(unittest.TestCase):
+    def test_overflow(self):
+        set_flagstate(set())  # clear flags
+        result = exp(BigFloat(1e308))
+        self.assertEqual(get_flagstate(), set([Inexact, Overflow]))
+
+
 class ABCTests(unittest.TestCase):
     def setUp(self):
         setcontext(DefaultContext)
