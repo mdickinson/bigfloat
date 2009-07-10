@@ -18,151 +18,363 @@ results.
 The :mod:`bigfloat` module provides a convenient and friendly Python
 interface to the operations and functions provided by MPFR.  The main
 class, :class:`BigFloat`, gives a multiple-precision floating-point
-type that can be freely mixed with Python integers and floats.  The
-:class:`Context` class, used in conjunction with Python's ``with``
-statement, gives a simple way of controlling precisions and rounding
-modes.  Additional module-level functions provide various standard
-mathematical operations.
+type that can be freely mixed with Python integers and floats, and can
+be used to emulate IEEE 754 arithmetic exactly.  The :class:`Context`
+class, used in conjunction with Python's ``with`` statement, gives a
+simple way of controlling precisions and rounding modes.  Additional
+module-level functions provide various standard mathematical
+operations.
 
-A quick tour
+
+Installation
 ------------
 
-Here's a quick tour to show off some of the features of the
-:mod:`bigfloat` module, and give some idea of how it can be used.
-Start off with::
+Prerequisites
+^^^^^^^^^^^^^
+
+In order to use the :mod:`bigfloat` module you will need to have both
+the GMP and MPFR libraries already installed on your system.  See the
+`MPFR homepage <http://www.mpfr.org>`_ and the `GMP homepage
+<http://gmplib.org>`_ for more information about these libraries.
+Currently, MPFR version 2.4.0 or later is required.
+
+This module requires Python version 2.5 or later.  For Python 2.5,
+you'll need to do a ``from __future__ import with_statement`` if you
+want to take advantage of all of the features of this module.
+
+Locating the MPFR library
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The :mod:`bigfloat` module attempts to locate the MPFR library on your
+system.  If it fails, or if you have multiple MPFR libraries installed
+on your system and want to specify which one to use, you should edit
+the ``mpfr_library_location`` setting in the ``bigfloat_config.py``
+file to specify the library location.
+
+Other configuration
+^^^^^^^^^^^^^^^^^^^
+
+The ``bigfloat_config.py`` file also allows you to specify some other
+system-dependent values.  On a typical system, with default installs
+of GMP and MPFR, it's unlikely that these values will need to be
+changed.  But if you're getting segmentation faults or crashes with
+the bigfloat library then you may need to edit the values in this
+file.  In this case it will probably also be useful to have the gmp.h
+and mpfr.h include files handy;  on Linux systems, these files may
+be in a different package from the library files (e.g., 'mpfr-devel'
+instead of 'mpfr').
+
+
+Tutorial
+--------
+
+Start by importing the module (assuming that you've already installed
+it and its prerequisites) with:
 
    >>> from bigfloat import *
 
-Note that this import brings a fairly large number of functions into
-the current namespace, and clobbers some builtin Python functions:
-``abs``, ``max``, ``min`` and ``pow``.  In normal usage you'll
-probably only want to import the classes and functions that you
-actually need.
+This import brings a fairly large number of functions into the current
+namespace, and clobbers some builtin Python functions: ``abs``,
+``max``, ``min`` and ``pow``.  In normal usage you'll probably only
+want to import the classes and functions that you actually need.
 
-The most important type is the :class:`BigFloat` class.  A
+BigFloat construction
+^^^^^^^^^^^^^^^^^^^^^
+
+The main type of interest is the :class:`BigFloat` class.  The
+BigFloat type is an immutable binary floating-point type.  A
 :class:`BigFloat` instance can be created from an integer, a float or
-a string::
+a string:
 
    >>> BigFloat(123)
    BigFloat.exact('123.00000000000000', precision=53)
-   >>> BigFloat(4.56)
-   BigFloat.exact('4.5599999999999996', precision=53)
-   >>> BigFloat('1e1000')
-   BigFloat.exact('1.0000000000000001e+1000', precision=53)
+   >>> BigFloat(-4.56)
+   BigFloat.exact('-4.5599999999999996', precision=53)
 
-As you see above, each BigFloat instance has a value and a precision,
-with the latter giving the number of bits used to store the
-significand of the BigFloat.  By default, newly-created BigFloats have
-a precision of 53 bits; we'll see how to change this below.  The
-slightly strange form of the output above is chosen to ensure that for
-a BigFloat x, eval(repr(x)) recovers x exactly.  If you just want to
-see the digits, use ``print`` instead::
+Each BigFloat instance has both a *value* and a *precision*.  The
+precision gives the number of bits used to store the significand of
+the BigFloat.  The *value* of a (finite, nonzero) BigFloat with
+precision ``p`` is a real number of the form ``(-1)**sign * m * 2**e``
+where ``sign`` is either ``0`` or ``1``, ``m`` is the *significand*, a
+number in the half-open interval [0.5, 1.0) that can be expressed in
+the form ``n/2**p`` for some integer ``n``, and ``e`` is an integer
+giving the *exponent*.  In addition, zeros (positive and negative),
+infinities and NaNs are representable.  Note that printed form of a
+BigFloat shows only a decimal approximation to the stored value, for
+the sake of human readers.
+
+The precision of newly-constructed BigFloat instances is dictated by
+the *current precision*, which defaults to 53.  This setting can be
+overridden by supplying a ``context`` keyword argument to the
+constructor:
+
+   >>> BigFloat(-4.56, context=precision(24))
+   BigFloat.exact('-4.55999994', precision=24)
+
+The input value is rounded to the correct precision using the *current
+rounding mode*, which defaults to ``RoundTiesToEven``; again, this can
+be overridden with the ``context`` keyword argument:
+
+   >>> BigFloat('3.14')
+   BigFloat.exact('3.1400000000000001', precision=53)
+   >>> BigFloat('3.14', context=RoundTowardZero)
+   BigFloat.exact('3.1399999999999997', precision=53)
+   >>> BigFloat('3.14', context=RoundTowardPositive + precision(24))
+   BigFloat.exact('3.14000010', precision=24)
+
+More generally, the second argument to the BigFloat constructor should
+be an instance of the :class:`Context` class.  The various rounding
+modes are all Context instances, and ``precision`` is a function
+returning a Context:
+
+   >>> RoundTowardNegative
+   Context(rounding='RoundTowardNegative')
+   >>> precision(1000)
+   Context(precision=1000)
+
+Contexts can be combined by addition, as seen above.
+
+   >>> precision(1000) + RoundTowardNegative
+   Context(precision=1000, rounding='RoundTowardNegative')
+
+The `bigfloat` module also defines various constant Contexts.  For
+example, ``quadruple_precision`` is a Context that corresponds to the
+IEEE 754 binary128 interchange format::
+
+   >>> quadruple_precision
+   Context(precision=113, emax=16384, emin=-16493, subnormalize=True)
+   >>> BigFloat('1.1', quadruple_precision)
+   BigFloat.exact('1.10000000000000000000000000000000008', precision=113)
+
+The current settings for precision and rounding mode are also given by
+a Context instance, the *current context*, accessible via the
+:func:`getcontext` function:
+
+   >>> getcontext()
+   Context(precision=53, emax=1073741823, emin=-1073741823, subnormalize=False, rounding='RoundTiesToEven')
+
+Note that (unlike Python's standard decimal module), :class:`Context`
+instances are immutable.  We'll learn more about Contexts, and how to
+use them, below.
+
+There's also a second method for constructing BigFloat instances:
+:meth:`BigFloat.exact`.  As with the usual constructor, this
+constructor accepts integers, floats and strings.  However, for
+integers and floats it performs an exact conversion, creating a
+BigFloat with precision large enough to hold the integer or float
+exactly (regardless of the current precision setting):
+
+   >>> BigFloat.exact(-123)
+   BigFloat.exact('-123.0', precision=7)
+   >>> BigFloat.exact(7**30)
+   BigFloat.exact('22539340290692258087863249.0', precision=85)
+   >>> BigFloat.exact(-56.7)
+   BigFloat.exact('-56.700000000000003', precision=53)
+
+For strings, :meth:`BigFloat.exact` accepts a second ``precision``
+argument, and always rounds using the ``RoundTiesToEven`` rounding
+mode.
+
+   >>> BigFloat.exact('1.1', precision=80)
+   BigFloat.exact('1.1000000000000000000000003', precision=80)
+
+Also unlike the usual constructor, BigFloat.exact makes no use of the
+current context, and so evaluates the same way every time; this is why
+the :func:`repr` of a BigFloat is expressed in terms of
+:meth:`BigFloat.exact`.  The :func:`str` of a BigFloat looks prettier,
+but doesn't supply enough information to recover that BigFloat
+exactly:
 
    >>> print BigFloat('1e1000')
    1.0000000000000001e+1000
 
-All the usual arithmetic operations apply to BigFloats, and BigFloat
-instances can be freely mixed with integers and floats in those
-operations::
+Arithmetic on BigFloats
+^^^^^^^^^^^^^^^^^^^^^^^
+
+All the usual arithmetic operations, with the exception of floor
+division, apply to BigFloats, and BigFloat instances can be freely
+mixed with integers and floats (but not strings!) in those operations:
 
    >>> BigFloat(1234)/3
    BigFloat.exact('411.33333333333331', precision=53)
    >>> BigFloat('1e1233')**0.5
    BigFloat.exact('3.1622776601683794e+616', precision=53)
 
-(Exception: floor division and the divmod function are not yet
-implemented for BigFloats.)  Comparisons between BigFloats and
-integers or floats also behave as you'd expect them to.  The
-:mod:`bigfloat` module provides a number of standard mathematical
-functions.  For example::
+As with the BigFloat constructor, the precision for the result is
+taken from the current context, as is the rounding mode used to round
+the exact mathematical result to the nearest BigFloat.
 
-   >>> sqrt(1729)
+For mixed-type operations, the integer or float is converted *exactly*
+to a BigFloat before the operation (as though the BigFloat.exact
+constructor had been applied to it).  So there's only a single point
+where precision might be lost: namely, when the result of the
+operation is rounded to the nearest value representable as a BigFloat.
+
+.. note::
+
+   The current precision and rounding mode even apply to the unary
+   plus and minus operations.  In particular, ``+x`` is not
+   necessarily a no-op for a BigFloat instance x:
+
+   >>> BigFloat.exact(7**100)
+   BigFloat.exact('3234476509624757991344647769100216810857203198904625400933895331391691459636928060001.0', precision=281)
+   >>> +BigFloat.exact(7**100)
+   BigFloat.exact('3.2344765096247579e+84', precision=53)
+
+   This is occasionally useful, for rounding a result produced in a
+   different context to the current context.
+
+For each arithmetic operation the :mod:`bigfloat` module exports a
+corresponding function.  For example, the :func:`div` function
+corresponds to usual (true) division:
+
+   >>> 355/BigFloat(113)
+   BigFloat.exact('3.1415929203539825', precision=53)
+   >>> div(355, 113)
+   BigFloat.exact('3.1415929203539825', precision=53)
+
+This is useful for a couple of reasons: one reason is that it makes it
+possible to use ``div(x, y)`` in contexts where a BigFloat result is
+desired but where one or both of x and y might be an integer or float.
+But a more important reason is that these functions, like the BigFloat
+constructor, accept an extra ``context`` keyword argument giving a
+context for the operation::
+
+   >>> div(355, 113, context=single_precision)
+   BigFloat.exact('3.14159298', precision=24)
+
+Similarly, the ``sub`` function corresponds to Python's subtraction
+operation.  To fully appreciate some of the subtleties of the ways
+that binary arithmetic operations might be performed, note the
+difference in the results of the following:
+
+   >>> x = 10**16+1  # integer, not exactly representable as a float
+   >>> y = 10**16.   # 10.**16 is exactly representable as a float
+   >>> x - y
+   0.0
+   >>> BigFloat(x) - BigFloat(y)
+   BigFloat.exact('0', precision=53)
+   >>> sub(x, y)
+   BigFloat.exact('1.0000000000000000', precision=53)
+
+For the first subtraction, the integer is first converted to a float,
+losing accuracy, and then the subtraction is performed, giving a
+result of 0.0.  The second case is similar: ``x`` and ``y`` are both
+explicitly converted to BigFloat instances, and the conversion of
+``y`` again loses precision.  In the third case, ``x`` and ``y`` are
+*implicitly* converted to BigFloat instances, and that conversion is
+exact, so the subtraction produces exactly the right answer.
+
+Comparisons between BigFloats and integers or floats also behave as
+you'd expect them to; for these, there's no need for a corresponding
+function.
+
+The :mod:`bigfloat` module provides a number of standard mathematical
+functions.  These functions follow the same rules as the arithmetic
+operations above: the inputs can be integers, floats or BigFloat
+instances; integers and floats are converted to BigFloats using an
+exact conversion; the result is a BigFloat with precision and rounding
+mode taken from the current context, and parameters from the current
+context can be overridden by providing a ``context`` keyword argument.
+Here are some examples:
+
+   >>> sqrt(1729, context=RoundTowardZero)
    BigFloat.exact('41.581245772583578', precision=53)
-   >>> atanh(0.5)
-   BigFloat.exact('0.54930614433405489', precision=53)
-   >>> const_pi()
-   BigFloat.exact('3.1415926535897931', precision=53)
-   >>> const_catalan() # catalan's constant
-   BigFloat.exact('0.91596559417721901', precision=53)
+   >>> sqrt(1729, context=RoundTowardPositive)
+   BigFloat.exact('41.581245772583586', precision=53)
+   >>> atanh(0.5, context=precision(20))
+   BigFloat.exact('0.54930592', precision=20)
+   >>> const_catalan(precision(1000))
+   BigFloat.exact('0.915965594177219015054603514932384110774149374281672134266498119621763019776254769479356512926115106248574422619196199579035898803325859059431594737481158406995332028773319460519038727478164087865909024706484152163000228727640942388259957741508816397470252482011560707644883807873370489900864775113226027', precision=1000)
    >>> 4*exp(-const_pi()/2/agm(1, 1e-100))
    BigFloat.exact('9.9999999999998517e-101', precision=53)
 
-Note that the arguments to all of these functions can be integers,
-floats, or BigFloats.  The results are always BigFloats.
+For a full list of the supported functions, see the reference manual.
 
-So far, all results have been rounded to a precision of 53 bits, the
-same as Python's float type uses on a typical platform.  Python's
-with statement provides a mechanism for making temporary changes
-to the precision::
+Controlling the precision and rounding mode
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-   >>> with precision(200):
-   ...     x = 1/BigFloat(98)
+We've seen one way of controlling precision and rounding mode, via the
+``context`` keyword argument.  There's another way that's often more
+convenient, especially when a single context change is supposed to
+apply to multiple operations: contexts can be used directly in Python
+``with`` statements.  Note: if you're using Python 2.5, you'll need
+to enable with statements with:
+
+   >>> from __future__ import with_statement
+
+For example, here we compute high-precision upper and lower-bounds for
+the thousandth harmonic number:
+
+   >>> with precision(100):
+   ...     with RoundTowardNegative:  # lower bound
+   ...         lower_bound = sum(div(1, n) for n in range(1, 1001))
+   ...     with RoundTowardPositive:  # upper bound
+   ...         upper_bound = sum(div(1, n) for n in range(1, 1001))
    ... 
-   >>> x
-   BigFloat.exact('0.010204081632653061224489795918367346938775510204081632653061220', precision=200)
+   >>> lower_bound
+   BigFloat.exact('7.4854708605503449126565182015873', precision=100)
+   >>> upper_bound
+   BigFloat.exact('7.4854708605503449126565182077593', precision=100)
 
-Here we get a result with 200 bits of precision, or around 60 decimal
-digits.  All statements inside the with block would be executed with a
-precision of 200 bits; after the with block exits the previous
-precision is restored.
+The effect of the with statement is to change the current context for
+the duration of the with block; when the block exits, the previous
+context is restored.  With statements can be nested, as seen above.
+Let's double-check the above results using the asymptotic formula for
+the nth harmonic number [#harmonic]_:
 
-Rounding modes can be controlled in a similar fashion.  There are four
-rounding modes: ``RoundTiesToEven``, ``RoundTowardPositive``,
-``RoundTowardNegative`` and ``RoundTowardZero``.  Here's an example
-that uses the ``RoundTowardPositive`` and ``RoundTowardNegative``
-rounding modes to compute upper and lower bounds for log10(2)::
-
-   >>> with RoundTowardPositive:
-   ...     upper_bound = log10(2)
-   ...     exp_upper_bound = 10**upper_bound
+   >>> n = 1000
+   >>> with precision(100):
+   ...     approx = log(n) + const_euler() + div(1, 2*n) - 1/(12*sqr(n))
    ... 
-   >>> with RoundTowardNegative:
-   ...     lower_bound = log10(2)
-   ...     exp_lower_bound = 10**lower_bound
-   ... 
-   >>> exp_lower_bound  # should be strictly less than 2
-   BigFloat.exact('1.99999999999999999999999999999999981', precision=113)
-   >>> exp_lower_bound < 2 < exp_upper_bound
-   True
+   >>> approx
+   BigFloat.exact('7.4854708605503365793271531207983', precision=100)
 
-Note that BigFloat instances are immutable: a change to the precision
-or rounding mode does not affect existing BigFloat instances; it only
-affects the choice of precision for newly-created BigFloats.
+The error in this approximation should be approximately -1/(120*n**4):
 
-A more permanent change can be effected using the setcontext function.
-After::
+   >>> error = approx - lower_bound
+   >>> error
+   BigFloat.exact('-8.3333293650807890e-15', precision=53)
+   >>> -1/(120*pow(n, 4))
+   BigFloat.exact('-8.3333333333333336e-15', precision=53)
 
-   >>> setcontext(precision(113))
+A more permanent change to the context can be effected using the
+:func:`setcontext` function, which takes a single argument of type
+:class:`Context`:
 
-any operation or function call on BigFloats will return a result with
-precision 113.  Conversely, the getcontext() function shows the
-settings currently in use::
+   >>> setcontext(precision(30))
+   >>> sqrt(2)
+   BigFloat.exact('1.4142135624', precision=30)
+   >>> setcontext(RoundTowardZero)
+   >>> sqrt(2)
+   BigFloat.exact('1.4142135605', precision=30)
 
-   >>> getcontext()
-   Context(precision=113, emax=1073741823, emin=-1073741823, subnormalize=False, rounding='RoundTiesToEven')
+An important point here is that in all places that a context is used,
+only the attributes specified by that context are changed.  For
+example, the context ``precision(30)`` only has the ``precision``
+attribute, so only that attribute is affected by the ``setcontext``
+call; the other attributes are not changed.  Similarly, the
+``setcontext(RoundTowardZero)`` line above doesn't affect the
+precision.
 
-Precision and rounding mode can also be set on an
-operation-by-operation basis, by supplying the optional ``context``
-keyword argument to the individual operations.  The above calculations
-could also have been performed as follows::
+There's a ``DefaultContext`` constant giving the default context, so
+you can always restore the original default context as follows:
 
-   >>> upper_bound = log10(2, RoundTowardPositive)
-   >>> exp_upper_bound = pow(10, upper_bound, RoundTowardPositive)
-   >>> lower_bound = log10(2, RoundTowardNegative)
-   >>> exp_lower_bound = pow(10, lower_bound, RoundTowardNegative)
-   >>> exp_lower_bound < 2 < exp_upper_bound
-   True
+   >>> setcontext(DefaultContext)
 
-Note the use of the ``pow`` function above in place of the ``**``
-operator.  For each Python arithmetic operator the :mod:`bigfloat`
-module provides a corresponding function: ``pow`` for ``**``, ``add``
-for ``+``, ``neg`` for unary minus, and so on.  (Here, ``pow`` is one
-of the :mod:`bigfloat` functions that we imported at the start of the
-session; it's not the usual builtin ``pow`` function.)
+.. note::
+
+   If :func:`setcontext` is used within a with statement, its effects
+   only last for the duration of the block following the with
+   statement.
+
+
+Flags
+^^^^^
 
 The :mod:`bigfloat` module also provides four global flags: 'Inexact',
 'Overflow', 'Underflow', 'NanFlag', along with methods to set and test
-these flags::
+these flags:
 
    >>> set_flagstate(set())  # clear all flags
    >>> get_flagstate()
@@ -174,7 +386,7 @@ these flags::
 
 These flags show that overflow occurred, and that the given result
 (infinity) was inexact.  The flags are sticky: none of the standard
-operations ever clears a flag.
+operations ever clears a flag:
 
    >>> sqrt(2)
    BigFloat.exact('1.4142135623730951', precision=53)
@@ -190,48 +402,12 @@ The functions :func:`clear_flag`, :func:`set_flag` and
 :func:`test_flag` allow clearing, setting and testing of individual
 flags.
 
-Installation
-------------
 
-Prerequisites
-^^^^^^^^^^^^^
-
-In order to use the :mod:`bigfloat` module you will need to have both
-the GMP and MPFR libraries already installed on your system.  See the
-`MPFR homepage <http://www.mpfr.org>`_ and the `GMP homepage
-<http://gmplib.org>`_ for more information about these libraries.
-Currently, MPFR version 2.4.0 or higher is required.
-
-This module requires Python version 2.5 or higher.  For use with
-Python 2.5, you'll need to do a ``from __future__ import
-with_statement`` if you want to take advantage of all of the features
-of this module.
-
-Locating the MPFR library
-^^^^^^^^^^^^^^^^^^^^^^^^^
-
-The :mod:`bigfloat` module attempts to locate the MPFR library on your
-system.  If it fails, or if you have multiple MPFR libraries installed
-on your system and want to specify which one to use, you should edit
-the 'mpfr_library_location' line in the 'bigfloat_config.py' file to
-specify the library location.
-
-Other configuration
-^^^^^^^^^^^^^^^^^^^
-
-The 'bigfloat_config.py' file also allows you to specify some other
-system-dependent values.  On a typical system, with default installs
-of GMP and MPFR, it's unlikely that these values will need to be
-changed.  But if you're getting segmentation faults or crashes with
-the bigfloat library then you may need to edit the values in this
-file.  In this case it will probably also be useful to have the gmp.h
-and mpfr.h include files handy;  on Linux systems, these files may
-be in a different package from the library files (e.g., 'mpfr-devel'
-instead of 'mpfr').
-
+Reference
+---------
 
 The BigFloat class
-------------------
+^^^^^^^^^^^^^^^^^^
 
 The :class:`BigFloat` class implements multiple-precision binary
 floating-point numbers.  Each :class:`BigFloat` instance has both a
@@ -284,14 +460,14 @@ zeros, and NaNs.
       relatively prime, d is positive, and the value of self is
       exactly n/d.
 
-      If self is an infinity or nan then ValueError is raised.  Both
-      negative and positive zeros are converted to (0, 1).
+      If self is an infinity or nan then ValueError is raised.
+      Negative and positive zero are both converted to (0, 1).
 
 
 
 
-Context objects
----------------
+The Context class
+^^^^^^^^^^^^^^^^^
 
 A :class:`Context` object is a simple immutable object that packages together
 attributes describing a floating-point format, together with a rounding mode.
@@ -401,7 +577,7 @@ A neater way to make a temporary change to the current context is to
 use a with statement.  Every :class:`Context` instance can be used
 directly in a with statement, and changes the current context for the
 duration of the block following the with statement, restoring the
-previous context when the block is exited.  For example::
+previous context when the block is exited.  For example:
 
    >>> with single_precision:
    ...     sqrt(2)
@@ -437,12 +613,12 @@ one aspect of the current context.
 .. function:: rounding(rnd)
 
    Return a copy of the current context with the rounding mode changed
-   to rnd.  Example usage::
+   to rnd.  Example usage:
 
-      >>> with rounding(RoundTowardNegative):
+      >>> with RoundTowardNegative:
       ...     lower_bound = log2(10)
       ... 
-      >>> with rounding(RoundTowardPositive):
+      >>> with RoundTowardPositive:
       ...     upper_bound = log2(10)
       ... 
       >>> lower_bound
@@ -463,24 +639,6 @@ one aspect of the current context.
       ...     gamma(1.5)
       ... 
       BigFloat.exact('0.88622692545275801364912', precision=73)
-
-.. function:: exponent_limits(emin=None, emax=None, subnormalize=False)
-
-   Return a copy of the current context with given exponent
-   limits. emin and emax default to the smallest and largest possible
-   values, respectively.  When called with no arguments, this function
-   can be convenient for temporarily relaxing exponents to avoid
-   underflow or overflow during intermediate calculations::
-
-      >>> with double_precision:
-      ...     log(pow(2, 1234))   # intermediate power overflows
-      ... 
-      BigFloat.exact('Infinity', precision=53)
-      >>> with double_precision:
-      ...     with exponent_limits():
-      ...         log(pow(2, 1234))
-      ... 
-      BigFloat.exact('855.34362081097254', precision=53)
 
 
 
@@ -521,13 +679,13 @@ Here are some notes on particular arithmetic operations.
   are not currently implemented for :class:`BigFloat` instances.
 
 For each arithmetic operation there's a corresponding module-level
-function.  This function also accepts a keyword argument 'rounding',
+function.  This function also accepts a keyword argument 'context',
 which can be used to override the rounding mode of the current
-context.  For example::
+context.  For example:
 
-   >>> div(2, 3, rounding=RoundTowardPositive)
+   >>> div(2, 3, context=RoundTowardPositive)
    BigFloat.exact('0.66666666666666674', precision=53)
-   >>> div(2, 3, rounding=RoundTowardNegative)
+   >>> div(2, 3, context=RoundTowardNegative)
    BigFloat.exact('0.66666666666666663', precision=53)
 
 This can be handy for places where you only want to alter the rounding
@@ -537,7 +695,7 @@ These module-level functions are also useful when you don't
 necessarily know whether the input arguments are integers, floats or
 BigFloats and you want to ensure that the result is a :class:`BigFloat`, or
 that there's no loss of precision during argument conversion.  Consider
-the following::
+the following:
 
    >>> x = 10.**16  # exactly representable as a Python float
    >>> y = 10**16-1 # Python integer
@@ -677,3 +835,6 @@ use of the current context, and do not affect the state of the flags.
       If self is an infinity or nan then ValueError is raised.  Both
       negative and positive zeros are converted to (0, 1).
 
+.. rubric:: Footnotes
+
+.. [#harmonic] See http://mathworld.wolfram.com/HarmonicNumber.html
