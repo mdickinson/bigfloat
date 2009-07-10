@@ -1,0 +1,61 @@
+\documentclass{article}
+
+\usepackage{amsmath}
+\usepackage{amsthm}
+
+\newtheorem{lemma}{Lemma}
+\newtheorem{definition}{Definition}
+\newtheorem{examples}{Examples}
+\newcommand{\abs}[1]{|#1|}
+
+\begin{document}
+
+\begin{definition}
+  For any positive real number~$x$, write $e(x)$ for the unique
+  integer such that $2^{e(x)-1} \le x < 2^{e(x)}$.
+\end{definition}
+
+The following lemma is needed for implementing efficient floor division.
+
+\begin{lemma}
+  Suppose that $x$, $y$ and $z$ are positive binary floating-point
+  numbers with precisions~$p$, $q$ and $r$ respectively, and that $z
+  \ne x/y$.  Then
+  $$\abs{z-x/y} \ge 2^{e(z) - \max(p+1,\,q+r)}$$ where $e(z)$ is the
+  unique integer satisfying $2^{e(z)-1} \le z < 2^{e(z)}$.
+\end{lemma}
+
+\begin{proof}
+  We divide the proof into two cases.  For the first case, suppose
+  that $e(x)-e(y) \ge e(z)-1$.  Now
+  $$z-x/y = (2^{r-e(z)}z)2^{e(z)-r} - \frac{2^{p-e(x)}x}{2^{q-e(y)}y}
+  2^{e(x)-e(y)-p+q}$$ and $2^{r-e(z)}z$, $2^{p-e(x)}x$ and
+  $2^{q-e(y)}y$ are integers, so
+  $$z-x/y = \left(\frac{2^{\min(e(z)-r,\,
+      e(x)-e(y)-p+q)}}{2^{q-e(y)}y}\right)t$$ for some nonzero
+  integer~$t$.  Since $2^{-e(y)}y < 1$ by definition of $e(y)$, and
+  $e(x)-e(y)\ge e(z)-1$ by assumption, the result follows.
+
+  For the second case, suppose that $e(x) - e(y) \le e(z)-2$.
+  Then
+  \begin{align*}
+    \frac xy&\le (1-2^{-p})2^{e(x)-e(y)+1}\\
+      &\le(1-2^{-p})2^{e(z)-1}\\
+      &< 2^{e(z)-1} \le z.
+  \end{align*}
+  and hence $z-x/y \ge 2^{e(z)-1-p}$.  Hence we obtain the inequality
+  of the theorem.  We get equality if and only if $y$ and $z$ are
+  exact powers of $2$, $x = (1-2^{-p})2^{e(x)}$, $e(x)-e(y) = e(z)-2$,
+  and $p+1\ge q+r$.
+\end{proof}
+
+\begin{examples}
+  Suppose that $y=z=1$, $x = 1-2^{-5}$.  Then $e(z) = 1$,
+  we can take $q=r=1$ and $p=5$, and the lemma predicts that $z-x/y \ge
+  2^{-5}$.
+
+  Now suppose that
+
+\end{examples}
+
+\end{document}
