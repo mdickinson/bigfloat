@@ -1,0 +1,4 @@
+Changes to make for py3k
+------------------------
+- Don't need from __future__ import with
+- get rid of bit_length function and use int.bit_length instead
