@@ -358,6 +358,10 @@ def _wrap_standard_function(f, argtypes):
         context = getcontext()
         if 'context' in kwargs:
             context += kwargs['context']
+        elif len(args) == len(argtypes) + 1:
+            context += args[-1]
+            args = args[:-1]
+
         if len(args) != len(argtypes):
             raise TypeError("Wrong number of arguments")
         converted_args = []
