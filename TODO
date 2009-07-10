@@ -11,9 +11,3 @@ Implement floordiv method for BigFloats
   something huge, n + 1 shouldn't be computed exactly (since this
   might involved billions of bits); instead we need to find an
   indirect way of doing this comparison.
-
-Flags for subnormal numbers
----------------------------
-
-  mpfr_subnormalize doesn't set the underflow and inexact flags
-  appropriately;  we should do that.
