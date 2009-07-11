@@ -499,7 +499,7 @@ standard_unary_functions = [
     'acosh', 'asinh', 'atanh',
     'log1p', 'expm1',
     'eint', 'li2',
-    'gamma', 'lngamma', 'lgamma',
+    'gamma', 'lngamma',
     'zeta',
     'erf', 'erfc',
     'j0', 'j1', 'y0', 'y1',
