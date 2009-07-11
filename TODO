@@ -11,3 +11,14 @@ Implement floordiv method for BigFloats
   something huge, n + 1 shouldn't be computed exactly (since this
   might involved billions of bits); instead we need to find an
   indirect way of doing this comparison.
+
+
+Implement round for BigFloats
+-----------------------------
+  Should be straightforward;  go via string.
+
+Wrap the lgamma function
+------------------------
+  Problem here is that lgamma is not a standard function: it
+  has two outputs, a sign and a BigFloat.
+
