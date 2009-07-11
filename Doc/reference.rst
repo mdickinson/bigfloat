@@ -629,6 +629,20 @@ instances.
    imported.  It has precision of 53, large exponent bounds, no
    subnormalization, and the RoundTiesToEven rounding mode.
 
+.. data:: EmptyContext
+
+   Equal to Context().  Occasionally useful where a context is
+   syntactically required for a with statement, but no change to the
+   current context is desired.  For example::
+
+      if <want_extra_precision>:
+          c = extra_precision(10)
+      else:
+          c = EmptyContext
+
+      with c:
+          <do calculation>
+
 .. data:: half_precision
 .. data:: single_precision
 .. data:: double_precision
@@ -664,6 +678,28 @@ instances.
    rounds results towards zero.  ``RoundTowardPositive`` rounds
    results towards positive infinity, and ``RoundTowardsNegative``
    rounds results towards negative infinity.
+
+Constants
+^^^^^^^^^
+
+.. data:: PRECISION_MIN
+.. data:: PRECISION_MAX
+
+   Minimum and maximum precision that's valid for Contexts and
+   BigFloat instances.  In the current implementation, PRECISION_MIN
+   is 2 and PRECISION_MAX is 2**31-1.
+
+.. data:: EMIN_MIN
+.. data:: EMIN_MAX
+
+   Minimum and maximum allowed values for the Context emin attribute.
+   In the current implementation EMIN_MIN = -EMIN_MAX = 1-2**30
+
+.. data:: EMAX_MIN
+.. data:: EMAX_MAX
+
+   Minimum and maximum allowed values for the Context emax attribute.
+   In the current implementation -EMAX_MIN = EMAX_MAX = 2**30-1
 
 
 The current context
@@ -800,6 +836,14 @@ All functions in this section follow the same rules:
   explicit ``context`` keyword argument.
 * Results are correctly rounded.
 
+Conversion from string
+""""""""""""""""""""""
+
+.. function:: set_str2(s, base)
+
+   Convert a string s, representing a number in base b, to a BigFloat.
+   The base should satisfy 2 <= base <= 36.
+
 Arithmetic functions
 """"""""""""""""""""
 
@@ -810,6 +854,16 @@ Arithmetic functions
 .. function:: pow(x, y)
 
    Return x+y, x-y, x*y, x/y and x**y respectively.
+
+.. function:: mod(x, y)
+
+   Return the reduction of x modulo y.  The result has the same sign as x.
+   In other words, return x-q*y, where q is the integer part of x/y.
+
+.. function:: remainder(x, y)
+
+   Return x-q*y, where q is the closest integer to x/y, with ties rounded
+   to the nearest even integer.
 
 .. function:: dim(x, y)
 
@@ -879,24 +933,24 @@ Exponential and logarithmic functions
    >>> expm1(1e-10)
    BigFloat.exact('1.0000000000500000e-10', precision=53)
 
-.. function:: exp2(x):
+.. function:: exp2(x)
 
    Return ``2**x``.
 
-.. function:: exp10(x):
+.. function:: exp10(x)
 
    Return ``10**x``.
 
-.. function:: log(x):
+.. function:: log(x)
 
    Return the natural (base ``e``) logarithm of *x*.
 
-.. function:: log1p(x):
+.. function:: log1p(x)
 
    Return ``log(1+x)``.  Useful for small values of x, where
    computing ``log(1+x)`` directly loses significant accuracy.
 
-.. function:: log2(x):
+.. function:: log2(x)
 
    Return the log base 2 of *x*.
 
@@ -933,7 +987,6 @@ Trigonometric functions
    Return the arctangent2 of y and x.  This is the angle that the ray
    joining (0, 0) to (x, y) makes with the positive x-axis.
 
-
 Hyperbolic trig functions
 """"""""""""""""""""""""""
 
@@ -963,6 +1016,10 @@ Special functions
 .. function:: li2(x)
 
    Return the real part of the dilogarithm of x.
+
+.. function:: factorial(n)
+
+   Return the factorial of n.  *n* should be a nonnegative integer.
 
 .. function:: gamma(x)
 
@@ -1002,6 +1059,27 @@ Special functions
 
    Return the arithmetic-geometric mean of x and y.
 
+Constants
+""""""""""
+
+.. function:: const_catalan()
+
+   The Catalan constant 1 - 1/3**2 + 1/5**2 - 1/7**2 + 1/9**2 - ... = 0.9159655941...
+
+.. function:: const_euler()
+
+   The Euler-Mascheroni constant 0.5772156649..., equal to the limit
+   of (1 + 1/2 + 1/3 + ... + 1/n) - log(n) as n approaches infinity.
+
+.. function:: const_log2()
+
+   The natural log of 2, 0.6931471805...
+
+.. function:: const_pi()
+
+   The constant pi = 3.1415926535...
+
+
 Miscellaneous functions
 """"""""""""""""""""""""
 
@@ -1020,7 +1098,102 @@ Miscellaneous functions
    Return a BigFloat with absolute value taken from x and sign taken
    from y.
 
+.. function:: frac(x)
 
+   Return the fractional part of x.  The result has the same sign
+   as x.
+
+.. function:: floor(x)
+
+   Return the floor of x.  Note that since the result is rounded to
+   the current context, it's quite possible for the result to be
+   larger than x:
+
+   >>> with DefaultContext:
+   ...     floor(2**100-1) <= 2**100-1
+   ... 
+   False
+
+   If you want to be sure of getting a result that's no larger than
+   *x*, use the ``RoundTowardNegative`` rounding mode.  Alternatively,
+   if you want the exact floor you may want to clear the ``Inexact``
+   flag before the call and test it afterwards.  Similar comments
+   apply to the :func:`ceil`, :func:`round` and :func:`trunc`
+   functions.
+
+.. function:: ceil(x)
+
+   Return the ceiling of x.
+
+.. function:: round(x)
+
+   Return x, rounded to the nearest integer.  Ties are rounded
+   away from zero. ('Biased rounding')
+
+.. function:: trunc(x)
+
+   Return the integer part of x.
+
+Flags
+-----
+
+.. data:: Underflow
+
+   Underflow flag.  Set whenever the result of an operation
+   underflows.  The meaning of this flag differs depending on whether
+   the subnormalize attribute is true for the operation context.  In
+   the language of IEEE 754, we use the `after rounding` semantics.
+   The Underflow flag is set on underflow even when the result of an
+   operation is exact.
+
+   In detail: let ``c`` be the context that's in effect for an
+   operation, function or BigFloat construction.  Let ``x`` be the
+   result of the operation, rounded to the context precision with the
+   context rounding mode, but as though the exponent were unbounded.
+
+   If c.subnormalize is False, the Underflow flag is set if and only
+   if ``x`` is nonzero, finite, and strictly smaller than
+   ``2**(c.emin-1)`` in absolute value.  If c.subnormalize is True,
+   the Underflow flag is set if and only if ``x`` is nonzero, finite,
+   and strictly smaller than ``2**(c.emin+c.precision-2)`` in absolute
+   value.
+
+.. data:: Overflow
+
+   Set whenever the result of an operation overflows.  An operation
+   performed in a context ``c`` overflows if the result computed as if
+   with unbounded exponent range is finite and greater than or equal
+   to ``2**c.emax`` in absolute value.
+
+.. data:: Inexact
+
+   Inexact flag.  Set whenever the result of an operation is not
+   exactly equal to the true mathematical result.
+
+.. data:: NanFlag
+
+   NaN flag.  Set whever the result of an operation gives a NaN
+   result.
+
+.. function:: clear_flag(flag)
+
+   Clear the given flag.
+
+.. function:: set_flag(flag)
+
+   Set the given flag.
+
+.. function:: test_flag(flag)
+
+   Return True if the given flag is set and False otherwise.
+
+.. function:: get_flagstate()
+
+   Return a set containing the flags that are currently set.
+
+.. function:: set_flagstate(flag_set)
+
+   Set all flags that are in *flag_set*, and clear all other flags.
 
 .. rubric:: Footnotes
 
