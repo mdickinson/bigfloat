@@ -412,7 +412,7 @@ def _wrap_predicate(f):
         return f(*converted_args)
     return wrapped_f
 
-def reverse_args(f):
+def _reverse_args(f):
     def reversed_f(self, other):
         return f(other, self)
     return reversed_f
@@ -443,7 +443,7 @@ class BigFloat(object):
         """
         with (context if context is not None else EmptyContext):
             if isinstance(value, float):
-                return set_d(value)
+                return _set_d(value)
             elif isinstance(value, basestring):
                 return set_str2(value.strip(), 10)
             elif isinstance(value, (int, long)):
@@ -765,6 +765,15 @@ name_translation = {
     'unordered_p' : 'unordered',
     'lessgreater_p' : 'lessgreater',
 
+    # fac_ui -> factorial
+    'fac_ui': 'factorial',
+
+    # conversions to integer
+    'rint_floor': 'floor',
+    'rint_ceil': 'ceil',
+    'rint_round': 'round',
+    'rint_trunc': 'trunc',
+
     # suppress export of some standard functions
     'add_d': '_add_d',
     'add_ui': '_add_ui',
@@ -784,8 +793,27 @@ name_translation = {
     'd_div': '_d_div',
     'ui_div': '_ui_div',
     'si_div': '_si_div',
-    'sqrt_ui' : '_sqrt_ui',
+    'pow_si': '_pow_si',
+    'pow_ui': '_pow_ui',
+    'ui_pow': '_ui_pow',
+    'ui_pow_ui': '_ui_pow_ui',
 
+    'sqrt_ui': '_sqrt_ui',
+    'zeta_ui': '_zeta_ui',
+
+    # and some more
+    'div_2si': '_div_2si',
+    'div_2ui': '_div_2ui',
+    'mul_2si': '_mul_2si',
+    'mul_2ui': '_mul_2ui',
+
+    'set_d': '_set_d',
+    'set_si': '_set_si',
+    'set_si_2exp': '_set_si_2exp',
+    'set_ui': '_set_ui',
+    'set_ui_2exp': '_set_ui_2exp',
+
+    'setsign': '_setsign',
 }
 
 def _wrap_standard_functions():
@@ -819,12 +847,12 @@ BigFloat.__pow__ = pow
 BigFloat.__mod__ = mod
 
 # and their reverse operations
-BigFloat.__radd__ = reverse_args(add)
-BigFloat.__rsub__ = reverse_args(sub)
-BigFloat.__rmul__ = reverse_args(mul)
-BigFloat.__rdiv__ = BigFloat.__rtruediv__ = reverse_args(div)
-BigFloat.__rpow__ = reverse_args(pow)
-BigFloat.__rmod__ = reverse_args(mod)
+BigFloat.__radd__ = _reverse_args(add)
+BigFloat.__rsub__ = _reverse_args(sub)
+BigFloat.__rmul__ = _reverse_args(mul)
+BigFloat.__rdiv__ = BigFloat.__rtruediv__ = _reverse_args(div)
+BigFloat.__rpow__ = _reverse_args(pow)
+BigFloat.__rmod__ = _reverse_args(mod)
 
 # comparisons
 BigFloat.__eq__ = _is_equal
