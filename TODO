@@ -22,3 +22,6 @@ Wrap the lgamma function
   Problem here is that lgamma is not a standard function: it
   has two outputs, a sign and a BigFloat.
 
+* Better error messages
+
+* Docstrings for standard functions
