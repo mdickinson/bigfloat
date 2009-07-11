@@ -178,15 +178,16 @@ mode.
    >>> BigFloat.exact('1.1', precision=80)
    BigFloat.exact('1.1000000000000000000000003', precision=80)
 
-Also unlike the usual constructor, BigFloat.exact makes no use of the
-current context, and so evaluates the same way every time; this is why
-the :func:`repr` of a BigFloat is expressed in terms of
-:meth:`BigFloat.exact`.  The :func:`str` of a BigFloat looks prettier,
-but doesn't supply enough information to recover that BigFloat
-exactly:
+The result of a call to BigFloat.exact is independent of the current
+context; this is why the :func:`repr` of a BigFloat is expressed in
+terms of :meth:`BigFloat.exact`.  The :func:`str` of a BigFloat looks
+prettier, but doesn't supply enough information to recover that
+BigFloat exactly if you don't know the precision:
 
-   >>> print BigFloat('1e1000')
-   1.0000000000000001e+1000
+   >>> print BigFloat('1e1000', precision(20))
+   9.9999988e+999
+   >>> print BigFloat('1e1000', precision(21))
+   9.9999988e+999
 
 Arithmetic on BigFloats
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -416,27 +417,38 @@ of significant bits used to store the value.  A finite nonzero
 :class:`BigFloat` instance with precision p can be thought of as a
 (sign, significand, exponent) triple (s, m, e), representing the value
 (-1)**s * m * 2**e, where m is a value in the range [0.5, 1.0) stored
-with p bits of precision.  (Thus m is of the form n/2**p for some
-integer n with 2**(p-1) <= n < 2**p.)
+with p bits of precision.  Thus m is of the form n/2**p for some
+integer n with 2**(p-1) <= n < 2**p.
 
 In addition to nonzero finite numbers, :class:`BigFloat` instances can
-also represent positive and negative infinities, positive and negative
-zeros, and NaNs.
+also represent positive and negative infinity, positive and negative
+zero, and NaNs.
 
-:class:`BigFloat` instances should be considered immutable.
+:class:`BigFloat` instances should be treated as immutable.
 
-.. class:: BigFloat(value)
+.. class:: BigFloat(value, context=None)
 
    Construct a new :class:`BigFloat` instance from an integer, string,
-   float or another :class:`BigFloat` instance, using the rounding-mode
-   and precision given by the current context.
+   float or another :class:`BigFloat` instance, using the
+   rounding-mode and output format (precision, exponent bounds and
+   subnormalization) given by the current context.  If the *context*
+   keyword argument is given, its value should be a :class:`Context`
+   instance and its attributes override those of the current context.
 
    *value* can be an integer, string, float, or another
    :class:`BigFloat` instance.  In all cases the given value is
-   rounded to the format (precision, exponent limits and
+   rounded to the format (determined by precision, exponent limits and
    subnormalization) given by the current context, using the rounding
    mode specified by the current context.  The integer 0 is always
    converted to positive zero.
+
+   .. method:: fromhex(cls, value, context=None)
+
+      Class method that constructs a new :class:`BigFloat` instance
+      from a hexadecimal string.  Rounds to the current context using
+      the given precision.  If the *context* keyword argument is
+      given, its value should be a :class:`Context` instance and its
+      attributes override those of the current context.
 
    .. method:: exact(cls, value, precision=None)
 
@@ -454,6 +466,12 @@ zeros, and NaNs.
       precision argument must be given.  The string is converted using
       the given precision and the RoundTiesToEven rounding mode.
 
+   .. method:: hex(self)
+
+      Return a hexadecimal representation of a BigFloat.  The
+      advantage of the hexadecimal representation is that it
+      represents the value of the BigFloat exactly.
+
    .. method:: as_integer_ratio(self)
 
       Return a pair (n, d) of integers such that n and d are
@@ -463,58 +481,144 @@ zeros, and NaNs.
       If self is an infinity or nan then ValueError is raised.
       Negative and positive zero are both converted to (0, 1).
 
+Special methods
+""""""""""""""""
 
+The :class:`BigFloat` type has a full complement of special methods.
+Here are some brief notes on those methods, indicating any possible
+deviations from expected behaviour.
+
+* The repr of a BigFloat instance ``x`` has the property that
+  ``eval(repr(x))`` recovers ``x`` exactly.
+
+* The '+' ,'-', '*', '/', '**' and '%' binary operators are supported,
+  and mixed-type operations involving a BigFloat and an integer or
+  float are permitted.  Mixed-type operations behave as though the
+  non-BigFloat operand is first converted to a BigFloat with no loss
+  of accuracy.  The '/' operator implements true division, regardless
+  of whether 'from __future__ import division' is in effect or not.
+  The result of '%' has the same sign as the first argument, not the
+  second.  Floor division is not currently implemented.
+
+* The '+' and '-' unary operators and built-in :func:`abs` function
+  are supported.  Note that these all round to the current context; in
+  particular, '+x' is not necessarily equal to 'x' for a BigFloat ``x``.
+
+* The six comparison operators '==', '<=', '<', '!=', '>', '>=' are
+  supported.  Comparisons involving NaNs always return False, except
+  in the case of '!=' where they always return True.  Again,
+  comparisons with integers or floats are permitted, with the integer
+  or float being converted exactly before the comparison; the context
+  does not affect the result of a comparison.
+
+* Conversions to int and long always round towards zero; conversions
+  to float always use the ``RoundTiesToEven`` rounding mode.
+  Conversion to bool returns False for a nonzero BigFloat and True
+  otherwise.  None of these conversions is affected by the current
+  context.
+
+* BigFloats are hashable.  For Python 2.6 and later, the hash function
+  obeys the rule that objects that compare equal should hash equal; in
+  particular, if ``x == n`` for some BigFloat instance ``x`` and some
+  Python int or long ``n``then ``hash(x) == hash(n)``, and similarly
+  for floats.  In Python 2.5, there are some rare cases where ``x ==
+  n`` does not imply ``hash(x) == hash(n)``.
 
 
 The Context class
 ^^^^^^^^^^^^^^^^^
 
-A :class:`Context` object is a simple immutable object that packages together
-attributes describing a floating-point format, together with a rounding mode.
+A :class:`Context` object is a simple immutable object that packages
+together attributes describing a floating-point format, together with
+a rounding mode.
 
-.. class:: Context(precision, rounding, emax, emin, subnormalize)
+.. class:: Context(precision=None, emin=None, emax=None, subnormalize=None, rounding=None)
 
-   Create a new Context object with the given attributes.  The
-   arguments correspond to the attributes of the :class:`Context`
-   object, described below.  :class:`Context` instances should be
-   treated as immutable, and all attributes are read-only.
+   Create a new Context object with the given attributes.  Not all
+   attributes need to be specified.  Note that all attributes of the
+   generated Context are read-only.  Attributes that are unset for
+   this Context instance return ``None``.
 
    .. attribute:: precision
 
-      Precision of the floating-point format, given in bits.
+      Precision of the floating-point format, given in bits.  This
+      should be an integer in the range [PRECISION_MIN,
+      PRECISION_MAX].  PRECISION_MIN is usually 2.
 
    .. attribute:: emax
 
-      Maximum exponent allowed for this format.  The largest
-      representable finite number representable in the context self is
+      Maximum exponent allowed for this format.  The largest finite
+      number representable in the context self is
       (1-2**-self.precision) * 2**self.emax.
 
    .. attribute:: emin
 
-      Minimum exponent allowed for this format.  The smallest representable
-      positive number in the format is 0.5 * 2**emin.
+      Minimum exponent allowed for this format.  The smallest positive
+      number representable in the context self is ``0.5 * 2**self.emin``.
+
+      .. note::
+
+         There's nothing to stop you defining a context with emin >
+         emax, but don't expect to get sensible results if you do
+         this.
 
    .. attribute:: subnormalize
 
-      A boolean value, True if the format has gradual underflow, and
-      False otherwise.  With gradual underflow, all finite floating-point
-      numbers have a value that's an integer multiple of 2**(emin-1).
+      A boolean value: True if the format has gradual underflow, and
+      False otherwise.  With gradual underflow, all finite
+      floating-point numbers have a value that's an integer multiple
+      of 2**(emin-1).
 
    .. attribute:: rounding
 
-      The rounding mode of this Context.
-
-   :class:`Context` instances are callable, accepting a set of keyword
-   arguments that are used to update the attributes of the Context.
-   This gives a convenient way to obtain a modification of an existing
-   context::
-
-      >>> double_precision
-      Context(precision=53, rounding=RoundTiesToEven, emax=1024, emin=-1073, subnormalize=True)
-      >>> double_precision(precision=64)
-      Context(precision=64, rounding=RoundTiesToEven, emax=1024, emin=-1073, subnormalize=True)
+      The rounding mode of this Context.  This should be a string.
+      Valid values are 'RoundTiesToEven', 'RoundTowardZero',
+      'RoundTowardPositive' and 'RoundTowardNegative'.  Note that the
+      rounding modes ``RoundTiesToEven``, etc. exported by the
+      :mod:`bigfloat` module are Context instances, not strings, so
+      cannot be used directly here.
 
 
+:class:`Context` instances can be added.  If ``x`` and ``y`` are
+Context instances then ``x + y`` is the Context whose attributes
+combine those of ``x`` and ``y``.  In the case that both ``x`` and
+``y`` have a particular attribute set, the value for ``y`` takes
+precedence:
+
+   >>> x = Context(precision=200, rounding='RoundTiesToEven')
+   >>> y = Context(precision=53, subnormalize=True)
+   >>> x + y
+   Context(precision=53, subnormalize=True, rounding='RoundTiesToEven')
+   >>> y + x
+   Context(precision=200, subnormalize=True, rounding='RoundTiesToEven')
+
+:class:`Context` instances can be used in with statements to alter
+the current context.  In effect, ::
+
+   with c:
+       <block>
+
+behaves roughly like ::
+
+   old_context = getcontext()
+   setcontext(c)
+   <block>
+   setcontext(old_context)
+
+except that nesting of with statements works as you'd expect, and the
+old context is guaranteed to be restored even if an exception occurs
+during execution of the block.
+
+Note that for Context instances ``x`` and ``y``, ::
+
+   with x + y:
+       <block>
+
+is exactly equivalent to ::
+
+   with x:
+       with y:
+           <block>
 
 The bigfloat module defines a number of predefined :class:`Context`
 instances.
@@ -532,38 +636,67 @@ instances.
 
    These :class:`Context` instances correspond to the binary16,
    binary32, binary64 and binary128 interchange formats described in
-   IEEE 754-2008 (section 3.6).
+   IEEE 754-2008 (section 3.6).  They're all special cases of the
+   :func:`IEEEContext` function.
 
 .. function:: IEEEContext(bitwidth)
 
-   If bitwidth is one of 16, 32, 64, or a multiple of 32 that's not
-   less than 128, return the IEEE binary interchange format with the
-   given bit width.  See section 3.6 of IEEE 754-2008 for details.
+   If bitwidth is one of widths permitted by IEEE 754 (that is, either
+   16, 32, 64, or a multiple of 32 that's not less than 128), return
+   the IEEE 754 binary interchange format with the given bit width.
+   See section 3.6 of IEEE 754-2008 or the bigfloat source for
+   details.
 
+.. function:: precision(p)
 
-Creating new contexts
----------------------
+   A convenience function, to save typing.  ``precision(p)`` is
+   exactly equivalent to ``Context(precision=p)``.
 
+.. data:: RoundTiesToEven
+.. data:: RoundTowardZero
+.. data:: RoundTowardPositive
+.. data:: RoundTowardNegative
+
+   Contexts corresponding to the four available rounding modes.
+   ``RoundTiesToEven`` rounds the result of an operation or function
+   to the nearest representable BigFloat, with ties rounded to the
+   BigFloat whose least significant bit is zero.  ``RoundTowardZero``
+   rounds results towards zero.  ``RoundTowardPositive`` rounds
+   results towards positive infinity, and ``RoundTowardsNegative``
+   rounds results towards negative infinity.
 
 
 The current context
--------------------
+^^^^^^^^^^^^^^^^^^^
 
 There can be many Context objects in existence at one time, but
 there's only ever one *current context*.  The current context is given
-by a thread-local :class:`Context` instance.  Whenever any arithmetic
-operation or function computation is performed, the current context is
-consulted to determine:
+by a thread-local :class:`Context` instance.  Whenever the BigFloat
+constructor is called, or any arithmetic operation or standard
+function computation is performed, the current context is consulted to
+determine:
 
-* The format that the result of the operation or function should take, and
+* The format that the result of the operation or function should take
+  (as specified by the ``precision``, ``emax``, ``emin`` and
+  ``subnormalize`` attributes of the context), and
 
-* The rounding mode to use when computing the result, except when this
-  rounding mode has been directly overridden by giving the 'rounding'
-  keyword argument to a function call.
+* The rounding mode to use when computing the result, as specified by
+  the ``rounding`` attribute of the current context.
 
-There are two ways to change the current context.  The direct way to
-get and set the current context is to use the :func:`getcontext` and
-:func:`setcontext` functions.
+If an additional ``context`` keyword argument is given to the
+operation, function or constructor, then attributes from the context
+override the corresponding attributes in the current context.
+For example, ::
+
+   sqrt(x, context=my_context)
+
+is equivalent to ::
+
+   with my_context:
+       sqrt(x)
+
+The current context can be read and written directly using the
+:func:`getcontext` and :func:`setcontext` functions.
 
 .. function:: getcontext()
 
@@ -573,63 +706,15 @@ get and set the current context is to use the :func:`getcontext` and
 
    Set the current context to the given context.
 
-A neater way to make a temporary change to the current context is to
-use a with statement.  Every :class:`Context` instance can be used
-directly in a with statement, and changes the current context for the
-duration of the block following the with statement, restoring the
-previous context when the block is exited.  For example:
-
-   >>> with single_precision:
-   ...     sqrt(2)
-   ... 
-   BigFloat.exact('1.41421354', precision=24)
-   >>> with quadruple_precision:
-   ...     sqrt(2)
-   ... 
-   BigFloat.exact('1.41421356237309504880168872420969798', precision=113)
-
-Here, single_precision and quadruple_precision are predefined
-:class:`Context` instances that describe the IEEE 754 binary32 and
-binary128 floating-point formats.
-
-A number of convenience functions are provided for changing only
-one aspect of the current context.
-
-.. function:: precision(p)
-
-   Return a copy of the current context with the precision changed to p.
-   Example usage::
-
-      >>> with precision(100):
-      ...     sqrt(2)
-      ... 
-      BigFloat.exact('1.4142135623730950488016887242092', precision=100)
-
-      >>> with precision(20):
-      ...     const_pi()
-      ... 
-      BigFloat.exact('3.1415939', precision=20)
-
-.. function:: rounding(rnd)
-
-   Return a copy of the current context with the rounding mode changed
-   to rnd.  Example usage:
-
-      >>> with RoundTowardNegative:
-      ...     lower_bound = log2(10)
-      ... 
-      >>> with RoundTowardPositive:
-      ...     upper_bound = log2(10)
-      ... 
-      >>> lower_bound
-      BigFloat.exact('3.3219280948873622', precision=53)
-      >>> upper_bound
-      BigFloat.exact('3.3219280948873626', precision=53)
+It's usually neater to make a temporary change to the context using a
+with statement, as described above.  There's also one convenience
+function that's often useful in calculations:
 
 .. function:: extra_precision(p)
 
    Return a copy of the current context with the precision increased
-   by p.
+   by p.  Equivalent to
+   ``Context(precision=getcontext().precision+p)``.
 
       >>> getcontext().precision
       53
@@ -641,100 +726,16 @@ one aspect of the current context.
       BigFloat.exact('0.88622692545275801364912', precision=73)
 
 
+Functions
+---------
 
+Here are descriptions of the various module level functions exported
+by the :mod:`bigfloat` module.
 
-   
-Arithmetic on BigFloats
------------------------
+Additional Comparisons
+^^^^^^^^^^^^^^^^^^^^^^
 
-All the usual unary and binary arithmetic operations can be applied to
-BigFloats.  The result of any operation is rounded to the current
-context, using the rounding mode from the current context.  The value
-of the result is as if the operation had been performed to
-infinite-precision, and then correctly rounded using the current
-rounding mode.
-
-Mixed-type operations are permitted between a :class:`BigFloat` and an integer,
-or a :class:`BigFloat` and a float.  For these operations, the integer or float
-is first implicitly converted to a :class:`BigFloat`.  The implicit conversion
-is performed exactly, without reference to the current context, so
-that an arithmetic operation between (for example) an integer and a
-:class:`BigFloat` will only involve a single round, at the end of the
-operation.
-
-Here are some notes on particular arithmetic operations.
-
-* The unary + and - operations round to the current context, just like
-  the binary operations.  So +x is not a no-op.  This can be useful
-  for rounding the result of an extended computation with extra
-  precision or relaxed exponent bounds back to the current context.
-
-* Similarly, the builtin abs function rounds to the current context,
-  using the context rounding mode.
-
-* The remainder x % y has the sign of x, not the sign of y.  In this
-  it differs from Python floats and integers.
-
-* The floor division operator x // y and the builtin divmod function
-  are not currently implemented for :class:`BigFloat` instances.
-
-For each arithmetic operation there's a corresponding module-level
-function.  This function also accepts a keyword argument 'context',
-which can be used to override the rounding mode of the current
-context.  For example:
-
-   >>> div(2, 3, context=RoundTowardPositive)
-   BigFloat.exact('0.66666666666666674', precision=53)
-   >>> div(2, 3, context=RoundTowardNegative)
-   BigFloat.exact('0.66666666666666663', precision=53)
-
-This can be handy for places where you only want to alter the rounding
-mode for a single function call or operation.
-
-These module-level functions are also useful when you don't
-necessarily know whether the input arguments are integers, floats or
-BigFloats and you want to ensure that the result is a :class:`BigFloat`, or
-that there's no loss of precision during argument conversion.  Consider
-the following:
-
-   >>> x = 10.**16  # exactly representable as a Python float
-   >>> y = 10**16-1 # Python integer
-   >>> x - y
-   0.0
-   >>> BigFloat(x) - BigFloat(y)
-   BigFloat.exact('0', precision=53)
-   >>> sub(x, y)
-   BigFloat.exact('1.0000000000000000', precision=53)
-
-In the first subtraction, y is implicity converted from an integer to
-a Python float before the operation;  this conversion loses precision,
-so the result of the subtraction is inaccurate.
-
-The second subtraction is similar: both x and y are explicitly
-converted to :class:`BigFloat` instances, and while x can be converted exactly,
-y cannot at the current context precision.  So again the conversion
-loses precision and the result of the subtraction is innaccurate.
-
-In the third case both arguments x and y are converted with no loss of
-precision, and the subtraction gives the correct result.
-
-The module-level functions are :func:`add`, :func:`sub', :func:`mul`,
-:func:`div`, :func:`pow` and :func:`mod`.  Note that :func:`pow`
-shadows the builtin :func:`pow` function, and that :func:`div`
-corresponds to true division.
-
-Comparisons
------------
-
-The comparison operators should work as expected.  Note that any
-comparison involving a NaN always returns False, with the exception of
-the != comparison, which always returns True.  As with the arithmetic
-operations, comparisons between :class:`BigFloat` objects and integers
-or :class:`BigFloat` objects and floats also work as expected,
-performing an implicit exact conversion of the integer or float to a
-:class:`BigFloat` before comparing.
-
-The module provides two additional comparison functions that don't
+There are two additional comparison functions that don't
 correspond to any of the Python comparison operators.
 
 .. function:: lessgreater(x, y)
@@ -748,19 +749,8 @@ correspond to any of the Python comparison operators.
 
    Return True if either x or y is a NaN, and False otherwise.
 
-Conversions
------------
-
-Conversion of a :class:`BigFloat` to an integer using the :func:`int` builtin
-function always truncates (rounds towards zero), regardless of the
-current context rounding mode.
-
-Conversion of a :class:`BigFloat` to a float using the :func:`float` builtin
-function always rounds to the nearest floating-point number,
-regardless of the current context rounding mode.
-
 Number classification functions
--------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The following functions all accept a single :class:`BigFloat` instance (or a
 float, or an integer) and return a boolean value.  They make no
@@ -786,54 +776,251 @@ use of the current context, and do not affect the state of the flags.
 
 .. function:: is_negative(x)
 
-   Return True if the sign bit of x is set, and False otherwise.  Note that
-   this function is misnamed:  is_negative(-0.0) returns True, even though
-   -0.0 is not, strictly speaking, negative.
+   Return True if the sign bit of x is set, and False otherwise.  Note
+   that the name of this function is slightly misleading for zeros:
+   is_negative(-0.0) returns True, even though -0.0 is not, strictly
+   speaking, negative.
 
 .. function:: is_integer(x)
 
-   Return True if x is an exact integer and False otherwise.
+   Return True if x is finite and an exact integer, and False
+   otherwise.
+
+Standard functions
+^^^^^^^^^^^^^^^^^^
+
+All functions in this section follow the same rules:
+
+* Arguments can be BigFloats, integers or floats, unless otherwise
+  specified.
+* Integer or float arguments are converted exactly to BigFloats.
+* The format of the result and the rounding mode used are taken from
+  the current context.
+* Attributes of the current context can be overridden by supplying an
+  explicit ``context`` keyword argument.
+* Results are correctly rounded.
+
+Arithmetic functions
+""""""""""""""""""""
+
+.. function:: add(x, y)
+.. function:: sub(x, y)
+.. function:: mul(x, y)
+.. function:: div(x, y)
+.. function:: pow(x, y)
+
+   Return x+y, x-y, x*y, x/y and x**y respectively.
+
+.. function:: dim(x, y)
+
+   Return max(x-y, 0).
+
+.. function:: pos(x)
+.. function:: neg(x)
+.. function:: abs(x)
+
+   Return +x, -x and the absolute value of x respectively.  Note that
+   these functions will round if x is not exactly representable in the
+   current context.
+
+.. function:: fma(x, y, z)
+
+   Return x*y+z, but with no loss of intermediate accuracy.
+
+.. function:: fms(x, y, z)
+
+   Return x*y-z, with no loss of intermediate accuracy.
+
+.. function:: sqr(x)
+
+   Return x*x.
+
+.. function:: sqrt(x)
+
+   Return the square root of x, or a NaN if x is negative.  The square
+   root of negative zero returns negative zero.
+
+.. function:: rec_sqrt(x)
+
+   Return the reciprocal of the square root of x.  rec_sqrt of zero
+   returns positive infinity, regardless of the sign of the zero.
+   Note that this means that 1/sqrt(x) differs from rec_sqrt(x) when
+   x is negative zero.
+
+.. function:: cbrt(x)
+
+   Return the cube root of x.
+
+.. function:: root(x, n)
+
+   Return the nth root of x; n should be a nonnegative integer.  For
+   even n, return NaN if x is negative.  For n = 0, always return NaN.
+
+.. function:: hypot(x, y)
+
+   Return the square root of x*x+y*y.
+
+Exponential and logarithmic functions
+""""""""""""""""""""""""""""""""""""""
+
+.. function:: exp(x)
+
+   Return ``e**x``, where ``e`` is Euler's constant. (2.71828...)
+
+.. function:: expm1(x)
+
+   Return ``e**x - 1``.  Useful for values of ``x`` close to 0, when
+   the expression ``exp(x)-1`` would lose significant accuracy.
+
+   >>> exp(1e-10)-1
+   BigFloat.exact('1.0000000827403710e-10', precision=53)
+   >>> exp(1e-10, precision(100))-1
+   BigFloat.exact('1.0000000000500000e-10', precision=53)
+   >>> expm1(1e-10)
+   BigFloat.exact('1.0000000000500000e-10', precision=53)
+
+.. function:: exp2(x):
+
+   Return ``2**x``.
+
+.. function:: exp10(x):
+
+   Return ``10**x``.
+
+.. function:: log(x):
+
+   Return the natural (base ``e``) logarithm of *x*.
+
+.. function:: log1p(x):
+
+   Return ``log(1+x)``.  Useful for small values of x, where
+   computing ``log(1+x)`` directly loses significant accuracy.
+
+.. function:: log2(x):
+
+   Return the log base 2 of *x*.
+
+.. function:: log10(x)
+
+   Return the log base 10 of *x*.
+
+Trigonometric functions
+""""""""""""""""""""""""
+
+.. function:: cos(x)
+.. function:: sin(x)
+.. function:: tan(x)
+.. function:: sec(x)
+.. function:: csc(x)
+.. function:: cot(x)
+
+   Cosine, sine, tangent, secant, cosecant and cotangent of x,
+   respectively.  Note that these functions are (necessarily) very
+   slow for large arguments (for example, ``x`` larger than
+   ``BigFloat('1e1000000')``), since reducing ``x`` correctly modulo
+   ``pi`` requires computing ``pi`` to high precision.  Input
+   arguments are in radians, not degrees.
+
+.. function:: acos(x)
+.. function:: asin(x)
+.. function:: atan(x)
+
+   Inverse cosine, sine and tangent functions, giving a result in
+   radians.
+
+.. function:: atan2(y, x)
+
+   Return the arctangent2 of y and x.  This is the angle that the ray
+   joining (0, 0) to (x, y) makes with the positive x-axis.
 
 
+Hyperbolic trig functions
+""""""""""""""""""""""""""
+
+.. function:: cosh(x)
+.. function:: sinh(x)
+.. function:: tanh(x)
+.. function:: sech(x)
+.. function:: csch(x)
+.. function:: coth(x)
+
+   Hyperbolic cosine, sine, tangent, secant, cosecant and cotangent of x,
+   respectively.
+
+.. function:: acosh(x)
+.. function:: asinh(x)
+.. function:: atanh(x)
+
+   Inverse hyperbolic cosine, sine and tangent functions.
+
+Special functions
+""""""""""""""""""
+
+.. function:: eint(x)
+
+   Return the exponential integral of x.
+
+.. function:: li2(x)
+
+   Return the real part of the dilogarithm of x.
+
+.. function:: gamma(x)
+
+   Return the gamma function applied to x.
+
+.. function:: lngamma(x)
+
+   Return log(gamma(x)).
+
+.. function:: zeta(x)
+
+   Return the Riemann zeta function of x.
+
+.. function:: erf(x)
+
+   Return the error function of x.
+
+.. function:: erfc(x)
+
+   Return the complementary error function of x.
+
+.. function:: j0(x)
+.. function:: j1(x)
+.. function:: jn(n, x)
+
+   Return Bessel function of the first kind of order 0, 1 and n,
+   evaluated at x.  For ``jn``, *n* should be an integer.
+
+.. function:: y0(x)
+.. function:: y1(x)
+.. function:: yn(n, x)
+
+   Return Bessel function of the second kind of order 0, 1 and n,
+   evaluated at x.  For ``yn``, *n* should be an integer.
+
+.. function:: agm(x, y)
+
+   Return the arithmetic-geometric mean of x and y.
+
+Miscellaneous functions
+""""""""""""""""""""""""
+
+.. function:: max(x, y)
+
+   Return the maximum of *x* and *y*.  If *x* and *y* are zeros with
+   different signs, return positive zero.
+
+.. function:: min(x, y)
+
+   Return the minimum of *x* and *y*.  If *x* and *y* are zeros with
+   different signs, return negative zero.
+
+.. function:: copysign(x, y)
+
+   Return a BigFloat with absolute value taken from x and sign taken
+   from y.
 
 
-.. class:: BigFloat(value)
-
-   Construct a new :class:`BigFloat` instance from an integer, string,
-   float or another :class:`BigFloat` instance, using the rounding-mode
-   and precision given by the current context.
-
-   *value* can be an integer, string, float, or another
-   :class:`BigFloat` instance.  In all cases the given value is
-   rounded to the format (precision, exponent limits and
-   subnormalization) given by the current context, using the rounding
-   mode specified by the current context.  The integer 0 is always
-   converted to positive zero.
-
-   .. method:: exact(cls, value, precision=None)
-
-      A classmethod to construct a new :class:`BigFloat` instance from
-      an integer, string, float or another :class:`BigFloat` instance,
-      doing an exact conversion where possible.  Unlike the usual
-      :class:`BigFloat` constructor, this alternative constructor makes no use
-      of the current context and will not affect the current flags.
-
-      If value is an integer, float or :class:`BigFloat`, then the
-      precision keyword must not be given, and the conversion is
-      exact.  The resulting :class:`BigFloat` has a precision
-      sufficiently large to hold the converted value exactly.  If
-      value is a string, then the precision argument must be given.
-      The string is converted using the given precision and the
-      RoundTiesToEven rounding mode.
-
-   .. method:: as_integer_ratio(self)
-
-      Return a pair (n, d) of integers such that n and d are
-      relatively prime, d is positive, and the value of self is
-      exactly n/d.
-
-      If self is an infinity or nan then ValueError is raised.  Both
-      negative and positive zeros are converted to (0, 1).
 
 .. rubric:: Footnotes
 
