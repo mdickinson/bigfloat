@@ -3,6 +3,7 @@ from __future__ import with_statement # for Python 2.5
 import unittest
 import operator
 from bigfloat import *
+from bigfloat import _all_flags
 import math
 
 all_rounding_modes = [RoundTowardZero, RoundTowardNegative,
@@ -401,7 +402,7 @@ class BigFloatTests(unittest.TestCase):
         # it's independent of the currently-set flags.
 
         # Set all flags...
-        set_flagstate(all_flags)
+        set_flagstate(_all_flags)
         self.assertEqual(BigFloat.exact(12345), 12345)
         self.assertEqual(BigFloat.exact(1e-72), 1e-72)
 

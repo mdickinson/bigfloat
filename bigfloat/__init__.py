@@ -41,7 +41,7 @@ __all__ = [
     'test_flag', 'set_flag', 'clear_flag',
 
     # and to get and set the entire flag state
-    'set_flagstate', 'get_flagstate', 'all_flags',
+    'set_flagstate', 'get_flagstate',
 ]
 
 import sys as _sys
@@ -686,7 +686,7 @@ Overflow = 'Overflow'
 Underflow = 'Underflow'
 NanFlag ='NanFlag'
 
-all_flags = set([Inexact, Overflow, Underflow, NanFlag])
+_all_flags = set([Inexact, Overflow, Underflow, NanFlag])
 
 _flag_translate = {
     'underflow' : Underflow,
@@ -713,17 +713,17 @@ def clear_flag(f):
 
 
 def get_flagstate():
-    return set(f for f in all_flags if test_flag(f))
+    return set(f for f in _all_flags if test_flag(f))
 
 def set_flagstate(flagset):
     # set all flags in the given flag set;  clear all flags not
     # in the given flag set.
-    if not flagset <= all_flags:
+    if not flagset <= _all_flags:
         raise ValueError("unrecognized flags in flagset")
 
     for f in flagset:
         set_flag(f)
-    for f in all_flags-flagset:
+    for f in _all_flags-flagset:
         clear_flag(f)
 
 @_contextlib.contextmanager
