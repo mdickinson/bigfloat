@@ -25,3 +25,7 @@ Wrap the lgamma function
 * Better error messages
 
 * Docstrings for standard functions
+
+* Expose get_str;  make it a method
+
+* Rename set_str2; make it a classmethod
