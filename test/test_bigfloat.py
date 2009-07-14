@@ -534,6 +534,50 @@ class BigFloatTests(unittest.TestCase):
         self.assertEqual(hash(BigFloat('1.625')), hash(float('1.625')))
         self.assertEqual(hash(BigFloat.exact(1.1)), hash(1.1))
 
+    def test_hex(self):
+        # test conversion to a hex string
+
+        test_values = [
+            # (input, precision, output)
+            ('NaN', 2, 'NaN'),
+            ('NaN', 24, 'NaN'),
+            ('NaN', 53, 'NaN'),
+            ('NaN', 100, 'NaN'),
+            #('-NaN', 10, '-NaN'),
+            ('Inf', 2, 'Infinity'),
+            ('-Inf', 10, '-Infinity'),
+            ('0', 53, '0'),
+            ('-0', 24, '-0'),
+
+            ('0.25', 4, '0x0.8p-1'),
+            ('0.25', 5, '0x0.80p-1'),
+
+            ('0.5', 2, '0x0.8p+0'),
+            ('0.5', 3, '0x0.8p+0'),
+            ('0.5', 4, '0x0.8p+0'),
+            ('0.5', 5, '0x0.80p+0'),
+            ('0.5', 8, '0x0.80p+0'),
+            ('0.5', 9, '0x0.800p+0'),
+
+            ('1', 2, '0x0.8p+1'),
+            ('1', 3, '0x0.8p+1'),
+            ('1', 4, '0x0.8p+1'),
+            ('1', 5, '0x0.80p+1'),
+            ('1', 8, '0x0.80p+1'),
+            ('1', 9, '0x0.800p+1'),
+
+            ('1.5', 24, '0x0.c00000p+1'),
+            ('-1.5', 24, '-0x0.c00000p+1'),
+            ('3.14159265358979323846264', 52, '0x0.c90fdaa22168cp+2'),
+            ('3.14159265358979323846264', 53, '0x0.c90fdaa22168c0p+2'),
+
+            ]
+
+        for strarg, precision, expected in test_values:
+            arg = BigFloat.exact(strarg, precision=precision)
+            got = arg.hex()
+            self.assertEqual(expected, got)
+
     def test_int(self):
         # test conversion to int
         self.assertEqual(int(BigFloat(13.7)), 13)

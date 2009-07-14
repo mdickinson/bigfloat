@@ -437,22 +437,28 @@ class BigFloat(object):
     def __new__(cls, value, context=None):
         """Create BigFloat from integer, float, string or another BigFloat.
 
+        If the context keyword argument is not given, the result
+        format and the rounding mode 
+
         Uses the current precision and rounding mode, unless an
         alternative context is given.
 
         """
-        with (context if context is not None else EmptyContext):
-            if isinstance(value, float):
-                return _set_d(value)
-            elif isinstance(value, basestring):
-                return set_str2(value.strip(), 10)
-            elif isinstance(value, (int, long)):
-                return set_str2('%x' % value, 16)
-            elif isinstance(value, BigFloat):
-                return pos(value)
-            else:
-                raise TypeError("Can't convert argument %s of type %s "
-                                "to BigFloat" % (value, type(value)))
+        if context is not None:
+            with context:
+                return cls(value)
+
+        if isinstance(value, float):
+            return _set_d(value)
+        elif isinstance(value, basestring):
+            return set_str2(value.strip(), 10)
+        elif isinstance(value, (int, long)):
+            return set_str2('%x' % value, 16)
+        elif isinstance(value, BigFloat):
+            return pos(value)
+        else:
+            raise TypeError("Can't convert argument %s of type %s "
+                            "to BigFloat" % (value, type(value)))
 
     @classmethod
     def fromhex(cls, value, context=None):
@@ -558,18 +564,71 @@ class BigFloat(object):
         """
         return mpfr.mpfr_get_d(self._value, 'RoundTiesToEven')
 
+    def _sign(self):
+        return mpfr.mpfr_signbit(self._value)
+
+    def _significand(self):
+        """Return the significand of self, as a BigFloat.
+
+        If self is a nonzero finite number, return a BigFloat m
+        with the same precision as self, such that
+
+          0.5 <= m < 1. and
+          self = +/-m * 2**e
+
+        for some exponent e.
+
+        If self is zero, infinity or nan, return a copy of self with
+        the sign set to 0.
+
+        """
+
+        m = Mpfr()
+        mpfr.mpfr_init2(m, self.precision)
+        mpfr.mpfr_set(m, self._value, 'RoundTiesToEven')
+        if self and is_finite(self):
+            mpfr.mpfr_set_exp(m, 0)
+        mpfr.mpfr_setsign(m, m, False, 'RoundTiesToEven')
+        return BigFloat._from_Mpfr(m)
+
+    def _exponent(self):
+        """Return the exponent of self, as an integer.
+
+        The exponent is defined as the unique integer k such that
+        2**(k-1) <= abs(self) < 2**k.
+
+        If self is not finite and nonzero, return a string:  one
+        of '0', 'Infinity' or 'NaN'.
+
+        """
+
+        if self and is_finite(self):
+            return mpfr.mpfr_get_exp(self._value)
+
+        if not self:
+            return '0'
+        elif is_inf(self):
+            return 'Infinity'
+        elif is_nan(self):
+            return 'NaN'
+        else:
+            assert False, "shouldn't ever get here"
+
     def hex(self):
         """Return a hexadecimal representation of a BigFloat."""
 
-        negative, digits, e = mpfr.mpfr_get_str2(self._value, 16, 0,
-                                                 'RoundTiesToEven')
-        result = '%s0x%s.%sp%+d' % (
-            '-' if negative else '',
-            digits[:1],
-            digits[1:],
-            4*(e-1))
-        return result
+        sign = '-' if self._sign() else ''
+        e = self._exponent()
+        if isinstance(e, basestring):
+            return sign + e
 
+        m = self._significand()
+        _, digits, _ = mpfr.mpfr_get_str2(m._value, 16, 0, 'RoundTiesToEven')
+        # only print the number of digits that are actually necessary
+        n = 1+(self.precision-1)//4
+        assert all(c == '0' for c in digits[n:])
+        result = '%s0x0.%sp%+d' % (sign, digits[:n], e)
+        return result
 
     def as_integer_ratio(self):
         """Return pair n, d of integers such that the value of self is
