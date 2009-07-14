@@ -70,8 +70,8 @@ files may be in a different package from the library files (e.g.,
 Tutorial
 --------
 
-Start by importing the module (assuming that you've already installed
-it and its prerequisites) with:
+Start by importing the contents of the module (assuming that you've
+already installed it and its prerequisites) with:
 
    >>> from bigfloat import *
 
