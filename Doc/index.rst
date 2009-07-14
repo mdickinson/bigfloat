@@ -62,9 +62,9 @@ of GMP and MPFR, it's unlikely that these values will need to be
 changed.  But if you're getting segmentation faults or crashes with
 the bigfloat library then you may need to edit the values in this
 file.  In this case it will probably also be useful to have the gmp.h
-and mpfr.h include files handy;  on Linux systems, these files may
-be in a different package from the library files (e.g., 'mpfr-devel'
-instead of 'mpfr').
+and mpfr.h include files handy to refer to; on Linux systems, these
+files may be in a different package from the library files (e.g.,
+'mpfr-devel' instead of 'mpfr').
 
 
 Tutorial
@@ -80,11 +80,11 @@ namespace, and clobbers some builtin Python functions: ``abs``,
 ``max``, ``min`` and ``pow``.  In normal usage you'll probably only
 want to import the classes and functions that you actually need.
 
-BigFloat construction
-^^^^^^^^^^^^^^^^^^^^^
+:class:`BigFloat` construction
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The main type of interest is the :class:`BigFloat` class.  The
-BigFloat type is an immutable binary floating-point type.  A
+:class:`BigFloat` type is an immutable binary floating-point type.  A
 :class:`BigFloat` instance can be created from an integer, a float or
 a string:
 
@@ -93,19 +93,19 @@ a string:
    >>> BigFloat(-4.56)
    BigFloat.exact('-4.5599999999999996', precision=53)
 
-Each BigFloat instance has both a *value* and a *precision*.  The
+Each :class:`BigFloat` instance has both a *value* and a *precision*.  The
 precision gives the number of bits used to store the significand of
-the BigFloat.  The *value* of a (finite, nonzero) BigFloat with
+the :class:`BigFloat`.  The *value* of a (finite, nonzero) :class:`BigFloat` with
 precision ``p`` is a real number of the form ``(-1)**sign * m * 2**e``
 where ``sign`` is either ``0`` or ``1``, ``m`` is the *significand*, a
 number in the half-open interval [0.5, 1.0) that can be expressed in
 the form ``n/2**p`` for some integer ``n``, and ``e`` is an integer
 giving the *exponent*.  In addition, zeros (positive and negative),
 infinities and NaNs are representable.  Note that printed form of a
-BigFloat shows only a decimal approximation to the stored value, for
+:class:`BigFloat` shows only a decimal approximation to the stored value, for
 the sake of human readers.
 
-The precision of newly-constructed BigFloat instances is dictated by
+The precision of newly-constructed :class:`BigFloat` instances is dictated by
 the *current precision*, which defaults to 53.  This setting can be
 overridden by supplying a ``context`` keyword argument to the
 constructor:
@@ -124,7 +124,7 @@ be overridden with the ``context`` keyword argument:
    >>> BigFloat('3.14', context=RoundTowardPositive + precision(24))
    BigFloat.exact('3.14000010', precision=24)
 
-More generally, the second argument to the BigFloat constructor should
+More generally, the second argument to the :class:`BigFloat` constructor should
 be an instance of the :class:`Context` class.  The various rounding
 modes are all Context instances, and ``precision`` is a function
 returning a Context:
@@ -159,11 +159,11 @@ Note that (unlike Python's standard decimal module), :class:`Context`
 instances are immutable.  We'll learn more about Contexts, and how to
 use them, below.
 
-There's also a second method for constructing BigFloat instances:
+There's also a second method for constructing :class:`BigFloat` instances:
 :meth:`BigFloat.exact`.  As with the usual constructor, this
 constructor accepts integers, floats and strings.  However, for
 integers and floats it performs an exact conversion, creating a
-BigFloat with precision large enough to hold the integer or float
+:class:`BigFloat` with precision large enough to hold the integer or float
 exactly (regardless of the current precision setting):
 
    >>> BigFloat.exact(-123)
@@ -180,44 +180,45 @@ mode.
    >>> BigFloat.exact('1.1', precision=80)
    BigFloat.exact('1.1000000000000000000000003', precision=80)
 
-The result of a call to BigFloat.exact is independent of the current
-context; this is why the :func:`repr` of a BigFloat is expressed in
-terms of :meth:`BigFloat.exact`.  The :func:`str` of a BigFloat looks
+The result of a call to :class:`BigFloat`.exact is independent of the current
+context; this is why the :func:`repr` of a :class:`BigFloat` is expressed in
+terms of :meth:`BigFloat.exact`.  The :func:`str` of a :class:`BigFloat` looks
 prettier, but doesn't supply enough information to recover that
-BigFloat exactly if you don't know the precision:
+:class:`BigFloat` exactly if you don't know the precision:
 
    >>> print BigFloat('1e1000', precision(20))
    9.9999988e+999
    >>> print BigFloat('1e1000', precision(21))
    9.9999988e+999
 
-Arithmetic on BigFloats
-^^^^^^^^^^^^^^^^^^^^^^^
+Arithmetic on :class:`BigFloat` instances
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 All the usual arithmetic operations, with the exception of floor
-division, apply to BigFloats, and BigFloat instances can be freely
-mixed with integers and floats (but not strings!) in those operations:
+division, apply to :class:`BigFloat` instances, and those instances can be
+freely mixed with integers and floats (but not strings!) in those
+operations:
 
    >>> BigFloat(1234)/3
    BigFloat.exact('411.33333333333331', precision=53)
    >>> BigFloat('1e1233')**0.5
    BigFloat.exact('3.1622776601683794e+616', precision=53)
 
-As with the BigFloat constructor, the precision for the result is
+As with the :class:`BigFloat` constructor, the precision for the result is
 taken from the current context, as is the rounding mode used to round
-the exact mathematical result to the nearest BigFloat.
+the exact mathematical result to the nearest :class:`BigFloat`.
 
 For mixed-type operations, the integer or float is converted *exactly*
-to a BigFloat before the operation (as though the BigFloat.exact
+to a :class:`BigFloat` before the operation (as though the :class:`BigFloat`.exact
 constructor had been applied to it).  So there's only a single point
 where precision might be lost: namely, when the result of the
-operation is rounded to the nearest value representable as a BigFloat.
+operation is rounded to the nearest value representable as a :class:`BigFloat`.
 
 .. note::
 
    The current precision and rounding mode even apply to the unary
    plus and minus operations.  In particular, ``+x`` is not
-   necessarily a no-op for a BigFloat instance x:
+   necessarily a no-op for a :class:`BigFloat` instance x:
 
    >>> BigFloat.exact(7**100)
    BigFloat.exact('3234476509624757991344647769100216810857203198904625400933895331391691459636928060001.0', precision=281)
@@ -237,9 +238,9 @@ corresponds to usual (true) division:
    BigFloat.exact('3.1415929203539825', precision=53)
 
 This is useful for a couple of reasons: one reason is that it makes it
-possible to use ``div(x, y)`` in contexts where a BigFloat result is
+possible to use ``div(x, y)`` in contexts where a :class:`BigFloat` result is
 desired but where one or both of x and y might be an integer or float.
-But a more important reason is that these functions, like the BigFloat
+But a more important reason is that these functions, like the :class:`BigFloat`
 constructor, accept an extra ``context`` keyword argument giving a
 context for the operation::
 
@@ -263,23 +264,23 @@ difference in the results of the following:
 For the first subtraction, the integer is first converted to a float,
 losing accuracy, and then the subtraction is performed, giving a
 result of 0.0.  The second case is similar: ``x`` and ``y`` are both
-explicitly converted to BigFloat instances, and the conversion of
+explicitly converted to :class:`BigFloat` instances, and the conversion of
 ``y`` again loses precision.  In the third case, ``x`` and ``y`` are
-*implicitly* converted to BigFloat instances, and that conversion is
+*implicitly* converted to :class:`BigFloat` instances, and that conversion is
 exact, so the subtraction produces exactly the right answer.
 
-Comparisons between BigFloats and integers or floats also behave as
-you'd expect them to; for these, there's no need for a corresponding
-function.
+Comparisons between :class:`BigFloat` instances and integers or floats also
+behave as you'd expect them to; for these, there's no need for a
+corresponding function.
 
 The :mod:`bigfloat` module provides a number of standard mathematical
 functions.  These functions follow the same rules as the arithmetic
-operations above: the inputs can be integers, floats or BigFloat
-instances; integers and floats are converted to BigFloats using an
-exact conversion; the result is a BigFloat with precision and rounding
-mode taken from the current context, and parameters from the current
-context can be overridden by providing a ``context`` keyword argument.
-Here are some examples:
+operations above: the inputs can be integers, floats or :class:`BigFloat`
+instances; integers and floats are converted to :class:`BigFloat` instances
+using an exact conversion; the result is a :class:`BigFloat` with precision and
+rounding mode taken from the current context, and parameters from the
+current context can be overridden by providing a ``context`` keyword
+argument.  Here are some examples:
 
    >>> sqrt(1729, context=RoundTowardZero)
    BigFloat.exact('41.581245772583578', precision=53)
@@ -409,7 +410,7 @@ flags.
 Reference
 ---------
 
-The BigFloat class
+The :class:`BigFloat` class
 ^^^^^^^^^^^^^^^^^^
 
 The :class:`BigFloat` class implements multiple-precision binary
@@ -479,9 +480,9 @@ zero, and NaNs.
 
    .. method:: hex(self)
 
-      Return a hexadecimal representation of a BigFloat.  The
+      Return a hexadecimal representation of a :class:`BigFloat`.  The
       advantage of the hexadecimal representation is that it
-      represents the value of the BigFloat exactly.
+      represents the value of the :class:`BigFloat` exactly.
 
 
 Special methods
@@ -491,13 +492,13 @@ The :class:`BigFloat` type has a full complement of special methods.
 Here are some brief notes on those methods, indicating any possible
 deviations from expected behaviour.
 
-* The repr of a BigFloat instance ``x`` has the property that
+* The repr of a :class:`BigFloat` instance ``x`` has the property that
   ``eval(repr(x))`` recovers ``x`` exactly.
 
 * The '+' ,'-', '*', '/', '**' and '%' binary operators are supported,
-  and mixed-type operations involving a BigFloat and an integer or
+  and mixed-type operations involving a :class:`BigFloat` and an integer or
   float are permitted.  Mixed-type operations behave as though the
-  non-BigFloat operand is first converted to a BigFloat with no loss
+  non :class:`BigFloat` operand is first converted to a :class:`BigFloat` with no loss
   of accuracy.  The '/' operator implements true division, regardless
   of whether 'from __future__ import division' is in effect or not.
   The result of '%' has the same sign as the first argument, not the
@@ -505,7 +506,7 @@ deviations from expected behaviour.
 
 * The '+' and '-' unary operators and built-in :func:`abs` function
   are supported.  Note that these all round to the current context; in
-  particular, '+x' is not necessarily equal to 'x' for a BigFloat ``x``.
+  particular, '+x' is not necessarily equal to 'x' for a :class:`BigFloat` ``x``.
 
 * The six comparison operators '==', '<=', '<', '!=', '>', '>=' are
   supported.  Comparisons involving NaNs always return False, except
@@ -516,16 +517,16 @@ deviations from expected behaviour.
 
 * Conversions to int and long always round towards zero; conversions
   to float always use the ``RoundTiesToEven`` rounding mode.
-  Conversion to bool returns False for a nonzero BigFloat and True
+  Conversion to bool returns False for a nonzero :class:`BigFloat` and True
   otherwise.  None of these conversions is affected by the current
   context.
 
-* BigFloats are hashable.  For Python 2.6 and later, the hash function
-  obeys the rule that objects that compare equal should hash equal; in
-  particular, if ``x == n`` for some BigFloat instance ``x`` and some
-  Python int or long ``n``then ``hash(x) == hash(n)``, and similarly
-  for floats.  In Python 2.5, there are some rare cases where ``x ==
-  n`` does not imply ``hash(x) == hash(n)``.
+* :class:`BigFloat` instances are hashable.  For Python 2.6 and later, the hash
+  function obeys the rule that objects that compare equal should hash
+  equal; in particular, if ``x == n`` for some :class:`BigFloat` instance ``x``
+  and some Python int or long ``n``then ``hash(x) == hash(n)``, and
+  similarly for floats.  In Python 2.5, there are some rare cases
+  where ``x == n`` does not imply ``hash(x) == hash(n)``.
 
 
 The Context class
@@ -676,8 +677,8 @@ instances.
 
    Contexts corresponding to the four available rounding modes.
    ``RoundTiesToEven`` rounds the result of an operation or function
-   to the nearest representable BigFloat, with ties rounded to the
-   BigFloat whose least significant bit is zero.  ``RoundTowardZero``
+   to the nearest representable :class:`BigFloat`, with ties rounded to the
+   :class:`BigFloat` whose least significant bit is zero.  ``RoundTowardZero``
    rounds results towards zero.  ``RoundTowardPositive`` rounds
    results towards positive infinity, and ``RoundTowardsNegative``
    rounds results towards negative infinity.
@@ -689,7 +690,7 @@ Constants
 .. data:: PRECISION_MAX
 
    Minimum and maximum precision that's valid for Contexts and
-   BigFloat instances.  In the current implementation, PRECISION_MIN
+   :class:`BigFloat` instances.  In the current implementation, PRECISION_MIN
    is 2 and PRECISION_MAX is 2**31-1.
 
 .. data:: EMIN_MIN
@@ -710,7 +711,7 @@ The current context
 
 There can be many Context objects in existence at one time, but
 there's only ever one *current context*.  The current context is given
-by a thread-local :class:`Context` instance.  Whenever the BigFloat
+by a thread-local :class:`Context` instance.  Whenever the :class:`BigFloat`
 constructor is called, or any arithmetic operation or standard
 function computation is performed, the current context is consulted to
 determine:
@@ -770,9 +771,10 @@ Standard functions
 
 All functions in this section follow the same rules:
 
-* Arguments can be BigFloats, integers or floats, unless otherwise
-  specified.
-* Integer or float arguments are converted exactly to BigFloats.
+* Arguments can be :class:`BigFloat` instances, integers or floats, unless
+  otherwise specified.
+* Integer or float arguments are converted exactly to :class:`BigFloat`
+  instances.
 * The format of the result and the rounding mode used are taken from
   the current context.
 * Attributes of the current context can be overridden by supplying an
@@ -784,7 +786,7 @@ Conversion from string
 
 .. function:: set_str2(s, base)
 
-   Convert a string s, representing a number in base b, to a BigFloat.
+   Convert a string s, representing a number in base b, to a :class:`BigFloat`.
    The base should satisfy 2 <= base <= 36.
 
 Arithmetic functions
@@ -1038,7 +1040,7 @@ Miscellaneous functions
 
 .. function:: copysign(x, y)
 
-   Return a BigFloat with absolute value taken from x and sign taken
+   Return a :class:`BigFloat` with absolute value taken from x and sign taken
    from y.
 
 .. function:: frac(x)
@@ -1151,7 +1153,7 @@ Flags
    operation is exact.
 
    In detail: let ``c`` be the context that's in effect for an
-   operation, function or BigFloat construction.  Let ``x`` be the
+   operation, function or :class:`BigFloat` construction.  Let ``x`` be the
    result of the operation, rounded to the context precision with the
    context rounding mode, but as though the exponent were unbounded.
 
