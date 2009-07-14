@@ -29,3 +29,5 @@ Wrap the lgamma function
 * Expose get_str;  make it a method
 
 * Rename set_str2; make it a classmethod
+
+* Deal sensibly with signs of NaNs on input and output
