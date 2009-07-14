@@ -192,7 +192,7 @@ prettier, but doesn't supply enough information to recover that
    9.9999988e+999
 
 Arithmetic on :class:`BigFloat` instances
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 All the usual arithmetic operations, with the exception of floor
 division, apply to :class:`BigFloat` instances, and those instances can be
@@ -411,7 +411,7 @@ Reference
 ---------
 
 The :class:`BigFloat` class
-^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The :class:`BigFloat` class implements multiple-precision binary
 floating-point numbers.  Each :class:`BigFloat` instance has both a
@@ -484,6 +484,10 @@ zero, and NaNs.
       advantage of the hexadecimal representation is that it
       represents the value of the :class:`BigFloat` exactly.
 
+   .. attribute:: precision
+
+      Precision of a :class:`BigFloat` instance, in bits.
+
 
 Special methods
 """"""""""""""""
@@ -506,7 +510,8 @@ deviations from expected behaviour.
 
 * The '+' and '-' unary operators and built-in :func:`abs` function
   are supported.  Note that these all round to the current context; in
-  particular, '+x' is not necessarily equal to 'x' for a :class:`BigFloat` ``x``.
+  particular, '+x' is not necessarily equal to 'x' for a
+  :class:`BigFloat` instance ``x``.
 
 * The six comparison operators '==', '<=', '<', '!=', '>', '>=' are
   supported.  Comparisons involving NaNs always return False, except
