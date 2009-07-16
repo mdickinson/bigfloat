@@ -412,10 +412,23 @@ def _wrap_predicate(f):
         return f(*converted_args)
     return wrapped_f
 
-def _reverse_args(f):
-    def reversed_f(self, other):
-        return f(other, self)
-    return reversed_f
+def _binop(op):
+    def wrapped_op(self, other):
+        try:
+            result = op(self, other)
+        except TypeError:
+            result = NotImplemented
+        return result
+    return wrapped_op
+
+def _rbinop(op):
+    def wrapped_op(self, other):
+        try:
+            result = op(other, self)
+        except TypeError:
+            result = NotImplemented
+        return result
+    return wrapped_op
 
 class BigFloat(object):
     @classmethod
@@ -898,27 +911,27 @@ BigFloat.__neg__ = neg
 BigFloat.__abs__ = abs
 
 # binary arithmetic operations
-BigFloat.__add__ = add
-BigFloat.__sub__ = sub
-BigFloat.__mul__ = mul
-BigFloat.__div__ = BigFloat.__truediv__ = div
-BigFloat.__pow__ = pow
-BigFloat.__mod__ = mod
+BigFloat.__add__ = _binop(add)
+BigFloat.__sub__ = _binop(sub)
+BigFloat.__mul__ = _binop(mul)
+BigFloat.__div__ = BigFloat.__truediv__ = _binop(div)
+BigFloat.__pow__ = _binop(pow)
+BigFloat.__mod__ = _binop(mod)
 
 # and their reverse operations
-BigFloat.__radd__ = _reverse_args(add)
-BigFloat.__rsub__ = _reverse_args(sub)
-BigFloat.__rmul__ = _reverse_args(mul)
-BigFloat.__rdiv__ = BigFloat.__rtruediv__ = _reverse_args(div)
-BigFloat.__rpow__ = _reverse_args(pow)
-BigFloat.__rmod__ = _reverse_args(mod)
+BigFloat.__radd__ = _rbinop(add)
+BigFloat.__rsub__ = _rbinop(sub)
+BigFloat.__rmul__ = _rbinop(mul)
+BigFloat.__rdiv__ = BigFloat.__rtruediv__ = _rbinop(div)
+BigFloat.__rpow__ = _rbinop(pow)
+BigFloat.__rmod__ = _rbinop(mod)
 
 # comparisons
-BigFloat.__eq__ = _is_equal
-BigFloat.__le__ = _is_lessequal
-BigFloat.__lt__ = _is_less
-BigFloat.__ge__ = _is_greaterequal
-BigFloat.__gt__ = _is_greater
+BigFloat.__eq__ = _binop(_is_equal)
+BigFloat.__le__ = _binop(_is_lessequal)
+BigFloat.__lt__ = _binop(_is_less)
+BigFloat.__ge__ = _binop(_is_greaterequal)
+BigFloat.__gt__ = _binop(_is_greater)
 
 #_old__all__ = __all__
 #del __all__
