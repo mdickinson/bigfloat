@@ -1,3 +1,6 @@
+Add license information
+-----------------------
+
 Implement floordiv method for BigFloats
 ---------------------------------------
   x // y should behave as with any other operation or function, though
@@ -31,3 +34,5 @@ Wrap the lgamma function
 * Rename set_str2; make it a classmethod
 
 * Deal sensibly with signs of NaNs on input and output
+
+* Return NotImplemented from binary methods where appropriate
