@@ -388,6 +388,7 @@ mpfr_functions = [
     # Most of these are standard functions, declared below.
     ('sin_cos', [IMpfr, IMpfr, IMpfr, RoundingMode], Ternary),
     ('sinh_cosh', [IMpfr, IMpfr, IMpfr, RoundingMode], Ternary),
+    ('lgamma', [IMpfr, ctypes.POINTER(ctypes.c_int), IMpfr, RoundingMode], Ternary),
     ('free_cache', [], None),
 
     # we don't wrap mpfr_sum at the moment
@@ -584,6 +585,7 @@ standard_functions = \
 
 extra_standard_functions = [
     ('set_str2', [ctypes.c_char_p, Base]),
+    ('lgamma2', [IMpfr]),
     ]
 
 unary_predicates = [
@@ -651,6 +653,14 @@ MPFR_EMAX_MAX = mpfr.mpfr_get_emax_max()
 
 ################################################################################
 # Python wrappers for some of the functions that are awkward to use directly
+
+def lgamma2(rop, x, rnd):
+    """Like mpfr_lgamma, but doesn't return the sign."""
+
+    sign = ctypes.c_int()
+    return mpfr.mpfr_lgamma(rop, ctypes.pointer(sign), x, rnd)
+
+mpfr.mpfr_lgamma2 = lgamma2
 
 def set_str2(rop, s, base, rnd):
     """Set value of rop from the string s, using given base and rounding mode.
