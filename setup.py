@@ -29,8 +29,7 @@ Features:
 
 
 
-if __name__ == "__main__":
-
+def main():
     setup(name='bigfloat',
           version='0.1',
           description=DESCRIPTION,
@@ -40,3 +39,7 @@ if __name__ == "__main__":
           url='http://www.mpfr.org',
           packages=['bigfloat'],
           )
+
+if __name__ == "__main__":
+    main()
+

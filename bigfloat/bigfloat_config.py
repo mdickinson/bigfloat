@@ -7,7 +7,7 @@
 ## bigfloat module will make an attempt to find the library itself.
 ##
 ## Here's an example that's suitable for an OS X machine using MacPorts:
-# mpfr_library_location = '/opt/local/lib/libmpfr.dylib'
+mpfr_library_location = '/opt/local/lib/libmpfr.dylib'
 
 ## Set 'gmp_mp_size_t_int' to True if GMP uses the C 'int' type for
 ## mp_size_t and mp_exp_t, and to False if is uses the C 'long' type
