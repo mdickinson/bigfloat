@@ -64,7 +64,6 @@ def create_config(infile, outfile, replacement_dict):
         outf.write(line)
     outf.close()
 
-
 class build_config(Command):
     description = "build config file (copy and make substitutions)"
 
@@ -76,7 +75,7 @@ class build_config(Command):
         self.build_dir = None
 
     def finalize_options(self):
-        self.set_undefined_options('build', ('build_scripts', 'build_dir'))
+        self.set_undefined_options('build', ('build_lib', 'build_dir'))
 
     def run(self):
         # determine where to look for library files
@@ -102,18 +101,44 @@ class build_config(Command):
         # write config file
         config_in = 'bigfloat_config.py.in'
         self.mkpath(self.build_dir)
-        outfile = os.path.join(self.build_dir, 'config', 'bigfloat_config.py')
+        outfile = os.path.join(self.build_dir, 'bigfloat_config.py')
         create_config(config_in, outfile, {'$(MPFR_LIB_LOC)': mpfr_lib})
 
+class install_config(Command):
+    description = "build config file (copy and make substitutions)"
+
+    user_options = [
+        ('install-dir=', 'd', 'directory to install config file to'),
+        ('build-dir=', 'b', 'build directory (place to install from)'),
+        ('skip-build', None, 'skip the build steps'),
+        ]
+
+    def initialize_options(self):
+        self.install_dir = None
+        self.build_dir = None
+        self.skip_build = None
+
+    def finalize_options(self):
+        self.set_undefined_options('build', ('build_scripts', 'build_dir'))
+        self.set_undefined_options('install',
+                                   ('install_lib', 'install_dir'),
+                                   ('skip_build', 'skip_build'),
+                                   )
+
+    def run(self):
+        if not self.skip_build:
+            self.run_command('build_config')
+        self.outfile = self.copy_tree(self.build_dir, self.install_dir)
+
+
+
 class BigFloatBuild(build):
-    # same as usual build, except that we need to make sure that build_config
-    # gets executed as a subcommand
-
-    def has_config(self):
-        return True
-
     sub_commands = build.sub_commands
-    sub_commands.append(('build_config', has_config))
+    sub_commands.append(('build_config', lambda self:True))
+
+class BigFloatInstall(install):
+    sub_commands = install.sub_commands
+    sub_commands.append(('install_config', lambda self:True))
 
 
 def main():
@@ -132,7 +157,8 @@ def main():
         cmdclass = {
             'build':BigFloatBuild,
             'build_config':build_config,
-#            'install':BigFloatInstall,
+            'install':BigFloatInstall,
+            'install_config':install_config,
             },
         )
 
