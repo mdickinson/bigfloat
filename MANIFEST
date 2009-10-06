@@ -1,0 +1,8 @@
+MANIFEST
+README
+setup.py
+bigfloat_config.py.in
+bigfloat/__init__.py
+bigfloat/pympfr.py
+test/test_bigfloat.py
+test/test_pympfr.py
