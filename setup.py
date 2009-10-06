@@ -1,5 +1,8 @@
 from distutils.core import setup
 from distutils.command.build import build
+from distutils.command.install import install
+from distutils.cmd import Command
+import distutils.sysconfig
 import distutils.ccompiler
 import os.path
 import sys
@@ -51,86 +54,87 @@ def find_include_file(dirs, libname):
     # failed to find include file
     raise ValueError("Unable to locate include file for %s library" % libname)
 
+def create_config(infile, outfile, replacement_dict):
+    # make substitutions in config file
+    outf = open(outfile, 'w')
+    for line in open(infile, 'r'):
+        for k, v in replacement_dict.items():
+            if k in line:
+                line = line.replace(k, v)
+        outf.write(line)
+    outf.close()
 
-# the main job of this class is to create the configuration file,
-# including the locations of the libraries and include files.
 
-class BigFloatBuild(build):
+class build_config(Command):
+    description = "build config file (copy and make substitutions)"
+
+    user_options = [
+        ('build-dir=', 'd', 'directory to build in'),
+        ]
+
+    def initialize_options(self):
+        self.build_dir = None
+
+    def finalize_options(self):
+        self.set_undefined_options('build', ('build_scripts', 'build_dir'))
+
     def run(self):
-
+        # determine where to look for library files
         library_dirs = ['/usr/local/lib', '/usr/lib']
-        include_dirs = ['/usr/local/include', '/usr/include']
-
         if sys.platform == "darwin":
-            # fink directories
+            # fink directory
             library_dirs.append('/sw/lib')
-            include_dirs.append('/sw/include')
-            # macports directories
+            # macports directory
             library_dirs.append('/opt/local/lib')
-            include_dirs.append('/opt/local/include')
 
-        # directories from prefix
-        #prefix = sysconfig.get_config_var('prefix')
-        #if prefix:
-        #    library_dirs.append(os.path.join(prefix, 'lib'))
-        #    include_dirs.append(os.path.join(prefix, 'include'))
+        # directory from prefix
+        prefix = distutils.sysconfig.get_config_var('prefix')
+        if prefix:
+            library_dirs.append(os.path.join(prefix, 'lib'))
 
         # standard locations
         library_dirs.append('/usr/local/lib')
-        include_dirs.append('/usr/local/include')
         library_dirs.append('/usr/lib')
-        include_dirs.append('/usr/include')
 
+        # find mpfr library file
         mpfr_lib = find_library_file(library_dirs, 'mpfr')
 
-        # don't actually need the location of the gmp library,
-        # though we may in the future
-        #gmp_lib = find_library_file(library_dirs, 'gmp')
+        # write config file
+        config_in = 'bigfloat_config.py.in'
+        self.mkpath(self.build_dir)
+        outfile = os.path.join(self.build_dir, 'config', 'bigfloat_config.py')
+        create_config(config_in, outfile, {'$(MPFR_LIB_LOC)': mpfr_lib})
 
-        # We don't actually need the include files right now
-        #mpfr_include = find_include_file(include_dirs, 'mpfr')
-        #gmp_include = find_include_file(include_dirs, 'gmp')
+class BigFloatBuild(build):
+    # same as usual build, except that we need to make sure that build_config
+    # gets executed as a subcommand
 
-        print mpfr_lib
+    def has_config(self):
+        return True
 
-        # now need to put this info into the configuration file, somehow.
-        # and include the configuration file in the files to copy...
-
-        # we're effectively imitating the build_scripts command,
-        # which also needs to copy and edit
-
-        # first we need to get the build_dir;  let's use the build-temp
-        # directory for this
-
-        # name of config file
-        config = 'bigfloat_config.py.in'
-        self.mkpath(self.build_temp)
-        outfile = os.path.join(self.build_temp, 'bigfloat_config.py')
-        outf = open(outfile, 'w')
-
-        f = open(config, 'r')
-        for line in f:
-            if '$(MPFR_LIB_LOC)' in line:
-                line = line.replace('$(MPFR_LIB_LOC)', mpfr_lib)
-            outf.write(line)
-        outf.close()
-
+    sub_commands = build.sub_commands
+    sub_commands.append(('build_config', has_config))
 
 
 def main():
 
-    setup(name='bigfloat',
-          version='0.1',
-          description=DESCRIPTION,
-          long_description=LONG_DESCRIPTION,
-          author='Mark Dickinson',
-          author_email='dickinsm@gmail.com',
-          url='http://www.mpfr.org',
-          packages=['bigfloat'],
+    setup(
+        name='bigfloat',
+        version='0.1',
+        description=DESCRIPTION,
+        long_description=LONG_DESCRIPTION,
+        author='Mark Dickinson',
+        author_email='dickinsm@gmail.com',
+        url='http://www.mpfr.org',
+        packages=['bigfloat'],
 
-          # Build info
-          cmdclass = {'build':BigFloatBuild},
-          )
+        # Build info
+        cmdclass = {
+            'build':BigFloatBuild,
+            'build_config':build_config,
+#            'install':BigFloatInstall,
+            },
+        )
 
 if __name__ == "__main__":
     main()
