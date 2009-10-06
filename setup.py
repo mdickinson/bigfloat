@@ -132,7 +132,6 @@ def main():
             'build':BigFloatBuild,
             'build_config':build_config,
             'install_lib':BigFloatInstallLib,
-#            'install_config':install_config,
             },
         )
 
