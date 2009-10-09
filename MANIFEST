@@ -6,4 +6,4 @@ bigfloat/__init__.py
 bigfloat/pympfr.py
 bigfloat/test/test_bigfloat.py
 bigfloat/test/test_pympfr.py
-bigfloat/__init__.py
+bigfloat/test/__init__.py
