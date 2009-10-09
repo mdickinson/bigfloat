@@ -1,5 +1,6 @@
 from __future__ import with_statement # for Python 2.5
 
+from test.test_support import run_unittest
 import unittest
 import operator
 from bigfloat import *
@@ -934,7 +935,7 @@ pos 1p+1024 -> Infinity Inexact Overflow
 """.split('\n'))
 
 def test_main():
-    unittest.main()
+    run_unittest(BigFloatTests, ContextTests, FlagTests, ABCTests)
 
 if __name__ == '__main__':
     test_main()
