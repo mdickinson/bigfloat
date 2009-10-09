@@ -813,7 +813,7 @@ def _saved_flags():
 # prefix) to Python function names.  Names that don't start with '_' will
 # be added to __all__.
 
-name_translation = {
+_name_translation = {
     # avoid clobbering set builtin
     'set': 'pos',
 
@@ -891,14 +891,14 @@ name_translation = {
 def _wrap_standard_functions():
     for fn, argtypes in standard_functions + extra_standard_functions:
         mpfr_fn = getattr(mpfr, 'mpfr_' + fn)
-        pyfn_name = name_translation.get(fn, fn)
+        pyfn_name = _name_translation.get(fn, fn)
         globals()[pyfn_name] = _wrap_standard_function(mpfr_fn, argtypes)
         if not pyfn_name.startswith('_'):
             __all__.append(pyfn_name)
 
     for fn, argtypes in predicates:
         mpfr_fn = getattr(mpfr, 'mpfr_' + fn)
-        pyfn_name = name_translation.get(fn, fn)
+        pyfn_name = _name_translation.get(fn, fn)
         globals()[pyfn_name] = _wrap_predicate(mpfr_fn)
         if not pyfn_name.startswith('_'):
             __all__.append(pyfn_name)
