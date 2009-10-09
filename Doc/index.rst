@@ -1144,6 +1144,19 @@ use of the current context, and do not affect the state of the flags.
    Return True if x is finite and an exact integer, and False
    otherwise.
 
+Miscellaneous functions
+"""""""""""""""""""""""
+
+.. function:: next_up(x)
+
+   Return the least representable BigFloat that's strictly greater than x.
+   This operation is quiet:  it doesn't affect any of the flags.
+
+.. function:: next_down(x)
+
+   Return the greatest representable BigFloat that's strictly less than x.
+   This operation is quiet:  it doesn't affect any of the flags.
+
 
 Flags
 -----

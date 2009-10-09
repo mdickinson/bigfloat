@@ -42,6 +42,9 @@ __all__ = [
 
     # and to get and set the entire flag state
     'set_flagstate', 'get_flagstate',
+
+    # numeric functions
+    'next_up', 'next_down',
 ]
 
 import sys as _sys
@@ -352,6 +355,75 @@ def extra_precision(prec):
     precision increased by prec."""
     c = getcontext()
     return Context(precision=c.precision+prec)
+
+def next_up(x, context=None):
+    """next_up(x): return the least representable float that's
+    strictly greater than x.
+
+    This operation is quiet:  flags are not affected.
+    """
+
+    # make sure we don't alter any flags
+    with _saved_flags():
+        if context is None:
+            context = EmptyContext
+        x = BigFloat._implicit_convert(x)
+
+        with context + RoundTowardPositive:
+            # nan maps to itself
+            if is_nan(x):
+                return +x
+
+            # round to current context; if value changes, we're done
+            y = +x
+            if y != x:
+                return y
+
+            # otherwise apply mpfr_nextabove
+            bf = Mpfr()
+            mpfr.mpfr_init2(bf, y.precision)
+            ternary = mpfr.mpfr_set(bf, y._value, 'RoundTiesToEven')
+            assert ternary == 0
+            mpfr.mpfr_nextabove(bf)
+            y = BigFloat._from_Mpfr(bf)
+
+            # apply + one more time to deal with subnormals
+            return +y
+
+def next_down(x, context=None):
+    """next_down(x): return the greatest representable float that's
+    strictly less than x.
+
+    This operation is quiet:  flags are not affected.
+    """
+
+    # make sure we don't alter any flags
+    with _saved_flags():
+        if context is None:
+            context = EmptyContext
+        x = BigFloat._implicit_convert(x)
+
+        with context + RoundTowardNegative:
+            # nan maps to itself
+            if is_nan(x):
+                return +x
+
+            # round to current context; if value changes, we're done
+            y = +x
+            if y != x:
+                return y
+
+            # otherwise apply mpfr_nextabove
+            bf = Mpfr()
+            mpfr.mpfr_init2(bf, y.precision)
+            ternary = mpfr.mpfr_set(bf, y._value, 'RoundTiesToEven')
+            assert ternary == 0
+            mpfr.mpfr_nextbelow(bf)
+            y = BigFloat._from_Mpfr(bf)
+
+            # apply + one more time to deal with subnormals
+            return +y
+
 
 def _wrap_standard_function(f, argtypes):
     def wrapped_f(*args, **kwargs):
