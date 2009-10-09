@@ -6,6 +6,7 @@ import operator
 from bigfloat import *
 from bigfloat import _all_flags
 import math
+import __builtin__
 
 all_rounding_modes = [RoundTowardZero, RoundTowardNegative,
                       RoundTowardPositive, RoundTiesToEven]
@@ -696,7 +697,7 @@ class BigFloatTests(unittest.TestCase):
                 else:
                     self.assertEqual(x, -negx)
 
-                absx = __builtins__.abs(x)
+                absx = __builtin__.abs(x)
                 self.assertEqual(absx.precision, p)
                 if p < 150:
                     self.assertNotEqual(x, absx)
