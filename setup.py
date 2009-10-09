@@ -125,7 +125,10 @@ def main():
         author='Mark Dickinson',
         author_email='dickinsm@gmail.com',
         url='http://www.mpfr.org',
-        packages=['bigfloat'],
+        packages=[
+            'bigfloat',
+            'bigfloat.test',
+            ],
 
         # Build info
         cmdclass = {
