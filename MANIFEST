@@ -4,5 +4,6 @@ setup.py
 bigfloat_config.py.in
 bigfloat/__init__.py
 bigfloat/pympfr.py
-test/test_bigfloat.py
-test/test_pympfr.py
+bigfloat/test/test_bigfloat.py
+bigfloat/test/test_pympfr.py
+bigfloat/__init__.py
