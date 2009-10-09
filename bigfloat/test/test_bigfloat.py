@@ -13,17 +13,41 @@ all_rounding_modes = [RoundTowardZero, RoundTowardNegative,
 all_rounding_mode_strings = ['RoundTowardZero', 'RoundTowardNegative',
                              'RoundTowardPositive', 'RoundTiesToEven']
 
-def identicalBigFloats(self, other):
-    """True if self and other are interchangable for practical purposes.
 
-    Return True if:
-      both self and other are nans, or
-      self and other are both zero, with the same sign, or
-      self and other are nonzero and equal
+def diffBigFloat(x, y, match_precisions=True):
+    """Determine whether two BigFloat instances can be considered
+    identical.  Returns None on sucess (indicating that the two
+    BigFloats *are* identical), and an appropriate error message on
+    failure."""
 
-    """
-    return is_nan(self) and is_nan(other) or \
-        self == other and is_negative(self) == is_negative(other)
+    if not (isinstance(x, BigFloat) and isinstance(y, BigFloat)):
+        raise ValueError("Expected x and y to be BigFloat instances "
+                         "in assertIdenticalBigFloat")
+
+    # precisions should match
+    if match_precisions:
+        if x.precision != y.precision:
+            return "Precisions of %r and %r differ." % (x, y)
+
+    # if one of x or y is a nan then both should be
+    if is_nan(x) or is_nan(y):
+        if not (is_nan(x) and is_nan(y)):
+            return ("One of %r and %r is a nan, but the other is not." %
+                      (x, y))
+        else:
+            return None
+
+    # if both x and y are zeros then their signs should be identical
+    if is_zero(x) and is_zero(y):
+        if is_negative(x) != is_negative(y):
+            return "Zeros %r and %r have different signs." % (x, y)
+
+    # otherwise, it's enough that x and y have equal value
+    if x != y:
+        return "%r and %r have unequal value." % (x, y)
+
+    # no essential difference between x and y
+    return None
 
 
 class BigFloatTests(unittest.TestCase):
@@ -833,7 +857,10 @@ def process_lines(lines):
             actual_flags = get_flagstate()
 
             # compare actual with expected results
-            self.assert_(identicalBigFloats(actual_result, expected_result))
+            diff = diffBigFloat(actual_result, expected_result,
+                                match_precisions=False)
+            if diff is not None:
+                self.fail(diff)
             self.assertEqual(actual_flags, expected_flags)
 
     return test_fn
