@@ -1,7 +1,24 @@
 #!/usr/bin/env python2.6
+
+"""
+The documentation for mpfr_get_str, for converting a precision n
+number into a base b string, says:
+
+   "the chosen precision of str is the minimal precision depending on
+   n and b only that satisfies the above property, i.e., m = 1 +
+   ceil(n*log(2)/log(b)), but in some very rare cases, it might be
+   m+1."
+
+In this script, we compute the smallest precisions for which this
+'very rare' case occurs, for each base b in the range 2 <= b <= 62.
+We compare our results with those computed by Paul Zimmerman.
+
+"""
+
 from fractions import Fraction
 from itertools import izip
-from pympfr import pympfr, GMP_RNDN, GMP_RNDU, GMP_RNDD
+from bigfloat import log2, div, precision, next_up
+from bigfloat import RoundTowardPositive, RoundTowardNegative, RoundTiesToEven
 
 def semiconvergents(x):
     """Semiconvergents of continued fraction expansion of a Fraction x."""
@@ -18,59 +35,24 @@ def semiconvergents(x):
 
 def logn2(n, p):
     """Best p-bit lower and upper bounds for log(2)/log(n), as Fractions."""
+    with precision(p):
+        extra = 10
+        while True:
+            with precision(p+extra):
+                # use extra precision for intermediate step
+                log2upper = log2(n, RoundTowardPositive)
+                log2lower = log2(n, RoundTowardNegative)
 
-    down, up = RoundTowardNegative, RoundTowardPositive
+            lower = div(1, log2upper, RoundTowardNegative)
+            upper = div(1, log2lower, RoundTowardPositive)
 
-    extra = 10
-    while True:
-        with precision(p+extra):
-            with rounding(up):
-                log2upper = log2(n)
-            with rounding(down):
-                log2lower = log2(n)
+            # if lower and upper are adjacent (or equal) we're done
+            if next_up(lower) == upper:
+                return (Fraction(*lower.as_integer_ratio()),
+                        Fraction(*upper.as_integer_ratio()))
 
-        with rounding(down):
-            lower = 1/log2upper
-        with rounding(up):
-            upper = 1/log2lower
-
-
-
-
-    with rounding(down):
-        with precision(p+extra):
-            log2lower = log2(n)
-
- upper = log2(n)
-    with rounding(up): upper = 1/upper
-
-
-    lower, upper, lower_copy = map(pympfr, [p]*3)
-    y = pympfr(p + 10)
-    one = pympfr()
-    one.set_d(1.0, GMP_RNDN)
-    # convert n to a pympfr instance
-    fn = pympfr()
-    if fn.set_d(n, GMP_RNDN):
-        raise ValueError("Default precision too low to represent n exactly.")
-    n = fn
-
-    while True:
-        # get lower and upper bounds for log(2)/log(n) ( = 1/log2(n))
-        y.log2(n, GMP_RNDU)
-        lower.div(one, y, GMP_RNDD)
-        y.log2(n, GMP_RNDD)
-        upper.div(one, y, GMP_RNDU)
-
-        # if the two bounds are adjacent (or equal), we're done
-        lower_copy.set(lower, GMP_RNDN)
-        lower_copy.nexttoward(upper)
-        if lower_copy == upper:
-            return (Fraction(*lower.as_integer_ratio()),
-                    Fraction(*upper.as_integer_ratio()))
-
-        # otherwise, increase the precision and try again
-        y.precision += 10
+            # otherwise, increase the precision and try again
+            extra += 10
 
 marks_results = {}
 all_n = [n for n in xrange(3, 63) if n & (n-1)]
