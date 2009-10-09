@@ -128,6 +128,7 @@ def main():
         packages=[
             'bigfloat',
             'bigfloat.test',
+            'bigfloat.examples',
             ],
 
         # Build info

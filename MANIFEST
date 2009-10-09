@@ -7,3 +7,5 @@ bigfloat/pympfr.py
 bigfloat/test/test_bigfloat.py
 bigfloat/test/test_pympfr.py
 bigfloat/test/__init__.py
+bigfloat/examples/__init__.py
+bigfloat/examples/contfrac.py
