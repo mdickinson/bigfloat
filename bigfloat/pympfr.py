@@ -585,7 +585,7 @@ standard_functions = \
 
 extra_standard_functions = [
     ('set_str2', [ctypes.c_char_p, Base]),
-    ('lgamma2', [IMpfr]),
+    ('lgamma_nosign', [IMpfr]),
     ]
 
 unary_predicates = [
@@ -654,13 +654,13 @@ MPFR_EMAX_MAX = mpfr.mpfr_get_emax_max()
 ################################################################################
 # Python wrappers for some of the functions that are awkward to use directly
 
-def lgamma2(rop, x, rnd):
+def lgamma_nosign(rop, x, rnd):
     """Like mpfr_lgamma, but doesn't return the sign."""
 
     sign = ctypes.c_int()
     return mpfr.mpfr_lgamma(rop, ctypes.pointer(sign), x, rnd)
 
-mpfr.mpfr_lgamma2 = lgamma2
+mpfr.mpfr_lgamma_nosign = lgamma_nosign
 
 def set_str2(rop, s, base, rnd):
     """Set value of rop from the string s, using given base and rounding mode.

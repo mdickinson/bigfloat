@@ -912,6 +912,9 @@ _name_translation = {
     # fac_ui -> factorial
     'fac_ui': 'factorial',
 
+    # lgamma
+    'lgamma_nosign': 'lgamma',
+
     # conversions to integer
     'rint_floor': 'floor',
     'rint_ceil': 'ceil',

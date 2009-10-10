@@ -975,6 +975,10 @@ Special functions
 
    Return the gamma function applied to x.
 
+.. function:: lgamma(x)
+
+   Return the natural log of the absolute value of gamma(x).
+
 .. function:: lngamma(x)
 
    Return log(gamma(x)).
