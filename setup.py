@@ -124,7 +124,18 @@ def main():
         long_description=LONG_DESCRIPTION,
         author='Mark Dickinson',
         author_email='dickinsm@gmail.com',
-        url='http://www.mpfr.org',
+        url='http://bitbucket.org/dickinsm/bigfloat',
+        classifiers=[
+            'Development Status :: 3 - Alpha',
+            'License :: OSI Approved :: Academic Free License (AFL)',
+            'Programming Language :: Python',
+            'Topic :: Scientific/Engineering :: Mathematics',
+            ],
+        platforms = [
+            'Linux',
+            'OS X',
+            ],
+        license = 'Academic Free License (AFL)',
         packages=[
             'bigfloat',
             'bigfloat.test',
