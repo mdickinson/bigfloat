@@ -1,6 +1,3 @@
-Add license information
------------------------
-
 Implement floordiv method for BigFloats
 ---------------------------------------
   x // y should behave as with any other operation or function, though
@@ -15,15 +12,9 @@ Implement floordiv method for BigFloats
   might involved billions of bits); instead we need to find an
   indirect way of doing this comparison.
 
-
 Implement round for BigFloats
 -----------------------------
   Should be straightforward;  go via string.
-
-Wrap the lgamma function
-------------------------
-  Problem here is that lgamma is not a standard function: it
-  has two outputs, a sign and a BigFloat.
 
 * Better error messages
 
