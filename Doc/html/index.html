@@ -1,0 +1,1562 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bigfloat — High precision floating-point arithmetic &mdash; BigFloat v0.1 documentation</title>
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_MODINDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="BigFloat v0.1 documentation" href="" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="modindex.html" title="Global Module Index"
+             accesskey="M">modules</a> |</li>
+        <li><a href="">BigFloat v0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-bigfloat">
+<h1><tt class="xref docutils literal"><span class="pre">bigfloat</span></tt> &#8212; High precision floating-point arithmetic<a class="headerlink" href="#module-bigfloat" title="Permalink to this headline">¶</a></h1>
+<p>The <tt class="xref docutils literal"><span class="pre">bigfloat</span></tt> module is a Python wrapper for the MPFR library
+for arbitrary precision floating-point reliable arithmetic.</p>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>The <a class="reference external" href="http://www.mpfr.org">MPFR library</a> is a well-known portable C
+library for arbitrary-precision arithmetic on floating-point numbers.
+It provides precise control over precisions and rounding modes and
+gives correctly-rounded reproducible platform-independent results.</p>
+<p>The <tt class="xref docutils literal"><span class="pre">bigfloat</span></tt> module aims to provide a convenient and friendly
+Python interface to the operations and functions provided by the MPFR
+library.  The main class, <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a>, gives an immutable
+multiple-precision floating-point type that can be freely mixed with
+Python integers and floats.  The <a title="bigfloat.Context" class="reference internal" href="#bigfloat.Context"><tt class="xref docutils literal"><span class="pre">Context</span></tt></a> class, used in
+conjunction with Python&#8217;s <tt class="docutils literal"><span class="pre">with</span></tt> statement, gives a simple way of
+controlling precisions and rounding modes.  Additional module-level
+functions provide various standard mathematical operations.  There is
+full support for IEEE 754 signed zeros, nans, infinities and
+subnormals.</p>
+</div>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="prerequisites">
+<h3>Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this headline">¶</a></h3>
+<p>In order to use the <tt class="xref docutils literal"><span class="pre">bigfloat</span></tt> module you will need to have both
+the GMP and MPFR libraries already installed on your system.  See the
+<a class="reference external" href="http://www.mpfr.org">MPFR homepage</a> and the <a class="reference external" href="http://gmplib.org">GMP homepage</a> for more information about these libraries.
+Currently, MPFR version 2.4.0 or later is required.</p>
+<p>This module requires Python version 2.5 or later.  For Python 2.5,
+you&#8217;ll need to do a <tt class="docutils literal"><span class="pre">from</span> <span class="pre">__future__</span> <span class="pre">import</span> <span class="pre">with_statement</span></tt> if you
+want to take advantage of all of the features of this module.</p>
+</div>
+<div class="section" id="locating-the-mpfr-library">
+<h3>Locating the MPFR library<a class="headerlink" href="#locating-the-mpfr-library" title="Permalink to this headline">¶</a></h3>
+<p>The <tt class="xref docutils literal"><span class="pre">bigfloat</span></tt> module attempts to locate the MPFR library on your
+system.  If it fails, or if you have multiple MPFR libraries installed
+on your system and want to specify which one to use, you should edit
+the <tt class="docutils literal"><span class="pre">mpfr_library_location</span></tt> setting in the <tt class="docutils literal"><span class="pre">bigfloat_config.py</span></tt>
+file to specify the library location.</p>
+</div>
+<div class="section" id="other-configuration">
+<h3>Other configuration<a class="headerlink" href="#other-configuration" title="Permalink to this headline">¶</a></h3>
+<p>The <tt class="docutils literal"><span class="pre">bigfloat_config.py</span></tt> file also allows you to specify some other
+system-dependent values.  On a typical system, with default installs
+of GMP and MPFR, it&#8217;s unlikely that these values will need to be
+changed.  But if you&#8217;re getting segmentation faults or crashes with
+the bigfloat library then you may need to edit the values in this
+file.  In this case it will probably also be useful to have the gmp.h
+and mpfr.h include files handy to refer to; on Linux systems, these
+files may be in a different package from the library files (e.g.,
+&#8216;mpfr-devel&#8217; instead of &#8216;mpfr&#8217;).</p>
+</div>
+</div>
+<div class="section" id="tutorial">
+<h2>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this headline">¶</a></h2>
+<p>Start by importing the contents of the module (assuming that you&#8217;ve
+already installed it and its prerequisites) with:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">bigfloat</span> <span class="kn">import</span> <span class="o">*</span>
+</pre></div>
+</div>
+<p>This import brings a fairly large number of functions into the current
+namespace, and clobbers some builtin Python functions: <tt class="docutils literal"><span class="pre">abs</span></tt>,
+<tt class="docutils literal"><span class="pre">max</span></tt>, <tt class="docutils literal"><span class="pre">min</span></tt> and <tt class="docutils literal"><span class="pre">pow</span></tt>.  In normal usage you&#8217;ll probably only
+want to import the classes and functions that you actually need.</p>
+<div class="section" id="bigfloat-construction">
+<h3><a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> construction<a class="headerlink" href="#bigfloat-construction" title="Permalink to this headline">¶</a></h3>
+<p>The main type of interest is the <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> class.  The
+<a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> type is an immutable binary floating-point type.  A
+<a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> instance can be created from an integer, a float or
+a string:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">BigFloat</span><span class="p">(</span><span class="mf">123</span><span class="p">)</span>
+<span class="go">BigFloat.exact(&#39;123.00000000000000&#39;, precision=53)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">BigFloat</span><span class="p">(</span><span class="o">-</span><span class="mf">4.56</span><span class="p">)</span>
+<span class="go">BigFloat.exact(&#39;-4.5599999999999996&#39;, precision=53)</span>
+</pre></div>
+</div>
+<p>Each <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> instance has both a <em>value</em> and a <em>precision</em>.  The
+precision gives the number of bits used to store the significand of
+the <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a>.  The <em>value</em> of a (finite, nonzero) <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> with
+precision <tt class="docutils literal"><span class="pre">p</span></tt> is a real number of the form <tt class="docutils literal"><span class="pre">(-1)**sign</span> <span class="pre">*</span> <span class="pre">m</span> <span class="pre">*</span> <span class="pre">2**e</span></tt>
+where <tt class="docutils literal"><span class="pre">sign</span></tt> is either <tt class="docutils literal"><span class="pre">0</span></tt> or <tt class="docutils literal"><span class="pre">1</span></tt>, <tt class="docutils literal"><span class="pre">m</span></tt> is the <em>significand</em>, a
+number in the half-open interval [0.5, 1.0) that can be expressed in
+the form <tt class="docutils literal"><span class="pre">n/2**p</span></tt> for some integer <tt class="docutils literal"><span class="pre">n</span></tt>, and <tt class="docutils literal"><span class="pre">e</span></tt> is an integer
+giving the <em>exponent</em>.  In addition, zeros (positive and negative),
+infinities and NaNs are representable.  Note that printed form of a
+<a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> shows only a decimal approximation to the stored value, for
+the sake of human readers.</p>
+<p>The precision of newly-constructed <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> instances is dictated by
+the <em>current precision</em>, which defaults to 53.  This setting can be
+overridden by supplying a <tt class="docutils literal"><span class="pre">context</span></tt> keyword argument to the
+constructor:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">BigFloat</span><span class="p">(</span><span class="o">-</span><span class="mf">4.56</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">precision</span><span class="p">(</span><span class="mf">24</span><span class="p">))</span>
+<span class="go">BigFloat.exact(&#39;-4.55999994&#39;, precision=24)</span>
+</pre></div>
+</div>
+<p>The input value is rounded to the correct precision using the <em>current
+rounding mode</em>, which defaults to <tt class="docutils literal"><span class="pre">RoundTiesToEven</span></tt>; again, this can
+be overridden with the <tt class="docutils literal"><span class="pre">context</span></tt> keyword argument:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">BigFloat</span><span class="p">(</span><span class="s">&#39;3.14&#39;</span><span class="p">)</span>
+<span class="go">BigFloat.exact(&#39;3.1400000000000001&#39;, precision=53)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">BigFloat</span><span class="p">(</span><span class="s">&#39;3.14&#39;</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">RoundTowardZero</span><span class="p">)</span>
+<span class="go">BigFloat.exact(&#39;3.1399999999999997&#39;, precision=53)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">BigFloat</span><span class="p">(</span><span class="s">&#39;3.14&#39;</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">RoundTowardPositive</span> <span class="o">+</span> <span class="n">precision</span><span class="p">(</span><span class="mf">24</span><span class="p">))</span>
+<span class="go">BigFloat.exact(&#39;3.14000010&#39;, precision=24)</span>
+</pre></div>
+</div>
+<p>More generally, the second argument to the <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> constructor should
+be an instance of the <a title="bigfloat.Context" class="reference internal" href="#bigfloat.Context"><tt class="xref docutils literal"><span class="pre">Context</span></tt></a> class.  The various rounding
+modes are all Context instances, and <tt class="docutils literal"><span class="pre">precision</span></tt> is a function
+returning a Context:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">RoundTowardNegative</span>
+<span class="go">Context(rounding=&#39;RoundTowardNegative&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">precision</span><span class="p">(</span><span class="mf">1000</span><span class="p">)</span>
+<span class="go">Context(precision=1000)</span>
+</pre></div>
+</div>
+<p>Contexts can be combined by addition, as seen above.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">precision</span><span class="p">(</span><span class="mf">1000</span><span class="p">)</span> <span class="o">+</span> <span class="n">RoundTowardNegative</span>
+<span class="go">Context(precision=1000, rounding=&#39;RoundTowardNegative&#39;)</span>
+</pre></div>
+</div>
+<p>The <cite>bigfloat</cite> module also defines various constant Contexts.  For
+example, <tt class="docutils literal"><span class="pre">quadruple_precision</span></tt> is a Context that corresponds to the
+IEEE 754 binary128 interchange format:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">quadruple_precision</span>
+<span class="go">Context(precision=113, emax=16384, emin=-16493, subnormalize=True)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">BigFloat</span><span class="p">(</span><span class="s">&#39;1.1&#39;</span><span class="p">,</span> <span class="n">quadruple_precision</span><span class="p">)</span>
+<span class="go">BigFloat.exact(&#39;1.10000000000000000000000000000000008&#39;, precision=113)</span>
+</pre></div>
+</div>
+<p>The current settings for precision and rounding mode are also given by
+a Context instance, the <em>current context</em>, accessible via the
+<a title="bigfloat.getcontext" class="reference internal" href="#bigfloat.getcontext"><tt class="xref docutils literal"><span class="pre">getcontext()</span></tt></a> function:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">getcontext</span><span class="p">()</span>
+<span class="go">Context(precision=53, emax=1073741823, emin=-1073741823, subnormalize=False, rounding=&#39;RoundTiesToEven&#39;)</span>
+</pre></div>
+</div>
+<p>Note that (unlike Python&#8217;s standard decimal module), <a title="bigfloat.Context" class="reference internal" href="#bigfloat.Context"><tt class="xref docutils literal"><span class="pre">Context</span></tt></a>
+instances are immutable.  We&#8217;ll learn more about Contexts, and how to
+use them, below.</p>
+<p>There&#8217;s also a second method for constructing <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> instances:
+<a title="bigfloat.BigFloat.exact" class="reference internal" href="#bigfloat.BigFloat.exact"><tt class="xref docutils literal"><span class="pre">BigFloat.exact()</span></tt></a>.  As with the usual constructor, this
+constructor accepts integers, floats and strings.  However, for
+integers and floats it performs an exact conversion, creating a
+<a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> with precision large enough to hold the integer or float
+exactly (regardless of the current precision setting):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">BigFloat</span><span class="o">.</span><span class="n">exact</span><span class="p">(</span><span class="o">-</span><span class="mf">123</span><span class="p">)</span>
+<span class="go">BigFloat.exact(&#39;-123.0&#39;, precision=7)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">BigFloat</span><span class="o">.</span><span class="n">exact</span><span class="p">(</span><span class="mf">7</span><span class="o">**</span><span class="mf">30</span><span class="p">)</span>
+<span class="go">BigFloat.exact(&#39;22539340290692258087863249.0&#39;, precision=85)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">BigFloat</span><span class="o">.</span><span class="n">exact</span><span class="p">(</span><span class="o">-</span><span class="mf">56.7</span><span class="p">)</span>
+<span class="go">BigFloat.exact(&#39;-56.700000000000003&#39;, precision=53)</span>
+</pre></div>
+</div>
+<p>For strings, <a title="bigfloat.BigFloat.exact" class="reference internal" href="#bigfloat.BigFloat.exact"><tt class="xref docutils literal"><span class="pre">BigFloat.exact()</span></tt></a> accepts a second <tt class="docutils literal"><span class="pre">precision</span></tt>
+argument, and always rounds using the <tt class="docutils literal"><span class="pre">RoundTiesToEven</span></tt> rounding
+mode.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">BigFloat</span><span class="o">.</span><span class="n">exact</span><span class="p">(</span><span class="s">&#39;1.1&#39;</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="mf">80</span><span class="p">)</span>
+<span class="go">BigFloat.exact(&#39;1.1000000000000000000000003&#39;, precision=80)</span>
+</pre></div>
+</div>
+<p>The result of a call to <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a>.exact is independent of the current
+context; this is why the <tt class="xref docutils literal"><span class="pre">repr()</span></tt> of a <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> is expressed in
+terms of <a title="bigfloat.BigFloat.exact" class="reference internal" href="#bigfloat.BigFloat.exact"><tt class="xref docutils literal"><span class="pre">BigFloat.exact()</span></tt></a>.  The <tt class="xref docutils literal"><span class="pre">str()</span></tt> of a <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> looks
+prettier, but doesn&#8217;t supply enough information to recover that
+<a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> exactly if you don&#8217;t know the precision:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">BigFloat</span><span class="p">(</span><span class="s">&#39;1e1000&#39;</span><span class="p">,</span> <span class="n">precision</span><span class="p">(</span><span class="mf">20</span><span class="p">))</span>
+<span class="go">9.9999988e+999</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">BigFloat</span><span class="p">(</span><span class="s">&#39;1e1000&#39;</span><span class="p">,</span> <span class="n">precision</span><span class="p">(</span><span class="mf">21</span><span class="p">))</span>
+<span class="go">9.9999988e+999</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="arithmetic-on-bigfloat-instances">
+<h3>Arithmetic on <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> instances<a class="headerlink" href="#arithmetic-on-bigfloat-instances" title="Permalink to this headline">¶</a></h3>
+<p>All the usual arithmetic operations, with the exception of floor
+division, apply to <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> instances, and those instances can be
+freely mixed with integers and floats (but not strings!) in those
+operations:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">BigFloat</span><span class="p">(</span><span class="mf">1234</span><span class="p">)</span><span class="o">/</span><span class="mf">3</span>
+<span class="go">BigFloat.exact(&#39;411.33333333333331&#39;, precision=53)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">BigFloat</span><span class="p">(</span><span class="s">&#39;1e1233&#39;</span><span class="p">)</span><span class="o">**</span><span class="mf">0.5</span>
+<span class="go">BigFloat.exact(&#39;3.1622776601683794e+616&#39;, precision=53)</span>
+</pre></div>
+</div>
+<p>As with the <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> constructor, the precision for the result is
+taken from the current context, as is the rounding mode used to round
+the exact mathematical result to the nearest <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a>.</p>
+<p>For mixed-type operations, the integer or float is converted <em>exactly</em>
+to a <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> before the operation (as though the <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a>.exact
+constructor had been applied to it).  So there&#8217;s only a single point
+where precision might be lost: namely, when the result of the
+operation is rounded to the nearest value representable as a <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a>.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>The current precision and rounding mode even apply to the unary
+plus and minus operations.  In particular, <tt class="docutils literal"><span class="pre">+x</span></tt> is not
+necessarily a no-op for a <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> instance x:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">BigFloat</span><span class="o">.</span><span class="n">exact</span><span class="p">(</span><span class="mf">7</span><span class="o">**</span><span class="mf">100</span><span class="p">)</span>
+<span class="go">BigFloat.exact(&#39;3234476509624757991344647769100216810857203198904625400933895331391691459636928060001.0&#39;, precision=281)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="o">+</span><span class="n">BigFloat</span><span class="o">.</span><span class="n">exact</span><span class="p">(</span><span class="mf">7</span><span class="o">**</span><span class="mf">100</span><span class="p">)</span>
+<span class="go">BigFloat.exact(&#39;3.2344765096247579e+84&#39;, precision=53)</span>
+</pre></div>
+</div>
+<p class="last">This is occasionally useful, for rounding a result produced in a
+different context to the current context.</p>
+</div>
+<p>For each arithmetic operation the <tt class="xref docutils literal"><span class="pre">bigfloat</span></tt> module exports a
+corresponding function.  For example, the <a title="bigfloat.div" class="reference internal" href="#bigfloat.div"><tt class="xref docutils literal"><span class="pre">div()</span></tt></a> function
+corresponds to usual (true) division:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="mf">355</span><span class="o">/</span><span class="n">BigFloat</span><span class="p">(</span><span class="mf">113</span><span class="p">)</span>
+<span class="go">BigFloat.exact(&#39;3.1415929203539825&#39;, precision=53)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">div</span><span class="p">(</span><span class="mf">355</span><span class="p">,</span> <span class="mf">113</span><span class="p">)</span>
+<span class="go">BigFloat.exact(&#39;3.1415929203539825&#39;, precision=53)</span>
+</pre></div>
+</div>
+<p>This is useful for a couple of reasons: one reason is that it makes it
+possible to use <tt class="docutils literal"><span class="pre">div(x,</span> <span class="pre">y)</span></tt> in contexts where a <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> result is
+desired but where one or both of x and y might be an integer or float.
+But a more important reason is that these functions, like the <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a>
+constructor, accept an extra <tt class="docutils literal"><span class="pre">context</span></tt> keyword argument giving a
+context for the operation:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">div</span><span class="p">(</span><span class="mf">355</span><span class="p">,</span> <span class="mf">113</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">single_precision</span><span class="p">)</span>
+<span class="go">BigFloat.exact(&#39;3.14159298&#39;, precision=24)</span>
+</pre></div>
+</div>
+<p>Similarly, the <tt class="docutils literal"><span class="pre">sub</span></tt> function corresponds to Python&#8217;s subtraction
+operation.  To fully appreciate some of the subtleties of the ways
+that binary arithmetic operations might be performed, note the
+difference in the results of the following:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="mf">10</span><span class="o">**</span><span class="mf">16</span><span class="o">+</span><span class="mf">1</span>  <span class="c"># integer, not exactly representable as a float</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="mf">10</span><span class="o">**</span><span class="mf">16.</span>   <span class="c"># 10.**16 is exactly representable as a float</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">-</span> <span class="n">y</span>
+<span class="go">0.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">BigFloat</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="n">BigFloat</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+<span class="go">BigFloat.exact(&#39;0&#39;, precision=53)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sub</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="go">BigFloat.exact(&#39;1.0000000000000000&#39;, precision=53)</span>
+</pre></div>
+</div>
+<p>For the first subtraction, the integer is first converted to a float,
+losing accuracy, and then the subtraction is performed, giving a
+result of 0.0.  The second case is similar: <tt class="docutils literal"><span class="pre">x</span></tt> and <tt class="docutils literal"><span class="pre">y</span></tt> are both
+explicitly converted to <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> instances, and the conversion of
+<tt class="docutils literal"><span class="pre">y</span></tt> again loses precision.  In the third case, <tt class="docutils literal"><span class="pre">x</span></tt> and <tt class="docutils literal"><span class="pre">y</span></tt> are
+<em>implicitly</em> converted to <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> instances, and that conversion is
+exact, so the subtraction produces exactly the right answer.</p>
+<p>Comparisons between <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> instances and integers or floats also
+behave as you&#8217;d expect them to; for these, there&#8217;s no need for a
+corresponding function.</p>
+<p>The <tt class="xref docutils literal"><span class="pre">bigfloat</span></tt> module provides a number of standard mathematical
+functions.  These functions follow the same rules as the arithmetic
+operations above: the inputs can be integers, floats or <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a>
+instances; integers and floats are converted to <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> instances
+using an exact conversion; the result is a <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> with precision and
+rounding mode taken from the current context, and parameters from the
+current context can be overridden by providing a <tt class="docutils literal"><span class="pre">context</span></tt> keyword
+argument.  Here are some examples:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1729</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">RoundTowardZero</span><span class="p">)</span>
+<span class="go">BigFloat.exact(&#39;41.581245772583578&#39;, precision=53)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1729</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">RoundTowardPositive</span><span class="p">)</span>
+<span class="go">BigFloat.exact(&#39;41.581245772583586&#39;, precision=53)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">atanh</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">precision</span><span class="p">(</span><span class="mf">20</span><span class="p">))</span>
+<span class="go">BigFloat.exact(&#39;0.54930592&#39;, precision=20)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">const_catalan</span><span class="p">(</span><span class="n">precision</span><span class="p">(</span><span class="mf">1000</span><span class="p">))</span>
+<span class="go">BigFloat.exact(&#39;0.915965594177219015054603514932384110774149374281672134266498119621763019776254769479356512926115106248574422619196199579035898803325859059431594737481158406995332028773319460519038727478164087865909024706484152163000228727640942388259957741508816397470252482011560707644883807873370489900864775113226027&#39;, precision=1000)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="mf">4</span><span class="o">*</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">const_pi</span><span class="p">()</span><span class="o">/</span><span class="mf">2</span><span class="o">/</span><span class="n">agm</span><span class="p">(</span><span class="mf">1</span><span class="p">,</span> <span class="mf">1e-100</span><span class="p">))</span>
+<span class="go">BigFloat.exact(&#39;9.9999999999998517e-101&#39;, precision=53)</span>
+</pre></div>
+</div>
+<p>For a full list of the supported functions, see the reference manual.</p>
+</div>
+<div class="section" id="controlling-the-precision-and-rounding-mode">
+<h3>Controlling the precision and rounding mode<a class="headerlink" href="#controlling-the-precision-and-rounding-mode" title="Permalink to this headline">¶</a></h3>
+<p>We&#8217;ve seen one way of controlling precision and rounding mode, via the
+<tt class="docutils literal"><span class="pre">context</span></tt> keyword argument.  There&#8217;s another way that&#8217;s often more
+convenient, especially when a single context change is supposed to
+apply to multiple operations: contexts can be used directly in Python
+<tt class="docutils literal"><span class="pre">with</span></tt> statements.  Note: if you&#8217;re using Python 2.5, you&#8217;ll need
+to enable with statements with:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">with_statement</span>
+</pre></div>
+</div>
+<p>For example, here we compute high-precision upper and lower-bounds for
+the thousandth harmonic number:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">precision</span><span class="p">(</span><span class="mf">100</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">with</span> <span class="n">RoundTowardNegative</span><span class="p">:</span>  <span class="c"># lower bound</span>
+<span class="gp">... </span>        <span class="n">lower_bound</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">div</span><span class="p">(</span><span class="mf">1</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mf">1</span><span class="p">,</span> <span class="mf">1001</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">with</span> <span class="n">RoundTowardPositive</span><span class="p">:</span>  <span class="c"># upper bound</span>
+<span class="gp">... </span>        <span class="n">upper_bound</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">div</span><span class="p">(</span><span class="mf">1</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mf">1</span><span class="p">,</span> <span class="mf">1001</span><span class="p">))</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lower_bound</span>
+<span class="go">BigFloat.exact(&#39;7.4854708605503449126565182015873&#39;, precision=100)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">upper_bound</span>
+<span class="go">BigFloat.exact(&#39;7.4854708605503449126565182077593&#39;, precision=100)</span>
+</pre></div>
+</div>
+<p>The effect of the with statement is to change the current context for
+the duration of the with block; when the block exits, the previous
+context is restored.  With statements can be nested, as seen above.
+Let&#8217;s double-check the above results using the asymptotic formula for
+the nth harmonic number <a class="footnote-reference" href="#harmonic" id="id1">[1]</a>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">n</span> <span class="o">=</span> <span class="mf">1000</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">precision</span><span class="p">(</span><span class="mf">100</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">approx</span> <span class="o">=</span> <span class="n">log</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">+</span> <span class="n">const_euler</span><span class="p">()</span> <span class="o">+</span> <span class="n">div</span><span class="p">(</span><span class="mf">1</span><span class="p">,</span> <span class="mf">2</span><span class="o">*</span><span class="n">n</span><span class="p">)</span> <span class="o">-</span> <span class="mf">1</span><span class="o">/</span><span class="p">(</span><span class="mf">12</span><span class="o">*</span><span class="n">sqr</span><span class="p">(</span><span class="n">n</span><span class="p">))</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">approx</span>
+<span class="go">BigFloat.exact(&#39;7.4854708605503365793271531207983&#39;, precision=100)</span>
+</pre></div>
+</div>
+<p>The error in this approximation should be approximately -1/(120*n**4):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">error</span> <span class="o">=</span> <span class="n">approx</span> <span class="o">-</span> <span class="n">lower_bound</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">error</span>
+<span class="go">BigFloat.exact(&#39;-8.3333293650807890e-15&#39;, precision=53)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="o">-</span><span class="mf">1</span><span class="o">/</span><span class="p">(</span><span class="mf">120</span><span class="o">*</span><span class="nb">pow</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mf">4</span><span class="p">))</span>
+<span class="go">BigFloat.exact(&#39;-8.3333333333333336e-15&#39;, precision=53)</span>
+</pre></div>
+</div>
+<p>A more permanent change to the context can be effected using the
+<a title="bigfloat.setcontext" class="reference internal" href="#bigfloat.setcontext"><tt class="xref docutils literal"><span class="pre">setcontext()</span></tt></a> function, which takes a single argument of type
+<a title="bigfloat.Context" class="reference internal" href="#bigfloat.Context"><tt class="xref docutils literal"><span class="pre">Context</span></tt></a>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">setcontext</span><span class="p">(</span><span class="n">precision</span><span class="p">(</span><span class="mf">30</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2</span><span class="p">)</span>
+<span class="go">BigFloat.exact(&#39;1.4142135624&#39;, precision=30)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">setcontext</span><span class="p">(</span><span class="n">RoundTowardZero</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2</span><span class="p">)</span>
+<span class="go">BigFloat.exact(&#39;1.4142135605&#39;, precision=30)</span>
+</pre></div>
+</div>
+<p>An important point here is that in all places that a context is used,
+only the attributes specified by that context are changed.  For
+example, the context <tt class="docutils literal"><span class="pre">precision(30)</span></tt> only has the <tt class="docutils literal"><span class="pre">precision</span></tt>
+attribute, so only that attribute is affected by the <tt class="docutils literal"><span class="pre">setcontext</span></tt>
+call; the other attributes are not changed.  Similarly, the
+<tt class="docutils literal"><span class="pre">setcontext(RoundTowardZero)</span></tt> line above doesn&#8217;t affect the
+precision.</p>
+<p>There&#8217;s a <tt class="docutils literal"><span class="pre">DefaultContext</span></tt> constant giving the default context, so
+you can always restore the original default context as follows:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">setcontext</span><span class="p">(</span><span class="n">DefaultContext</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">If <a title="bigfloat.setcontext" class="reference internal" href="#bigfloat.setcontext"><tt class="xref docutils literal"><span class="pre">setcontext()</span></tt></a> is used within a with statement, its effects
+only last for the duration of the block following the with
+statement.</p>
+</div>
+</div>
+<div class="section" id="flags">
+<h3>Flags<a class="headerlink" href="#flags" title="Permalink to this headline">¶</a></h3>
+<p>The <tt class="xref docutils literal"><span class="pre">bigfloat</span></tt> module also provides four global flags: &#8216;Inexact&#8217;,
+&#8216;Overflow&#8217;, &#8216;Underflow&#8217;, &#8216;NanFlag&#8217;, along with methods to set and test
+these flags:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">set_flagstate</span><span class="p">(</span><span class="n">set</span><span class="p">())</span>  <span class="c"># clear all flags</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">get_flagstate</span><span class="p">()</span>
+<span class="go">set([])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">exp</span><span class="p">(</span><span class="mf">10</span><span class="o">**</span><span class="mf">100</span><span class="p">)</span>
+<span class="go">BigFloat.exact(&#39;Infinity&#39;, precision=53)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">get_flagstate</span><span class="p">()</span>
+<span class="go">set([&#39;Overflow&#39;, &#39;Inexact&#39;])</span>
+</pre></div>
+</div>
+<p>These flags show that overflow occurred, and that the given result
+(infinity) was inexact.  The flags are sticky: none of the standard
+operations ever clears a flag:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2</span><span class="p">)</span>
+<span class="go">BigFloat.exact(&#39;1.4142135623730951&#39;, precision=53)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">get_flagstate</span><span class="p">()</span>  <span class="c"># overflow flag still set from the exp call</span>
+<span class="go">set([&#39;Overflow&#39;, &#39;Inexact&#39;])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">set_flagstate</span><span class="p">(</span><span class="n">set</span><span class="p">())</span>  <span class="c"># clear all flags</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2</span><span class="p">)</span>
+<span class="go">BigFloat.exact(&#39;1.4142135623730951&#39;, precision=53)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">get_flagstate</span><span class="p">()</span>   <span class="c"># sqrt only sets the inexact flag</span>
+<span class="go">set([&#39;Inexact&#39;])</span>
+</pre></div>
+</div>
+<p>The functions <a title="bigfloat.clear_flag" class="reference internal" href="#bigfloat.clear_flag"><tt class="xref docutils literal"><span class="pre">clear_flag()</span></tt></a>, <a title="bigfloat.set_flag" class="reference internal" href="#bigfloat.set_flag"><tt class="xref docutils literal"><span class="pre">set_flag()</span></tt></a> and
+<a title="bigfloat.test_flag" class="reference internal" href="#bigfloat.test_flag"><tt class="xref docutils literal"><span class="pre">test_flag()</span></tt></a> allow clearing, setting and testing of individual
+flags.</p>
+</div>
+</div>
+<div class="section" id="reference">
+<h2>Reference<a class="headerlink" href="#reference" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="the-bigfloat-class">
+<h3>The <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> class<a class="headerlink" href="#the-bigfloat-class" title="Permalink to this headline">¶</a></h3>
+<p>The <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> class implements multiple-precision binary
+floating-point numbers.  Each <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> instance has both a
+value and a precision; the precision is an integer giving the number
+of significant bits used to store the value.  A finite nonzero
+<a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> instance with precision p can be thought of as a
+(sign, significand, exponent) triple (s, m, e), representing the value
+(-1)**s * m * 2**e, where m is a value in the range [0.5, 1.0) stored
+with p bits of precision.  Thus m is of the form n/2**p for some
+integer n with 2**(p-1) &lt;= n &lt; 2**p.</p>
+<p>In addition to nonzero finite numbers, <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> instances can
+also represent positive and negative infinity, positive and negative
+zero, and NaNs.</p>
+<p><a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> instances should be treated as immutable.</p>
+<dl class="class">
+<dt id="bigfloat.BigFloat">
+<em class="property">
+class </em><tt class="descclassname">bigfloat.</tt><tt class="descname">BigFloat</tt><big>(</big><em>value</em>, <em>context=None</em><big>)</big><a class="headerlink" href="#bigfloat.BigFloat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct a new <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> instance from an integer, string,
+float or another <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> instance, using the
+rounding-mode and output format (precision, exponent bounds and
+subnormalization) given by the current context.  If the <em>context</em>
+keyword argument is given, its value should be a <a title="bigfloat.Context" class="reference internal" href="#bigfloat.Context"><tt class="xref docutils literal"><span class="pre">Context</span></tt></a>
+instance and its attributes override those of the current context.</p>
+<p><em>value</em> can be an integer, string, float, or another
+<a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> instance.  In all cases the given value is
+rounded to the format (determined by precision, exponent limits and
+subnormalization) given by the current context, using the rounding
+mode specified by the current context.  The integer 0 is always
+converted to positive zero.</p>
+<dl class="method">
+<dt id="bigfloat.BigFloat.as_integer_ratio">
+<tt class="descname">as_integer_ratio</tt><big>(</big><em>self</em><big>)</big><a class="headerlink" href="#bigfloat.BigFloat.as_integer_ratio" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a pair (n, d) of integers such that n and d are
+relatively prime, d is positive, and the value of self is
+exactly n/d.</p>
+<p>If self is an infinity or nan then ValueError is raised.
+Negative and positive zero are both converted to (0, 1).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bigfloat.BigFloat.exact">
+<tt class="descname">exact</tt><big>(</big><em>cls</em>, <em>value</em>, <em>precision=None</em><big>)</big><a class="headerlink" href="#bigfloat.BigFloat.exact" title="Permalink to this definition">¶</a></dt>
+<dd><p>A class method to construct a new <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> instance
+from an integer, string, float or another <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a>
+instance, doing an exact conversion where possible.  Unlike the
+usual <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> constructor, this alternative
+constructor makes no use of the current context and will not
+affect the current flags.</p>
+<p>If value is an integer, float or <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a>, then the precision
+keyword must not be given, and the conversion is exact.  The
+resulting <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> has a precision sufficiently large to hold the
+converted value exactly.  If value is a string, then the
+precision argument must be given.  The string is converted using
+the given precision and the RoundTiesToEven rounding mode.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bigfloat.BigFloat.fromhex">
+<tt class="descname">fromhex</tt><big>(</big><em>cls</em>, <em>value</em>, <em>context=None</em><big>)</big><a class="headerlink" href="#bigfloat.BigFloat.fromhex" title="Permalink to this definition">¶</a></dt>
+<dd>Class method that constructs a new <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> instance
+from a hexadecimal string.  Rounds to the current context using
+the given precision.  If the <em>context</em> keyword argument is
+given, its value should be a <a title="bigfloat.Context" class="reference internal" href="#bigfloat.Context"><tt class="xref docutils literal"><span class="pre">Context</span></tt></a> instance and its
+attributes override those of the current context.</dd></dl>
+
+<dl class="method">
+<dt id="bigfloat.BigFloat.hex">
+<tt class="descname">hex</tt><big>(</big><em>self</em><big>)</big><a class="headerlink" href="#bigfloat.BigFloat.hex" title="Permalink to this definition">¶</a></dt>
+<dd>Return a hexadecimal representation of a <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a>.  The
+advantage of the hexadecimal representation is that it
+represents the value of the <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> exactly.</dd></dl>
+
+<dl class="attribute">
+<dt id="bigfloat.BigFloat.precision">
+<tt class="descname">precision</tt><a class="headerlink" href="#bigfloat.BigFloat.precision" title="Permalink to this definition">¶</a></dt>
+<dd>Precision of a <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> instance, in bits.</dd></dl>
+
+</dd></dl>
+
+<div class="section" id="special-methods">
+<h4>Special methods<a class="headerlink" href="#special-methods" title="Permalink to this headline">¶</a></h4>
+<p>The <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> type has a full complement of special methods.
+Here are some brief notes on those methods, indicating any possible
+deviations from expected behaviour.</p>
+<ul class="simple">
+<li>The repr of a <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> instance <tt class="docutils literal"><span class="pre">x</span></tt> has the property that
+<tt class="docutils literal"><span class="pre">eval(repr(x))</span></tt> recovers <tt class="docutils literal"><span class="pre">x</span></tt> exactly.</li>
+<li>The &#8216;+&#8217; ,&#8217;-&#8216;, &#8216;*&#8217;, &#8216;/&#8217;, &#8216;**&#8217; and &#8216;%&#8217; binary operators are supported,
+and mixed-type operations involving a <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> and an integer or
+float are permitted.  Mixed-type operations behave as though the
+non <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> operand is first converted to a <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> with no loss
+of accuracy.  The &#8216;/&#8217; operator implements true division, regardless
+of whether &#8216;from __future__ import division&#8217; is in effect or not.
+The result of &#8216;%&#8217; has the same sign as the first argument, not the
+second.  Floor division is not currently implemented.</li>
+<li>The &#8216;+&#8217; and &#8216;-&#8216; unary operators and built-in <a title="bigfloat.abs" class="reference internal" href="#bigfloat.abs"><tt class="xref docutils literal"><span class="pre">abs()</span></tt></a> function
+are supported.  Note that these all round to the current context; in
+particular, &#8216;+x&#8217; is not necessarily equal to &#8216;x&#8217; for a
+<a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> instance <tt class="docutils literal"><span class="pre">x</span></tt>.</li>
+<li>The six comparison operators &#8216;==&#8217;, &#8216;&lt;=&#8217;, &#8216;&lt;&#8217;, &#8216;!=&#8217;, &#8216;&gt;&#8217;, &#8216;&gt;=&#8217; are
+supported.  Comparisons involving NaNs always return False, except
+in the case of &#8216;!=&#8217; where they always return True.  Again,
+comparisons with integers or floats are permitted, with the integer
+or float being converted exactly before the comparison; the context
+does not affect the result of a comparison.</li>
+<li>Conversions to int and long always round towards zero; conversions
+to float always use the <tt class="docutils literal"><span class="pre">RoundTiesToEven</span></tt> rounding mode.
+Conversion to bool returns False for a nonzero <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> and True
+otherwise.  None of these conversions is affected by the current
+context.</li>
+<li><a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> instances are hashable.  For Python 2.6 and later, the hash
+function obeys the rule that objects that compare equal should hash
+equal; in particular, if <tt class="docutils literal"><span class="pre">x</span> <span class="pre">==</span> <span class="pre">n</span></tt> for some <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> instance <tt class="docutils literal"><span class="pre">x</span></tt>
+and some Python int or long <tt class="docutils literal"><span class="pre">n``then</span> <span class="pre">``hash(x)</span> <span class="pre">==</span> <span class="pre">hash(n)</span></tt>, and
+similarly for floats.  In Python 2.5, there are some rare cases
+where <tt class="docutils literal"><span class="pre">x</span> <span class="pre">==</span> <span class="pre">n</span></tt> does not imply <tt class="docutils literal"><span class="pre">hash(x)</span> <span class="pre">==</span> <span class="pre">hash(n)</span></tt>.</li>
+</ul>
+</div>
+</div>
+<div class="section" id="the-context-class">
+<h3>The Context class<a class="headerlink" href="#the-context-class" title="Permalink to this headline">¶</a></h3>
+<p>A <a title="bigfloat.Context" class="reference internal" href="#bigfloat.Context"><tt class="xref docutils literal"><span class="pre">Context</span></tt></a> object is a simple immutable object that packages
+together attributes describing a floating-point format, together with
+a rounding mode.</p>
+<dl class="class">
+<dt id="bigfloat.Context">
+<em class="property">
+class </em><tt class="descclassname">bigfloat.</tt><tt class="descname">Context</tt><big>(</big><em>precision=None</em>, <em>emin=None</em>, <em>emax=None</em>, <em>subnormalize=None</em>, <em>rounding=None</em><big>)</big><a class="headerlink" href="#bigfloat.Context" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new Context object with the given attributes.  Not all
+attributes need to be specified.  Note that all attributes of the
+generated Context are read-only.  Attributes that are unset for
+this Context instance return <tt class="xref docutils literal"><span class="pre">None</span></tt>.</p>
+<dl class="attribute">
+<dt id="bigfloat.Context.precision">
+<tt class="descname">precision</tt><a class="headerlink" href="#bigfloat.Context.precision" title="Permalink to this definition">¶</a></dt>
+<dd>Precision of the floating-point format, given in bits.  This
+should be an integer in the range [PRECISION_MIN,
+PRECISION_MAX].  PRECISION_MIN is usually 2.</dd></dl>
+
+<dl class="attribute">
+<dt id="bigfloat.Context.emax">
+<tt class="descname">emax</tt><a class="headerlink" href="#bigfloat.Context.emax" title="Permalink to this definition">¶</a></dt>
+<dd>Maximum exponent allowed for this format.  The largest finite
+number representable in the context self is
+(1-2**-self.precision) * 2**self.emax.</dd></dl>
+
+<dl class="attribute">
+<dt id="bigfloat.Context.emin">
+<tt class="descname">emin</tt><a class="headerlink" href="#bigfloat.Context.emin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Minimum exponent allowed for this format.  The smallest positive
+number representable in the context self is <tt class="docutils literal"><span class="pre">0.5</span> <span class="pre">*</span> <span class="pre">2**self.emin</span></tt>.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">There&#8217;s nothing to stop you defining a context with emin &gt;
+emax, but don&#8217;t expect to get sensible results if you do
+this.</p>
+</div>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bigfloat.Context.subnormalize">
+<tt class="descname">subnormalize</tt><a class="headerlink" href="#bigfloat.Context.subnormalize" title="Permalink to this definition">¶</a></dt>
+<dd>A boolean value: True if the format has gradual underflow, and
+False otherwise.  With gradual underflow, all finite
+floating-point numbers have a value that&#8217;s an integer multiple
+of 2**(emin-1).</dd></dl>
+
+<dl class="attribute">
+<dt id="bigfloat.Context.rounding">
+<tt class="descname">rounding</tt><a class="headerlink" href="#bigfloat.Context.rounding" title="Permalink to this definition">¶</a></dt>
+<dd>The rounding mode of this Context.  This should be a string.
+Valid values are &#8216;RoundTiesToEven&#8217;, &#8216;RoundTowardZero&#8217;,
+&#8216;RoundTowardPositive&#8217; and &#8216;RoundTowardNegative&#8217;.  Note that the
+rounding modes <tt class="docutils literal"><span class="pre">RoundTiesToEven</span></tt>, etc. exported by the
+<tt class="xref docutils literal"><span class="pre">bigfloat</span></tt> module are Context instances, not strings, so
+cannot be used directly here.</dd></dl>
+
+</dd></dl>
+
+<p><a title="bigfloat.Context" class="reference internal" href="#bigfloat.Context"><tt class="xref docutils literal"><span class="pre">Context</span></tt></a> instances can be added.  If <tt class="docutils literal"><span class="pre">x</span></tt> and <tt class="docutils literal"><span class="pre">y</span></tt> are
+Context instances then <tt class="docutils literal"><span class="pre">x</span> <span class="pre">+</span> <span class="pre">y</span></tt> is the Context whose attributes
+combine those of <tt class="docutils literal"><span class="pre">x</span></tt> and <tt class="docutils literal"><span class="pre">y</span></tt>.  In the case that both <tt class="docutils literal"><span class="pre">x</span></tt> and
+<tt class="docutils literal"><span class="pre">y</span></tt> have a particular attribute set, the value for <tt class="docutils literal"><span class="pre">y</span></tt> takes
+precedence:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">Context</span><span class="p">(</span><span class="n">precision</span><span class="o">=</span><span class="mf">200</span><span class="p">,</span> <span class="n">rounding</span><span class="o">=</span><span class="s">&#39;RoundTiesToEven&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">Context</span><span class="p">(</span><span class="n">precision</span><span class="o">=</span><span class="mf">53</span><span class="p">,</span> <span class="n">subnormalize</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span>
+<span class="go">Context(precision=53, subnormalize=True, rounding=&#39;RoundTiesToEven&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">+</span> <span class="n">x</span>
+<span class="go">Context(precision=200, subnormalize=True, rounding=&#39;RoundTiesToEven&#39;)</span>
+</pre></div>
+</div>
+<p><a title="bigfloat.Context" class="reference internal" href="#bigfloat.Context"><tt class="xref docutils literal"><span class="pre">Context</span></tt></a> instances can be used in with statements to alter
+the current context.  In effect,</p>
+<div class="highlight-python"><pre>with c:
+    &lt;block&gt;</pre>
+</div>
+<p>behaves roughly like</p>
+<div class="highlight-python"><pre>old_context = getcontext()
+setcontext(c)
+&lt;block&gt;
+setcontext(old_context)</pre>
+</div>
+<p>except that nesting of with statements works as you&#8217;d expect, and the
+old context is guaranteed to be restored even if an exception occurs
+during execution of the block.</p>
+<p>Note that for Context instances <tt class="docutils literal"><span class="pre">x</span></tt> and <tt class="docutils literal"><span class="pre">y</span></tt>,</p>
+<div class="highlight-python"><pre>with x + y:
+    &lt;block&gt;</pre>
+</div>
+<p>is exactly equivalent to</p>
+<div class="highlight-python"><pre>with x:
+    with y:
+        &lt;block&gt;</pre>
+</div>
+<p>The bigfloat module defines a number of predefined <a title="bigfloat.Context" class="reference internal" href="#bigfloat.Context"><tt class="xref docutils literal"><span class="pre">Context</span></tt></a>
+instances.</p>
+<dl class="data">
+<dt id="bigfloat.DefaultContext">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">DefaultContext</tt><a class="headerlink" href="#bigfloat.DefaultContext" title="Permalink to this definition">¶</a></dt>
+<dd>The context that&#8217;s in use when the bigfloat module is first
+imported.  It has precision of 53, large exponent bounds, no
+subnormalization, and the RoundTiesToEven rounding mode.</dd></dl>
+
+<dl class="data">
+<dt id="bigfloat.EmptyContext">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">EmptyContext</tt><a class="headerlink" href="#bigfloat.EmptyContext" title="Permalink to this definition">¶</a></dt>
+<dd><p>Equal to Context().  Occasionally useful where a context is
+syntactically required for a with statement, but no change to the
+current context is desired.  For example:</p>
+<div class="highlight-python"><pre>if &lt;want_extra_precision&gt;:
+    c = extra_precision(10)
+else:
+    c = EmptyContext
+
+with c:
+    &lt;do calculation&gt;</pre>
+</div>
+</dd></dl>
+
+<dl class="data">
+<dt id="bigfloat.half_precision">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">half_precision</tt><a class="headerlink" href="#bigfloat.half_precision" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="data">
+<dt id="bigfloat.single_precision">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">single_precision</tt><a class="headerlink" href="#bigfloat.single_precision" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="data">
+<dt id="bigfloat.double_precision">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">double_precision</tt><a class="headerlink" href="#bigfloat.double_precision" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="data">
+<dt id="bigfloat.quadruple_precision">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">quadruple_precision</tt><a class="headerlink" href="#bigfloat.quadruple_precision" title="Permalink to this definition">¶</a></dt>
+<dd>These <a title="bigfloat.Context" class="reference internal" href="#bigfloat.Context"><tt class="xref docutils literal"><span class="pre">Context</span></tt></a> instances correspond to the binary16,
+binary32, binary64 and binary128 interchange formats described in
+IEEE 754-2008 (section 3.6).  They&#8217;re all special cases of the
+<a title="bigfloat.IEEEContext" class="reference internal" href="#bigfloat.IEEEContext"><tt class="xref docutils literal"><span class="pre">IEEEContext()</span></tt></a> function.</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.IEEEContext">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">IEEEContext</tt><big>(</big><em>bitwidth</em><big>)</big><a class="headerlink" href="#bigfloat.IEEEContext" title="Permalink to this definition">¶</a></dt>
+<dd>If bitwidth is one of widths permitted by IEEE 754 (that is, either
+16, 32, 64, or a multiple of 32 that&#8217;s not less than 128), return
+the IEEE 754 binary interchange format with the given bit width.
+See section 3.6 of IEEE 754-2008 or the bigfloat source for
+details.</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.precision">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">precision</tt><big>(</big><em>p</em><big>)</big><a class="headerlink" href="#bigfloat.precision" title="Permalink to this definition">¶</a></dt>
+<dd>A convenience function, to save typing.  <tt class="docutils literal"><span class="pre">precision(p)</span></tt> is
+exactly equivalent to <tt class="docutils literal"><span class="pre">Context(precision=p)</span></tt>.</dd></dl>
+
+<dl class="data">
+<dt id="bigfloat.RoundTiesToEven">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">RoundTiesToEven</tt><a class="headerlink" href="#bigfloat.RoundTiesToEven" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="data">
+<dt id="bigfloat.RoundTowardZero">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">RoundTowardZero</tt><a class="headerlink" href="#bigfloat.RoundTowardZero" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="data">
+<dt id="bigfloat.RoundTowardPositive">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">RoundTowardPositive</tt><a class="headerlink" href="#bigfloat.RoundTowardPositive" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="data">
+<dt id="bigfloat.RoundTowardNegative">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">RoundTowardNegative</tt><a class="headerlink" href="#bigfloat.RoundTowardNegative" title="Permalink to this definition">¶</a></dt>
+<dd>Contexts corresponding to the four available rounding modes.
+<tt class="docutils literal"><span class="pre">RoundTiesToEven</span></tt> rounds the result of an operation or function
+to the nearest representable <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a>, with ties rounded to the
+<a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> whose least significant bit is zero.  <tt class="docutils literal"><span class="pre">RoundTowardZero</span></tt>
+rounds results towards zero.  <tt class="docutils literal"><span class="pre">RoundTowardPositive</span></tt> rounds
+results towards positive infinity, and <tt class="docutils literal"><span class="pre">RoundTowardsNegative</span></tt>
+rounds results towards negative infinity.</dd></dl>
+
+<div class="section" id="constants">
+<h4>Constants<a class="headerlink" href="#constants" title="Permalink to this headline">¶</a></h4>
+<dl class="data">
+<dt id="bigfloat.PRECISION_MIN">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">PRECISION_MIN</tt><a class="headerlink" href="#bigfloat.PRECISION_MIN" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="data">
+<dt id="bigfloat.PRECISION_MAX">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">PRECISION_MAX</tt><a class="headerlink" href="#bigfloat.PRECISION_MAX" title="Permalink to this definition">¶</a></dt>
+<dd>Minimum and maximum precision that&#8217;s valid for Contexts and
+<a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> instances.  In the current implementation, PRECISION_MIN
+is 2 and PRECISION_MAX is 2**31-1.</dd></dl>
+
+<dl class="data">
+<dt id="bigfloat.EMIN_MIN">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">EMIN_MIN</tt><a class="headerlink" href="#bigfloat.EMIN_MIN" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="data">
+<dt id="bigfloat.EMIN_MAX">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">EMIN_MAX</tt><a class="headerlink" href="#bigfloat.EMIN_MAX" title="Permalink to this definition">¶</a></dt>
+<dd>Minimum and maximum allowed values for the Context emin attribute.
+In the current implementation EMIN_MIN = -EMIN_MAX = 1-2**30</dd></dl>
+
+<dl class="data">
+<dt id="bigfloat.EMAX_MIN">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">EMAX_MIN</tt><a class="headerlink" href="#bigfloat.EMAX_MIN" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="data">
+<dt id="bigfloat.EMAX_MAX">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">EMAX_MAX</tt><a class="headerlink" href="#bigfloat.EMAX_MAX" title="Permalink to this definition">¶</a></dt>
+<dd>Minimum and maximum allowed values for the Context emax attribute.
+In the current implementation -EMAX_MIN = EMAX_MAX = 2**30-1</dd></dl>
+
+</div>
+<div class="section" id="the-current-context">
+<h4>The current context<a class="headerlink" href="#the-current-context" title="Permalink to this headline">¶</a></h4>
+<p>There can be many Context objects in existence at one time, but
+there&#8217;s only ever one <em>current context</em>.  The current context is given
+by a thread-local <a title="bigfloat.Context" class="reference internal" href="#bigfloat.Context"><tt class="xref docutils literal"><span class="pre">Context</span></tt></a> instance.  Whenever the <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a>
+constructor is called, or any arithmetic operation or standard
+function computation is performed, the current context is consulted to
+determine:</p>
+<ul class="simple">
+<li>The format that the result of the operation or function should take
+(as specified by the <tt class="docutils literal"><span class="pre">precision</span></tt>, <tt class="docutils literal"><span class="pre">emax</span></tt>, <tt class="docutils literal"><span class="pre">emin</span></tt> and
+<tt class="docutils literal"><span class="pre">subnormalize</span></tt> attributes of the context), and</li>
+<li>The rounding mode to use when computing the result, as specified by
+the <tt class="docutils literal"><span class="pre">rounding</span></tt> attribute of the current context.</li>
+</ul>
+<p>If an additional <tt class="docutils literal"><span class="pre">context</span></tt> keyword argument is given to the
+operation, function or constructor, then attributes from the context
+override the corresponding attributes in the current context.
+For example,</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">sqrt</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">my_context</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>is equivalent to</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">with</span> <span class="n">my_context</span><span class="p">:</span>
+    <span class="n">sqrt</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The current context can be read and written directly using the
+<a title="bigfloat.getcontext" class="reference internal" href="#bigfloat.getcontext"><tt class="xref docutils literal"><span class="pre">getcontext()</span></tt></a> and <a title="bigfloat.setcontext" class="reference internal" href="#bigfloat.setcontext"><tt class="xref docutils literal"><span class="pre">setcontext()</span></tt></a> functions.</p>
+<dl class="function">
+<dt id="bigfloat.getcontext">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">getcontext</tt><big>(</big><big>)</big><a class="headerlink" href="#bigfloat.getcontext" title="Permalink to this definition">¶</a></dt>
+<dd>Return a copy of the current context.</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.setcontext">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">setcontext</tt><big>(</big><em>context</em><big>)</big><a class="headerlink" href="#bigfloat.setcontext" title="Permalink to this definition">¶</a></dt>
+<dd>Set the current context to the given context.</dd></dl>
+
+<p>It&#8217;s usually neater to make a temporary change to the context using a
+with statement, as described above.  There&#8217;s also one convenience
+function that&#8217;s often useful in calculations:</p>
+<dl class="function">
+<dt id="bigfloat.extra_precision">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">extra_precision</tt><big>(</big><em>p</em><big>)</big><a class="headerlink" href="#bigfloat.extra_precision" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a copy of the current context with the precision increased
+by p.  Equivalent to
+<tt class="docutils literal"><span class="pre">Context(precision=getcontext().precision+p)</span></tt>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">getcontext</span><span class="p">()</span><span class="o">.</span><span class="n">precision</span>
+<span class="go">53</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">extra_precision</span><span class="p">(</span><span class="mf">10</span><span class="p">)</span><span class="o">.</span><span class="n">precision</span>
+<span class="go">63</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">extra_precision</span><span class="p">(</span><span class="mf">20</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">gamma</span><span class="p">(</span><span class="mf">1.5</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="go">BigFloat.exact(&#39;0.88622692545275801364912&#39;, precision=73)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="standard-functions">
+<h3>Standard functions<a class="headerlink" href="#standard-functions" title="Permalink to this headline">¶</a></h3>
+<p>All functions in this section follow the same rules:</p>
+<ul class="simple">
+<li>Arguments can be <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> instances, integers or floats, unless
+otherwise specified.</li>
+<li>Integer or float arguments are converted exactly to <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a>
+instances.</li>
+<li>The format of the result and the rounding mode used are taken from
+the current context.</li>
+<li>Attributes of the current context can be overridden by supplying an
+explicit <tt class="docutils literal"><span class="pre">context</span></tt> keyword argument.</li>
+<li>Results are correctly rounded.</li>
+</ul>
+<div class="section" id="conversion-from-string">
+<h4>Conversion from string<a class="headerlink" href="#conversion-from-string" title="Permalink to this headline">¶</a></h4>
+<dl class="function">
+<dt id="bigfloat.set_str2">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">set_str2</tt><big>(</big><em>s</em>, <em>base</em><big>)</big><a class="headerlink" href="#bigfloat.set_str2" title="Permalink to this definition">¶</a></dt>
+<dd>Convert a string s, representing a number in base b, to a <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a>.
+The base should satisfy 2 &lt;= base &lt;= 36.</dd></dl>
+
+</div>
+<div class="section" id="arithmetic-functions">
+<h4>Arithmetic functions<a class="headerlink" href="#arithmetic-functions" title="Permalink to this headline">¶</a></h4>
+<dl class="function">
+<dt id="bigfloat.add">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">add</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="headerlink" href="#bigfloat.add" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.sub">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">sub</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="headerlink" href="#bigfloat.sub" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.mul">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">mul</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="headerlink" href="#bigfloat.mul" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.div">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">div</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="headerlink" href="#bigfloat.div" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.pow">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">pow</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="headerlink" href="#bigfloat.pow" title="Permalink to this definition">¶</a></dt>
+<dd>Return x+y, x-y, x*y, x/y and x**y respectively.</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.mod">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">mod</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="headerlink" href="#bigfloat.mod" title="Permalink to this definition">¶</a></dt>
+<dd>Return the reduction of x modulo y.  The result has the same sign as x.
+In other words, return x-q*y, where q is the integer part of x/y.</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.remainder">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">remainder</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="headerlink" href="#bigfloat.remainder" title="Permalink to this definition">¶</a></dt>
+<dd>Return x-q*y, where q is the closest integer to x/y, with ties rounded
+to the nearest even integer.</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.dim">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">dim</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="headerlink" href="#bigfloat.dim" title="Permalink to this definition">¶</a></dt>
+<dd>Return max(x-y, 0).</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.pos">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">pos</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.pos" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.neg">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">neg</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.neg" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.abs">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">abs</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.abs" title="Permalink to this definition">¶</a></dt>
+<dd>Return +x, -x and the absolute value of x respectively.  Note that
+these functions will round if x is not exactly representable in the
+current context.</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.fma">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">fma</tt><big>(</big><em>x</em>, <em>y</em>, <em>z</em><big>)</big><a class="headerlink" href="#bigfloat.fma" title="Permalink to this definition">¶</a></dt>
+<dd>Return x*y+z, but with no loss of intermediate accuracy.</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.fms">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">fms</tt><big>(</big><em>x</em>, <em>y</em>, <em>z</em><big>)</big><a class="headerlink" href="#bigfloat.fms" title="Permalink to this definition">¶</a></dt>
+<dd>Return x*y-z, with no loss of intermediate accuracy.</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.sqr">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">sqr</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.sqr" title="Permalink to this definition">¶</a></dt>
+<dd>Return x*x.</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.sqrt">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">sqrt</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.sqrt" title="Permalink to this definition">¶</a></dt>
+<dd>Return the square root of x, or a NaN if x is negative.  The square
+root of negative zero returns negative zero.</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.rec_sqrt">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">rec_sqrt</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.rec_sqrt" title="Permalink to this definition">¶</a></dt>
+<dd>Return the reciprocal of the square root of x.  rec_sqrt of zero
+returns positive infinity, regardless of the sign of the zero.
+Note that this means that 1/sqrt(x) differs from rec_sqrt(x) when
+x is negative zero.</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.cbrt">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">cbrt</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.cbrt" title="Permalink to this definition">¶</a></dt>
+<dd>Return the cube root of x.</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.root">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">root</tt><big>(</big><em>x</em>, <em>n</em><big>)</big><a class="headerlink" href="#bigfloat.root" title="Permalink to this definition">¶</a></dt>
+<dd>Return the nth root of x; n should be a nonnegative integer.  For
+even n, return NaN if x is negative.  For n = 0, always return NaN.</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.hypot">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">hypot</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="headerlink" href="#bigfloat.hypot" title="Permalink to this definition">¶</a></dt>
+<dd>Return the square root of x*x+y*y.</dd></dl>
+
+</div>
+<div class="section" id="exponential-and-logarithmic-functions">
+<h4>Exponential and logarithmic functions<a class="headerlink" href="#exponential-and-logarithmic-functions" title="Permalink to this headline">¶</a></h4>
+<dl class="function">
+<dt id="bigfloat.exp">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">exp</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.exp" title="Permalink to this definition">¶</a></dt>
+<dd>Return <tt class="docutils literal"><span class="pre">e**x</span></tt>, where <tt class="docutils literal"><span class="pre">e</span></tt> is Euler&#8217;s constant. (2.71828...)</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.expm1">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">expm1</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.expm1" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return <tt class="docutils literal"><span class="pre">e**x</span> <span class="pre">-</span> <span class="pre">1</span></tt>.  Useful for values of <tt class="docutils literal"><span class="pre">x</span></tt> close to 0, when
+the expression <tt class="docutils literal"><span class="pre">exp(x)-1</span></tt> would lose significant accuracy.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">exp</span><span class="p">(</span><span class="mf">1e-10</span><span class="p">)</span><span class="o">-</span><span class="mf">1</span>
+<span class="go">BigFloat.exact(&#39;1.0000000827403710e-10&#39;, precision=53)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">exp</span><span class="p">(</span><span class="mf">1e-10</span><span class="p">,</span> <span class="n">precision</span><span class="p">(</span><span class="mf">100</span><span class="p">))</span><span class="o">-</span><span class="mf">1</span>
+<span class="go">BigFloat.exact(&#39;1.0000000000500000e-10&#39;, precision=53)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">expm1</span><span class="p">(</span><span class="mf">1e-10</span><span class="p">)</span>
+<span class="go">BigFloat.exact(&#39;1.0000000000500000e-10&#39;, precision=53)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.exp2">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">exp2</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.exp2" title="Permalink to this definition">¶</a></dt>
+<dd>Return <tt class="docutils literal"><span class="pre">2**x</span></tt>.</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.exp10">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">exp10</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.exp10" title="Permalink to this definition">¶</a></dt>
+<dd>Return <tt class="docutils literal"><span class="pre">10**x</span></tt>.</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.log">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">log</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.log" title="Permalink to this definition">¶</a></dt>
+<dd>Return the natural (base <tt class="docutils literal"><span class="pre">e</span></tt>) logarithm of <em>x</em>.</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.log1p">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">log1p</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.log1p" title="Permalink to this definition">¶</a></dt>
+<dd>Return <tt class="docutils literal"><span class="pre">log(1+x)</span></tt>.  Useful for small values of x, where
+computing <tt class="docutils literal"><span class="pre">log(1+x)</span></tt> directly loses significant accuracy.</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.log2">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">log2</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.log2" title="Permalink to this definition">¶</a></dt>
+<dd>Return the log base 2 of <em>x</em>.</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.log10">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">log10</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.log10" title="Permalink to this definition">¶</a></dt>
+<dd>Return the log base 10 of <em>x</em>.</dd></dl>
+
+</div>
+<div class="section" id="trigonometric-functions">
+<h4>Trigonometric functions<a class="headerlink" href="#trigonometric-functions" title="Permalink to this headline">¶</a></h4>
+<dl class="function">
+<dt id="bigfloat.cos">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">cos</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.cos" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.sin">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">sin</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.sin" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.tan">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">tan</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.tan" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.sec">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">sec</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.sec" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.csc">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">csc</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.csc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.cot">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">cot</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.cot" title="Permalink to this definition">¶</a></dt>
+<dd>Cosine, sine, tangent, secant, cosecant and cotangent of x,
+respectively.  Note that these functions are (necessarily) very
+slow for large arguments (for example, <tt class="docutils literal"><span class="pre">x</span></tt> larger than
+<tt class="docutils literal"><span class="pre">BigFloat('1e1000000')</span></tt>), since reducing <tt class="docutils literal"><span class="pre">x</span></tt> correctly modulo
+<tt class="docutils literal"><span class="pre">pi</span></tt> requires computing <tt class="docutils literal"><span class="pre">pi</span></tt> to high precision.  Input
+arguments are in radians, not degrees.</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.acos">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">acos</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.acos" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.asin">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">asin</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.asin" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.atan">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">atan</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.atan" title="Permalink to this definition">¶</a></dt>
+<dd>Inverse cosine, sine and tangent functions, giving a result in
+radians.</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.atan2">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">atan2</tt><big>(</big><em>y</em>, <em>x</em><big>)</big><a class="headerlink" href="#bigfloat.atan2" title="Permalink to this definition">¶</a></dt>
+<dd>Return the arctangent2 of y and x.  This is the angle that the ray
+joining (0, 0) to (x, y) makes with the positive x-axis.</dd></dl>
+
+</div>
+<div class="section" id="hyperbolic-trig-functions">
+<h4>Hyperbolic trig functions<a class="headerlink" href="#hyperbolic-trig-functions" title="Permalink to this headline">¶</a></h4>
+<dl class="function">
+<dt id="bigfloat.cosh">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">cosh</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.cosh" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.sinh">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">sinh</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.sinh" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.tanh">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">tanh</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.tanh" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.sech">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">sech</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.sech" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.csch">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">csch</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.csch" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.coth">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">coth</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.coth" title="Permalink to this definition">¶</a></dt>
+<dd>Hyperbolic cosine, sine, tangent, secant, cosecant and cotangent of x,
+respectively.</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.acosh">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">acosh</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.acosh" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.asinh">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">asinh</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.asinh" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.atanh">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">atanh</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.atanh" title="Permalink to this definition">¶</a></dt>
+<dd>Inverse hyperbolic cosine, sine and tangent functions.</dd></dl>
+
+</div>
+<div class="section" id="special-functions">
+<h4>Special functions<a class="headerlink" href="#special-functions" title="Permalink to this headline">¶</a></h4>
+<dl class="function">
+<dt id="bigfloat.eint">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">eint</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.eint" title="Permalink to this definition">¶</a></dt>
+<dd>Return the exponential integral of x.</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.li2">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">li2</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.li2" title="Permalink to this definition">¶</a></dt>
+<dd>Return the real part of the dilogarithm of x.</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.factorial">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">factorial</tt><big>(</big><em>n</em><big>)</big><a class="headerlink" href="#bigfloat.factorial" title="Permalink to this definition">¶</a></dt>
+<dd>Return the factorial of n.  <em>n</em> should be a nonnegative integer.</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.gamma">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">gamma</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.gamma" title="Permalink to this definition">¶</a></dt>
+<dd>Return the gamma function applied to x.</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.lgamma">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">lgamma</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.lgamma" title="Permalink to this definition">¶</a></dt>
+<dd>Return the natural log of the absolute value of gamma(x).</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.lngamma">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">lngamma</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.lngamma" title="Permalink to this definition">¶</a></dt>
+<dd>Return log(gamma(x)).</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.zeta">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">zeta</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.zeta" title="Permalink to this definition">¶</a></dt>
+<dd>Return the Riemann zeta function of x.</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.erf">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">erf</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.erf" title="Permalink to this definition">¶</a></dt>
+<dd>Return the error function of x.</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.erfc">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">erfc</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.erfc" title="Permalink to this definition">¶</a></dt>
+<dd>Return the complementary error function of x.</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.j0">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">j0</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.j0" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.j1">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">j1</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.j1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.jn">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">jn</tt><big>(</big><em>n</em>, <em>x</em><big>)</big><a class="headerlink" href="#bigfloat.jn" title="Permalink to this definition">¶</a></dt>
+<dd>Return Bessel function of the first kind of order 0, 1 and n,
+evaluated at x.  For <tt class="docutils literal"><span class="pre">jn</span></tt>, <em>n</em> should be an integer.</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.y0">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">y0</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.y0" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.y1">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">y1</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.y1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.yn">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">yn</tt><big>(</big><em>n</em>, <em>x</em><big>)</big><a class="headerlink" href="#bigfloat.yn" title="Permalink to this definition">¶</a></dt>
+<dd>Return Bessel function of the second kind of order 0, 1 and n,
+evaluated at x.  For <tt class="docutils literal"><span class="pre">yn</span></tt>, <em>n</em> should be an integer.</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.agm">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">agm</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="headerlink" href="#bigfloat.agm" title="Permalink to this definition">¶</a></dt>
+<dd>Return the arithmetic-geometric mean of x and y.</dd></dl>
+
+</div>
+<div class="section" id="id2">
+<h4>Constants<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h4>
+<dl class="function">
+<dt id="bigfloat.const_catalan">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">const_catalan</tt><big>(</big><big>)</big><a class="headerlink" href="#bigfloat.const_catalan" title="Permalink to this definition">¶</a></dt>
+<dd>The Catalan constant 1 - 1/3**2 + 1/5**2 - 1/7**2 + 1/9**2 - ... = 0.9159655941...</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.const_euler">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">const_euler</tt><big>(</big><big>)</big><a class="headerlink" href="#bigfloat.const_euler" title="Permalink to this definition">¶</a></dt>
+<dd>The Euler-Mascheroni constant 0.5772156649..., equal to the limit
+of (1 + 1/2 + 1/3 + ... + 1/n) - log(n) as n approaches infinity.</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.const_log2">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">const_log2</tt><big>(</big><big>)</big><a class="headerlink" href="#bigfloat.const_log2" title="Permalink to this definition">¶</a></dt>
+<dd>The natural log of 2, 0.6931471805...</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.const_pi">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">const_pi</tt><big>(</big><big>)</big><a class="headerlink" href="#bigfloat.const_pi" title="Permalink to this definition">¶</a></dt>
+<dd>The constant pi = 3.1415926535...</dd></dl>
+
+</div>
+<div class="section" id="miscellaneous-functions">
+<h4>Miscellaneous functions<a class="headerlink" href="#miscellaneous-functions" title="Permalink to this headline">¶</a></h4>
+<dl class="function">
+<dt id="bigfloat.max">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">max</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="headerlink" href="#bigfloat.max" title="Permalink to this definition">¶</a></dt>
+<dd>Return the maximum of <em>x</em> and <em>y</em>.  If <em>x</em> and <em>y</em> are zeros with
+different signs, return positive zero.</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.min">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">min</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="headerlink" href="#bigfloat.min" title="Permalink to this definition">¶</a></dt>
+<dd>Return the minimum of <em>x</em> and <em>y</em>.  If <em>x</em> and <em>y</em> are zeros with
+different signs, return negative zero.</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.copysign">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">copysign</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="headerlink" href="#bigfloat.copysign" title="Permalink to this definition">¶</a></dt>
+<dd>Return a <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> with absolute value taken from x and sign taken
+from y.</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.frac">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">frac</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.frac" title="Permalink to this definition">¶</a></dt>
+<dd>Return the fractional part of x.  The result has the same sign
+as x.</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.floor">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">floor</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.floor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the floor of x.  Note that since the result is rounded to
+the current context, it&#8217;s quite possible for the result to be
+larger than x:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">DefaultContext</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">floor</span><span class="p">(</span><span class="mf">2</span><span class="o">**</span><span class="mf">100</span><span class="o">-</span><span class="mf">1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mf">2</span><span class="o">**</span><span class="mf">100</span><span class="o">-</span><span class="mf">1</span>
+<span class="gp">...</span>
+<span class="go">False</span>
+</pre></div>
+</div>
+<p>If you want to be sure of getting a result that&#8217;s no larger than
+<em>x</em>, use the <tt class="docutils literal"><span class="pre">RoundTowardNegative</span></tt> rounding mode.  Alternatively,
+if you want the exact floor you may want to clear the <tt class="docutils literal"><span class="pre">Inexact</span></tt>
+flag before the call and test it afterwards.  Similar comments
+apply to the <a title="bigfloat.ceil" class="reference internal" href="#bigfloat.ceil"><tt class="xref docutils literal"><span class="pre">ceil()</span></tt></a>, <a title="bigfloat.round" class="reference internal" href="#bigfloat.round"><tt class="xref docutils literal"><span class="pre">round()</span></tt></a> and <a title="bigfloat.trunc" class="reference internal" href="#bigfloat.trunc"><tt class="xref docutils literal"><span class="pre">trunc()</span></tt></a>
+functions.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.ceil">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">ceil</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.ceil" title="Permalink to this definition">¶</a></dt>
+<dd>Return the ceiling of x.</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.round">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">round</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.round" title="Permalink to this definition">¶</a></dt>
+<dd>Return x, rounded to the nearest integer.  Ties are rounded
+away from zero. (&#8216;Biased rounding&#8217;)</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.trunc">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">trunc</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.trunc" title="Permalink to this definition">¶</a></dt>
+<dd>Return the integer part of x.</dd></dl>
+
+</div>
+</div>
+<div class="section" id="other-functions">
+<h3>Other Functions<a class="headerlink" href="#other-functions" title="Permalink to this headline">¶</a></h3>
+<p>Here are descriptions of the various module level functions exported
+by the <tt class="xref docutils literal"><span class="pre">bigfloat</span></tt> module.</p>
+<div class="section" id="additional-comparisons">
+<h4>Additional Comparisons<a class="headerlink" href="#additional-comparisons" title="Permalink to this headline">¶</a></h4>
+<p>There are two additional comparison functions that don&#8217;t
+correspond to any of the Python comparison operators.</p>
+<dl class="function">
+<dt id="bigfloat.lessgreater">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">lessgreater</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="headerlink" href="#bigfloat.lessgreater" title="Permalink to this definition">¶</a></dt>
+<dd>Return True if either x &lt; y or x &gt; y, and False otherwise.
+lessgreater(x, y) differs from x != y in the case where either x or
+y is a NaN: in that case, lessgreater(x, y) will return False,
+while x != y will return True.</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.unordered">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">unordered</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="headerlink" href="#bigfloat.unordered" title="Permalink to this definition">¶</a></dt>
+<dd>Return True if either x or y is a NaN, and False otherwise.</dd></dl>
+
+</div>
+<div class="section" id="number-classification-functions">
+<h4>Number classification functions<a class="headerlink" href="#number-classification-functions" title="Permalink to this headline">¶</a></h4>
+<p>The following functions all accept a single <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> instance (or a
+float, or an integer) and return a boolean value.  They make no
+use of the current context, and do not affect the state of the flags.</p>
+<dl class="function">
+<dt id="bigfloat.is_nan">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">is_nan</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.is_nan" title="Permalink to this definition">¶</a></dt>
+<dd>Return True if x is a NaN and False otherwise.</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.is_inf">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">is_inf</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.is_inf" title="Permalink to this definition">¶</a></dt>
+<dd>Return True if x is an infinity (either positive or negative), and False
+otherwise.</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.is_zero">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">is_zero</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.is_zero" title="Permalink to this definition">¶</a></dt>
+<dd>Return True if x is a zero (either positive zero or negative zero),
+and False otherwise.</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.is_finite">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">is_finite</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.is_finite" title="Permalink to this definition">¶</a></dt>
+<dd>Return True if x is not an infinity or NaN, and False otherwise.</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.is_negative">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">is_negative</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.is_negative" title="Permalink to this definition">¶</a></dt>
+<dd>Return True if the sign bit of x is set, and False otherwise.  Note
+that the name of this function is slightly misleading for zeros:
+is_negative(-0.0) returns True, even though -0.0 is not, strictly
+speaking, negative.</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.is_integer">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">is_integer</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.is_integer" title="Permalink to this definition">¶</a></dt>
+<dd>Return True if x is finite and an exact integer, and False
+otherwise.</dd></dl>
+
+</div>
+<div class="section" id="id3">
+<h4>Miscellaneous functions<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h4>
+<dl class="function">
+<dt id="bigfloat.next_up">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">next_up</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.next_up" title="Permalink to this definition">¶</a></dt>
+<dd>Return the least representable BigFloat that&#8217;s strictly greater than x.
+This operation is quiet:  it doesn&#8217;t affect any of the flags.</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.next_down">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">next_down</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#bigfloat.next_down" title="Permalink to this definition">¶</a></dt>
+<dd>Return the greatest representable BigFloat that&#8217;s strictly less than x.
+This operation is quiet:  it doesn&#8217;t affect any of the flags.</dd></dl>
+
+</div>
+</div>
+</div>
+<div class="section" id="id4">
+<h2>Flags<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<dl class="data">
+<dt id="bigfloat.Underflow">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">Underflow</tt><a class="headerlink" href="#bigfloat.Underflow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Underflow flag.  Set whenever the result of an operation
+underflows.  The meaning of this flag differs depending on whether
+the subnormalize attribute is true for the operation context.  In
+the language of IEEE 754, we use the <cite>after rounding</cite> semantics.
+The Underflow flag is set on underflow even when the result of an
+operation is exact.</p>
+<p>In detail: let <tt class="docutils literal"><span class="pre">c</span></tt> be the context that&#8217;s in effect for an
+operation, function or <a title="bigfloat.BigFloat" class="reference internal" href="#bigfloat.BigFloat"><tt class="xref docutils literal"><span class="pre">BigFloat</span></tt></a> construction.  Let <tt class="docutils literal"><span class="pre">x</span></tt> be the
+result of the operation, rounded to the context precision with the
+context rounding mode, but as though the exponent were unbounded.</p>
+<p>If c.subnormalize is False, the Underflow flag is set if and only
+if <tt class="docutils literal"><span class="pre">x</span></tt> is nonzero, finite, and strictly smaller than
+<tt class="docutils literal"><span class="pre">2**(c.emin-1)</span></tt> in absolute value.  If c.subnormalize is True,
+the Underflow flag is set if and only if <tt class="docutils literal"><span class="pre">x</span></tt> is nonzero, finite,
+and strictly smaller than <tt class="docutils literal"><span class="pre">2**(c.emin+c.precision-2)</span></tt> in absolute
+value.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="bigfloat.Overflow">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">Overflow</tt><a class="headerlink" href="#bigfloat.Overflow" title="Permalink to this definition">¶</a></dt>
+<dd>Set whenever the result of an operation overflows.  An operation
+performed in a context <tt class="docutils literal"><span class="pre">c</span></tt> overflows if the result computed as if
+with unbounded exponent range is finite and greater than or equal
+to <tt class="docutils literal"><span class="pre">2**c.emax</span></tt> in absolute value.</dd></dl>
+
+<dl class="data">
+<dt id="bigfloat.Inexact">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">Inexact</tt><a class="headerlink" href="#bigfloat.Inexact" title="Permalink to this definition">¶</a></dt>
+<dd>Inexact flag.  Set whenever the result of an operation is not
+exactly equal to the true mathematical result.</dd></dl>
+
+<dl class="data">
+<dt id="bigfloat.NanFlag">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">NanFlag</tt><a class="headerlink" href="#bigfloat.NanFlag" title="Permalink to this definition">¶</a></dt>
+<dd>NaN flag.  Set whever the result of an operation gives a NaN
+result.</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.clear_flag">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">clear_flag</tt><big>(</big><em>flag</em><big>)</big><a class="headerlink" href="#bigfloat.clear_flag" title="Permalink to this definition">¶</a></dt>
+<dd>Clear the given flag.</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.set_flag">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">set_flag</tt><big>(</big><em>flag</em><big>)</big><a class="headerlink" href="#bigfloat.set_flag" title="Permalink to this definition">¶</a></dt>
+<dd>Set the given flag.</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.test_flag">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">test_flag</tt><big>(</big><em>flag</em><big>)</big><a class="headerlink" href="#bigfloat.test_flag" title="Permalink to this definition">¶</a></dt>
+<dd>Return True if the given flag is set and False otherwise.</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.get_flagstate">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">get_flagstate</tt><big>(</big><big>)</big><a class="headerlink" href="#bigfloat.get_flagstate" title="Permalink to this definition">¶</a></dt>
+<dd>Return a set containing the flags that are currently set.</dd></dl>
+
+<dl class="function">
+<dt id="bigfloat.set_flagstate">
+<tt class="descclassname">bigfloat.</tt><tt class="descname">set_flagstate</tt><big>(</big><em>flag_set</em><big>)</big><a class="headerlink" href="#bigfloat.set_flagstate" title="Permalink to this definition">¶</a></dt>
+<dd>Set all flags that are in <em>flag_set</em>, and clear all other flags.</dd></dl>
+
+<p class="rubric">Footnotes</p>
+<table class="docutils footnote" frame="void" id="harmonic" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>See <a class="reference external" href="http://mathworld.wolfram.com/HarmonicNumber.html">http://mathworld.wolfram.com/HarmonicNumber.html</a></td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference external" href="genindex.html"><em>Index</em></a></li>
+<li><a class="reference external" href="modindex.html"><em>Module Index</em></a></li>
+<li><a class="reference external" href="search.html"><em>Search Page</em></a></li>
+</ul>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <h3><a href="">Table Of Contents</a></h3>
+            <ul>
+<li><a class="reference external" href=""><tt class="docutils literal"><span class="pre">bigfloat</span></tt> &#8212; High precision floating-point arithmetic</a><ul>
+<li><a class="reference external" href="#introduction">Introduction</a></li>
+<li><a class="reference external" href="#installation">Installation</a><ul>
+<li><a class="reference external" href="#prerequisites">Prerequisites</a></li>
+<li><a class="reference external" href="#locating-the-mpfr-library">Locating the MPFR library</a></li>
+<li><a class="reference external" href="#other-configuration">Other configuration</a></li>
+</ul>
+</li>
+<li><a class="reference external" href="#tutorial">Tutorial</a><ul>
+<li><a class="reference external" href="#bigfloat-construction"><tt class="docutils literal"><span class="pre">BigFloat</span></tt> construction</a></li>
+<li><a class="reference external" href="#arithmetic-on-bigfloat-instances">Arithmetic on <tt class="docutils literal"><span class="pre">BigFloat</span></tt> instances</a></li>
+<li><a class="reference external" href="#controlling-the-precision-and-rounding-mode">Controlling the precision and rounding mode</a></li>
+<li><a class="reference external" href="#flags">Flags</a></li>
+</ul>
+</li>
+<li><a class="reference external" href="#reference">Reference</a><ul>
+<li><a class="reference external" href="#the-bigfloat-class">The <tt class="docutils literal"><span class="pre">BigFloat</span></tt> class</a><ul>
+<li><a class="reference external" href="#special-methods">Special methods</a></li>
+</ul>
+</li>
+<li><a class="reference external" href="#the-context-class">The Context class</a><ul>
+<li><a class="reference external" href="#constants">Constants</a></li>
+<li><a class="reference external" href="#the-current-context">The current context</a></li>
+</ul>
+</li>
+<li><a class="reference external" href="#standard-functions">Standard functions</a><ul>
+<li><a class="reference external" href="#conversion-from-string">Conversion from string</a></li>
+<li><a class="reference external" href="#arithmetic-functions">Arithmetic functions</a></li>
+<li><a class="reference external" href="#exponential-and-logarithmic-functions">Exponential and logarithmic functions</a></li>
+<li><a class="reference external" href="#trigonometric-functions">Trigonometric functions</a></li>
+<li><a class="reference external" href="#hyperbolic-trig-functions">Hyperbolic trig functions</a></li>
+<li><a class="reference external" href="#special-functions">Special functions</a></li>
+<li><a class="reference external" href="#id2">Constants</a></li>
+<li><a class="reference external" href="#miscellaneous-functions">Miscellaneous functions</a></li>
+</ul>
+</li>
+<li><a class="reference external" href="#other-functions">Other Functions</a><ul>
+<li><a class="reference external" href="#additional-comparisons">Additional Comparisons</a></li>
+<li><a class="reference external" href="#number-classification-functions">Number classification functions</a></li>
+<li><a class="reference external" href="#id3">Miscellaneous functions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference external" href="#id4">Flags</a></li>
+</ul>
+</li>
+<li><a class="reference external" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+
+            <h3>This Page</h3>
+            <ul class="this-page-menu">
+              <li><a href="_sources/index.txt"
+                     rel="nofollow">Show Source</a></li>
+            </ul>
+          <div id="searchbox" style="display: none">
+            <h3>Quick search</h3>
+              <form class="search" action="search.html" method="get">
+                <input type="text" name="q" size="18" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+              </form>
+              <p class="searchtip" style="font-size: 90%">
+              Enter search terms or a module, class or function name.
+              </p>
+          </div>
+          <script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="modindex.html" title="Global Module Index"
+             >modules</a> |</li>
+        <li><a href="">BigFloat v0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+      &copy; Copyright 2009, Mark Dickinson.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.2.
+    </div>
+  </body>
+</html>
