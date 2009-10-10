@@ -1,5 +1,6 @@
 MANIFEST
 README
+Academic Free License 3.0.html
 setup.py
 bigfloat_config.py.in
 bigfloat/__init__.py
