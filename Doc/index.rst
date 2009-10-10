@@ -1,16 +1,16 @@
-:mod:`bigfloat` --- High precision floating-point arithmetic
-============================================================
+The bigfloat package --- high precision floating-point arithmetic
+=================================================================
 
 .. module:: bigfloat
    :synopsis: Python wrapper for MPFR floating-point library.
 
 .. moduleauthor:: Mark Dickinson <dickinsm@gmail.com>
 
-The :mod:`bigfloat` module is a Python wrapper for the MPFR library
-for arbitrary precision floating-point reliable arithmetic.
-
 Introduction
 ------------
+
+The :mod:`bigfloat` module is a Python wrapper for the MPFR library
+for arbitrary precision floating-point reliable arithmetic.
 
 The `MPFR library <http://www.mpfr.org>`_ is a well-known portable C
 library for arbitrary-precision arithmetic on floating-point numbers.
@@ -21,12 +21,42 @@ The :mod:`bigfloat` module aims to provide a convenient and friendly
 Python interface to the operations and functions provided by the MPFR
 library.  The main class, :class:`BigFloat`, gives an immutable
 multiple-precision floating-point type that can be freely mixed with
-Python integers and floats.  The :class:`Context` class, used in
+Python integers and floats.  The :class:`Context` class, when used in
 conjunction with Python's ``with`` statement, gives a simple way of
 controlling precisions and rounding modes.  Additional module-level
 functions provide various standard mathematical operations.  There is
 full support for IEEE 754 signed zeros, nans, infinities and
 subnormals.
+
+Here's a quick tour::
+
+   >>> from bigfloat import *
+   >>> sqrt(2, precision(100))  # compute sqrt(2) with 100 bits of precision
+   BigFloat.exact('1.4142135623730950488016887242092', precision=100)
+   >>> with precision(100):     # another way to get the same result
+   ...     sqrt(2)
+   ... 
+   BigFloat.exact('1.4142135623730950488016887242092', precision=100)
+   >>> my_context = precision(100) + RoundTowardPositive
+   >>> my_context
+   Context(precision=100, rounding='RoundTowardPositive')
+   >>> sqrt(2, my_context)      # and another, this time rounding up
+   BigFloat.exact('1.4142135623730950488016887242108', precision=100)
+   >>> with RoundTowardNegative: # a lower bound for zeta(2)
+   ...     sum(1/sqr(n) for n in range(1, 10000))
+   ... 
+   BigFloat.exact('1.6448340618469506', precision=53)
+   >>> zeta(2) # actual value, for comparison
+   BigFloat.exact('1.6449340668482264', precision=53)
+   >>> const_pi()**2/6.0  # double check value
+   BigFloat.exact('1.6449340668482264', precision=53)
+   >>> quadruple_precision  # context implementing IEEE 754 binary128 format
+   Context(precision=113, emax=16384, emin=-16493, subnormalize=True)
+   >>> next_up(0, quadruple_precision)  # smallest subnormal for binary128
+   BigFloat.exact('6.47517511943802511092443895822764655e-4966', precision=113)
+   >>> log2(_)
+   BigFloat.exact('-16494.000000000000', precision=53)
+
 
 Installation
 ------------
