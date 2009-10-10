@@ -523,7 +523,7 @@ class BigFloat(object):
         """Create BigFloat from integer, float, string or another BigFloat.
 
         If the context keyword argument is not given, the result
-        format and the rounding mode 
+        format and the rounding mode
 
         Uses the current precision and rounding mode, unless an
         alternative context is given.
