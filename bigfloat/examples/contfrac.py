@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.6
+from __future__ import with_statement
 
 """
 The documentation for mpfr_get_str, for converting a precision n
