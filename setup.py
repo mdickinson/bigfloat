@@ -13,26 +13,29 @@ Arbitrary precision correctly-rounded floating point arithmetic, via MPFR.\
 """
 
 LONG_DESCRIPTION="""\
-The bigfloat module provides a Python wrapper for the MPFR library.
-The MPFR library is a well-known, well-tested C library for
-arbitrary-precision binary floating point reliable arithmetic; it's
-already used by a wide variety of projects, including GCC and SAGE.
-It gives precise control over rounding modes and precisions, and
-guaranteed reproducible and portable results.  You'll need to have the
-MPFR and GMP libraries already installed on your system to use this
-module.
+The bigfloat package is a Python package providing arbitrary-precision
+correctly-rounded floating-point arithmetic.  It is implemented as a
+wrapper around the MPFR library (http://www.mpfr.org).
 
 Features:
 
  - correct rounding on all operations;  precisely defined semantics
    compatible with the IEEE 754-2008 standard.
 
- - the main 'BigFloat' type interacts well with Python integers and
-   floats.
+ - the BigFloat type interacts well with Python integers and floats.
 
  - full support for emulating IEEE 754 arithmetic in any of the IEEE binary
    interchange formats described in IEEE 754-2008.  Infinities, NaNs,
    signed zeros, and subnormals are all supported.
+
+ - easy control of rounding modes and precisions, via Python's 'with'
+   statement.
+
+For current documentation, see:
+
+   http://packages.python.org/bigfloat/
+
+
 """
 
 
@@ -119,7 +122,7 @@ def main():
 
     setup(
         name='bigfloat',
-        version='0.1',
+        version='0.1.1',
         description=DESCRIPTION,
         long_description=LONG_DESCRIPTION,
         author='Mark Dickinson',
