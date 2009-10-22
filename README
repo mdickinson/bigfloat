@@ -1,29 +1,14 @@
 
 The bigfloat package is a Python package providing arbitrary-precision
-correctly-rounded floating-point arithmetic.  It is implemented as a
-wrapper around the MPFR library (http://www.mpfr.org).
+correctly-rounded floating-point arithmetic.  It is currently
+implemented as a ctypes wrapper around the MPFR library
+(http://www.mpfr.org).
 
 The bigfloat package is copyright (c) Mark Dickinson 2009, and is
 licensed under the Academic Free License version 3.0.  A copy of the
 license is included with the source distribution.
 
-Installation
-------------
+For installation instructions, please see the separate INSTALL file.
 
-To install, execute the command:
-
-  python setup.py install
-
-from the bigfloat-0.1/ directory.
-
-Prerequisites
--------------
-
-This package requires Python 2.5 or later.  The MPFR and GMP libraries will
-need to be already installed on your system.
-
-If your MPFR library is located in an unusual place, or you have
-multiple MPFR libraries installed on your system and you want to
-specify which one to use, you may need to edit the bigfloat_config.py
-configuration file.  You may also need to edit this file if the MPFR
-or GMP libraries were built using a non-standard configuration.
+Feedback is welcome!  Please contact Mark Dickinson at
+dickinsm@gmail.com with suggestions, complaints, bug reports, etc.
