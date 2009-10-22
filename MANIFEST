@@ -10,3 +10,4 @@ bigfloat/test/test_pympfr.py
 bigfloat/test/__init__.py
 bigfloat/examples/__init__.py
 bigfloat/examples/contfrac.py
+bigfloat/examples/lanczos_coeffs.py
