@@ -4,9 +4,9 @@ correctly-rounded floating-point arithmetic.  It is currently
 implemented as a ctypes wrapper around the MPFR library
 (http://www.mpfr.org).
 
-The bigfloat package is copyright (c) Mark Dickinson 2009, and is
-licensed under the Academic Free License version 3.0.  A copy of the
-license is included with the source distribution.
+The bigfloat package is copyright (c) Mark Dickinson 2009--2010, and
+is licensed under the Academic Free License version 3.0.  A copy of
+the license is included with the source distribution.
 
 For installation instructions, please see the separate INSTALL file.
 
