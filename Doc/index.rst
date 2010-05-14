@@ -61,6 +61,15 @@ Here's a quick tour::
 Installation
 ------------
 
+Where to get it
+^^^^^^^^^^^^^^^
+
+The latest released version of the :mod:`bigfloat` module can be
+downloaded from its place at the `Python Package Index
+<http://pypi.python.org/pypi/bigfloat/>`_.  Development sources can be
+checked out from the project's `bitbucket page
+<http://bitbucket.org/dickinsm/bigfloat>`_.
+
 Prerequisites
 ^^^^^^^^^^^^^
 
