@@ -5,7 +5,15 @@ To install, execute the command:
 
   python setup.py install
 
-from the bigfloat-0.1/ directory.
+from the bigfloat-0.1/ directory.  You may need to become superuser,
+or use the 'sudo' command.
+
+The setup script will try to find a suitable installed version of the
+MPFR library.  If it fails to find the library, or if you have
+multiple copies of the MPFR library on your system and setup.py finds
+the wrong one, you can edit the bigfloat_config.py.in file to specify
+the location of the MPFR library on your system directly, and then
+retry the install.
 
 Prerequisites
 -------------
