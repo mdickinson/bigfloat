@@ -7,6 +7,7 @@ import distutils.sysconfig
 import distutils.ccompiler
 import os.path
 import sys
+import platform
 
 DESCRIPTION="""\
 Arbitrary precision correctly-rounded floating point arithmetic, via MPFR.\
@@ -96,10 +97,11 @@ class build_config(Command):
             library_dirs.append(os.path.join(prefix, 'lib'))
 
         # standard locations
-        if sys.maxsize == 2**63-1:
+        if platform.architecture()[0] == '64bit':
             library_dirs.extend(['/usr/local/lib64', '/usr/lib64'])
-        elif sys.maxsize == 2**31-1:
+        else:
             library_dirs.extend(['/usr/local/lib32', '/usr/lib32'])
+
         library_dirs.append('/usr/local/lib')
         library_dirs.append('/usr/lib')
 
