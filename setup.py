@@ -83,7 +83,7 @@ class build_config(Command):
 
     def run(self):
         # determine where to look for library files
-        library_dirs = ['/usr/local/lib', '/usr/lib']
+        library_dirs = []
         if sys.platform == "darwin":
             # fink directory
             library_dirs.append('/sw/lib')
@@ -96,6 +96,10 @@ class build_config(Command):
             library_dirs.append(os.path.join(prefix, 'lib'))
 
         # standard locations
+        if sys.maxsize == 2**63-1:
+            library_dirs.extend(['/usr/local/lib64', '/usr/lib64'])
+        elif sys.maxsize == 2**31-1:
+            library_dirs.extend(['/usr/local/lib32', '/usr/lib32'])
         library_dirs.append('/usr/local/lib')
         library_dirs.append('/usr/lib')
 
