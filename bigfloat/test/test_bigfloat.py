@@ -759,6 +759,18 @@ class ContextTests(unittest.TestCase):
     #    self.assertEqual(e.rounding, RoundTowardZero)
     #    self.assertEqual(e.subnormalize, c.subnormalize)
 
+    def test_hashable(self):
+        # create equal but non-identical contexts
+        c1 = Context(emin=-999, emax=999, precision=100,
+                     subnormalize=True, rounding='RoundTowardPositive')
+        c2 = (Context(emax=999, emin=-999, rounding='RoundTowardPositive') + 
+              Context(precision=100, subnormalize=True))
+        self.asssertEqual(hash(c1), hash(c2))
+
+        # check partial contexts
+        c3 = Context(
+
+
     def test_with(self):
         # check use of contexts in with statements
         c = Context(emin = -123, emax=456, precision=1729,

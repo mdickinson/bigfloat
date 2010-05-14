@@ -228,6 +228,11 @@ class Context(object):
             self.rounding == other.rounding
             )
 
+    def __hash__(self):
+        return hash((self.precision, self.emin, self.emax,
+                     self.subnormalize, self.rounding))
+
+
     @property
     def precision(self):
         return self._precision
