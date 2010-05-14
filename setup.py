@@ -109,7 +109,7 @@ class build_config(Command):
         mpfr_lib = find_library_file(library_dirs, 'mpfr')
 
         # write config file
-        config_in = 'bigfloat_config.py.in'
+        config_in = 'bigfloat/bigfloat_config.py.in'
         self.mkpath(self.build_dir)
         outfile = os.path.join(self.build_dir, 'bigfloat_config.py')
         create_config(config_in, outfile, {'$(MPFR_LIB_LOC)': mpfr_lib})
