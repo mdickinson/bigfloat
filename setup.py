@@ -3,6 +3,7 @@ from distutils.command.build import build
 from distutils.command.install import install
 from distutils.command.install_lib import install_lib
 from distutils.cmd import Command
+from distutils import log
 import distutils.sysconfig
 import distutils.ccompiler
 import os.path
@@ -107,10 +108,12 @@ class build_config(Command):
 
         # find mpfr library file
         mpfr_lib = find_library_file(library_dirs, 'mpfr')
+        log.info("found MPFR library at '%s'", mpfr_lib)
 
         # write config file
         config_in = 'bigfloat/bigfloat_config.py.in'
         config_out = 'bigfloat/bigfloat_config.py'
+        log.info("creating '%s' from '%s'", config_out, config_in)
         create_config(config_in, config_out, {'$(MPFR_LIB_LOC)': mpfr_lib})
 
 class BigFloatBuild(build):
