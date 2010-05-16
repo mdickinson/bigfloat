@@ -1,0 +1,2 @@
+include INSTALL
+recursive-include bigfloat/docs *
