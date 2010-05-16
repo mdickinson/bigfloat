@@ -1,3 +1,4 @@
 include INSTALL
 include bigfloat/bigfloat_config.py.in
+exclude bigfloat/bigfloat_config.py
 recursive-include bigfloat/docs *
