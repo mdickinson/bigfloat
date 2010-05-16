@@ -119,7 +119,7 @@ class build_config(Command):
 
 class BigFloatBuild(build):
     sub_commands = build.sub_commands
-    sub_commands.append(('build_config', lambda self:True))
+    sub_commands.insert(0, ('build_config', lambda self:True))
 
 class BigFloatInstallLib(install_lib):
     def build(self):
