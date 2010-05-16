@@ -64,9 +64,10 @@ def create_config(infile, outfile, replacement_dict):
     # make substitutions in config file
     outf = open(outfile, 'w')
     for line in open(infile, 'r'):
-        for k, v in replacement_dict.items():
-            if k in line:
-                line = line.replace(k, repr(v))
+        if not line.startswith('#'):
+            for k, v in replacement_dict.items():
+                if k in line:
+                    line = line.replace(k, repr(v))
         outf.write(line)
     outf.close()
 
