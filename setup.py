@@ -150,7 +150,13 @@ def main():
             'bigfloat.test',
             'bigfloat.examples',
             ],
-        package_data={'bigfloat': ['docs']},
+        package_data={'bigfloat': [
+                'docs/*.html',
+                'docs/*.inv',
+                'docs/*.js',
+                'docs/_sources/*',
+                'docs/_static/*',
+                ]},
 
         # Build info
         cmdclass = {
