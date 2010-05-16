@@ -110,9 +110,8 @@ class build_config(Command):
 
         # write config file
         config_in = 'bigfloat/bigfloat_config.py.in'
-        self.mkpath(self.build_dir)
-        outfile = os.path.join(self.build_dir, 'bigfloat_config.py')
-        create_config(config_in, outfile, {'$(MPFR_LIB_LOC)': mpfr_lib})
+        config_out = 'bigfloat/bigfloat_config.py'
+        create_config(config_in, config_out, {'$(MPFR_LIB_LOC)': mpfr_lib})
 
 class BigFloatBuild(build):
     sub_commands = build.sub_commands
