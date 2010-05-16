@@ -1,6 +1,9 @@
 What's new in bigfloat 0.1.2?
 =============================
 
-- Include documentation in distribution.
+- Include html documentation in distribution, in docs directory.
 
-- Add /usr/lib{32,64} and /usr/local/lib{32,64} to default search paths in setup.py.
+- Add /usr/lib{32,64} and /usr/local/lib{32,64} to default search
+  paths in setup.py.
+
+- Make Context objects hashable.
