@@ -16,6 +16,7 @@ clean:
 	-rm -fr $(DOCDIR)
 	-rm -fr build/
 	-rm -fr dist/
+	-rm bigfloat/bigfloat_config.py
 	-rm -fr bigfloat/*.pyc
 	-rm -fr bigfloat/examples/*.pyc
 	-rm -fr bigfloat/test/*.pyc
