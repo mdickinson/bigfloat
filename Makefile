@@ -6,7 +6,7 @@ SPHINXBUILD=sphinx-build-2.6
 DOCSRC=bigfloat/doc
 DOCDIR=bigfloat/docs
 
-.PHONY: build clean doc dist install
+.PHONY: build clean doc dist install test
 
 build: doc
 	$(PYTHON) setup.py build
@@ -29,6 +29,9 @@ dist: doc
 
 install: build
 	$(PYTHON) setup.py install
+
+test:
+	$(PYTHON) runtests.py
 
 $(DOCDIR): $(DOCSRC)/index.rst
 	cd $(DOCSRC) && $(MAKE) SPHINXBUILD=$(SPHINXBUILD) html
