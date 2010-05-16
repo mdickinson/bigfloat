@@ -31,7 +31,7 @@ dist: doc
 install: build
 	$(PYTHON) setup.py install
 
-test:
+test: build
 	$(PYTHON) runtests.py
 
 $(DOCDIR): $(DOCSRC)/index.rst
