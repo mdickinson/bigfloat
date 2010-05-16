@@ -765,11 +765,7 @@ class ContextTests(unittest.TestCase):
                      subnormalize=True, rounding='RoundTowardPositive')
         c2 = (Context(emax=999, emin=-999, rounding='RoundTowardPositive') + 
               Context(precision=100, subnormalize=True))
-        self.asssertEqual(hash(c1), hash(c2))
-
-        # check partial contexts
-        c3 = Context(
-
+        self.assertEqual(hash(c1), hash(c2))
 
     def test_with(self):
         # check use of contexts in with statements
