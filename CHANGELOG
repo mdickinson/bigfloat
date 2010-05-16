@@ -1,9 +1,29 @@
 What's new in bigfloat 0.1.2?
 =============================
 
+Library
+-------
+
+- Make Context objects hashable.
+
+Documentation
+-------------
+
+- Add 'where to get it' section to the documentation, pointing both
+  to the PyPI page and the bitbucket source.
+
+- Expand installation information in documentation.
+
+Packaging/distribution
+----------------------
+
 - Include html documentation in distribution, in docs directory.
+
+- Include INSTALL and CHANGELOG files in distribution.
+
+- Make sure the bigfloat_config.py file ends up in the top-level
+  package directory.
 
 - Add /usr/lib{32,64} and /usr/local/lib{32,64} to default search
   paths in setup.py.
 
-- Make Context objects hashable.
