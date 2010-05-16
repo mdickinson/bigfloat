@@ -1,4 +1,5 @@
 include INSTALL CHANGELOG
 include bigfloat/bigfloat_config.py.in
+include *.html
 exclude bigfloat/bigfloat_config.py
 recursive-include bigfloat/docs *
