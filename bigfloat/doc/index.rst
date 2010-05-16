@@ -83,22 +83,38 @@ This module requires Python version 2.5 or later.  For Python 2.5,
 you'll need to do a ``from __future__ import with_statement`` if you
 want to take advantage of all of the features of this module.
 
+Installation
+^^^^^^^^^^^^
+
+Like most third party Python libraries, the :mod:`bigfloat` module is
+installed by means of the ``setup.py`` script included in the
+distribution.  On most systems, installation should be as simple as
+doing::
+
+   python setup.py install
+
+in the top-level directory of the unpacked distribution.  You may need
+superuser privileges to install the library, for example with::
+
+   sudo python setup.py install
+
+
 Locating the MPFR library
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The :mod:`bigfloat` module attempts to locate the MPFR library on your
-system.  If it fails, or if you have multiple MPFR libraries installed
-on your system and want to specify which one to use, you should edit
-the ``mpfr_library_location`` setting in the ``bigfloat_config.py``
-file to specify the library location.
+The `setup.py` installation script attempts to locate the MPFR library
+on your system.  If it fails, or if you have multiple MPFR libraries
+installed on your system and want to specify which one to use, you
+should edit the ``mpfr_library_location`` setting in the
+``bigfloat/bigfloat_config.py.in`` file to specify the library location.
 
 Other configuration
 ^^^^^^^^^^^^^^^^^^^
 
-The ``bigfloat_config.py`` file also allows you to specify some other
-system-dependent values.  On a typical system, with default installs
-of GMP and MPFR, it's unlikely that these values will need to be
-changed.  But if you're getting segmentation faults or crashes with
+The ``bigfloat/bigfloat_config.py.in`` file also allows you to specify
+some other system-dependent values.  On a typical system, with default
+installs of GMP and MPFR, it's unlikely that these values will need to
+be changed.  But if you're getting segmentation faults or crashes with
 the bigfloat library then you may need to edit the values in this
 file.  In this case it will probably also be useful to have the gmp.h
 and mpfr.h include files handy to refer to; on Linux systems, these
