@@ -108,7 +108,7 @@ class BigFloatTests(unittest.TestCase):
     def test_arithmetic_functions(self):
         # test add, mul, div, sub, pow, mod
         test_precisions = [2, 10, 23, 24, 52, 53, 54, 100]
-        fns = [add, sub, mul, div, pow, mod]
+        fns = [add, sub, mul, div, pow]
         # mod function only exists for MPFR version >= 2.4.0
         if (MPFR_VERSION_MAJOR, MPFR_VERSION_MINOR) >= (2, 4):
             fns.append(mod)
