@@ -10,6 +10,9 @@ __all__ = [
     # mpfr library, giving access to the various Python-wrapped MPFR functions
     'mpfr',
 
+    # MPFR major and minor version numbers
+    'MPFR_VERSION_MAJOR', 'MPFR_VERSION_MINOR',
+
     # class implementing the floats themselves (corresponds to mpfr_t)
     'Mpfr',
 
