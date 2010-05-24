@@ -109,6 +109,10 @@ class BigFloatTests(unittest.TestCase):
         # test add, mul, div, sub, pow, mod
         test_precisions = [2, 10, 23, 24, 52, 53, 54, 100]
         fns = [add, sub, mul, div, pow, mod]
+        # mod function only exists for MPFR version >= 2.4.0
+        if (MPFR_VERSION_MAJOR, MPFR_VERSION_MINOR) >= (2, 4):
+            fns.append(mod)
+
         values = [2, 3L, 1.234, BigFloat('0.678'), BigFloat('nan'),
                   float('0.0'), float('inf'), True]
 
