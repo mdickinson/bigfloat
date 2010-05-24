@@ -139,7 +139,7 @@ def main():
         url='http://bitbucket.org/dickinsm/bigfloat',
         classifiers=[
             'Development Status :: 3 - Alpha',
-            'License :: OSI Approved :: Academic Free License (AFL)',
+            'License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)',
             'Programming Language :: Python',
             'Topic :: Scientific/Engineering :: Mathematics',
             ],
@@ -147,7 +147,7 @@ def main():
             'Linux',
             'OS X',
             ],
-        license = 'Academic Free License (AFL)',
+        license = 'GNU Library or Lesser General Public License (LGPL)',
         packages=[
             'bigfloat',
             'bigfloat.test',
