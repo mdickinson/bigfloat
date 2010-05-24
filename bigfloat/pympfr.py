@@ -399,7 +399,6 @@ mpfr_functions = [
 
     # Most of these are standard functions, declared below.
     ('sin_cos', [IMpfr, IMpfr, IMpfr, RoundingMode], Ternary),
-    ('sinh_cosh', [IMpfr, IMpfr, IMpfr, RoundingMode], Ternary),
     ('lgamma', [IMpfr, ctypes.POINTER(ctypes.c_int), IMpfr, RoundingMode], Ternary),
     ('free_cache', [], None),
 
@@ -421,7 +420,6 @@ mpfr_functions = [
 
     # rint_ceil, rint_floor, rint_round, rint_trunc are standard
     # frac is standard
-    ('modf', [IMpfr, IMpfr, IMpfr, RoundingMode], Ternary),
     # fmod, remainder are standard
     ('remquo', [IMpfr, ctypes.POINTER(ctypes.c_long), IMpfr, IMpfr, RoundingMode],
      Ternary),
@@ -467,6 +465,13 @@ mpfr_functions = [
     # Functions from 5.14 and 5.15 not wrapped.
     ]
 
+# functions that are new in MPFR version 2.4
+if (MPFR_VERSION_MAJOR, MPFR_VERSION_MINOR) >= (2, 4):
+    mpfr_functions.extend([
+            ('modf', [IMpfr, IMpfr, IMpfr, RoundingMode], Ternary),
+            ('sinh_cosh', [IMpfr, IMpfr, IMpfr, RoundingMode], Ternary),
+            ])
+
 # additional functions for flags in section 13
 mpfr_flags = ['underflow', 'overflow', 'nanflag', 'inexflag', 'erangeflag']
 for f in mpfr_flags:
@@ -501,7 +506,7 @@ standard_constants = [
 
 standard_unary_functions = [
     'set', 'neg', 'abs',
-    'sqr', 'sqrt', 'rec_sqrt', 'cbrt',
+    'sqr', 'sqrt', 'cbrt',
     'log', 'log2', 'log10',
     'exp', 'exp2', 'exp10',
     'cos', 'sin', 'tan',
@@ -511,7 +516,7 @@ standard_unary_functions = [
     'sech', 'csch', 'coth',
     'acosh', 'asinh', 'atanh',
     'log1p', 'expm1',
-    'eint', 'li2',
+    'eint',
     'gamma', 'lngamma',
     'zeta',
     'erf', 'erfc',
@@ -520,15 +525,27 @@ standard_unary_functions = [
     'frac',
     ]
 
+# functions that are new in MPFR version 2.4
+if (MPFR_VERSION_MAJOR, MPFR_VERSION_MINOR) >= (2, 4):
+    standard_unary_functions.extend([
+            'li2', 'rec_sqrt',
+            ])
+
 # standard functions taking two Mpfr instances as input
 
 standard_binary_functions = [
     'add', 'sub', 'mul', 'div', 'pow',
     'dim', 'atan2', 'agm', 'hypot',
-    'fmod', 'remainder',
+    'remainder',
     'max', 'min',
     'copysign',
     ]
+
+# functions that are new in MPFR version 2.4
+if (MPFR_VERSION_MAJOR, MPFR_VERSION_MINOR) >= (2, 4):
+    standard_binary_functions.extend([
+            'fmod',
+            ])
 
 # and three Mpfr instances...
 
@@ -548,22 +565,16 @@ additional_standard_functions = [
     # 5.5 Basic Arithmetic Functions
     ('add_ui', [IMpfr, UnsignedLong]),
     ('add_si', [IMpfr, Long]),
-    ('add_d', [IMpfr, ctypes.c_double]),
     ('ui_sub', [UnsignedLong, IMpfr]),
     ('sub_ui', [IMpfr, UnsignedLong]),
     ('si_sub', [Long, IMpfr]),
     ('sub_si', [IMpfr, Long]),
-    ('d_sub', [ctypes.c_double, IMpfr]),
-    ('sub_d', [IMpfr, ctypes.c_double]),
     ('mul_ui', [IMpfr, UnsignedLong]),
     ('mul_si', [IMpfr, Long]),
-    ('mul_d', [IMpfr, ctypes.c_double]),
     ('ui_div', [UnsignedLong, IMpfr]),
     ('div_ui', [IMpfr, UnsignedLong]),
     ('si_div', [Long, IMpfr]),
     ('div_si', [IMpfr, Long]),
-    ('d_div', [ctypes.c_double, IMpfr]),
-    ('div_d', [IMpfr, ctypes.c_double]),
     ('sqrt_ui', [UnsignedLong]),
     ('root', [IMpfr, UnsignedLong]),
     ('pow_ui', [IMpfr, UnsignedLong]),
@@ -584,6 +595,17 @@ additional_standard_functions = [
     # 5.12 Miscellaneous Functions
     ('setsign', [IMpfr, Bool]),
 ]
+
+# functions that are new in MPFR version 2.4
+if (MPFR_VERSION_MAJOR, MPFR_VERSION_MINOR) >= (2, 4):
+    additional_standard_functions.extend([
+            ('add_d', [IMpfr, ctypes.c_double]),
+            ('sub_d', [IMpfr, ctypes.c_double]),
+            ('d_sub', [ctypes.c_double, IMpfr]),
+            ('mul_d', [IMpfr, ctypes.c_double]),
+            ('div_d', [IMpfr, ctypes.c_double]),
+            ('d_div', [ctypes.c_double, IMpfr]),
+            ])
 
 standard_functions = \
     [(name, []) for name in standard_constants] + \

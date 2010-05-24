@@ -953,6 +953,10 @@ Arithmetic functions
    Note that this means that 1/sqrt(x) differs from rec_sqrt(x) when
    x is negative zero.
 
+   .. note::
+
+      Available for MPFR version >= 2.4.
+
 .. function:: cbrt(x)
 
    Return the cube root of x.
@@ -1066,6 +1070,10 @@ Special functions
    Return the exponential integral of x.
 
 .. function:: li2(x)
+
+   .. note::
+
+      Available for MPFR version >= 2.4.
 
    Return the real part of the dilogarithm of x.
 
