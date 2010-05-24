@@ -553,11 +553,21 @@ class BigFloatTests(unittest.TestCase):
         for n in range(-50, 50):
             self.assertEqual(hash(n), hash(BigFloat.exact(n)))
 
-        #   values near powers of 2
+        # XXX It's expected that these tests will fail on Python 2.5,
+        # due to the unpredictability of the integer hashing algorithm.
+        # There are no plans to fix this problem (and it's not really
+        # a problem unless you're putting both integers and BigFloat
+        # instances into the same set or dict).
+
+        # values near powers of 2
         for e in [30, 31, 32, 33, 34, 62, 63, 64, 65, 66]:
             for n in range(2**e-50, 2**e+50):
-                self.assertEqual(hash(n), hash(BigFloat.exact(n)))
-                self.assertEqual(hash(BigFloat(n)), hash(int(BigFloat(n))))
+                self.assertEqual(hash(n), hash(BigFloat.exact(n)),
+                                 "hash(n) != hash(BigFloat.exact(n)"
+                                 "for n = %s" % n)
+                self.assertEqual(hash(BigFloat(n)), hash(int(BigFloat(n))),
+                                 "hash(BigFloat(n)) != hash(int(BigFloat(n)))"
+                                 "for n = %s" % n)
 
         # check that hash values match those of floats
         self.assertEqual(hash(BigFloat('inf')), hash(float('inf')))
