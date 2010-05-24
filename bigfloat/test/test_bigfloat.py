@@ -5,6 +5,7 @@ import unittest
 import operator
 from bigfloat import *
 from bigfloat import _all_flags
+from bigfloat import MPFR_VERSION_MAJOR, MPFR_VERSION_MINOR
 import math
 import __builtin__
 
@@ -152,8 +153,12 @@ class BigFloatTests(unittest.TestCase):
         # whether or not 'from __future__ import division' is enabled.
         # So we test both operator.div and operator.truediv.
         operations = [operator.add, operator.mul, operator.div,
-                      operator.sub, operator.pow, operator.truediv,
-                      operator.mod]
+                      operator.sub, operator.pow, operator.truediv]
+
+        # % operator only works for MPFR version >= 2.4.
+        if (MPFR_VERSION_MAJOR, MPFR_VERSION_MINOR) >= (2, 4):
+            operations.append(operator.mod)
+
         for value in other_values:
             for p in test_precisions:
                 with precision(p):
