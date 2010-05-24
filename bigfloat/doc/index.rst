@@ -77,7 +77,7 @@ In order to use the :mod:`bigfloat` module you will need to have both
 the GMP and MPFR libraries already installed on your system.  See the
 `MPFR homepage <http://www.mpfr.org>`_ and the `GMP homepage
 <http://gmplib.org>`_ for more information about these libraries.
-Currently, MPFR version 2.4.0 or later is required.
+Currently, MPFR version 2.3.0 or later is required.
 
 This module requires Python version 2.5 or later.  For Python 2.5,
 you'll need to do a ``from __future__ import with_statement`` if you
@@ -955,7 +955,7 @@ Arithmetic functions
 
    .. note::
 
-      Available for MPFR version >= 2.4.
+      Available for MPFR version >= 2.4.0
 
 .. function:: cbrt(x)
 
@@ -1073,7 +1073,7 @@ Special functions
 
    .. note::
 
-      Available for MPFR version >= 2.4.
+      Available for MPFR version >= 2.4.0
 
    Return the real part of the dilogarithm of x.
 
