@@ -997,16 +997,16 @@ BigFloat.__mul__ = _binop(mul)
 BigFloat.__div__ = BigFloat.__truediv__ = _binop(div)
 BigFloat.__pow__ = _binop(pow)
 
-if (MPFR_VERSION_MAJOR, MPFR_VERSION_MINOR) >= (2, 4):
-    BigFloat.__mod__ = _binop(mod)
-
 # and their reverse operations
 BigFloat.__radd__ = _rbinop(add)
 BigFloat.__rsub__ = _rbinop(sub)
 BigFloat.__rmul__ = _rbinop(mul)
 BigFloat.__rdiv__ = BigFloat.__rtruediv__ = _rbinop(div)
 BigFloat.__rpow__ = _rbinop(pow)
-BigFloat.__rmod__ = _rbinop(mod)
+
+if (MPFR_VERSION_MAJOR, MPFR_VERSION_MINOR) >= (2, 4):
+    BigFloat.__mod__ = _binop(mod)
+    BigFloat.__rmod__ = _rbinop(mod)
 
 # comparisons
 BigFloat.__eq__ = _binop(_is_equal)
