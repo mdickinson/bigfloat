@@ -563,10 +563,10 @@ class BigFloatTests(unittest.TestCase):
         for e in [30, 31, 32, 33, 34, 62, 63, 64, 65, 66]:
             for n in range(2**e-50, 2**e+50):
                 self.assertEqual(hash(n), hash(BigFloat.exact(n)),
-                                 "hash(n) != hash(BigFloat.exact(n)"
+                                 "hash(n) != hash(BigFloat.exact(n)) "
                                  "for n = %s" % n)
                 self.assertEqual(hash(BigFloat(n)), hash(int(BigFloat(n))),
-                                 "hash(BigFloat(n)) != hash(int(BigFloat(n)))"
+                                 "hash(BigFloat(n)) != hash(int(BigFloat(n))) "
                                  "for n = %s" % n)
 
         # check that hash values match those of floats
