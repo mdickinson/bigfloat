@@ -22,6 +22,7 @@ clean:
 	-rm -fr bigfloat/test/*.pyc
 	-rm MANIFEST
 	find . -name \*~ -exec rm {} \;
+	find . -name \*.orig -exec rm {} \;
 
 doc: $(DOCDIR)
 
