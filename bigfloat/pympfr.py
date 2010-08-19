@@ -204,7 +204,6 @@ class Mpfr(object):
     def __new__(cls, precision):
         self = object.__new__(cls)
         self._value = PreMpfr()
-        self._as_parameter_ = self._value
         finalize.track_for_finalization(self, self._value, mpfr.mpfr_clear)
         self._initialized = False
         return self
@@ -218,7 +217,7 @@ class Mpfr(object):
 
     @classmethod
     def from_param(cls, self):
-        return self
+        return self._value
 
 # Precision class used for automatic range checking of precisions.
 # Arguments of type mpfr_prec_t should use the Precision class.
@@ -296,21 +295,6 @@ def Ternary(x):
 ################################################################################
 # Various useful errcheck functions
 
-def set_init(result, func, args):
-    mpfr_instance = args[0]
-    assert not hasattr(mpfr_instance, '_initialized')
-    mpfr_instance._initialized=True
-
-def clear_init(result, func, args):
-    mpfr_instance = args[0]
-    assert hasattr(mpfr_instance, '_initialized')
-    del mpfr_instance._initialized
-
-def set_init_on_success(result, func, args):
-    if result:
-        raise ValueError("Initialization call failed")
-    set_init(result, func, args)
-
 def error_on_failure(result, func, args):
     if result:
         raise ValueError("call failed")
@@ -340,8 +324,8 @@ MPFR_EMIN_DEFAULT = -MPFR_EMAX_DEFAULT
 mpfr_functions = [
 
     # 5.1: Initialization Functions
-    ('init2', [PreMpfr, Precision], None, set_init),
-    ('clear', [PreMpfr], None, clear_init),
+    ('init2', [PreMpfr, Precision], None),
+    ('clear', [PreMpfr], None),
     ('set_default_prec', [Precision], None),
     ('get_default_prec', [], mpfr_prec_t),
     ('set_prec', [PreMpfr, Precision], None),
