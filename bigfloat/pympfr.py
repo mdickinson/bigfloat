@@ -219,6 +219,16 @@ class Mpfr(object):
     def from_param(cls, self):
         return self._value
 
+    def __repr__(self):
+        # Crude but usable string representation for Mpfr type.
+        negative, digits, exp = get_str2(self, 10, 0, RoundTiesToEven)
+        if '@NaN@' not in digits and '@Inf@' not in digits:
+            digits = '0.' + digits + 'E' + str(exp)
+        return ('-' if negative else '') + digits
+
+    __str__ = __repr__
+
+
 # Precision class used for automatic range checking of precisions.
 # Arguments of type mpfr_prec_t should use the Precision class.
 # Return values of type mpfr_prec_t should just be declared as
@@ -747,19 +757,6 @@ def remquo2(r, x, y, rnd):
     ternary = mpfr.mpfr_remquo(r, ctypes.byref(q), x, y, rnd)
     return ternary, q
 
-################################################################################
-# A couple of extra niceties to make the Mpfr class easier to use.
-
-# First, we monkeypatch the Mpfr class to give it a crude but usable
-# string representation.
-
-def _mpfr_str(self):
-    negative, digits, exp = get_str2(self, 10, 0, RoundTiesToEven)
-    if '@NaN@' not in digits and '@Inf@' not in digits:
-        digits = '0.' + digits + 'E' + str(exp)
-    return ('-' if negative else '') + digits
-
-Mpfr.__repr__ = Mpfr.__str__ = _mpfr_str
 
 ################################################################################
 # Context manager to give an easy way to change emin and emax temporarily.
