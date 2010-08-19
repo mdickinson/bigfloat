@@ -200,8 +200,9 @@ class __mpfr_struct(ctypes.Structure):
 
 PreMpfr = __mpfr_struct * 1
 
-# Wrapper for the PreMpfr type that ensures initialization, and automatic calling
-# of mpfr.mpfr_clear when an Mpfr instance goes out of scope.
+# Wrapper for the PreMpfr type that ensures initialization, and
+# automatic calling of mpfr.mpfr_clear when an Mpfr instance goes out
+# of scope.
 
 class Mpfr(object):
     def __new__(cls, precision):
@@ -358,7 +359,7 @@ mpfr_functions = [
     # the ternary value.  Use set_str2 (defined below) instead.
     ('set_str', [Mpfr, ctypes.c_char_p, Base, RoundingMode], ctypes.c_int,
      error_on_failure),
-    ('strtofr', [Mpfr, ctypes.c_char_p, ctypes.POINTER(ctypes.c_char_p), 
+    ('strtofr', [Mpfr, ctypes.c_char_p, ctypes.POINTER(ctypes.c_char_p),
                  Base, RoundingMode], Ternary),
     ('set_inf', [Mpfr, Sign], None),
     ('set_nan', [Mpfr], None),
@@ -393,7 +394,7 @@ mpfr_functions = [
     ('cmp_ui_2exp', [Mpfr, UnsignedLong, Exponent], Ternary),
     ('cmp_si_2exp', [Mpfr, Long, Exponent], Ternary),
     ('cmpabs', [Mpfr, Mpfr], Ternary),
-    
+
     # nan_p, inf_p, number_p, zero_p are standard predicates, declared below
     ('sgn', [Mpfr], Ternary),
 
@@ -403,7 +404,8 @@ mpfr_functions = [
 
     # Most of these are standard functions, declared below.
     ('sin_cos', [Mpfr, Mpfr, Mpfr, RoundingMode], Ternary),
-    ('lgamma', [Mpfr, ctypes.POINTER(ctypes.c_int), Mpfr, RoundingMode], Ternary),
+    ('lgamma', [Mpfr, ctypes.POINTER(ctypes.c_int), Mpfr, RoundingMode],
+     Ternary),
     ('free_cache', [], None),
 
     # we don't wrap mpfr_sum at the moment
