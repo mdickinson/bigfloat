@@ -131,7 +131,7 @@ def main():
 
     setup(
         name='bigfloat',
-        version='0.1.2',
+        version='0.2',
         description=DESCRIPTION,
         long_description=LONG_DESCRIPTION,
         author='Mark Dickinson',
