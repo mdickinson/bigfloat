@@ -1,3 +1,11 @@
+What's new in bigfloat 0.2?
+===========================
+
+Library
+-------
+
+- Make bigfloat compatible with versions of MPFR as far back as MPFR 2.3.0
+
 What's new in bigfloat 0.1.2?
 =============================
 
