@@ -21,7 +21,10 @@ from contextlib import contextmanager
 import ctypes
 import ctypes.util
 
-import bigfloat_config
+try:
+    import bigfloat_config
+except ImportError:
+    bigfloat_config = None
 import finalize
 
 __all__ = [
