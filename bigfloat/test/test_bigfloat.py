@@ -24,6 +24,7 @@ from bigfloat import *
 from bigfloat import _all_flags
 from bigfloat import MPFR_VERSION_MAJOR, MPFR_VERSION_MINOR
 import math
+import sys
 import __builtin__
 
 all_rounding_modes = [RoundTowardZero, RoundTowardNegative,
@@ -566,6 +567,16 @@ class BigFloatTests(unittest.TestCase):
         self.assertEqual(hash(x1), hash(x2))
         self.assertEqual(hash(x1), hash(x3))
 
+        # check that hash values match those of floats
+        self.assertEqual(hash(BigFloat('inf')), hash(float('inf')))
+        self.assertEqual(hash(BigFloat('-inf')), hash(float('-inf')))
+        self.assertEqual(hash(BigFloat('0')), hash(float('0')))
+        self.assertEqual(hash(BigFloat('-0')), hash(float('-0')))
+        self.assertEqual(hash(BigFloat('1')), hash(float('1')))
+        self.assertEqual(hash(BigFloat('-1')), hash(float('-1')))
+        self.assertEqual(hash(BigFloat('1.625')), hash(float('1.625')))
+        self.assertEqual(hash(BigFloat.exact(1.1)), hash(1.1))
+
         # check that hash(n) matches hash(BigFloat(n)) for integers n
         for n in range(-50, 50):
             self.assertEqual(hash(n), hash(BigFloat.exact(n)))
@@ -575,6 +586,8 @@ class BigFloatTests(unittest.TestCase):
         # There are no plans to fix this problem (and it's not really
         # a problem unless you're putting both integers and BigFloat
         # instances into the same set or dict).
+        if sys.version_info < (2, 6):
+            return
 
         # values near powers of 2
         for e in [30, 31, 32, 33, 34, 62, 63, 64, 65, 66]:
@@ -585,16 +598,6 @@ class BigFloatTests(unittest.TestCase):
                 self.assertEqual(hash(BigFloat(n)), hash(int(BigFloat(n))),
                                  "hash(BigFloat(n)) != hash(int(BigFloat(n))) "
                                  "for n = %s" % n)
-
-        # check that hash values match those of floats
-        self.assertEqual(hash(BigFloat('inf')), hash(float('inf')))
-        self.assertEqual(hash(BigFloat('-inf')), hash(float('-inf')))
-        self.assertEqual(hash(BigFloat('0')), hash(float('0')))
-        self.assertEqual(hash(BigFloat('-0')), hash(float('-0')))
-        self.assertEqual(hash(BigFloat('1')), hash(float('1')))
-        self.assertEqual(hash(BigFloat('-1')), hash(float('-1')))
-        self.assertEqual(hash(BigFloat('1.625')), hash(float('1.625')))
-        self.assertEqual(hash(BigFloat.exact(1.1)), hash(1.1))
 
     def test_hex(self):
         # test conversion to a hex string
