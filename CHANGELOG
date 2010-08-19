@@ -4,6 +4,9 @@ What's new in bigfloat 0.2?
 Library
 -------
 
+- Use a weakref callback to ensure mpfr_clear gets called, instead of
+  relying on __del__.
+
 - Make bigfloat compatible with versions of MPFR as far back as MPFR 2.3.0
 
 What's new in bigfloat 0.1.2?

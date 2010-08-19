@@ -402,8 +402,7 @@ def next_up(x, context=None):
                 return y
 
             # otherwise apply mpfr_nextabove
-            bf = Mpfr()
-            mpfr.mpfr_init2(bf, y.precision)
+            bf = Mpfr(y.precision)
             ternary = mpfr.mpfr_set(bf, y._value, 'RoundTiesToEven')
             assert ternary == 0
             mpfr.mpfr_nextabove(bf)
@@ -436,8 +435,7 @@ def next_down(x, context=None):
                 return y
 
             # otherwise apply mpfr_nextabove
-            bf = Mpfr()
-            mpfr.mpfr_init2(bf, y.precision)
+            bf = Mpfr(y.precision)
             ternary = mpfr.mpfr_set(bf, y._value, 'RoundTiesToEven')
             assert ternary == 0
             mpfr.mpfr_nextbelow(bf)
@@ -460,13 +458,12 @@ def _wrap_standard_function(f, argtypes):
             raise TypeError("Wrong number of arguments")
         converted_args = []
         for arg, arg_t in zip(args, argtypes):
-            if arg_t is _pympfr.IMpfr:
+            if arg_t is _pympfr.Mpfr:
                 arg = BigFloat._implicit_convert(arg)._value
             converted_args.append(arg)
         rounding = context.rounding
         converted_args.append(rounding)
-        bf = Mpfr()
-        mpfr.mpfr_init2(bf, context.precision)
+        bf = Mpfr(context.precision)
         ternary = f(bf, *converted_args)
 
         # fit result to current context
@@ -500,7 +497,7 @@ def _wrap_predicate(f):
             raise TypeError("Wrong number of arguments")
         converted_args = []
         for arg, arg_t in zip(args, argtypes):
-            if arg_t is _pympfr.IMpfr:
+            if arg_t is _pympfr.Mpfr:
                 arg = BigFloat._implicit_convert(arg)._value
             converted_args.append(arg)
         return f(*converted_args)
@@ -581,8 +578,7 @@ class BigFloat(object):
         # the testing of that machinery.
 
         # XXX Maybe we should move this function into test_bigfloat
-        bf = Mpfr()
-        mpfr.mpfr_init2(bf, len(value)*4)  # should be sufficient precision
+        bf = Mpfr(len(value)*4) # should be sufficient precision
         ternary = mpfr.mpfr_set_str2(bf, value, 16, 'RoundTiesToEven')
         if ternary:
             # conversion should have been exact, except possibly if
@@ -690,8 +686,7 @@ class BigFloat(object):
 
         """
 
-        m = Mpfr()
-        mpfr.mpfr_init2(m, self.precision)
+        m = Mpfr(self.precision)
         mpfr.mpfr_set(m, self._value, 'RoundTiesToEven')
         if self and is_finite(self):
             mpfr.mpfr_set_exp(m, 0)
