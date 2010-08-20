@@ -115,7 +115,7 @@ integers and floats as well as ``BigFloat`` instances, but always
 return a ``BigFloat`` instance.
 
 Rounding modes can be controlled similarly.  Here are upper and lower
-bounds for π, accurate to 53 significant bits.
+bounds for π, accurate to 53 significant bits::
 
     >>> with RoundTowardPositive:
     ...     const_pi()
