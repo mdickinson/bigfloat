@@ -1,5 +1,4 @@
-include INSTALL CHANGELOG
+include INSTALL
+include CHANGELOG
 include COPYING COPYING.LESSER
-include bigfloat/bigfloat_config.py.in
-exclude bigfloat/bigfloat_config.py
 recursive-include bigfloat/docs *

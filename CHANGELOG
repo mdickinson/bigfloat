@@ -4,6 +4,12 @@ What's new in bigfloat 0.2?
 Library
 -------
 
+- The setup.py file no longer attempts to locate the MPFR library at
+  install time.  The configuration file still exists, and can be edited
+  to give a hard-coded location.  Alternatively, ctypes should find the
+  library if it's within the usual library search paths.  (If not, it
+  might be necessary to set LD_LIBRARY_PATH or DYLD_LIBRARY_PATH.)
+  
 - Use a weakref callback to ensure mpfr_clear gets called, instead of
   relying on __del__.
 

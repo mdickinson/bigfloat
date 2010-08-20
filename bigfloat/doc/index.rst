@@ -102,24 +102,27 @@ superuser privileges to install the library, for example with::
 Locating the MPFR library
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The `setup.py` installation script attempts to locate the MPFR library
-on your system.  If it fails, or if you have multiple MPFR libraries
-installed on your system and want to specify which one to use, you
-should edit the ``mpfr_library_location`` setting in the
-``bigfloat/bigfloat_config.py.in`` file to specify the library location.
+On import, the :mod:`bigfloat` module attempts to locate an MPFR library on
+your system; if the library is in the usual library search path (as controlled
+by the LD_LIBRARY_PATH environment variable on Linux, for example) then it
+should be found as normal.  If the module fails to find the MPFR library, or if
+you have multiple MPFR libraries installed on your system and want to specify
+which one to use, you can edit the ``mpfr_library_location`` setting in the
+``bigfloat_config.py`` configuration file to specify the library location.
+This file should be found in the same location as the other installed source
+files for the bigfloat module.
 
 Other configuration
 ^^^^^^^^^^^^^^^^^^^
 
-The ``bigfloat/bigfloat_config.py.in`` file also allows you to specify
-some other system-dependent values.  On a typical system, with default
-installs of GMP and MPFR, it's unlikely that these values will need to
-be changed.  But if you're getting segmentation faults or crashes with
-the bigfloat library then you may need to edit the values in this
-file.  In this case it will probably also be useful to have the gmp.h
-and mpfr.h include files handy to refer to; on Linux systems, these
-files may be in a different package from the library files (e.g.,
-'mpfr-devel' instead of 'mpfr').
+The ``bigfloat_config.py`` configuration file also allows you to specify some
+other system-dependent values.  On a typical system, with default installs of
+GMP and MPFR, it's unlikely that these values will need to be changed.  But if
+you're getting segmentation faults or crashes with the bigfloat library then
+you may need to edit the values in this file.  In this case it will probably
+also be useful to have the gmp.h and mpfr.h include files handy to refer to; on
+Linux systems, these files may be in a different package from the library files
+(e.g., 'mpfr-devel' instead of 'mpfr').
 
 
 Tutorial

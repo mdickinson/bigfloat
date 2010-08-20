@@ -20,6 +20,7 @@ from __future__ import with_statement  # for Python 2.5
 from contextlib import contextmanager
 import ctypes
 import ctypes.util
+import os.path
 
 try:
     import bigfloat_config
@@ -62,11 +63,20 @@ __all__ = [
 ################################################################################
 # Locate and load the library
 
-_locate_error_message = \
-"""Failed to find the MPFR library.  Please ensure that the MPFR
-library is installed on your system, and if necessary edit the
-'mpfr_library_location' entry in the bigfloat_config.py configuration
-file to give the location of the library."""
+_locate_error_message = """\
+Failed to find the MPFR library.  Please ensure that the MPFR library
+is installed on your system and is in the library search path.  You
+may need to set LD_LIBRARY_PATH (or DYLD_LIBRARY_PATH on OS X) for
+this.
+
+If necessary you can edit the 'mpfr_library_location' entry in the
+bigfloat_config.py configuration file to give the location of the
+library.  This configuration file can be found in the same place that
+the bigfloat library was installed:
+
+%s
+""" % (os.path.join(
+        os.path.abspath(os.path.dirname(__file__)), 'bigfloat_config.py'),)
 
 # try the config file first
 _mpfr_library_name = getattr(bigfloat_config, 'mpfr_library_location', None)

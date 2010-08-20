@@ -21,9 +21,15 @@
 ## Set 'mpfr_library_location' to a string giving the location of the
 ## MPFR library on your system.  This is particularly useful if you
 ## have multiple versions of MPFR installed and you'd like to specify
-## which one should be used.  A value of $(MPFR_LIB_LOC) will be
-## substituted with the mpfr library version detected at setup time.
-mpfr_library_location = $(MPFR_LIB_LOC)
+## which one should be used, or if your MPFR library is in an unusual
+## location that's outside the usual library search paths.
+##
+## For example: to make bigfloat use the MacPorts version of mpfr on
+## OS X you might use:
+##
+## mpfr_library_location = "/opt/local/lib/libmpfr.dylib"
+##
+#mpfr_library_location = None
 
 ## Set 'gmp_mp_size_t_int' to True if GMP uses the C 'int' type for
 ## mp_size_t and mp_exp_t, and to False if is uses the C 'long' type
