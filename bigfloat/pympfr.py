@@ -20,13 +20,14 @@ from __future__ import with_statement  # for Python 2.5
 from contextlib import contextmanager
 import ctypes
 import ctypes.util
+import weakref
 import os.path
 
 try:
     import bigfloat_config
 except ImportError:
     bigfloat_config = None
-import finalize
+
 
 __all__ = [
     # mpfr library, giving access to the various Python-wrapped MPFR functions
@@ -214,13 +215,24 @@ PreMpfr = __mpfr_struct * 1
 # automatic calling of mpfr.mpfr_clear when an Mpfr instance goes out
 # of scope.
 
+# We ensure mpfr.mpfr_clear gets called by using a suitable weakref
+# callback.
+
 class Mpfr(object):
+    # Dictionary from weakrefs to PreMpfr instances.
+    _values = {}
     def __new__(cls, precision):
         self = object.__new__(cls)
         self._value = PreMpfr()
-        finalize.track_for_finalization(self, self._value, mpfr.mpfr_clear)
+        wref = weakref.ref(self, self._clear_value)
+        self._values[wref] = self._value
         self._initialized = False
         return self
+
+    @classmethod
+    def _clear_value(cls, wref):
+        mpfr.mpfr_clear(cls._values[wref])
+        del cls._values[wref]
 
     def __init__(self, precision):
         if self._initialized:
