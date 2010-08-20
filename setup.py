@@ -16,7 +16,7 @@ Arbitrary precision correctly-rounded floating point arithmetic, via MPFR.\
 """
 
 LONG_DESCRIPTION="""\
-The bigfloat package is a Python package providing arbitrary-precision
+The ``bigfloat`` package is a Python package providing arbitrary-precision
 correctly-rounded binary floating-point arithmetic.  It is currently
 implemented as a ctypes wrapper around the MPFR library (http://www.mpfr.org).
 
@@ -54,28 +54,33 @@ actually need.
 
 The main class is the ``BigFloat`` class::
 
-    >>> BigFloat(1)     # construction from an integer
+    >>> BigFloat(1)  # can be constructed from an integer, float or string
     BigFloat.exact('1.0000000000000000', precision=53)
-    >>> BigFloat(-1.23) # construction from a float
-    BigFloat.exact('-1.2300000000000000', precision=53)
-    >>> BigFloat('1.23456')
-    BigFloat.exact('1.2345600000000001', precision=53)
-    >>> BigFloat('1.23456') # and from a string
-    BigFloat.exact('1.2345600000000001', precision=53)
+    >>> BigFloat('3.14159') ** 2 / 6.0  # can combine with ints and floats
+    BigFloat.exact('1.6449312880166664', precision=53)
+    >>> BigFloat('0.1', precision(200)) # high-precision value from string
+    BigFloat.exact('0.1000000000000000000000000000000000000000000000000000
+    0000000002', precision=200)
 
-Each new ``BigFloat`` instance is created in the current *context*.
-The current context is represented by a ``Context`` instance.  Each
-``Context`` instance determines, amongst other things, a precision
-and a rounding mode used for the results of operations.  The current
-context is given by the ``getcontext`` function::
+
+Newly-created ``BigFloat`` instances refer to the current *context* to
+determine what precision and rounding modes to use.  This current
+context is represented by a ``Context`` instance, and can be retrieved
+by calling ``getcontext``::
 
     >>> getcontext()
     Context(precision=53, emax=1073741823, emin=-1073741823,
             subnormalize=False, rounding='RoundTiesToEven')
 
+The ``precision(200)`` argument passed to the ``BigFloat`` constructor
+above is also an example of a ``Context``::
+
+    >>> precision(200)
+    Context(precision=200)
+
 The context used for a calculation can be set using the ``setcontext``
-function, but a better way to change the context (temporarily) is to
-use Python's ``with`` statement::
+function, but a better way to make a temporary change to the context
+is to use Python's ``with`` statement::
 
     >>> with precision(1000):
     ...     print sqrt(2)
@@ -86,10 +91,10 @@ use Python's ``with`` statement::
     8206057147010955997160597027453459686201472851741864088919860955
     232923048430871432145083976260362799525140798964
 
-Here ``precision(1000)`` is a ``Context`` instance with a precision of
-1000 bits, and ``sqrt`` is one of a number of mathematical functions
-that bigfloat exports.  As you can see, these functions operate on
-integers and floats as well as BigFloat instances.
+Here, ``sqrt`` is one of a number of mathematical functions that the
+``bigfloat`` module exports.  As you can see, these functions operate on
+integers and floats as well as ``BigFloat`` instances, but always
+return a ``BigFloat`` instance.
 
 Rounding modes can be controlled similarly.  Here are upper and lower
 bounds for π, accurate to 53 significant bits.
@@ -104,7 +109,7 @@ bounds for π, accurate to 53 significant bits.
     BigFloat.exact('3.1415926535897931', precision=53)
 
 And as you'd expect, ``with`` statements like those above can be
-nested.  Contexts can also be combined using addition::
+nested.  ``Context`` objects can also be combined using addition::
 
     >>> with RoundTowardPositive + precision(24):
     ...     BigFloat(1) / 3
