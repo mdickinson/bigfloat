@@ -93,8 +93,8 @@ mpfr = ctypes.cdll.LoadLibrary(_mpfr_library_name)
 mpfr.mpfr_get_version.argtypes = []
 mpfr.mpfr_get_version.restype = ctypes.c_char_p
 
-_mpfr_version = mpfr.mpfr_get_version()
-MPFR_VERSION_MAJOR, MPFR_VERSION_MINOR, _ = _mpfr_version.split('.', 2)
+_mpfr_version = mpfr.mpfr_get_version().decode('ascii')
+MPFR_VERSION_MAJOR, MPFR_VERSION_MINOR, _ = _mpfr_version.split(u'.', 2)
 MPFR_VERSION_MAJOR = int(MPFR_VERSION_MAJOR)
 MPFR_VERSION_MINOR = int(MPFR_VERSION_MINOR)
 
