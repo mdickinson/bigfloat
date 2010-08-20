@@ -127,13 +127,8 @@ formats are predefined::
 Links
 -----
 
-For the full documentation, see:
-
-   http://packages.python.org/bigfloat/
-
-Project homepage:
-
-    http://bitbucket.org/dickinsm/bigfloat/
+* `Package documentation <http://packages.python.org/bigfloat/>`_
+* `Project homepage at bitbucket <http://bitbucket.org/dickinsm/bigfloat/>`_
 
 
 """
