@@ -18,6 +18,17 @@ Library
 - Relicense under LGPL, since this package might be considered a
   derived work of MPFR.
 
+
+Tests
+-----
+
+- Skip the hashing consistency tests (those that test whether hash(n)
+  == hash(BigFloat(n) for integers n) on Python 2.5.  In rare cases,
+  this equality fails with Python 2.5, and this is awkward to fix.  If
+  this affects you, upgrade to Python 2.6 or avoid mixing BigFloat
+  instances with ints in sets or dictionary keys.
+
+
 What's new in bigfloat 0.1.2?
 =============================
 
