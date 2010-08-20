@@ -1,0 +1,47 @@
+Steps to make a release of this package
+=======================================
+
+* Update the version number in setup.py.
+
+* Update the version and release information in bigfloat/doc/conf.py
+
+* Tag the release.  (hg tag v0.2.1)
+
+* Create the distribution with
+
+    make dist
+
+* Upload to PyPI with:
+
+    make upload
+
+This requires being identified with the server, e.g., with
+
+    python2.7 setup.py register
+
+
+Later: make sure that the newly uploaded package is visible.
+
+Now the documentation needs to be updated.
+This requires a .zip file that's
+unpacked into the relevant URL.  The zip file must have a top-level
+file called 'index.html'.
+
+According to the upload page, only static versions of the
+documentation can be uploaded.  However, uploading the entire docs,
+including the javascript, seems to work.
+
+To create the documentation:
+
+    make doc
+    cd bigfloat/docs
+    zip -r docs.zip *
+    
+Now the docs.zip file can be uploaded.
+
+To upload documentation:
+
+  - go to pypi.python.org
+  - log in if necessary
+  - click on 'bigfloat' under 'Your packages' at the top right.
+  - Choose File, and Upload Documentation...
