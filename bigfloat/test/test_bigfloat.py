@@ -17,15 +17,55 @@
 
 from __future__ import with_statement # for Python 2.5
 
+import sys
+import __builtin__
 from test.test_support import run_unittest
 import unittest
 import operator
-from bigfloat import *
+
+from bigfloat import (
+    # main class
+    BigFloat,
+
+    # contexts
+    Context,
+
+    # limits on emin, emax and precision
+    EMIN_MIN, EMAX_MAX,
+
+    # context constants...
+    DefaultContext,
+    half_precision, single_precision,
+    double_precision, quadruple_precision,
+    RoundTiesToEven, RoundTowardZero,
+    RoundTowardPositive, RoundTowardNegative,
+
+    # ... and functions
+    IEEEContext, precision,
+
+    # get and set current context
+    getcontext, setcontext,
+
+    # flags
+    Inexact, Overflow, NanFlag, Underflow,
+    set_flagstate, get_flagstate,
+
+    # standard arithmetic functions
+    add, sub, mul, div, mod, pow,
+
+    sqrt, exp, next_up, pos,
+
+    const_pi, const_catalan,
+
+    # tests
+    is_nan, is_inf, is_zero, is_negative, is_finite, is_integer,
+
+    # comparisons
+    lessgreater, unordered,
+)
+
 from bigfloat import _all_flags
 from bigfloat import MPFR_VERSION_MAJOR, MPFR_VERSION_MINOR
-import math
-import sys
-import __builtin__
 
 all_rounding_modes = [RoundTowardZero, RoundTowardNegative,
                       RoundTowardPositive, RoundTiesToEven]
@@ -446,8 +486,6 @@ class BigFloatTests(unittest.TestCase):
         # be too small.  Here we test with strings.)
         too_large = '1e%d' % (EMAX_MAX//3)
         too_small = '1e%d' % (EMIN_MIN//3)
-        too_large_neg = '-1e%d' % (EMAX_MAX//3)
-        too_small_neg = '-1e%d' % (EMIN_MIN//3)
         self.assertRaises(ValueError, BigFloat.exact, too_large, 53)
         self.assertRaises(ValueError, BigFloat.exact, too_small, 53)
 
@@ -1064,7 +1102,7 @@ class ContextTests(unittest.TestCase):
 class FlagTests(unittest.TestCase):
     def test_overflow(self):
         set_flagstate(set())  # clear flags
-        result = exp(BigFloat(1e308))
+        exp(BigFloat(1e308))
         self.assertEqual(get_flagstate(), set([Inexact, Overflow]))
 
 
