@@ -68,7 +68,29 @@ import sys as _sys
 import contextlib as _contextlib
 
 import pympfr as _pympfr
-from pympfr import *
+from pympfr import (
+    # mpfr library, giving access to the various Python-wrapped MPFR functions
+    mpfr,
+
+    # MPFR major and minor version numbers
+    MPFR_VERSION_MAJOR, MPFR_VERSION_MINOR,
+
+    # class implementing the floats themselves (corresponds to mpfr_t)
+    Mpfr,
+
+    # constants giving limits on the precision
+    MPFR_PREC_MIN, MPFR_PREC_MAX,
+
+    # constants giving emin and emax values
+    MPFR_EMIN_DEFAULT, MPFR_EMIN_MAX,
+    MPFR_EMAX_DEFAULT, MPFR_EMAX_MIN,
+
+    # lists of standard functions and predicates
+    standard_functions, predicates, extra_standard_functions,
+
+    # context manager for temporarily changing exponent bounds
+    eminmax,
+)
 
 # builtin abs, max, min and pow functions are shadowed by BigFloat
 # max, min and pow functions later on; keep a copy of the builtin
@@ -491,7 +513,6 @@ def _wrap_standard_function(f, argtypes):
 
 def _wrap_predicate(f):
     def wrapped_f(*args):
-        context = getcontext()
         argtypes = f.argtypes
         if len(args) != len(argtypes):
             raise TypeError("Wrong number of arguments")
