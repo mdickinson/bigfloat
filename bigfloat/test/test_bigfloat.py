@@ -789,6 +789,187 @@ class BigFloatTests(unittest.TestCase):
                 else:
                     self.assertEqual(x, absx)
 
+    def test__format_to_floating_precision(self):
+        # Formatting to precision 1.  We need extra testing for this, since
+        # it's not supported by the MPFR library itself.
+        
+
+        x = BigFloat('9.55')
+        self.assertEqual(
+            x._format_to_floating_precision(1),
+            (False, '1', 1),
+        )
+
+        x = BigFloat('9.7')
+        self.assertEqual(
+            x._format_to_floating_precision(1),
+            (False, '1', 1),
+        )
+
+        # Halfway cases
+        x = BigFloat('-0.5')
+        self.assertEqual(
+            x._format_to_floating_precision(1),
+            (True, '5', -1),
+        )
+        x = BigFloat('-1.5')
+        self.assertEqual(
+            x._format_to_floating_precision(1),
+            (True, '2', 0),
+        )
+        x = BigFloat('-2.5')
+        self.assertEqual(
+            x._format_to_floating_precision(1),
+            (True, '2', 0),
+        )
+        x = BigFloat('-3.5')
+        self.assertEqual(
+            x._format_to_floating_precision(1),
+            (True, '4', 0),
+        )
+        x = BigFloat('0.5')
+        self.assertEqual(
+            x._format_to_floating_precision(1),
+            (False, '5', -1),
+        )
+        x = BigFloat('1.5')
+        self.assertEqual(
+            x._format_to_floating_precision(1),
+            (False, '2', 0),
+        )
+        x = BigFloat('2.5')
+        self.assertEqual(
+            x._format_to_floating_precision(1),
+            (False, '2', 0),
+        )
+        x = BigFloat('3.5')
+        self.assertEqual(
+            x._format_to_floating_precision(1),
+            (False, '4', 0),
+        )
+
+    def test__format_to_fixed_precision(self):
+        # Zeros
+        x = BigFloat('0')
+        self.assertEqual(
+            x._format_to_fixed_precision(5),
+            (False, '0', -5),
+        )
+
+        x = BigFloat('-0')
+        self.assertEqual(
+            x._format_to_fixed_precision(-3),
+            (True, '0', 3),
+        )
+
+        # Specials
+        x = BigFloat('Infinity')
+        self.assertEqual(
+            x._format_to_fixed_precision(5),
+            (False, 'Infinity', None),
+        )
+        x = BigFloat('-Infinity')
+        self.assertEqual(
+            x._format_to_fixed_precision(5),
+            (True, 'Infinity', None),
+        )
+        x = BigFloat('NaN')
+        self.assertEqual(
+            x._format_to_fixed_precision(5),
+            (False, 'NaN', None),
+        )
+
+        x = BigFloat('4567.892391555555')
+        self.assertEqual(
+            x._format_to_fixed_precision(5),
+            (False, '456789239', -5),
+        )
+
+        x = BigFloat('-0.000123456')
+        self.assertEqual(
+            x._format_to_fixed_precision(10),
+            (True, '1234560', -10),
+        )
+        self.assertEqual(
+            x._format_to_fixed_precision(6),
+            (True, '123', -6),
+        )
+        self.assertEqual(
+            x._format_to_fixed_precision(5),
+            (True, '12', -5),
+        )
+
+        self.assertEqual(
+            x._format_to_fixed_precision(4),
+            (True, '1', -4),
+        )
+
+        self.assertEqual(
+            x._format_to_fixed_precision(3),
+            (True, '0', -3),
+        )
+
+        # Cases where we end up computing zero significant digits.
+        self.assertEqual(
+            BigFloat('0.0999999999')._format_to_fixed_precision(0),
+            (False, '0', 0),
+        )
+        self.assertEqual(
+            BigFloat('0.1000000001')._format_to_fixed_precision(0),
+            (False, '0', 0),
+        )
+        self.assertEqual(
+            BigFloat('0.499999999')._format_to_fixed_precision(0),
+            (False, '0', 0),
+        )
+        self.assertEqual(
+            BigFloat('0.5')._format_to_fixed_precision(0),
+            (False, '0', 0),
+        )
+        self.assertEqual(
+            BigFloat('0.500000001')._format_to_fixed_precision(0),
+            (False, '1', 0),
+        )
+        self.assertEqual(
+            BigFloat('0.9')._format_to_fixed_precision(0),
+            (False, '1', 0),
+        )
+        self.assertEqual(
+            BigFloat('0.99')._format_to_fixed_precision(0),
+            (False, '1', 0),
+        )
+        self.assertEqual(
+            BigFloat('0.999999999')._format_to_fixed_precision(0),
+            (False, '1', 0),
+        )
+
+
+
+        # Values close to powers of 10; checking exponent calculation
+        x = BigFloat('1.000000000001')
+        self.assertEqual(
+            x._format_to_fixed_precision(3),
+            (False, '1000', -3),
+        )
+
+        x = BigFloat('0.999999999999')
+        self.assertEqual(
+            x._format_to_fixed_precision(3),
+            (False, '1000', -3),
+        )
+
+        x = BigFloat('1.0000000000000001')
+        self.assertEqual(
+            x._format_to_fixed_precision(3),
+            (False, '1000', -3),
+        )
+
+        x = BigFloat('0.9999999999999999')
+        self.assertEqual(
+            x._format_to_fixed_precision(3),
+            (False, '1000', -3),
+        )
+
 
 class ContextTests(unittest.TestCase):
     def setUp(self):

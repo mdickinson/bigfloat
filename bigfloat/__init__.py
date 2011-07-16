@@ -802,6 +802,148 @@ class BigFloat(object):
         return "BigFloat.exact('%s', precision=%d)" % (
             str(self), self.precision)
 
+    def _format_to_precision_one(self):
+        """ Format 'self' to one significant figure.
+
+        This is a special case of _format_to_floating_precision, made necessary
+        because the mpfr_get_str function doesn't support passing a precision
+        smaller than 2 (according to the docs), so we need some trickery to
+        make this work.
+
+        Rounding is always round-to-nearest.
+        """
+
+        # Start by formatting to 2 digits; we'll then truncate to one digit,
+        # rounding appropriately.
+        sign, digits, exp = mpfr.mpfr_get_str2(
+            self._value, 10, 2, 'RoundTowardNegative'
+        )
+
+        # If the last digit is 5, we can't tell which way to round; instead,
+        # recompute with the opposite rounding direction, and round based on
+        # the result of that.
+        if digits[-1] == '5':
+            sign, digits, exp = mpfr.mpfr_get_str2(
+                self._value, 10, 2, 'RoundTowardPositive'
+            )
+
+        if digits[-1] in '01234':
+            round_up = False
+        elif digits[-1] in '6789':
+            round_up = True
+        else:
+            # Halfway case: round to even.
+            round_up = digits[-2] in '13579'
+
+        digits = digits[:-1]
+        if round_up:
+            digits = str(int(digits) + 1)
+            if len(digits) == 2:
+                assert digits[-1] == '0'
+                digits = digits[:-1]
+                exp += 1
+        return sign, digits, exp - 1
+
+    def _format_to_floating_precision(self, precision):
+        """ Format a nonzero finite BigFloat instance to a given number of
+        significant digits.
+
+        Returns a triple (negative, digits, exp) where:
+
+          - negative is a boolean, True for a negative number, else False
+          - digits is a string giving the digits of the output
+          - exp represents the exponent of the output,
+
+        The normalization of the exponent is such that <digits>E<exp>
+        represents the decimal approximation to self.
+
+        Rounding is always round-to-nearest.
+        """
+        if precision <= 0:
+            raise ValueError("precision argument should be at least 1")
+
+        if precision == 1:
+            return self._format_to_precision_one()
+
+        sign, digits, exp = mpfr.mpfr_get_str2(
+            self._value, 10, precision, 'RoundTiesToEven'
+        )
+
+        return sign, digits, exp - len(digits)
+
+    def _format_to_fixed_precision(self, precision):
+        """ Format 'self' to a given number of digits after the decimal point.
+
+        Returns a triple (negative, digits, exp) where:
+
+          - negative is a boolean, True for a negative number, else False
+          - digits is a string giving the digits of the output
+          - exp represents the exponent of the output
+
+        The normalization of the exponent is such that <digits>E<exp>
+        represents the decimal approximation to self.
+
+        """
+        # MPFR only provides functions to format to a given number of
+        # significant digits.  So we must:
+        #
+        #   (1) Identify an e such that 10**(e-1) <= abs(x) < 10**e.
+        #
+        #   (2) Determine the number of significant digits required, and format
+        #       to that number of significant digits.
+        #
+        #   (3) Adjust output if necessary if it's been rounded up to 10**e.
+
+        # Zeros
+        if is_zero(self):
+            return is_negative(self), '0', -precision
+
+        # Specials
+        if is_inf(self):
+            return is_negative(self), 'Infinity', None
+
+        if is_nan(self):
+            return is_negative(self), 'NaN', None
+
+        # Figure out the exponent by making a call to get_str2.  exp satisfies
+        # 10**(exp-1) <= self < 10**exp
+        _, _, exp = mpfr.mpfr_get_str2(self._value, 10, 2, 'RoundTowardZero')
+
+        sig_figs = exp + precision
+
+        if sig_figs < 0:
+            sign = self._sign()
+            return sign, '0', -precision
+
+        elif sig_figs == 0:
+            # Ex: 0.1 <= x < 1.0, rounding x to nearest multiple of 1.0.
+            # Or: 100.0 <= x < 1000.0, rounding x to nearest multiple of 1000.0
+            sign, digits, new_exp = mpfr.mpfr_get_str2(
+                self._value, 10, 2, 'RoundTowardNegative'
+            )
+            if int(digits) == 50:
+                # Halfway case
+                sign, digits, new_exp = mpfr.mpfr_get_str2(
+                    self._value, 10, 2, 'RoundTowardPositive'
+                )
+
+            digits = '1' if int(digits) > 50 or new_exp == exp + 1 else '0'
+            return sign, digits, -precision
+
+        negative, digits, new_exp = self._format_to_floating_precision(
+            sig_figs
+        )
+
+        # It's possible that the rounding up involved changes the exponent;
+        # in that case we have to adjust the digits accordingly.  The only
+        # possibility should be that new_exp == exp + 1.
+        if new_exp + len(digits) != exp:
+            assert new_exp + len(digits) == exp + 1
+            digits += '0'
+
+        return negative, digits, -precision
+
+
     def __hash__(self):
         # if self is exactly representable as a float, then its hash
         # should match that of the float.  Note that this covers the
