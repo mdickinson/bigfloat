@@ -736,6 +736,28 @@ class BigFloatTests(unittest.TestCase):
             self.assertEqual(BigFloat('7.4e-324'), pow(2, -1074))
             self.assertEqual(BigFloat('7.5e-324'), pow(2, -1073))
 
+    def test_copy_abs(self):
+        x = BigFloat.exact('1234091801830413840192384102394810329481324.3', precision=200)
+        neg_x = BigFloat.exact('-1234091801830413840192384102394810329481324.3', precision=200)
+        self.assertEqual(x.copy_abs(), x)
+        self.assertEqual(neg_x.copy_abs(), x)
+
+        inf = BigFloat('infinity')
+        ninf = BigFloat('-infinity')
+        self.assertEqual(inf.copy_abs(), inf)
+        self.assertEqual(ninf.copy_abs(), inf)
+
+    def test_copy_neg(self):
+        x = BigFloat.exact('1234091801830413840192384102394810329481324.3', precision=200)
+        neg_x = BigFloat.exact('-1234091801830413840192384102394810329481324.3', precision=200)
+        self.assertEqual(x.copy_neg(), neg_x)
+        self.assertEqual(neg_x.copy_neg(), x)
+
+        inf = BigFloat('infinity')
+        ninf = BigFloat('-infinity')
+        self.assertEqual(inf.copy_neg(), ninf)
+        self.assertEqual(ninf.copy_neg(), inf)
+
     def test_unary_operations(self):
         # test __pos__, __neg__ and __abs__
 

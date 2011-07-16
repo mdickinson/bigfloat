@@ -716,6 +716,29 @@ class BigFloat(object):
         else:
             assert False, "shouldn't ever get here"
 
+    def copy_neg(self):
+        """ Return a copy of self with the opposite sign bit.
+
+        Unlike -self, this does not make use of the context:  the result
+        has the same precision as the original.
+
+        """
+        result = Mpfr(self.precision)
+        new_sign = not self._sign()
+        mpfr.mpfr_setsign(result, self._value, new_sign, 'RoundTiesToEven')
+        return BigFloat._from_Mpfr(result)
+
+    def copy_abs(self):
+        """ Return a copy of self with the sign bit unset.
+
+        Unlike abs(self), this does not make use of the context: the result
+        has the same precision as the original.
+
+        """
+        result = Mpfr(self.precision)
+        mpfr.mpfr_setsign(result, self._value, False, 'RoundTiesToEven')
+        return BigFloat._from_Mpfr(result)
+
     def hex(self):
         """Return a hexadecimal representation of a BigFloat."""
 
