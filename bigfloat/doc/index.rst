@@ -556,6 +556,20 @@ zero, and NaNs.
       If self is an infinity or nan then ValueError is raised.
       Negative and positive zero are both converted to (0, 1).
 
+   .. method:: copy_abs(self)
+
+      Return a copy of *self* with the sign bit unset.
+
+      In contrast to ``abs(self)``, ``self.copy_abs()`` makes no use of the
+      context, and the result has the same precision as the original.
+      
+   .. method:: copy_neg(self)
+
+      Return a copy of *self* with the opposite sign bit.
+
+      In constract to ``neg(self)``, ``self.copy_neg()`` makes no use of the
+      context, and the result has the same precision as the original.
+
    .. method:: exact(cls, value, precision=None)
 
       A class method to construct a new :class:`BigFloat` instance
