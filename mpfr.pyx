@@ -61,7 +61,8 @@ cdef class Mpfr:
         c_mpfr_init2(self._value, precision)
 
     def __dealloc__(self):
-        c_mpfr_clear(self._value)
+        if self._value._mpfr_d != NULL:
+            c_mpfr_clear(self._value)
 
 
 def mpfr_get_str(Mpfr op not None, int b = 10, mpfr_rnd_t rnd = MPFR_RNDN):

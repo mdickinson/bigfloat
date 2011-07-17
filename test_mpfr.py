@@ -14,6 +14,17 @@ from mpfr import (
 
 
 class TestMpfr(unittest.TestCase):
+    def test_bad_constructor(self):
+        with self.assertRaises(TypeError):
+            Mpfr()
+
+        with self.assertRaises(TypeError):
+            Mpfr("not a number")
+
+        with self.assertRaises(TypeError):
+            Mpfr(10, 11)
+
+
     def test_none_argument(self):
         with self.assertRaises(TypeError):
             mpfr_const_pi(None, 0)
