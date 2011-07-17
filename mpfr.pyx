@@ -1,19 +1,16 @@
-cdef extern from "gmp.h":
-    # GMP type declarations
-    ctypedef int mp_exp_t
-    ctypedef unsigned int mp_limb_t
+cimport cgmp
 
 cdef extern from "mpfr.h":
     # MPFR type declarations
     ctypedef int mpfr_prec_t
     ctypedef int mpfr_sign_t
-    ctypedef mp_exp_t mpfr_exp_t
+    ctypedef cgmp.mp_exp_t mpfr_exp_t
 
     ctypedef struct __mpfr_struct:
         mpfr_prec_t _mpfr_prec
         mpfr_sign_t _mpfr_sign
         mpfr_exp_t  _mpfr_exp
-        mp_limb_t   *_mpfr_d
+        cgmp.mp_limb_t   *_mpfr_d
 
     ctypedef __mpfr_struct mpfr_t[1]
 
