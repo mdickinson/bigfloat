@@ -10,6 +10,7 @@ from mpfr import (
     mpfr_get_str,
     mpfr_set,
     mpfr_set_d,
+    mpfr_set_str,
 )
 
 
@@ -53,6 +54,19 @@ class TestMpfr(unittest.TestCase):
         self.assertEqual(
             mpfr_get_str(x, 10, MPFR_RNDN),
             ('99999999977', -1),
+        )
+
+    def test_set_str(self):
+        x = Mpfr(30)
+        mpfr_set_str(x, '1.2345', 10, MPFR_RNDU)
+        self.assertEqual(
+            mpfr_get_str(x, 10, MPFR_RNDN),
+            ('12345000003', 1),
+        )
+        mpfr_set_str(x, '1.2345', 10, MPFR_RNDD)
+        self.assertEqual(
+            mpfr_get_str(x, 10, MPFR_RNDN),
+            ('12344999984', 1),
         )
 
     def test_rounding_modes(self):
