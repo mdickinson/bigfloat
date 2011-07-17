@@ -79,10 +79,16 @@ class TestMpfr(unittest.TestCase):
             mpfr_get_str(x, 10, MPFR_RNDN),
             ('12344999984', 1),
         )
+        # Invalid base
+        with self.assertRaises(ValueError):
+            mpfr_set_str(x, '1.2345', 1, MPFR_RNDN)
+        with self.assertRaises(ValueError):
+            mpfr_set_str(x, '1.2345', 63, MPFR_RNDN)
 
     def test_get_str(self):
         x = Mpfr(20)
         mpfr_const_pi(x, MPFR_RNDN)
+        # Invalid base
         with self.assertRaises(ValueError):
             print mpfr_get_str(x, 1, MPFR_RNDN)
         with self.assertRaises(ValueError):
