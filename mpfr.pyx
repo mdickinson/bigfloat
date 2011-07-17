@@ -65,7 +65,7 @@ cdef class Mpfr:
             c_mpfr_clear(self._value)
 
 
-def mpfr_get_str(Mpfr op not None, int b = 10, mpfr_rnd_t rnd = MPFR_RNDN):
+def mpfr_get_str(Mpfr op not None, int b, mpfr_rnd_t rnd):
     """ Compute a base 'b' string representation for 'op'.
 
     'rnd' gives the rounding mode to use.
@@ -76,6 +76,9 @@ def mpfr_get_str(Mpfr op not None, int b = 10, mpfr_rnd_t rnd = MPFR_RNDN):
         exp is the exponent
 
     The exponent is normalized so that 0.<digits>E<exp> approximates 'op'.
+
+    Note that the signature of this function does not match that of the
+    underlying MPFR function call.
 
     """
     cdef mpfr_exp_t exp

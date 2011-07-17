@@ -27,13 +27,13 @@ class TestMpfr(unittest.TestCase):
 
     def test_none_argument(self):
         with self.assertRaises(TypeError):
-            mpfr_const_pi(None, 0)
+            mpfr_const_pi(None, MPFR_RNDN)
 
     def test_const_pi(self):
         pi = Mpfr(10)
         mpfr_const_pi(pi, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_str(pi),
+            mpfr_get_str(pi, 10, MPFR_RNDN),
             ('31406', 1),
         )
 
@@ -43,15 +43,15 @@ class TestMpfr(unittest.TestCase):
         mpfr_const_pi(x, MPFR_RNDN)
         mpfr_set(y, x, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_str(x),
-            mpfr_get_str(y),
+            mpfr_get_str(x, 10, MPFR_RNDN),
+            mpfr_get_str(y, 10, MPFR_RNDN),
         )
 
     def test_set_d(self):
         x = Mpfr(30)
         mpfr_set_d(x, 0.1, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_str(x),
+            mpfr_get_str(x, 10, MPFR_RNDN),
             ('99999999977', -1),
         )
 
