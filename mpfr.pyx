@@ -27,6 +27,10 @@ cdef extern from "mpfr.h":
         C_MPFR_RNDF "MPFR_RNDF"
         C_MPFR_RNDNA "MPFR_RNDNA" = -1
 
+    # Limits
+    int C_MPFR_PREC_MIN "MPFR_PREC_MIN"
+    int C_MPFR_PREC_MAX "MPFR_PREC_MAX"
+
     # MPFR function definitions
     void c_mpfr_init2 "mpfr_init2" (mpfr_t x, mpfr_prec_t prec)
     void c_mpfr_clear "mpfr_clear" (mpfr_t x)
@@ -47,6 +51,10 @@ cdef extern from "mpfr.h":
     int c_mpfr_const_pi "mpfr_const_pi" (mpfr_t rop, mpfr_rnd_t rnd)
 
 
+# Make precision limits available to Python
+MPFR_PREC_MIN = C_MPFR_PREC_MIN
+MPFR_PREC_MAX = C_MPFR_PREC_MAX
+
 # Make rounding mode values available to Python
 MPFR_RNDN =  C_MPFR_RNDN
 MPFR_RNDZ =  C_MPFR_RNDZ
@@ -57,11 +65,26 @@ MPFR_RNDF =  C_MPFR_RNDF
 MPFR_RNDNA =  C_MPFR_RNDNA
 
 
+cdef check_base(int b):
+    if not 2 <= b <= 62:
+        raise ValueError("base should be in the range 2 to 62 (inclusive)")
+
+
+cdef check_precision(int precision):
+    if not MPFR_PREC_MIN <= precision <= MPFR_PREC_MAX:
+        raise ValueError(
+            "precision should be between {} and {}".format(
+                MPFR_PREC_MIN, MPFR_PREC_MAX
+            )
+        )
+
+
 cdef class Mpfr:
     """ Mutable arbitrary-precision floating-point type. """
     cdef mpfr_t _value
 
     def __cinit__(self, precision):
+        check_precision(precision)
         c_mpfr_init2(self._value, precision)
 
     def __dealloc__(self):
@@ -71,6 +94,8 @@ cdef class Mpfr:
 
 def mpfr_get_str(Mpfr op not None, int b, mpfr_rnd_t rnd):
     """ Compute a base 'b' string representation for 'op'.
+
+    'b' should be an integer between 2 and 62 (inclusive).
 
     'rnd' gives the rounding mode to use.
 
@@ -87,6 +112,8 @@ def mpfr_get_str(Mpfr op not None, int b, mpfr_rnd_t rnd):
     """
     cdef mpfr_exp_t exp
     cdef bytes digits
+
+    check_base(b)
 
     c_digits = c_mpfr_get_str(NULL, &exp, 10, 0, op._value, rnd)
     if c_digits == NULL:

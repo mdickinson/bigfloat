@@ -25,6 +25,14 @@ class TestMpfr(unittest.TestCase):
         with self.assertRaises(TypeError):
             Mpfr(10, 11)
 
+        with self.assertRaises(ValueError):
+            Mpfr(1)
+
+    def test_constructor(self):
+        x = Mpfr(10)
+        self.assertIsInstance(x, Mpfr)
+        y = Mpfr(20L)
+        self.assertIsInstance(y, Mpfr)
 
     def test_none_argument(self):
         with self.assertRaises(TypeError):
@@ -68,6 +76,15 @@ class TestMpfr(unittest.TestCase):
             mpfr_get_str(x, 10, MPFR_RNDN),
             ('12344999984', 1),
         )
+
+    def test_get_str(self):
+        x = Mpfr(20)
+        mpfr_const_pi(x, MPFR_RNDN)
+        with self.assertRaises(ValueError):
+            print mpfr_get_str(x, 1, MPFR_RNDN)
+        with self.assertRaises(ValueError):
+            print mpfr_get_str(x, 63, MPFR_RNDN)
+
 
     def test_rounding_modes(self):
         self.assertEqual(MPFR_RNDN, 0)
