@@ -25,7 +25,7 @@ cdef check_base(int b):
         raise ValueError("base should be in the range 2 to 62 (inclusive)")
 
 
-cdef check_precision(int precision):
+cdef check_precision(cmpfr.mpfr_prec_t precision):
     if not MPFR_PREC_MIN <= precision <= MPFR_PREC_MAX:
         raise ValueError(
             "precision should be between {} and {}".format(
