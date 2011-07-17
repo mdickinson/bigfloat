@@ -16,6 +16,7 @@ MPFR_RNDNA =  cmpfr.MPFR_RNDNA
 
 # Checks for valid parameter ranges
 cdef check_rounding_mode(cmpfr.mpfr_rnd_t rnd):
+    # MPFR_RNDF not implemented yet; MPFR_RNDNA should not be used.
     if not MPFR_RNDN <= rnd <= MPFR_RNDA:
         raise ValueError("invalid rounding mode {}".format(rnd))
 
@@ -23,6 +24,11 @@ cdef check_rounding_mode(cmpfr.mpfr_rnd_t rnd):
 cdef check_base(int b):
     if not 2 <= b <= 62:
         raise ValueError("base should be in the range 2 to 62 (inclusive)")
+
+
+cdef check_get_str_n(size_t n):
+    if not (n == 0 or 2 <= n):
+        raise ValueError("n should be either 0 or at least 2")    
 
 
 cdef check_precision(cmpfr.mpfr_prec_t precision):
@@ -47,7 +53,7 @@ cdef class Mpfr:
             cmpfr.mpfr_clear(self._value)
 
 
-def mpfr_get_str(Mpfr op not None, int b, cmpfr.mpfr_rnd_t rnd):
+def mpfr_get_str(int b, size_t n, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
     """ Compute a base 'b' string representation for 'op'.
 
     'b' should be an integer between 2 and 62 (inclusive).
@@ -69,11 +75,14 @@ def mpfr_get_str(Mpfr op not None, int b, cmpfr.mpfr_rnd_t rnd):
     cdef bytes digits
 
     check_base(b)
+    check_get_str_n(n)
     check_rounding_mode(rnd)
-    c_digits = cmpfr.mpfr_get_str(NULL, &exp, b, 0, op._value, rnd)
+    c_digits = cmpfr.mpfr_get_str(NULL, &exp, b, n, op._value, rnd)
     if c_digits == NULL:
         raise RuntimeError("Error during string conversion.")
 
+    # It's possible for the conversion from c_digits to digits to raise, so use
+    # a try-finally block to ensure that c_digits always gets freed.
     try:
         digits = str(c_digits)
     finally:

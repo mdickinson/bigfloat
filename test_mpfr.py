@@ -42,7 +42,7 @@ class TestMpfr(unittest.TestCase):
         pi = Mpfr(10)
         mpfr_const_pi(pi, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_str(pi, 10, MPFR_RNDN),
+            mpfr_get_str(10, 0, pi, MPFR_RNDN),
             ('31406', 1),
         )
 
@@ -52,8 +52,8 @@ class TestMpfr(unittest.TestCase):
         mpfr_const_pi(x, MPFR_RNDN)
         mpfr_set(y, x, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_str(x, 10, MPFR_RNDN),
-            mpfr_get_str(y, 10, MPFR_RNDN),
+            mpfr_get_str(10, 0, x, MPFR_RNDN),
+            mpfr_get_str(10, 0, y, MPFR_RNDN),
         )
         # Invalid rounding mode.
         with self.assertRaises(ValueError):
@@ -63,7 +63,7 @@ class TestMpfr(unittest.TestCase):
         x = Mpfr(30)
         mpfr_set_d(x, 0.1, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_str(x, 10, MPFR_RNDN),
+            mpfr_get_str(10, 0, x, MPFR_RNDN),
             ('99999999977', -1),
         )
 
@@ -71,12 +71,12 @@ class TestMpfr(unittest.TestCase):
         x = Mpfr(30)
         mpfr_set_str(x, '1.2345', 10, MPFR_RNDU)
         self.assertEqual(
-            mpfr_get_str(x, 10, MPFR_RNDN),
+            mpfr_get_str(10, 0, x, MPFR_RNDN),
             ('12345000003', 1),
         )
         mpfr_set_str(x, '1.2345', 10, MPFR_RNDD)
         self.assertEqual(
-            mpfr_get_str(x, 10, MPFR_RNDN),
+            mpfr_get_str(10, 0, x, MPFR_RNDN),
             ('12344999984', 1),
         )
         # Invalid base
@@ -91,27 +91,27 @@ class TestMpfr(unittest.TestCase):
 
         # Invalid base
         with self.assertRaises(ValueError):
-            print mpfr_get_str(x, 1, MPFR_RNDN)
+            print mpfr_get_str(1, 0, x, MPFR_RNDN)
         with self.assertRaises(ValueError):
-            print mpfr_get_str(x, 63, MPFR_RNDN)
+            print mpfr_get_str(63, 0, x, MPFR_RNDN)
 
         # Bases other than 10
         x = Mpfr(20)
         mpfr_set_str(x, '64', 10, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_str(x, 10, MPFR_RNDN),
+            mpfr_get_str(10, 0, x, MPFR_RNDN),
             ('64000000', 2),
         )
         self.assertEqual(
-            mpfr_get_str(x, 2, MPFR_RNDN),
+            mpfr_get_str(2, 0, x, MPFR_RNDN),
             ('10000000000000000000', 7),
         )
         self.assertEqual(
-            mpfr_get_str(x, 3, MPFR_RNDN),
+            mpfr_get_str(3, 0, x, MPFR_RNDN),
             ('21010000000000', 4),
         )
         self.assertEqual(
-            mpfr_get_str(x, 62, MPFR_RNDN),
+            mpfr_get_str(62, 0, x, MPFR_RNDN),
             ('12000', 2),
         )
 
