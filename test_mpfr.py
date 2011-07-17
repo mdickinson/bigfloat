@@ -55,6 +55,9 @@ class TestMpfr(unittest.TestCase):
             mpfr_get_str(x, 10, MPFR_RNDN),
             mpfr_get_str(y, 10, MPFR_RNDN),
         )
+        # Invalid rounding mode.
+        with self.assertRaises(ValueError):
+            mpfr_set(y, x, -1)
 
     def test_set_d(self):
         x = Mpfr(30)

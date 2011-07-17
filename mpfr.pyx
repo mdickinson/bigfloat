@@ -65,6 +65,12 @@ MPFR_RNDF =  C_MPFR_RNDF
 MPFR_RNDNA =  C_MPFR_RNDNA
 
 
+# Checks for valid parameter ranges
+cdef check_rounding_mode(mpfr_rnd_t rnd):
+    if not MPFR_RNDN <= rnd <= MPFR_RNDA:
+        raise ValueError("invalid rounding mode {}".format(rnd))
+
+
 cdef check_base(int b):
     if not 2 <= b <= 62:
         raise ValueError("base should be in the range 2 to 62 (inclusive)")
@@ -114,7 +120,7 @@ def mpfr_get_str(Mpfr op not None, int b, mpfr_rnd_t rnd):
     cdef bytes digits
 
     check_base(b)
-
+    check_rounding_mode(rnd)
     c_digits = c_mpfr_get_str(NULL, &exp, 10, 0, op._value, rnd)
     if c_digits == NULL:
         raise RuntimeError("Error during string conversion.")
@@ -128,13 +134,18 @@ def mpfr_get_str(Mpfr op not None, int b, mpfr_rnd_t rnd):
 
 
 def mpfr_const_pi(Mpfr rop not None, mpfr_rnd_t rnd):
+    check_rounding_mode(rnd)
     return c_mpfr_const_pi(rop._value, rnd)
 
 def mpfr_set(Mpfr rop not None, Mpfr op not None, mpfr_rnd_t rnd):
+    check_rounding_mode(rnd)
     return c_mpfr_set(rop._value, op._value, rnd)
 
 def mpfr_set_d(Mpfr rop not None, double op, mpfr_rnd_t rnd):
+    check_rounding_mode(rnd)
     return c_mpfr_set_d(rop._value, op, rnd)
 
 def mpfr_set_str(Mpfr rop not None, bytes s, int base, mpfr_rnd_t rnd):
+    check_base(base)
+    check_rounding_mode(rnd)
     return c_mpfr_set_str(rop._value, s, base, rnd)
