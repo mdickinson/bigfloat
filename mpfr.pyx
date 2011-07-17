@@ -18,13 +18,13 @@ cdef extern from "mpfr.h":
     ctypedef __mpfr_struct mpfr_t[1]
 
     ctypedef enum mpfr_rnd_t:
-        MPFR_RNDN = 0
-        MPFR_RNDZ
-        MPFR_RNDU
-        MPFR_RNDD
-        MPFR_RNDA
-        MPFR_RNDF
-        MPFR_RNDNA = -1
+        C_MPFR_RNDN "MPFR_RNDN" = 0
+        C_MPFR_RNDZ "MPFR_RNDZ"
+        C_MPFR_RNDU "MPFR_RNDU"
+        C_MPFR_RNDD "MPFR_RNDD"
+        C_MPFR_RNDA "MPFR_RNDA"
+        C_MPFR_RNDF "MPFR_RNDF"
+        C_MPFR_RNDNA "MPFR_RNDNA" = -1
 
     # MPFR function definitions
     void c_mpfr_init2 "mpfr_init2" (mpfr_t x, mpfr_prec_t prec)
@@ -39,6 +39,15 @@ cdef extern from "mpfr.h":
 
     int c_mpfr_const_pi "mpfr_const_pi" (mpfr_t rop, mpfr_rnd_t rnd)
 
+
+# Make rounding mode values available to Python
+MPFR_RNDN =  C_MPFR_RNDN
+MPFR_RNDZ =  C_MPFR_RNDZ
+MPFR_RNDU =  C_MPFR_RNDU
+MPFR_RNDD =  C_MPFR_RNDD
+MPFR_RNDA =  C_MPFR_RNDA
+MPFR_RNDF =  C_MPFR_RNDF
+MPFR_RNDNA =  C_MPFR_RNDNA
 
 
 cdef class Mpfr:
