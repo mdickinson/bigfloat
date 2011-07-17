@@ -30,6 +30,8 @@ cdef extern from "mpfr.h":
     # MPFR function definitions
     void c_mpfr_init2 "mpfr_init2" (mpfr_t x, mpfr_prec_t prec)
     void c_mpfr_clear "mpfr_clear" (mpfr_t x)
+    int c_mpfr_set "mpfr_set" (mpfr_t rop, mpfr_t op, mpfr_rnd_t rnd)
+    int c_mpfr_set_d "mpfr_set_d" (mpfr_t rop, double op, mpfr_rnd_t rnd)
 
     char * c_mpfr_get_str "mpfr_get_str" (
         char *str, mpfr_exp_t *expptr, int b,
@@ -92,3 +94,9 @@ def mpfr_get_str(Mpfr op not None, int b = 10, mpfr_rnd_t rnd = MPFR_RNDN):
 
 def mpfr_const_pi(Mpfr rop not None, mpfr_rnd_t rnd):
     return c_mpfr_const_pi(rop._value, rnd)
+
+def mpfr_set(Mpfr rop not None, Mpfr op not None, mpfr_rnd_t rnd):
+    return c_mpfr_set(rop._value, op._value, rnd)
+
+def mpfr_set_d(Mpfr rop not None, double op, mpfr_rnd_t rnd):
+    return c_mpfr_set_d(rop._value, op, rnd)
