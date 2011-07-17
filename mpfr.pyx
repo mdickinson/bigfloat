@@ -121,7 +121,7 @@ def mpfr_get_str(Mpfr op not None, int b, mpfr_rnd_t rnd):
 
     check_base(b)
     check_rounding_mode(rnd)
-    c_digits = c_mpfr_get_str(NULL, &exp, 10, 0, op._value, rnd)
+    c_digits = c_mpfr_get_str(NULL, &exp, b, 0, op._value, rnd)
     if c_digits == NULL:
         raise RuntimeError("Error during string conversion.")
 

@@ -88,12 +88,32 @@ class TestMpfr(unittest.TestCase):
     def test_get_str(self):
         x = Mpfr(20)
         mpfr_const_pi(x, MPFR_RNDN)
+
         # Invalid base
         with self.assertRaises(ValueError):
             print mpfr_get_str(x, 1, MPFR_RNDN)
         with self.assertRaises(ValueError):
             print mpfr_get_str(x, 63, MPFR_RNDN)
 
+        # Bases other than 10
+        x = Mpfr(20)
+        mpfr_set_str(x, '64', 10, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_str(x, 10, MPFR_RNDN),
+            ('64000000', 2),
+        )
+        self.assertEqual(
+            mpfr_get_str(x, 2, MPFR_RNDN),
+            ('10000000000000000000', 7),
+        )
+        self.assertEqual(
+            mpfr_get_str(x, 3, MPFR_RNDN),
+            ('21010000000000', 4),
+        )
+        self.assertEqual(
+            mpfr_get_str(x, 62, MPFR_RNDN),
+            ('12000', 2),
+        )
 
     def test_rounding_modes(self):
         self.assertEqual(MPFR_RNDN, 0)
