@@ -26,6 +26,7 @@ cdef extern from "mpfr.h":
         MPFR_RNDF
         MPFR_RNDNA = -1
 
+    # MPFR function definitions
     void c_mpfr_init2 "mpfr_init2" (mpfr_t x, mpfr_prec_t prec)
     void c_mpfr_clear "mpfr_clear" (mpfr_t x)
 
@@ -81,20 +82,3 @@ def mpfr_get_str(Mpfr op not None, int b = 10, mpfr_rnd_t rnd = MPFR_RNDN):
 
 def mpfr_const_pi(Mpfr rop not None, mpfr_rnd_t rnd):
     return c_mpfr_const_pi(rop._value, rnd)
-
-
-def compute_pi(n):
-    """ Return a string representation of pi, computed to n bits. """
-
-    cdef Mpfr pi
-    cdef mpfr_exp_t exp
-    cdef char* pistr
-    cdef bytes return_str
-
-    # Create a new Mpfr instance to hold the result.
-    pi = Mpfr(n)
-
-    # Put pi into it.
-    mpfr_const_pi(pi, MPFR_RNDN)
-
-    return mpfr_get_str(pi)
