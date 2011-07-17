@@ -95,9 +95,19 @@ class TestMpfr(unittest.TestCase):
         with self.assertRaises(ValueError):
             print mpfr_get_str(63, 0, x, MPFR_RNDN)
 
+        # Invalid number of digits
+        with self.assertRaises(ValueError):
+            print mpfr_get_str(10, 1, x, MPFR_RNDN)
+        with self.assertRaises((ValueError, OverflowError)):
+            print mpfr_get_str(10, -1, x, MPFR_RNDN)
+
         # Bases other than 10
         x = Mpfr(20)
         mpfr_set_str(x, '64', 10, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_str(10, 2, x, MPFR_RNDN),
+            ('64', 2),
+        )
         self.assertEqual(
             mpfr_get_str(10, 0, x, MPFR_RNDN),
             ('64000000', 2),
