@@ -1,10 +1,10 @@
-# GMP type declarations
 cdef extern from "gmp.h":
+    # GMP type declarations
     ctypedef int mp_exp_t
     ctypedef unsigned int mp_limb_t
 
-# MPFR type declarations
 cdef extern from "mpfr.h":
+    # MPFR type declarations
     ctypedef int mpfr_prec_t
     ctypedef int mpfr_sign_t
     ctypedef mp_exp_t mpfr_exp_t
@@ -17,6 +17,7 @@ cdef extern from "mpfr.h":
 
     ctypedef __mpfr_struct mpfr_t[1]
 
+    # MPFR rounding modes
     ctypedef enum mpfr_rnd_t:
         C_MPFR_RNDN "MPFR_RNDN" = 0
         C_MPFR_RNDZ "MPFR_RNDZ"
