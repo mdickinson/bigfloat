@@ -13,6 +13,10 @@ MPFR_RNDA =  cmpfr.MPFR_RNDA
 MPFR_RNDF =  cmpfr.MPFR_RNDF
 MPFR_RNDNA =  cmpfr.MPFR_RNDNA
 
+# Default values for Emax and Emin
+MPFR_EMAX_DEFAULT = cmpfr.MPFR_EMAX_DEFAULT
+MPFR_EMIN_DEFAULT = cmpfr.MPFR_EMIN_DEFAULT
+
 
 # Checks for valid parameter ranges
 cdef check_rounding_mode(cmpfr.mpfr_rnd_t rnd):
@@ -107,3 +111,32 @@ def mpfr_set_str(Mpfr rop not None, bytes s, int base, cmpfr.mpfr_rnd_t rnd):
     check_base(base)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_set_str(rop._value, s, base, rnd)
+
+# Functions for getting exponent bounds.
+def mpfr_get_emin():
+    return cmpfr.mpfr_get_emin()
+
+def mpfr_get_emin_min():
+    return cmpfr.mpfr_get_emin_min()
+
+def mpfr_get_emin_max():
+    return cmpfr.mpfr_get_emin_max()
+
+def mpfr_get_emax():
+    return cmpfr.mpfr_get_emax()
+
+def mpfr_get_emax_min():
+    return cmpfr.mpfr_get_emax_min()
+
+def mpfr_get_emax_max():
+    return cmpfr.mpfr_get_emax_max()
+
+def mpfr_set_emin(cmpfr.mpfr_exp_t exp):
+    # XXX: Check the meaning of the return value;
+    # raise an exception if appropriate.
+    return cmpfr.mpfr_set_emin(exp)
+
+def mpfr_set_emax(cmpfr.mpfr_exp_t exp):
+    # XXX: Check the meaning of the return value;
+    # raise an exception if appropriate.
+    return cmpfr.mpfr_set_emax(exp)    

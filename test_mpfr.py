@@ -11,6 +11,16 @@ from mpfr import (
     mpfr_set,
     mpfr_set_d,
     mpfr_set_str,
+
+    mpfr_get_emin,
+    mpfr_get_emin_min,
+    mpfr_get_emin_max,
+    mpfr_get_emax,
+    mpfr_get_emax_min,
+    mpfr_get_emax_max,
+
+    mpfr_set_emin,
+    mpfr_set_emax,
 )
 
 
@@ -133,6 +143,23 @@ class TestMpfr(unittest.TestCase):
         self.assertIsInstance(MPFR_RNDD, int)
         self.assertIsInstance(MPFR_RNDA, int)
         self.assertIsInstance(MPFR_RNDF, int)
+
+    def test_exponent_bounds(self):
+        # Just exercise the exponent bound functions.
+        self.assertIsInstance(mpfr_get_emin(), (int, long))
+        self.assertIsInstance(mpfr_get_emin_min(), (int, long))
+        self.assertIsInstance(mpfr_get_emin_max(), (int, long))
+        self.assertIsInstance(mpfr_get_emax(), (int, long))
+        self.assertIsInstance(mpfr_get_emax_min(), (int, long))
+        self.assertIsInstance(mpfr_get_emax_max(), (int, long))
+
+        # Setting exponent bounds
+        mpfr_set_emin(-56)
+        self.assertEqual(mpfr_get_emin(), -56)
+
+        mpfr_set_emax(777)
+        self.assertEqual(mpfr_get_emax(), 777)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -25,8 +25,21 @@ cdef extern from "mpfr.h":
         MPFR_RNDNA = -1
 
     # Limits
-    int MPFR_PREC_MIN
-    int MPFR_PREC_MAX
+    mpfr_prec_t MPFR_PREC_MIN
+    mpfr_prec_t MPFR_PREC_MAX
+
+    mpfr_exp_t MPFR_EMIN_DEFAULT
+    mpfr_exp_t MPFR_EMAX_DEFAULT
+
+    # Functions to get and set exponent min and max values.
+    mpfr_exp_t mpfr_get_emin()
+    mpfr_exp_t mpfr_get_emin_min()
+    mpfr_exp_t mpfr_get_emin_max()
+    mpfr_exp_t mpfr_get_emax()
+    mpfr_exp_t mpfr_get_emax_min()
+    mpfr_exp_t mpfr_get_emax_max()
+    int mpfr_set_emin(mpfr_exp_t exp)
+    int mpfr_set_emax(mpfr_exp_t exp)
 
     # MPFR function definitions
     void mpfr_init2(mpfr_t x, mpfr_prec_t prec)
