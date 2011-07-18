@@ -208,6 +208,9 @@ def mpfr_set_emax(cmpfr.mpfr_exp_t exp):
     if error_code:
         raise ValueError("new exponent for emin is outside allowable range")
 
+def mpfr_get_prec(Mpfr x not None):
+    return cmpfr.mpfr_get_prec(x._value)
+
 def mpfr_clear_underflow():
     cmpfr.mpfr_clear_underflow()
 
