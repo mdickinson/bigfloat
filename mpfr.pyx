@@ -250,25 +250,20 @@ def mpfr_erangeflag_p():
 
 def mpfr_equal_p(Mpfr op1 not None, Mpfr op2 not None):
     cdef int result
-    result = cmpfr.mpfr_equal_p(op1._value, op2._value)
-    return bool(result)
+    return bool(cmpfr.mpfr_equal_p(op1._value, op2._value))
 
 def mpfr_less_p(Mpfr op1 not None, Mpfr op2 not None):
     cdef int result
-    result = cmpfr.mpfr_less_p(op1._value, op2._value)
-    return bool(result)
+    return bool(cmpfr.mpfr_less_p(op1._value, op2._value))
 
 def mpfr_lessequal_p(Mpfr op1 not None, Mpfr op2 not None):
     cdef int result
-    result = cmpfr.mpfr_lessequal_p(op1._value, op2._value)
-    return bool(result)
+    return bool(cmpfr.mpfr_lessequal_p(op1._value, op2._value))
 
 def mpfr_greater_p(Mpfr op1 not None, Mpfr op2 not None):
     cdef int result
-    result = cmpfr.mpfr_greater_p(op1._value, op2._value)
-    return bool(result)
+    return bool(cmpfr.mpfr_greater_p(op1._value, op2._value))
 
 def mpfr_greaterequal_p(Mpfr op1 not None, Mpfr op2 not None):
     cdef int result
-    result = cmpfr.mpfr_greaterequal_p(op1._value, op2._value)
-    return bool(result)
+    return bool(cmpfr.mpfr_greaterequal_p(op1._value, op2._value))
