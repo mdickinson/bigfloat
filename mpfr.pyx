@@ -31,9 +31,15 @@ cdef check_rounding_mode(cmpfr.mpfr_rnd_t rnd):
         raise ValueError("invalid rounding mode {}".format(rnd))
 
 
-cdef check_base(int b):
-    if not 2 <= b <= 62:
-        raise ValueError("base should be in the range 2 to 62 (inclusive)")
+cdef check_base(int b, int allow_zero):
+    if allow_zero:
+        if not ((2 <= b <= 62) or (b == 0)):
+            raise ValueError(
+                "base should be zero or in the range 2 to 62 (inclusive)"
+            )
+    else:
+        if not (2 <= b <= 62):
+            raise ValueError("base should be in the range 2 to 62 (inclusive)")
 
 
 cdef check_get_str_n(size_t n):
@@ -84,7 +90,7 @@ def mpfr_get_str(int b, size_t n, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
     cdef cmpfr.mpfr_exp_t exp
     cdef bytes digits
 
-    check_base(b)
+    check_base(b, False)
     check_get_str_n(n)
     check_rounding_mode(rnd)
     c_digits = cmpfr.mpfr_get_str(NULL, &exp, b, n, op._value, rnd)
@@ -100,6 +106,32 @@ def mpfr_get_str(int b, size_t n, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
 
     return digits, exp
 
+def mpfr_strtofr(Mpfr rop not None, bytes s, int base, cmpfr.mpfr_rnd_t rnd):
+    """ Read a floating-point number from a string s.
+
+    Returns a pair (ternary, endindex), where:
+
+      - ternary is the usual ternary return value
+      - endindex gives the index that points to the character of s
+        just after the valid data.
+
+    """
+    cdef char* endptr
+    cdef char* startptr
+
+    startptr = s
+
+    check_base(base, True)
+    check_rounding_mode(rnd)
+    ternary = cmpfr.mpfr_strtofr(
+        rop._value,
+        s,
+        &endptr,
+        base,
+        rnd,
+    )
+    endindex = endptr - startptr
+    return ternary, endindex
 
 def mpfr_const_pi(Mpfr rop not None, cmpfr.mpfr_rnd_t rnd):
     check_rounding_mode(rnd)
@@ -138,7 +170,7 @@ def mpfr_set_d(Mpfr rop not None, double op, cmpfr.mpfr_rnd_t rnd):
     return cmpfr.mpfr_set_d(rop._value, op, rnd)
 
 def mpfr_set_str(Mpfr rop not None, bytes s, int base, cmpfr.mpfr_rnd_t rnd):
-    check_base(base)
+    check_base(base, False)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_set_str(rop._value, s, base, rnd)
 

@@ -11,6 +11,7 @@ from mpfr import (
     mpfr_set,
     mpfr_set_d,
     mpfr_set_str,
+    mpfr_strtofr,
 
     mpfr_neg,
 
@@ -236,6 +237,18 @@ class TestMpfr(unittest.TestCase):
             mpfr_set_str(x, '1.2345', 1, MPFR_RNDN)
         with self.assertRaises(ValueError):
             mpfr_set_str(x, '1.2345', 63, MPFR_RNDN)
+
+    def test_strtofr(self):
+        x = Mpfr(30)
+
+        result, endindex = mpfr_strtofr(x, '135.6 789', 10, MPFR_RNDN)
+        self.assertIn(result, (-1, 0, 1))
+        self.assertEqual(endindex, 5)
+
+        self.assertEqual(
+            mpfr_get_str(10, 0, x, MPFR_RNDN),
+            ('13559999990', 3),
+        )
 
     def test_get_str(self):
         x = Mpfr(20)
