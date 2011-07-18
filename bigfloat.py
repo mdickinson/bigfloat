@@ -114,10 +114,6 @@ def mpfr_set_str2(rop, s, base, rnd):
 def mpfr_get_str2(rop, base, ndigits, rounding_mode):
 
     rounding_mode = _rounding_mode_dict[rounding_mode]
-    print "arguments: ",base, ndigits, rop, rounding_mode
-    print "types: ",type(base), type(ndigits), type(rop), type(rounding_mode)
-
-
     digits, exp = mpfr.mpfr_get_str(base, ndigits, rop, rounding_mode)
     negative = digits.startswith('-')
     if negative:
