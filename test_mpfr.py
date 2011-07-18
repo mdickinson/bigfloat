@@ -20,6 +20,12 @@ from mpfr import (
     mpfr_div,
     mpfr_fmod,
 
+    mpfr_equal_p,
+    mpfr_less_p,
+    mpfr_lessequal_p,
+    mpfr_greater_p,
+    mpfr_greaterequal_p,
+
     mpfr_get_emin,
     mpfr_get_emin_min,
     mpfr_get_emin_max,
@@ -163,6 +169,46 @@ class TestMpfr(unittest.TestCase):
         self.assertEqual(
             mpfr_get_str(10, 0, z, MPFR_RNDN),
             ('70000000000', 1),
+        )
+
+    def test_equal_p(self):
+        x = Mpfr(30)
+        mpfr_const_pi(x, MPFR_RNDN)
+        self.assertIs(
+            mpfr_equal_p(x, x),
+            True,
+        )
+
+    def test_lessequal_p(self):
+        x = Mpfr(30)
+        mpfr_const_pi(x, MPFR_RNDN)
+        self.assertIs(
+            mpfr_lessequal_p(x, x),
+            True,
+        )
+
+    def test_less_p(self):
+        x = Mpfr(30)
+        mpfr_const_pi(x, MPFR_RNDN)
+        self.assertIs(
+            mpfr_less_p(x, x),
+            False,
+        )
+
+    def test_greaterequal_p(self):
+        x = Mpfr(30)
+        mpfr_const_pi(x, MPFR_RNDN)
+        self.assertIs(
+            mpfr_greaterequal_p(x, x),
+            True,
+        )
+
+    def test_greater_p(self):
+        x = Mpfr(30)
+        mpfr_const_pi(x, MPFR_RNDN)
+        self.assertIs(
+            mpfr_greater_p(x, x),
+            False,
         )
 
     def test_set_d(self):

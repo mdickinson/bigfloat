@@ -91,3 +91,9 @@ cdef extern from "mpfr.h":
     int mpfr_mul(mpfr_t rop, mpfr_t op1, mpfr_t op2, mpfr_rnd_t rnd)
     int mpfr_div(mpfr_t rop, mpfr_t op1, mpfr_t op2, mpfr_rnd_t rnd)
     int mpfr_fmod(mpfr_t rop, mpfr_t op1, mpfr_t op2, mpfr_rnd_t rnd)
+
+    int mpfr_equal_p(mpfr_t op1, mpfr_t op2)
+    int mpfr_less_p(mpfr_t op1, mpfr_t op2)
+    int mpfr_lessequal_p(mpfr_t op1, mpfr_t op2)
+    int mpfr_greater_p(mpfr_t op1, mpfr_t op2)
+    int mpfr_greaterequal_p(mpfr_t op1, mpfr_t op2)
