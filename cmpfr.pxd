@@ -59,3 +59,22 @@ cdef extern from "mpfr.h":
     void mpfr_free_str(char *str)
 
     int mpfr_const_pi(mpfr_t rop, mpfr_rnd_t rnd)
+
+    void mpfr_clear_flags()
+    void mpfr_clear_underflow()
+    void mpfr_clear_overflow()
+    void mpfr_clear_nanflag()
+    void mpfr_clear_inexflag()
+    void mpfr_clear_erangeflag()
+
+    void mpfr_set_underflow()
+    void mpfr_set_overflow()
+    void mpfr_set_nanflag()
+    void mpfr_set_inexflag()
+    void mpfr_set_erangeflag()
+
+    int mpfr_underflow_p()
+    int mpfr_overflow_p()
+    int mpfr_nanflag_p()
+    int mpfr_inexflag_p()
+    int mpfr_erangeflag_p()

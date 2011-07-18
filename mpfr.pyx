@@ -140,3 +140,48 @@ def mpfr_set_emax(cmpfr.mpfr_exp_t exp):
     # XXX: Check the meaning of the return value;
     # raise an exception if appropriate.
     return cmpfr.mpfr_set_emax(exp)
+
+def mpfr_clear_underflow():
+    cmpfr.mpfr_clear_underflow()
+
+def mpfr_clear_overflow():
+    cmpfr.mpfr_clear_overflow()
+
+def mpfr_clear_nanflag():
+    cmpfr.mpfr_clear_nanflag()
+
+def mpfr_clear_inexflag():
+    cmpfr.mpfr_clear_inexflag()
+
+def mpfr_clear_erangeflag():
+    cmpfr.mpfr_clear_erangeflag()
+
+def mpfr_set_underflow():
+    cmpfr.mpfr_set_underflow()
+
+def mpfr_set_overflow():
+    cmpfr.mpfr_set_overflow()
+
+def mpfr_set_nanflag():
+    cmpfr.mpfr_set_nanflag()
+
+def mpfr_set_inexflag():
+    cmpfr.mpfr_set_inexflag()
+
+def mpfr_set_erangeflag():
+    cmpfr.mpfr_set_erangeflag()
+
+def mpfr_underflow_p():
+    return bool(cmpfr.mpfr_underflow_p())
+
+def mpfr_overflow_p():
+    return bool(cmpfr.mpfr_overflow_p())
+
+def mpfr_nanflag_p():
+    return bool(cmpfr.mpfr_nanflag_p())
+
+def mpfr_inexflag_p():
+    return bool(cmpfr.mpfr_inexflag_p())
+
+def mpfr_erangeflag_p():
+    return bool(cmpfr.mpfr_erangeflag_p())

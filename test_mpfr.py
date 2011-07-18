@@ -21,6 +21,24 @@ from mpfr import (
 
     mpfr_set_emin,
     mpfr_set_emax,
+
+    mpfr_clear_underflow,
+    mpfr_clear_overflow,
+    mpfr_clear_nanflag,
+    mpfr_clear_inexflag,
+    mpfr_clear_erangeflag,
+
+    mpfr_set_underflow,
+    mpfr_set_overflow,
+    mpfr_set_nanflag,
+    mpfr_set_inexflag,
+    mpfr_set_erangeflag,
+
+    mpfr_underflow_p,
+    mpfr_overflow_p,
+    mpfr_nanflag_p,
+    mpfr_inexflag_p,
+    mpfr_erangeflag_p,
 )
 
 
@@ -159,6 +177,35 @@ class TestMpfr(unittest.TestCase):
 
         mpfr_set_emax(777)
         self.assertEqual(mpfr_get_emax(), 777)
+
+    def test_flags(self):
+        # Exercise flag getting and setting methods.
+        mpfr_set_overflow()
+        self.assertIs(mpfr_overflow_p(), True)
+        mpfr_clear_overflow()
+        self.assertIs(mpfr_overflow_p(), False)
+
+        mpfr_set_underflow()
+        self.assertIs(mpfr_underflow_p(), True)
+        mpfr_clear_underflow()
+        self.assertIs(mpfr_underflow_p(), False)
+
+        mpfr_set_nanflag()
+        self.assertIs(mpfr_nanflag_p(), True)
+        mpfr_clear_nanflag()
+        self.assertIs(mpfr_nanflag_p(), False)
+
+        mpfr_set_inexflag()
+        self.assertIs(mpfr_inexflag_p(), True)
+        mpfr_clear_inexflag()
+        self.assertIs(mpfr_inexflag_p(), False)
+
+        mpfr_set_erangeflag()
+        self.assertIs(mpfr_erangeflag_p(), True)
+        mpfr_clear_erangeflag()
+        self.assertIs(mpfr_erangeflag_p(), False)
+
+
 
 
 if __name__ == '__main__':
