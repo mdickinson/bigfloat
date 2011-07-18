@@ -32,7 +32,7 @@ cdef check_base(int b):
 
 cdef check_get_str_n(size_t n):
     if not (n == 0 or 2 <= n):
-        raise ValueError("n should be either 0 or at least 2")    
+        raise ValueError("n should be either 0 or at least 2")
 
 
 cdef check_precision(cmpfr.mpfr_prec_t precision):
@@ -139,4 +139,4 @@ def mpfr_set_emin(cmpfr.mpfr_exp_t exp):
 def mpfr_set_emax(cmpfr.mpfr_exp_t exp):
     # XXX: Check the meaning of the return value;
     # raise an exception if appropriate.
-    return cmpfr.mpfr_set_emax(exp)    
+    return cmpfr.mpfr_set_emax(exp)
