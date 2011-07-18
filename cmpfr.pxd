@@ -1,6 +1,12 @@
 cimport cgmp
 
 cdef extern from "mpfr.h":
+    # Define MPFR version number
+    int MPFR_VERSION_MAJOR
+    int MPFR_VERSION_MINOR
+    int MPFR_VERSION_PATCHLEVEL
+    char *MPFR_VERSION_STRING        
+
     # MPFR type declarations
     ctypedef int mpfr_prec_t
     ctypedef int mpfr_sign_t
@@ -84,3 +90,4 @@ cdef extern from "mpfr.h":
     int mpfr_sub(mpfr_t rop, mpfr_t op1, mpfr_t op2, mpfr_rnd_t rnd)
     int mpfr_mul(mpfr_t rop, mpfr_t op1, mpfr_t op2, mpfr_rnd_t rnd)
     int mpfr_div(mpfr_t rop, mpfr_t op1, mpfr_t op2, mpfr_rnd_t rnd)
+    int mpfr_fmod(mpfr_t rop, mpfr_t op1, mpfr_t op2, mpfr_rnd_t rnd)

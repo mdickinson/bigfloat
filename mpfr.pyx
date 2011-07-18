@@ -1,5 +1,11 @@
 cimport cmpfr
 
+# Version information
+MPFR_VERSION_MAJOR = cmpfr.MPFR_VERSION_MAJOR
+MPFR_VERSION_MINOR = cmpfr.MPFR_VERSION_MINOR
+MPFR_VERSION_PATCHLEVEL = cmpfr.MPFR_VERSION_PATCHLEVEL
+MPFR_VERSION_STRING = cmpfr.MPFR_VERSION_STRING
+
 # Make precision limits available to Python
 MPFR_PREC_MIN = cmpfr.MPFR_PREC_MIN
 MPFR_PREC_MAX = cmpfr.MPFR_PREC_MAX
@@ -123,6 +129,10 @@ def mpfr_div(Mpfr rop not None, Mpfr op1 not None, Mpfr op2 not None, cmpfr.mpfr
     check_rounding_mode(rnd)
     return cmpfr.mpfr_div(rop._value, op1._value, op2._value, rnd)
 
+def mpfr_fmod(Mpfr rop not None, Mpfr op1 not None, Mpfr op2 not None, cmpfr.mpfr_rnd_t rnd):
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_fmod(rop._value, op1._value, op2._value, rnd)
+
 def mpfr_set_d(Mpfr rop not None, double op, cmpfr.mpfr_rnd_t rnd):
     check_rounding_mode(rnd)
     return cmpfr.mpfr_set_d(rop._value, op, rnd)
@@ -205,4 +215,3 @@ def mpfr_inexflag_p():
 
 def mpfr_erangeflag_p():
     return bool(cmpfr.mpfr_erangeflag_p())
-
