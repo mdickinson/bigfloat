@@ -14,6 +14,11 @@ from mpfr import (
 
     mpfr_neg,
 
+    mpfr_add,
+    mpfr_sub,
+    mpfr_mul,
+    mpfr_div,
+
     mpfr_get_emin,
     mpfr_get_emin_min,
     mpfr_get_emin_max,
@@ -97,6 +102,54 @@ class TestMpfr(unittest.TestCase):
         self.assertEqual(
             mpfr_get_str(10, 0, y, MPFR_RNDN),
             ('-31415926553', 1),
+        )
+
+    def test_add(self):
+        x = Mpfr(30)
+        y = Mpfr(30)
+        z = Mpfr(30)
+        mpfr_set_d(x, 7.0, MPFR_RNDN)
+        mpfr_set_d(y, 11.0, MPFR_RNDN)
+        mpfr_add(z, x, y, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_str(10, 0, z, MPFR_RNDN),
+            ('18000000000', 2),
+        )
+
+    def test_sub(self):
+        x = Mpfr(30)
+        y = Mpfr(30)
+        z = Mpfr(30)
+        mpfr_set_d(x, 7.0, MPFR_RNDN)
+        mpfr_set_d(y, 11.0, MPFR_RNDN)
+        mpfr_sub(z, x, y, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_str(10, 0, z, MPFR_RNDN),
+            ('-40000000000', 1),
+        )
+
+    def test_mul(self):
+        x = Mpfr(30)
+        y = Mpfr(30)
+        z = Mpfr(30)
+        mpfr_set_d(x, 7.0, MPFR_RNDN)
+        mpfr_set_d(y, 11.0, MPFR_RNDN)
+        mpfr_mul(z, x, y, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_str(10, 0, z, MPFR_RNDN),
+            ('77000000000', 2),
+        )
+
+    def test_div(self):
+        x = Mpfr(30)
+        y = Mpfr(30)
+        z = Mpfr(30)
+        mpfr_set_d(x, 7.0, MPFR_RNDN)
+        mpfr_set_d(y, 11.0, MPFR_RNDN)
+        mpfr_div(z, x, y, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_str(10, 0, z, MPFR_RNDN),
+            ('63636363670', 0),
         )
 
     def test_set_d(self):
