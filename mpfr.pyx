@@ -31,6 +31,11 @@ cdef check_rounding_mode(cmpfr.mpfr_rnd_t rnd):
         raise ValueError("invalid rounding mode {}".format(rnd))
 
 
+cdef check_ternary_value(int t):
+    if not -1 <= t <= 1:
+        raise ValueError("ternary value should be -1, 0 or 1")
+
+
 cdef check_base(int b, int allow_zero):
     if allow_zero:
         if not ((2 <= b <= 62) or (b == 0)):
@@ -247,6 +252,11 @@ def mpfr_inexflag_p():
 
 def mpfr_erangeflag_p():
     return bool(cmpfr.mpfr_erangeflag_p())
+
+def mpfr_check_range(Mpfr x not None, int t, cmpfr.mpfr_rnd_t rnd):
+    check_ternary_value(t)
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_check_range(x._value, t, rnd)
 
 def mpfr_equal_p(Mpfr op1 not None, Mpfr op2 not None):
     cdef int result
