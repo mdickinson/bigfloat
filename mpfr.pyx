@@ -103,6 +103,10 @@ def mpfr_set(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
     check_rounding_mode(rnd)
     return cmpfr.mpfr_set(rop._value, op._value, rnd)
 
+def mpfr_neg(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_neg(rop._value, op._value, rnd)
+
 def mpfr_set_d(Mpfr rop not None, double op, cmpfr.mpfr_rnd_t rnd):
     check_rounding_mode(rnd)
     return cmpfr.mpfr_set_d(rop._value, op, rnd)
@@ -185,3 +189,4 @@ def mpfr_inexflag_p():
 
 def mpfr_erangeflag_p():
     return bool(cmpfr.mpfr_erangeflag_p())
+

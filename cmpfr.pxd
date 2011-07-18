@@ -78,3 +78,5 @@ cdef extern from "mpfr.h":
     int mpfr_nanflag_p()
     int mpfr_inexflag_p()
     int mpfr_erangeflag_p()
+
+    int mpfr_neg(mpfr_t rop, mpfr_t op, mpfr_rnd_t rnd)

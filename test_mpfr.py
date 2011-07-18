@@ -12,6 +12,8 @@ from mpfr import (
     mpfr_set_d,
     mpfr_set_str,
 
+    mpfr_neg,
+
     mpfr_get_emin,
     mpfr_get_emin_min,
     mpfr_get_emin_max,
@@ -86,6 +88,16 @@ class TestMpfr(unittest.TestCase):
         # Invalid rounding mode.
         with self.assertRaises(ValueError):
             mpfr_set(y, x, -1)
+
+    def test_neg(self):
+        x = Mpfr(30)
+        y = Mpfr(30)
+        mpfr_const_pi(x, MPFR_RNDN)
+        mpfr_neg(y, x, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_str(10, 0, y, MPFR_RNDN),
+            ('-31415926553', 1),
+        )
 
     def test_set_d(self):
         x = Mpfr(30)
