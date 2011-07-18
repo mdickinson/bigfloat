@@ -162,14 +162,14 @@ def mpfr_get_emax_max():
     return cmpfr.mpfr_get_emax_max()
 
 def mpfr_set_emin(cmpfr.mpfr_exp_t exp):
-    # XXX: Check the meaning of the return value;
-    # raise an exception if appropriate.
-    return cmpfr.mpfr_set_emin(exp)
+    error_code = cmpfr.mpfr_set_emin(exp)
+    if error_code:
+        raise ValueError("new exponent for emin is outside allowable range")
 
 def mpfr_set_emax(cmpfr.mpfr_exp_t exp):
-    # XXX: Check the meaning of the return value;
-    # raise an exception if appropriate.
-    return cmpfr.mpfr_set_emax(exp)
+    error_code = cmpfr.mpfr_set_emax(exp)
+    if error_code:
+        raise ValueError("new exponent for emin is outside allowable range")
 
 def mpfr_clear_underflow():
     cmpfr.mpfr_clear_underflow()
