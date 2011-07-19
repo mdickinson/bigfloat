@@ -128,3 +128,6 @@ cdef extern from "mpfr.h":
     int mpfr_equal_p(mpfr_t op1, mpfr_t op2)
     int mpfr_lessgreater_p(mpfr_t op1, mpfr_t op2)
     int mpfr_unordered_p(mpfr_t op1, mpfr_t op2)
+
+    void mpfr_nextabove(mpfr_t op)
+    void mpfr_nextbelow(mpfr_t op)

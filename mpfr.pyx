@@ -336,3 +336,9 @@ def mpfr_lessgreater_p(Mpfr op1 not None, Mpfr op2 not None):
 
 def mpfr_unordered_p(Mpfr op1 not None, Mpfr op2 not None):
     return bool(cmpfr.mpfr_unordered_p(op1._value, op2._value))
+
+def mpfr_nextabove(Mpfr op not None):
+    cmpfr.mpfr_nextabove(op._value)
+
+def mpfr_nextbelow(Mpfr op not None):
+    cmpfr.mpfr_nextbelow(op._value)
