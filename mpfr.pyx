@@ -233,6 +233,11 @@ def mpfr_set_emax(cmpfr.mpfr_exp_t exp):
 def mpfr_get_prec(Mpfr x not None):
     return cmpfr.mpfr_get_prec(x._value)
 
+def mpfr_setsign(Mpfr rop not None, Mpfr op not None, s, cmpfr.mpfr_rnd_t rnd):
+    s = bool(s)
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_setsign(rop._value, op._value, s, rnd)
+
 def mpfr_clear_underflow():
     cmpfr.mpfr_clear_underflow()
 
