@@ -524,17 +524,11 @@ def next_down(x, context=None):
             # apply + one more time to deal with subnormals
             return +y
 
-# Rounding mode constants
-RoundTiesToEven = 'RoundTiesToEven'
-RoundTowardZero = 'RoundTowardZero'
-RoundTowardPositive = 'RoundTowardPositive'
-RoundTowardNegative = 'RoundTowardNegative'
-
 _rounding_mode_dict = {
-    RoundTiesToEven: 0,
-    RoundTowardZero: 1,
-    RoundTowardPositive: 2,
-    RoundTowardNegative: 3,
+    'RoundTiesToEven': 0,
+    'RoundTowardZero': 1,
+    'RoundTowardPositive': 2,
+    'RoundTowardNegative': 3,
     # XXX Add RoundAwayFromZero
 }
 
