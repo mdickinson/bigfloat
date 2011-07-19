@@ -82,6 +82,7 @@ standard_functions = [
     ('sqrt', [mpfr.Mpfr]),
     ('exp', [mpfr.Mpfr]),
     ('log', [mpfr.Mpfr]),
+    ('log2', [mpfr.Mpfr]),
 
     ('const_pi', []),
     ('const_catalan', []),

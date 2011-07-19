@@ -107,6 +107,7 @@ cdef extern from "mpfr.h":
     int mpfr_sqrt(mpfr_t rop, mpfr_t op, mpfr_rnd_t rnd)
     int mpfr_exp(mpfr_t rop, mpfr_t op, mpfr_rnd_t rnd)
     int mpfr_log(mpfr_t rop, mpfr_t op, mpfr_rnd_t rnd)
+    int mpfr_log2(mpfr_t rop, mpfr_t op, mpfr_rnd_t rnd)
 
     int mpfr_nan_p(mpfr_t op)
     int mpfr_inf_p(mpfr_t op)
