@@ -157,6 +157,10 @@ def mpfr_neg(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
     check_rounding_mode(rnd)
     return cmpfr.mpfr_neg(rop._value, op._value, rnd)
 
+def mpfr_abs(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_abs(rop._value, op._value, rnd)
+
 def mpfr_add(Mpfr rop not None, Mpfr op1 not None, Mpfr op2 not None, cmpfr.mpfr_rnd_t rnd):
     check_rounding_mode(rnd)
     return cmpfr.mpfr_add(rop._value, op1._value, op2._value, rnd)

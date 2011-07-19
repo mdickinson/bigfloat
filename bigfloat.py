@@ -72,6 +72,8 @@ import mpfr
 standard_functions = [
     ('set', [mpfr.Mpfr]),
     ('neg', [mpfr.Mpfr]),
+    ('abs', [mpfr.Mpfr]),
+
     ('add', [mpfr.Mpfr, mpfr.Mpfr]),
     ('sub', [mpfr.Mpfr, mpfr.Mpfr]),
     ('mul', [mpfr.Mpfr, mpfr.Mpfr]),

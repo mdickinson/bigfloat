@@ -102,6 +102,8 @@ cdef extern from "mpfr.h":
     int mpfr_subnormalize(mpfr_t x, int t, mpfr_rnd_t rnd)
 
     int mpfr_neg(mpfr_t rop, mpfr_t op, mpfr_rnd_t rnd)
+    int mpfr_abs(mpfr_t rop, mpfr_t op, mpfr_rnd_t rnd)
+
     int mpfr_add(mpfr_t rop, mpfr_t op1, mpfr_t op2, mpfr_rnd_t rnd)
     int mpfr_sub(mpfr_t rop, mpfr_t op1, mpfr_t op2, mpfr_rnd_t rnd)
     int mpfr_mul(mpfr_t rop, mpfr_t op1, mpfr_t op2, mpfr_rnd_t rnd)
