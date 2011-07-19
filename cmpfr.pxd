@@ -70,6 +70,8 @@ cdef extern from "mpfr.h":
 
     void mpfr_free_str(char *str)
 
+    mpfr_exp_t mpfr_get_exp(mpfr_t x)
+
     int mpfr_const_pi(mpfr_t rop, mpfr_rnd_t rnd)
     int mpfr_const_catalan(mpfr_t rop, mpfr_rnd_t rnd)
 

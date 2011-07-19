@@ -138,6 +138,9 @@ def mpfr_strtofr(Mpfr rop not None, bytes s, int base, cmpfr.mpfr_rnd_t rnd):
     endindex = endptr - startptr
     return ternary, endindex
 
+def mpfr_get_exp(Mpfr op not None):
+    return cmpfr.mpfr_get_exp(op._value)
+
 def mpfr_const_pi(Mpfr rop not None, cmpfr.mpfr_rnd_t rnd):
     check_rounding_mode(rnd)
     return cmpfr.mpfr_const_pi(rop._value, rnd)
