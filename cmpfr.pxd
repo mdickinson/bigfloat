@@ -71,6 +71,7 @@ cdef extern from "mpfr.h":
     void mpfr_free_str(char *str)
 
     int mpfr_const_pi(mpfr_t rop, mpfr_rnd_t rnd)
+    int mpfr_const_catalan(mpfr_t rop, mpfr_rnd_t rnd)
 
     void mpfr_clear_flags()
     void mpfr_clear_underflow()
@@ -101,15 +102,22 @@ cdef extern from "mpfr.h":
     int mpfr_fmod(mpfr_t rop, mpfr_t op1, mpfr_t op2, mpfr_rnd_t rnd)
     int mpfr_pow(mpfr_t rop, mpfr_t op1, mpfr_t op2, mpfr_rnd_t rnd)
 
+    int mpfr_sqrt(mpfr_t rop, mpfr_t op, mpfr_rnd_t rnd)
+    int mpfr_exp(mpfr_t rop, mpfr_t op, mpfr_rnd_t rnd)
+    int mpfr_log(mpfr_t rop, mpfr_t op, mpfr_rnd_t rnd)
+
     int mpfr_nan_p(mpfr_t op)
     int mpfr_inf_p(mpfr_t op)
     int mpfr_number_p(mpfr_t op)
     int mpfr_integer_p(mpfr_t op)
     int mpfr_zero_p(mpfr_t op)
     int mpfr_regular_p(mpfr_t op)
+    int mpfr_signbit(mpfr_t op)
 
     int mpfr_greater_p(mpfr_t op1, mpfr_t op2)
     int mpfr_greaterequal_p(mpfr_t op1, mpfr_t op2)
     int mpfr_less_p(mpfr_t op1, mpfr_t op2)
     int mpfr_lessequal_p(mpfr_t op1, mpfr_t op2)
     int mpfr_equal_p(mpfr_t op1, mpfr_t op2)
+    int mpfr_lessgreater_p(mpfr_t op1, mpfr_t op2)
+    int mpfr_unordered_p(mpfr_t op1, mpfr_t op2)

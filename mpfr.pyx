@@ -142,6 +142,10 @@ def mpfr_const_pi(Mpfr rop not None, cmpfr.mpfr_rnd_t rnd):
     check_rounding_mode(rnd)
     return cmpfr.mpfr_const_pi(rop._value, rnd)
 
+def mpfr_const_catalan(Mpfr rop not None, cmpfr.mpfr_rnd_t rnd):
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_const_catalan(rop._value, rnd)
+
 def mpfr_set(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
     check_rounding_mode(rnd)
     return cmpfr.mpfr_set(rop._value, op._value, rnd)
@@ -173,6 +177,18 @@ def mpfr_fmod(Mpfr rop not None, Mpfr op1 not None, Mpfr op2 not None, cmpfr.mpf
 def mpfr_pow(Mpfr rop not None, Mpfr op1 not None, Mpfr op2 not None, cmpfr.mpfr_rnd_t rnd):
     check_rounding_mode(rnd)
     return cmpfr.mpfr_pow(rop._value, op1._value, op2._value, rnd)
+
+def mpfr_sqrt(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_sqrt(rop._value, op._value, rnd)
+
+def mpfr_exp(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_exp(rop._value, op._value, rnd)
+
+def mpfr_log(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_log(rop._value, op._value, rnd)
 
 def mpfr_set_d(Mpfr rop not None, double op, cmpfr.mpfr_rnd_t rnd):
     check_rounding_mode(rnd)
@@ -283,6 +299,9 @@ def mpfr_zero_p(Mpfr op not None):
 def mpfr_regular_p(Mpfr op not None):
     return bool(cmpfr.mpfr_regular_p(op._value))
 
+def mpfr_signbit(Mpfr op not None):
+    return bool(cmpfr.mpfr_signbit(op._value))
+
 def mpfr_greater_p(Mpfr op1 not None, Mpfr op2 not None):
     return bool(cmpfr.mpfr_greater_p(op1._value, op2._value))
 
@@ -297,3 +316,9 @@ def mpfr_lessequal_p(Mpfr op1 not None, Mpfr op2 not None):
 
 def mpfr_equal_p(Mpfr op1 not None, Mpfr op2 not None):
     return bool(cmpfr.mpfr_equal_p(op1._value, op2._value))
+
+def mpfr_lessgreater_p(Mpfr op1 not None, Mpfr op2 not None):
+    return bool(cmpfr.mpfr_lessgreater_p(op1._value, op2._value))
+
+def mpfr_unordered_p(Mpfr op1 not None, Mpfr op2 not None):
+    return bool(cmpfr.mpfr_unordered_p(op1._value, op2._value))

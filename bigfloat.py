@@ -79,9 +79,16 @@ standard_functions = [
     ('fmod', [mpfr.Mpfr, mpfr.Mpfr]),
     ('pow', [mpfr.Mpfr, mpfr.Mpfr]),
 
-    ('set_d', [float]),
+    ('sqrt', [mpfr.Mpfr]),
+    ('exp', [mpfr.Mpfr]),
+    ('log', [mpfr.Mpfr]),
 
+    ('const_pi', []),
+    ('const_catalan', []),
+
+    ('set_d', [float]),
 ]
+
 predicates = [
     ('nan_p', [mpfr.Mpfr]),
     ('inf_p', [mpfr.Mpfr]),
@@ -89,12 +96,15 @@ predicates = [
     ('integer_p', [mpfr.Mpfr]),
     ('zero_p', [mpfr.Mpfr]),
     ('regular_p', [mpfr.Mpfr]),
+    ('signbit', [mpfr.Mpfr]),
 
     ('greater_p', [mpfr.Mpfr, mpfr.Mpfr]),
     ('greaterequal_p', [mpfr.Mpfr, mpfr.Mpfr]),
     ('less_p', [mpfr.Mpfr, mpfr.Mpfr]),
     ('lessequal_p', [mpfr.Mpfr, mpfr.Mpfr]),
     ('equal_p', [mpfr.Mpfr, mpfr.Mpfr]),
+    ('lessgreater_p', [mpfr.Mpfr, mpfr.Mpfr]),
+    ('unordered_p', [mpfr.Mpfr, mpfr.Mpfr]),
 ]
 
 
@@ -1278,3 +1288,6 @@ BigFloat.__gt__ = _binop(_is_greater)
 
 #_old__all__ = __all__
 #del __all__
+
+MPFR_VERSION_MAJOR = mpfr.MPFR_VERSION_MAJOR
+MPFR_VERSION_MINOR = mpfr.MPFR_VERSION_MINOR
