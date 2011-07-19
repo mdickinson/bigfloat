@@ -238,6 +238,10 @@ def mpfr_setsign(Mpfr rop not None, Mpfr op not None, s, cmpfr.mpfr_rnd_t rnd):
     check_rounding_mode(rnd)
     return cmpfr.mpfr_setsign(rop._value, op._value, s, rnd)
 
+def mpfr_get_d(Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_get_d(op._value, rnd)    
+
 def mpfr_clear_underflow():
     cmpfr.mpfr_clear_underflow()
 
