@@ -69,48 +69,6 @@ import contextlib as _contextlib
 
 import mpfr
 
-standard_functions = [
-    ('set', [mpfr.Mpfr]),
-    ('neg', [mpfr.Mpfr]),
-    ('abs', [mpfr.Mpfr]),
-
-    ('add', [mpfr.Mpfr, mpfr.Mpfr]),
-    ('sub', [mpfr.Mpfr, mpfr.Mpfr]),
-    ('mul', [mpfr.Mpfr, mpfr.Mpfr]),
-    ('div', [mpfr.Mpfr, mpfr.Mpfr]),
-    ('fmod', [mpfr.Mpfr, mpfr.Mpfr]),
-    ('pow', [mpfr.Mpfr, mpfr.Mpfr]),
-
-    ('sqrt', [mpfr.Mpfr]),
-    ('exp', [mpfr.Mpfr]),
-    ('log', [mpfr.Mpfr]),
-    ('log2', [mpfr.Mpfr]),
-
-    ('const_pi', []),
-    ('const_catalan', []),
-
-    ('set_d', [float]),
-]
-
-predicates = [
-    ('nan_p', [mpfr.Mpfr]),
-    ('inf_p', [mpfr.Mpfr]),
-    ('number_p', [mpfr.Mpfr]),
-    ('integer_p', [mpfr.Mpfr]),
-    ('zero_p', [mpfr.Mpfr]),
-    ('regular_p', [mpfr.Mpfr]),
-    ('signbit', [mpfr.Mpfr]),
-
-    ('greater_p', [mpfr.Mpfr, mpfr.Mpfr]),
-    ('greaterequal_p', [mpfr.Mpfr, mpfr.Mpfr]),
-    ('less_p', [mpfr.Mpfr, mpfr.Mpfr]),
-    ('lessequal_p', [mpfr.Mpfr, mpfr.Mpfr]),
-    ('equal_p', [mpfr.Mpfr, mpfr.Mpfr]),
-    ('lessgreater_p', [mpfr.Mpfr, mpfr.Mpfr]),
-    ('unordered_p', [mpfr.Mpfr, mpfr.Mpfr]),
-]
-
-
 def mpfr_set_str2(rop, s, base, rnd):
     """Set value of rop from the string s, using given base and rounding mode.
 
@@ -1160,23 +1118,6 @@ _name_translation = {
     # rename 'fmod' to 'mod', to correspond with the Python binary operation
     'fmod' : 'mod',
 
-    # predicates
-    'nan_p' : 'is_nan',
-    'inf_p' : 'is_inf',
-    'zero_p' : 'is_zero',
-    'number_p' : 'is_finite',
-    'integer_p' : 'is_integer',
-    'signbit' : 'is_negative',
-
-    # comparisons
-    'equal_p' : '_is_equal',
-    'greater_p' : '_is_greater',
-    'less_p' : '_is_less',
-    'lessequal_p' : '_is_lessequal',
-    'greaterequal_p' : '_is_greaterequal',
-    'unordered_p' : 'unordered',
-    'lessgreater_p' : 'lessgreater',
-
     # fac_ui -> factorial
     'fac_ui': 'factorial',
 
@@ -1231,25 +1172,56 @@ _name_translation = {
     'setsign': '_setsign',
 }
 
-def _wrap_standard_functions():
-    for fn, argtypes in standard_functions:
-        mpfr_fn = getattr(mpfr, 'mpfr_' + fn)
-        pyfn_name = _name_translation.get(fn, fn)
-        globals()[pyfn_name] = _wrap_standard_function(mpfr_fn, argtypes)
-        if not pyfn_name.startswith('_'):
-            __all__.append(pyfn_name)
 
-    for fn, argtypes in predicates:
-        mpfr_fn = getattr(mpfr, 'mpfr_' + fn)
-        pyfn_name = _name_translation.get(fn, fn)
-        globals()[pyfn_name] = _wrap_predicate(mpfr_fn, argtypes)
-        if not pyfn_name.startswith('_'):
-            __all__.append(pyfn_name)
+standard_functions = [
+    ('set', [mpfr.Mpfr]),
+    ('neg', [mpfr.Mpfr]),
+    ('abs', [mpfr.Mpfr]),
 
-_wrap_standard_functions()
+    ('add', [mpfr.Mpfr, mpfr.Mpfr]),
+    ('sub', [mpfr.Mpfr, mpfr.Mpfr]),
+    ('mul', [mpfr.Mpfr, mpfr.Mpfr]),
+    ('div', [mpfr.Mpfr, mpfr.Mpfr]),
+    ('fmod', [mpfr.Mpfr, mpfr.Mpfr]),
+    ('pow', [mpfr.Mpfr, mpfr.Mpfr]),
+
+    ('sqrt', [mpfr.Mpfr]),
+    ('exp', [mpfr.Mpfr]),
+    ('log', [mpfr.Mpfr]),
+    ('log2', [mpfr.Mpfr]),
+
+    ('const_pi', []),
+    ('const_catalan', []),
+
+    ('set_d', [float]),
+]
+
+for fn, argtypes in standard_functions:
+    mpfr_fn = getattr(mpfr, 'mpfr_' + fn)
+    pyfn_name = _name_translation.get(fn, fn)
+    globals()[pyfn_name] = _wrap_standard_function(mpfr_fn, argtypes)
+    if not pyfn_name.startswith('_'):
+        __all__.append(pyfn_name)
 
 set_str2 = _wrap_standard_function(mpfr_set_str2, [str, int])
 
+# Wrap predicates
+is_nan = _wrap_predicate(mpfr.mpfr_nan_p, [mpfr.Mpfr])
+is_inf = _wrap_predicate(mpfr.mpfr_inf_p, [mpfr.Mpfr])
+is_zero = _wrap_predicate(mpfr.mpfr_zero_p, [mpfr.Mpfr])
+is_finite = _wrap_predicate(mpfr.mpfr_number_p, [mpfr.Mpfr])
+is_integer = _wrap_predicate(mpfr.mpfr_integer_p, [mpfr.Mpfr])
+is_negative = _wrap_predicate(mpfr.mpfr_signbit, [mpfr.Mpfr])
+is_inf = _wrap_predicate(mpfr.mpfr_inf_p, [mpfr.Mpfr])
+is_regular = _wrap_predicate(mpfr.mpfr_regular_p, [mpfr.Mpfr])
+
+_is_equal = _wrap_predicate(mpfr.mpfr_equal_p, [mpfr.Mpfr, mpfr.Mpfr])
+_is_greater = _wrap_predicate(mpfr.mpfr_greater_p, [mpfr.Mpfr, mpfr.Mpfr])
+_is_greaterequal = _wrap_predicate(mpfr.mpfr_greaterequal_p, [mpfr.Mpfr, mpfr.Mpfr])
+_is_less = _wrap_predicate(mpfr.mpfr_less_p, [mpfr.Mpfr, mpfr.Mpfr])
+_is_lessequal = _wrap_predicate(mpfr.mpfr_lessequal_p, [mpfr.Mpfr, mpfr.Mpfr])
+lessgreater = _wrap_predicate(mpfr.mpfr_lessgreater_p, [mpfr.Mpfr, mpfr.Mpfr])
+unordered = _wrap_predicate(mpfr.mpfr_unordered_p, [mpfr.Mpfr, mpfr.Mpfr])
 
 # unary arithmetic operations
 BigFloat.__pos__ = pos
