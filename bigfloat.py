@@ -640,8 +640,11 @@ class BigFloat(object):
 
         if isinstance(value, float):
             return _set_d(value)
-        elif isinstance(value, basestring):
+        elif isinstance(value, str):
             return set_str2(value.strip(), 10)
+        elif isinstance(value, unicode):
+            value = value.strip().encode('ascii')
+            return set_str2(value, 10)
         elif isinstance(value, (int, long)):
             return set_str2('%x' % value, 16)
         elif isinstance(value, BigFloat):
