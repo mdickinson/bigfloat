@@ -665,7 +665,7 @@ class BigFloat(object):
 
         # XXX Maybe we should move this function into test_bigfloat
         bf = mpfr.Mpfr(len(value)*4) # should be sufficient precision
-        ternary = mpfr.mpfr_set_str2(bf, value, 16, 'RoundTiesToEven')
+        ternary = mpfr_set_str2(bf, value, 16, _rounding_mode_dict['RoundTiesToEven'])
         if ternary:
             # conversion should have been exact, except possibly if
             # value overflows or underflows
