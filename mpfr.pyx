@@ -170,6 +170,10 @@ def mpfr_fmod(Mpfr rop not None, Mpfr op1 not None, Mpfr op2 not None, cmpfr.mpf
     check_rounding_mode(rnd)
     return cmpfr.mpfr_fmod(rop._value, op1._value, op2._value, rnd)
 
+def mpfr_pow(Mpfr rop not None, Mpfr op1 not None, Mpfr op2 not None, cmpfr.mpfr_rnd_t rnd):
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_pow(rop._value, op1._value, op2._value, rnd)
+
 def mpfr_set_d(Mpfr rop not None, double op, cmpfr.mpfr_rnd_t rnd):
     check_rounding_mode(rnd)
     return cmpfr.mpfr_set_d(rop._value, op, rnd)

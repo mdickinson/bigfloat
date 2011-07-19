@@ -20,6 +20,7 @@ from mpfr import (
     mpfr_mul,
     mpfr_div,
     mpfr_fmod,
+    mpfr_pow,
 
     mpfr_equal_p,
     mpfr_less_p,
@@ -170,6 +171,18 @@ class TestMpfr(unittest.TestCase):
         self.assertEqual(
             mpfr_get_str(10, 0, z, MPFR_RNDN),
             ('70000000000', 1),
+        )
+
+    def test_pow(self):
+        x = Mpfr(30)
+        y = Mpfr(30)
+        z = Mpfr(30)
+        mpfr_set_d(x, 7.0, MPFR_RNDN)
+        mpfr_set_d(y, 11.0, MPFR_RNDN)
+        mpfr_pow(z, x, y, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_str(10, 0, z, MPFR_RNDN),
+            ('19773267440', 10),
         )
 
     def test_equal_p(self):

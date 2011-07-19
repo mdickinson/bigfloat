@@ -77,6 +77,7 @@ standard_functions = [
     ('mul', [mpfr.Mpfr, mpfr.Mpfr]),
     ('div', [mpfr.Mpfr, mpfr.Mpfr]),
     ('fmod', [mpfr.Mpfr, mpfr.Mpfr]),
+    ('pow', [mpfr.Mpfr, mpfr.Mpfr]),
 
     ('set_d', [float]),
 
