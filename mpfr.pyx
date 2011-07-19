@@ -288,6 +288,11 @@ def mpfr_check_range(Mpfr x not None, int t, cmpfr.mpfr_rnd_t rnd):
     check_rounding_mode(rnd)
     return cmpfr.mpfr_check_range(x._value, t, rnd)
 
+def mpfr_subnormalize(Mpfr x not None, int t, cmpfr.mpfr_rnd_t rnd):
+    check_ternary_value(t)
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_subnormalize(x._value, t, rnd)
+
 def mpfr_nan_p(Mpfr op not None):
     return bool(cmpfr.mpfr_nan_p(op._value))
 
