@@ -127,8 +127,6 @@ def mpfr_set_str2(rop, s, base, rnd):
 
 
 def mpfr_get_str2(rop, base, ndigits, rounding_mode):
-
-    rounding_mode = _rounding_mode_dict[rounding_mode]
     digits, exp = mpfr.mpfr_get_str(base, ndigits, rop, rounding_mode)
     negative = digits.startswith('-')
     if negative:
@@ -484,7 +482,7 @@ def next_up(x, context=None):
 
             # otherwise apply mpfr_nextabove
             bf = mpfr.Mpfr(y.precision)
-            ternary = mpfr.mpfr_set(bf, y._value, 'RoundTiesToEven')
+            ternary = mpfr.mpfr_set(bf, y._value, mpfr.MPFR_RNDN)
             assert ternary == 0
             mpfr.mpfr_nextabove(bf)
             y = BigFloat._from_Mpfr(bf)
@@ -517,7 +515,7 @@ def next_down(x, context=None):
 
             # otherwise apply mpfr_nextabove
             bf = mpfr.Mpfr(y.precision)
-            ternary = mpfr.mpfr_set(bf, y._value, 'RoundTiesToEven')
+            ternary = mpfr.mpfr_set(bf, y._value, mpfr.MPFR_RNDN)
             assert ternary == 0
             mpfr.mpfr_nextbelow(bf)
             y = BigFloat._from_Mpfr(bf)
@@ -526,10 +524,10 @@ def next_down(x, context=None):
             return +y
 
 _rounding_mode_dict = {
-    'RoundTiesToEven': 0,
-    'RoundTowardZero': 1,
-    'RoundTowardPositive': 2,
-    'RoundTowardNegative': 3,
+    'RoundTiesToEven': mpfr.MPFR_RNDN,
+    'RoundTowardZero': mpfr.MPFR_RNDZ,
+    'RoundTowardPositive': mpfr.MPFR_RNDU,
+    'RoundTowardNegative': mpfr.MPFR_RNDD,
     # XXX Add RoundAwayFromZero
 }
 
@@ -665,7 +663,7 @@ class BigFloat(object):
 
         # XXX Maybe we should move this function into test_bigfloat
         bf = mpfr.Mpfr(len(value)*4) # should be sufficient precision
-        ternary = mpfr_set_str2(bf, value, 16, _rounding_mode_dict['RoundTiesToEven'])
+        ternary = mpfr_set_str2(bf, value, 16, mpfr.MPFR_RNDN)
         if ternary:
             # conversion should have been exact, except possibly if
             # value overflows or underflows
@@ -732,8 +730,7 @@ class BigFloat(object):
         if not is_finite(self):
             raise ValueError("Can't convert infinity or nan to integer")
 
-        negative, digits, e = mpfr_get_str2(self._value, 16, 0,
-                                                 'RoundTiesToEven')
+        negative, digits, e = mpfr_get_str2(self._value, 16, 0, mpfr.MPFR_RNDN)
         n = int(digits, 16)
         e = 4*(e-len(digits))
         if e >= 0:
@@ -751,7 +748,7 @@ class BigFloat(object):
         Rounds using RoundTiesToEven, regardless of current rounding mode.
 
         """
-        return mpfr.mpfr_get_d(self._value, 'RoundTiesToEven')
+        return mpfr.mpfr_get_d(self._value, mpfr.MPFR_RNDN)
 
     def _sign(self):
         return mpfr.mpfr_signbit(self._value)
@@ -773,10 +770,10 @@ class BigFloat(object):
         """
 
         m = mpfr.Mpfr(self.precision)
-        mpfr.mpfr_set(m, self._value, 'RoundTiesToEven')
+        mpfr.mpfr_set(m, self._value, mpfr.MPFR_RNDN)
         if self and is_finite(self):
             mpfr.mpfr_set_exp(m, 0)
-        mpfr.mpfr_setsign(m, m, False, 'RoundTiesToEven')
+        mpfr.mpfr_setsign(m, m, False, mpfr.MPFR_RNDN)
         return BigFloat._from_Mpfr(m)
 
     def _exponent(self):
@@ -811,7 +808,7 @@ class BigFloat(object):
         """
         result = mpfr.Mpfr(self.precision)
         new_sign = not self._sign()
-        mpfr.mpfr_setsign(result, self._value, new_sign, 'RoundTiesToEven')
+        mpfr.mpfr_setsign(result, self._value, new_sign, mpfr.MPFR_RNDN)
         return BigFloat._from_Mpfr(result)
 
     def copy_abs(self):
@@ -822,7 +819,7 @@ class BigFloat(object):
 
         """
         result = mpfr.Mpfr(self.precision)
-        mpfr.mpfr_setsign(result, self._value, False, 'RoundTiesToEven')
+        mpfr.mpfr_setsign(result, self._value, False, mpfr.MPFR_RNDN)
         return BigFloat._from_Mpfr(result)
 
     def hex(self):
@@ -834,7 +831,7 @@ class BigFloat(object):
             return sign + e
 
         m = self._significand()
-        _, digits, _ = mpfr_get_str2(m._value, 16, 0, 'RoundTiesToEven')
+        _, digits, _ = mpfr_get_str2(m._value, 16, 0, mpfr.MPFR_RNDN)
         # only print the number of digits that are actually necessary
         n = 1+(self.precision-1)//4
         assert all(c == '0' for c in digits[n:])
@@ -853,8 +850,7 @@ class BigFloat(object):
             return 0, 1
 
         # convert to a hex string, and from there to a fraction
-        negative, digits, e = mpfr_get_str2(self._value, 16, 0,
-                                                 'RoundTiesToEven')
+        negative, digits, e = mpfr_get_str2(self._value, 16, 0, mpfr.MPFR_RNDN)
         digits = digits.rstrip('0')
 
         # find number of trailing 0 bits in last hex digit
@@ -875,8 +871,7 @@ class BigFloat(object):
         if is_zero(self):
             return '-0' if is_negative(self) else '0'
         elif is_finite(self):
-            negative, digits, e = mpfr_get_str2(self._value, 10, 0,
-                                                     'RoundTiesToEven')
+            negative, digits, e = mpfr_get_str2(self._value, 10, 0, mpfr.MPFR_RNDN)
             return _format_finite(negative, digits, e)
         elif is_inf(self):
             return '-Infinity' if is_negative(self) else 'Infinity'
@@ -902,7 +897,7 @@ class BigFloat(object):
         # Start by formatting to 2 digits; we'll then truncate to one digit,
         # rounding appropriately.
         sign, digits, exp = mpfr_get_str2(
-            self._value, 10, 2, 'RoundTowardNegative'
+            self._value, 10, 2, mpfr.MPFR_RNDD
         )
 
         # If the last digit is 5, we can't tell which way to round; instead,
@@ -910,7 +905,7 @@ class BigFloat(object):
         # the result of that.
         if digits[-1] == '5':
             sign, digits, exp = mpfr_get_str2(
-                self._value, 10, 2, 'RoundTowardPositive'
+                self._value, 10, 2, mpfr.MPFR_RNDU
             )
 
         if digits[-1] in '01234':
@@ -952,7 +947,7 @@ class BigFloat(object):
             return self._format_to_precision_one()
 
         sign, digits, exp = mpfr_get_str2(
-            self._value, 10, precision, 'RoundTiesToEven'
+            self._value, 10, precision, mpfr.MPFR_RNDN
         )
 
         return sign, digits, exp - len(digits)
@@ -993,7 +988,7 @@ class BigFloat(object):
 
         # Figure out the exponent by making a call to get_str2.  exp satisfies
         # 10**(exp-1) <= self < 10**exp
-        _, _, exp = mpfr_get_str2(self._value, 10, 2, 'RoundTowardZero')
+        _, _, exp = mpfr_get_str2(self._value, 10, 2, mpfr.MPFR_RNDZ)
 
         sig_figs = exp + precision
 
@@ -1005,12 +1000,12 @@ class BigFloat(object):
             # Ex: 0.1 <= x < 1.0, rounding x to nearest multiple of 1.0.
             # Or: 100.0 <= x < 1000.0, rounding x to nearest multiple of 1000.0
             sign, digits, new_exp = mpfr_get_str2(
-                self._value, 10, 2, 'RoundTowardNegative'
+                self._value, 10, 2, mpfr.MPFR_RNDD
             )
             if int(digits) == 50:
                 # Halfway case
                 sign, digits, new_exp = mpfr_get_str2(
-                    self._value, 10, 2, 'RoundTowardPositive'
+                    self._value, 10, 2, mpfr.MPFR_RNDU
                 )
 
             digits = '1' if int(digits) > 50 or new_exp == exp + 1 else '0'
@@ -1046,7 +1041,7 @@ class BigFloat(object):
         # integer and take the hash of that, but that would be
         # painfully slow for something like BigFloat('1e1000000000').
         negative, digits, e = mpfr_get_str2(self._value, 16, 0,
-                                                 'RoundTiesToEven')
+                                            mpfr.MPFR_RNDN)
         e -= len(digits)
         # The value of self is (-1)**negative * int(digits, 16) *
         # 16**e.  Compute a strictly positive integer n such that n is
