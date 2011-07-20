@@ -77,6 +77,30 @@ cdef class Mpfr:
         if self._value._mpfr_d != NULL:
             cmpfr.mpfr_clear(self._value)
 
+# Functions that aren't wrapped:
+#
+# These functions are used by the Mpfr class, but not exported
+# independently by the mpfr module:
+#
+#   mpfr_init2
+#   mpfr_clear
+#
+# These functions aren't wrapped at all:
+#
+#   mpfr_init
+#   mpfr_inits2
+#   mpfr_clears
+#   mpfr_inits
+#     -- there's no direct use for these 4 functions, since initialization and
+#        finalization are already handled by the Mpfr class.
+#
+#   mpfr_get_default_prec
+#   mpfr_set_default_prec
+#     -- we don't wrap any functions that make use of the default precision,
+#        so these aren't useful
+#
+#   mpfr_set_prec
+
 
 def mpfr_get_str(int b, size_t n, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
     """
@@ -392,6 +416,20 @@ def mpfr_pow(Mpfr rop not None, Mpfr op1 not None, Mpfr op2 not None,
 
 
 def mpfr_set_d(Mpfr rop not None, double op, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set the value of rop from a Python float op, rounded in the direction rnd.
+
+    Set the value of rop from op, rounded toward the given direction rnd.  If
+    the system does not support the IEEE 754 standard, mpfr_set_d might not
+    preserve the signed zeros.
+
+    Note: If you want to store a floating-point constant to an Mpfr object, you
+    should use mpfr_set_str (or one of the MPFR constant functions, such as
+    mpfr_const_pi for Pi) instead of mpfr_set_d.  Otherwise the floating-point
+    constant will be first converted into a reduced-precision (e.g., 53-bit)
+    binary number before MPFR can work with it.
+
+    """
     check_rounding_mode(rnd)
     return cmpfr.mpfr_set_d(rop._value, op, rnd)
 
@@ -430,6 +468,12 @@ def mpfr_set_emax(cmpfr.mpfr_exp_t exp):
         raise ValueError("new exponent for emin is outside allowable range")
 
 def mpfr_get_prec(Mpfr x not None):
+    """
+    Return the precision of x
+
+    Returns the number of bits used to store the significand of x.
+
+    """
     return cmpfr.mpfr_get_prec(x._value)
 
 def mpfr_setsign(Mpfr rop not None, Mpfr op not None, s, cmpfr.mpfr_rnd_t rnd):
