@@ -265,27 +265,33 @@ def mpfr_log2(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
     check_rounding_mode(rnd)
     return cmpfr.mpfr_log2(rop._value, op._value, rnd)
 
-def mpfr_add(Mpfr rop not None, Mpfr op1 not None, Mpfr op2 not None, cmpfr.mpfr_rnd_t rnd):
+def mpfr_add(Mpfr rop not None, Mpfr op1 not None, Mpfr op2 not None,
+             cmpfr.mpfr_rnd_t rnd):
     check_rounding_mode(rnd)
     return cmpfr.mpfr_add(rop._value, op1._value, op2._value, rnd)
 
-def mpfr_sub(Mpfr rop not None, Mpfr op1 not None, Mpfr op2 not None, cmpfr.mpfr_rnd_t rnd):
+def mpfr_sub(Mpfr rop not None, Mpfr op1 not None, Mpfr op2 not None,
+             cmpfr.mpfr_rnd_t rnd):
     check_rounding_mode(rnd)
     return cmpfr.mpfr_sub(rop._value, op1._value, op2._value, rnd)
 
-def mpfr_mul(Mpfr rop not None, Mpfr op1 not None, Mpfr op2 not None, cmpfr.mpfr_rnd_t rnd):
+def mpfr_mul(Mpfr rop not None, Mpfr op1 not None, Mpfr op2 not None,
+             cmpfr.mpfr_rnd_t rnd):
     check_rounding_mode(rnd)
     return cmpfr.mpfr_mul(rop._value, op1._value, op2._value, rnd)
 
-def mpfr_div(Mpfr rop not None, Mpfr op1 not None, Mpfr op2 not None, cmpfr.mpfr_rnd_t rnd):
+def mpfr_div(Mpfr rop not None, Mpfr op1 not None, Mpfr op2 not None,
+             cmpfr.mpfr_rnd_t rnd):
     check_rounding_mode(rnd)
     return cmpfr.mpfr_div(rop._value, op1._value, op2._value, rnd)
 
-def mpfr_fmod(Mpfr rop not None, Mpfr op1 not None, Mpfr op2 not None, cmpfr.mpfr_rnd_t rnd):
+def mpfr_fmod(Mpfr rop not None, Mpfr op1 not None, Mpfr op2 not None,
+              cmpfr.mpfr_rnd_t rnd):
     check_rounding_mode(rnd)
     return cmpfr.mpfr_fmod(rop._value, op1._value, op2._value, rnd)
 
-def mpfr_pow(Mpfr rop not None, Mpfr op1 not None, Mpfr op2 not None, cmpfr.mpfr_rnd_t rnd):
+def mpfr_pow(Mpfr rop not None, Mpfr op1 not None, Mpfr op2 not None,
+             cmpfr.mpfr_rnd_t rnd):
     check_rounding_mode(rnd)
     return cmpfr.mpfr_pow(rop._value, op1._value, op2._value, rnd)
 
@@ -337,7 +343,7 @@ def mpfr_setsign(Mpfr rop not None, Mpfr op not None, s, cmpfr.mpfr_rnd_t rnd):
 
 def mpfr_get_d(Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
     check_rounding_mode(rnd)
-    return cmpfr.mpfr_get_d(op._value, rnd)    
+    return cmpfr.mpfr_get_d(op._value, rnd)
 
 def mpfr_clear_underflow():
     cmpfr.mpfr_clear_underflow()
