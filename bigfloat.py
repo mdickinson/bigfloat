@@ -1112,9 +1112,6 @@ def _saved_flags():
 # be added to __all__.
 
 _name_translation = {
-    # avoid clobbering set builtin
-    'set': 'pos',
-
     # rename 'fmod' to 'mod', to correspond with the Python binary operation
     'fmod' : 'mod',
 
@@ -1129,81 +1126,30 @@ _name_translation = {
     'rint_ceil': 'ceil',
     'rint_round': 'round',
     'rint_trunc': 'trunc',
-
-    # suppress export of some standard functions
-    'add_d': '_add_d',
-    'add_ui': '_add_ui',
-    'add_si': '_add_si',
-    'sub_d': '_sub_d',
-    'sub_ui': '_sub_ui',
-    'sub_si': '_sub_si',
-    'd_sub': '_d_sub',
-    'ui_sub': '_ui_sub',
-    'si_sub': '_si_sub',
-    'mul_d': '_mul_d',
-    'mul_ui': '_mul_ui',
-    'mul_si': '_mul_si',
-    'div_d': '_div_d',
-    'div_ui': '_div_ui',
-    'div_si': '_div_si',
-    'd_div': '_d_div',
-    'ui_div': '_ui_div',
-    'si_div': '_si_div',
-    'pow_si': '_pow_si',
-    'pow_ui': '_pow_ui',
-    'ui_pow': '_ui_pow',
-    'ui_pow_ui': '_ui_pow_ui',
-
-    'sqrt_ui': '_sqrt_ui',
-    'zeta_ui': '_zeta_ui',
-
-    # and some more
-    'div_2si': '_div_2si',
-    'div_2ui': '_div_2ui',
-    'mul_2si': '_mul_2si',
-    'mul_2ui': '_mul_2ui',
-
-    'set_d': '_set_d',
-    'set_si': '_set_si',
-    'set_si_2exp': '_set_si_2exp',
-    'set_ui': '_set_ui',
-    'set_ui_2exp': '_set_ui_2exp',
-
-    'setsign': '_setsign',
 }
 
 
-standard_functions = [
-    ('set', [mpfr.Mpfr]),
-    ('neg', [mpfr.Mpfr]),
-    ('abs', [mpfr.Mpfr]),
-
-    ('add', [mpfr.Mpfr, mpfr.Mpfr]),
-    ('sub', [mpfr.Mpfr, mpfr.Mpfr]),
-    ('mul', [mpfr.Mpfr, mpfr.Mpfr]),
-    ('div', [mpfr.Mpfr, mpfr.Mpfr]),
-    ('fmod', [mpfr.Mpfr, mpfr.Mpfr]),
-    ('pow', [mpfr.Mpfr, mpfr.Mpfr]),
-
-    ('sqrt', [mpfr.Mpfr]),
-    ('exp', [mpfr.Mpfr]),
-    ('log', [mpfr.Mpfr]),
-    ('log2', [mpfr.Mpfr]),
-
-    ('const_pi', []),
-    ('const_catalan', []),
-
-    ('set_d', [float]),
-]
-
-for fn, argtypes in standard_functions:
-    mpfr_fn = getattr(mpfr, 'mpfr_' + fn)
-    pyfn_name = _name_translation.get(fn, fn)
-    globals()[pyfn_name] = _wrap_standard_function(mpfr_fn, argtypes)
-    if not pyfn_name.startswith('_'):
-        __all__.append(pyfn_name)
-
+_set_d = _wrap_standard_function(mpfr.mpfr_set_d, [float])
 set_str2 = _wrap_standard_function(mpfr_set_str2, [str, int])
+
+const_pi = _wrap_standard_function(mpfr.mpfr_const_pi, [])
+const_catalan = _wrap_standard_function(mpfr.mpfr_const_catalan, [])
+
+pos = _wrap_standard_function(mpfr.mpfr_set, [mpfr.Mpfr])
+neg = _wrap_standard_function(mpfr.mpfr_neg, [mpfr.Mpfr])
+abs = _wrap_standard_function(mpfr.mpfr_abs, [mpfr.Mpfr])
+sqrt = _wrap_standard_function(mpfr.mpfr_sqrt, [mpfr.Mpfr])
+exp = _wrap_standard_function(mpfr.mpfr_exp, [mpfr.Mpfr])
+log = _wrap_standard_function(mpfr.mpfr_log, [mpfr.Mpfr])
+log2 = _wrap_standard_function(mpfr.mpfr_log2, [mpfr.Mpfr])
+
+add = _wrap_standard_function(mpfr.mpfr_add, [mpfr.Mpfr, mpfr.Mpfr])
+sub = _wrap_standard_function(mpfr.mpfr_sub, [mpfr.Mpfr, mpfr.Mpfr])
+mul = _wrap_standard_function(mpfr.mpfr_mul, [mpfr.Mpfr, mpfr.Mpfr])
+div = _wrap_standard_function(mpfr.mpfr_div, [mpfr.Mpfr, mpfr.Mpfr])
+pow = _wrap_standard_function(mpfr.mpfr_pow, [mpfr.Mpfr, mpfr.Mpfr])
+mod = _wrap_standard_function(mpfr.mpfr_fmod, [mpfr.Mpfr, mpfr.Mpfr])
+
 
 # Wrap predicates
 is_nan = _wrap_predicate(mpfr.mpfr_nan_p, [mpfr.Mpfr])
@@ -1252,9 +1198,6 @@ BigFloat.__le__ = _binop(_is_lessequal)
 BigFloat.__lt__ = _binop(_is_less)
 BigFloat.__ge__ = _binop(_is_greaterequal)
 BigFloat.__gt__ = _binop(_is_greater)
-
-#_old__all__ = __all__
-#del __all__
 
 MPFR_VERSION_MAJOR = mpfr.MPFR_VERSION_MAJOR
 MPFR_VERSION_MINOR = mpfr.MPFR_VERSION_MINOR
