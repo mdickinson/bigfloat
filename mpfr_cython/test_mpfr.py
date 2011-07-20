@@ -1,8 +1,7 @@
 import unittest
 
 from mpfr import (
-    MPFR_RNDN, MPFR_RNDZ, MPFR_RNDU, MPFR_RNDD,
-    MPFR_RNDA, MPFR_RNDF, MPFR_RNDNA,
+    MPFR_RNDN, MPFR_RNDZ, MPFR_RNDU, MPFR_RNDD, MPFR_RNDA,
 
     Mpfr,
 
@@ -305,12 +304,10 @@ class TestMpfr(unittest.TestCase):
 
     def test_rounding_modes(self):
         self.assertEqual(MPFR_RNDN, 0)
-        self.assertEqual(MPFR_RNDNA, -1)
         self.assertIsInstance(MPFR_RNDZ, int)
         self.assertIsInstance(MPFR_RNDU, int)
         self.assertIsInstance(MPFR_RNDD, int)
         self.assertIsInstance(MPFR_RNDA, int)
-        self.assertIsInstance(MPFR_RNDF, int)
 
     def test_exponent_bounds(self):
         # Just exercise the exponent bound functions.
