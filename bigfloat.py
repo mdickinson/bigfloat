@@ -69,6 +69,14 @@ __all__ = [
     'const_euler',
     'const_catalan',
 
+    # single argument standard functions
+    'pos',
+    'neg',
+    'abs',
+    'sqrt',
+    'exp',
+    'log',
+    'log2',
 ]
 
 import sys as _sys
