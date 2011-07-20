@@ -506,7 +506,7 @@ _rounding_mode_dict = {
     # XXX Add RoundAwayFromZero
 }
 
-def _wrap_standard_function(f, argtypes):
+def _wrap_standard_function(f, argtypes, name=None):
     def wrapped_f(*args, **kwargs):
         context = getcontext()
         if 'context' in kwargs:
@@ -548,6 +548,11 @@ def _wrap_standard_function(f, argtypes):
                     mpfr.mpfr_set_inexflag()
 
         return BigFloat._from_Mpfr(bf)
+
+    if name is None:
+        assert f.__name__.startswith('mpfr_')
+        name = f.__name__[len('mpfr_'):]
+    wrapped_f.__name__ = name
     return wrapped_f
 
 def _wrap_predicate(f, argtypes):
@@ -1131,7 +1136,7 @@ const_pi = _wrap_standard_function(mpfr.mpfr_const_pi, [])
 const_euler = _wrap_standard_function(mpfr.mpfr_const_euler, [])
 const_catalan = _wrap_standard_function(mpfr.mpfr_const_catalan, [])
 
-pos = _wrap_standard_function(mpfr.mpfr_set, [mpfr.Mpfr])
+pos = _wrap_standard_function(mpfr.mpfr_set, [mpfr.Mpfr], name='pos')
 neg = _wrap_standard_function(mpfr.mpfr_neg, [mpfr.Mpfr])
 abs = _wrap_standard_function(mpfr.mpfr_abs, [mpfr.Mpfr])
 sqrt = _wrap_standard_function(mpfr.mpfr_sqrt, [mpfr.Mpfr])
@@ -1144,7 +1149,7 @@ sub = _wrap_standard_function(mpfr.mpfr_sub, [mpfr.Mpfr, mpfr.Mpfr])
 mul = _wrap_standard_function(mpfr.mpfr_mul, [mpfr.Mpfr, mpfr.Mpfr])
 div = _wrap_standard_function(mpfr.mpfr_div, [mpfr.Mpfr, mpfr.Mpfr])
 pow = _wrap_standard_function(mpfr.mpfr_pow, [mpfr.Mpfr, mpfr.Mpfr])
-mod = _wrap_standard_function(mpfr.mpfr_fmod, [mpfr.Mpfr, mpfr.Mpfr])
+mod = _wrap_standard_function(mpfr.mpfr_fmod, [mpfr.Mpfr, mpfr.Mpfr], name='mod')
 
 
 # Wrap predicates
