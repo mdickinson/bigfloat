@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# cython: embedsignature = True
 cimport cmpfr
 
 # Version information
@@ -58,7 +59,10 @@ cdef check_precision(cmpfr.mpfr_prec_t precision):
 
 
 cdef class Mpfr:
-    """ Mutable arbitrary-precision floating-point type. """
+    """
+    Mutable arbitrary-precision floating-point type.
+
+    """
     cdef cmpfr.mpfr_t _value
 
     def __cinit__(self, precision):
@@ -71,7 +75,8 @@ cdef class Mpfr:
 
 
 def mpfr_get_str(int b, size_t n, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
-    """ Compute a base 'b' string representation for 'op'.
+    """
+    Compute a base 'b' string representation for 'op'.
 
     'b' should be an integer between 2 and 62 (inclusive).
 
@@ -108,7 +113,8 @@ def mpfr_get_str(int b, size_t n, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
     return digits, exp
 
 def mpfr_strtofr(Mpfr rop not None, bytes s, int base, cmpfr.mpfr_rnd_t rnd):
-    """ Read a floating-point number from a string s.
+    """
+    Read a floating-point number from a string s.
 
     Returns a pair (ternary, endindex), where:
 
@@ -143,7 +149,8 @@ def mpfr_set_exp(Mpfr op not None, cmpfr.mpfr_exp_t exp):
         raise ValueError("exponent not in current exponent range")
 
 def mpfr_free_cache():
-    """ Free internal MPFR caches.
+    """
+    Free internal MPFR caches.
 
     Free various caches used by MPFR internally, in particular the caches
     used by the functions computing constants (mpfr_const_log2, mpfr_const_pi,
@@ -158,7 +165,8 @@ def mpfr_free_cache():
 # MPFR functions for computing constants, returning a ternary value.
 
 def mpfr_const_log2(Mpfr rop not None, cmpfr.mpfr_rnd_t rnd):
-    """ Set rop to log(2), rounded in the direction rnd.
+    """
+    Set rop to log(2), rounded in the direction rnd.
 
     Set rop to the natural logarithm of 2, rounded in the direction rnd.  This
     function caches the computed values to avoid other calculations if a lower
@@ -169,7 +177,8 @@ def mpfr_const_log2(Mpfr rop not None, cmpfr.mpfr_rnd_t rnd):
     return cmpfr.mpfr_const_log2(rop._value, rnd)
 
 def mpfr_const_pi(Mpfr rop not None, cmpfr.mpfr_rnd_t rnd):
-    """ Set rop to Pi, rounded in the direction rnd.
+    """
+    Set rop to Pi, rounded in the direction rnd.
 
     Set rop to the value of Pi, rounded in the direction rnd.  This function
     caches the computed value to avoid other calculations if a lower or equal
@@ -180,7 +189,8 @@ def mpfr_const_pi(Mpfr rop not None, cmpfr.mpfr_rnd_t rnd):
     return cmpfr.mpfr_const_pi(rop._value, rnd)
 
 def mpfr_const_euler(Mpfr rop not None, cmpfr.mpfr_rnd_t rnd):
-    """ Set rop to Euler's constant, rounded in the direction rnd.
+    """
+    Set rop to Euler's constant, rounded in the direction rnd.
 
     Set rop to the value of Euler's constant 0.577..., rounded in the direction
     rnd.  This function caches the computed value to avoid other calculations
@@ -192,7 +202,8 @@ def mpfr_const_euler(Mpfr rop not None, cmpfr.mpfr_rnd_t rnd):
     return cmpfr.mpfr_const_euler(rop._value, rnd)
 
 def mpfr_const_catalan(Mpfr rop not None, cmpfr.mpfr_rnd_t rnd):
-    """ Set rop to Catalan's constant, rounded in the direction rnd.
+    """
+    Set rop to Catalan's constant, rounded in the direction rnd.
 
     Set rop to the value of Catalan's constant 0.915..., rounded in the
     direction rnd.  This function caches the computed value to avoid other
@@ -206,7 +217,8 @@ def mpfr_const_catalan(Mpfr rop not None, cmpfr.mpfr_rnd_t rnd):
 # MPFR functions taking a single argument, returning a ternary value.
 
 def mpfr_set(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
-    """ Set rop from op, rounded in the direction rnd.
+    """
+    Set rop from op, rounded in the direction rnd.
 
     Set the value of rop from the value of the Mpfr object op, rounded toward
     the given direction rnd.
@@ -216,7 +228,8 @@ def mpfr_set(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
     return cmpfr.mpfr_set(rop._value, op._value, rnd)
 
 def mpfr_neg(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
-    """ Set rop to -op, rounded in the direction rnd.
+    """
+    Set rop to -op, rounded in the direction rnd.
 
     This function just changes or adjusts the sign if rop and op are the same
     variable, otherwise a rounding might occur if the precision of rop is less
@@ -227,7 +240,8 @@ def mpfr_neg(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
     return cmpfr.mpfr_neg(rop._value, op._value, rnd)
 
 def mpfr_abs(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
-    """ Set rop to the absolute value of op, rounded in the direction rnd.
+    """
+    Set rop to the absolute value of op, rounded in the direction rnd.
 
     This function just changes or adjusts the sign if rop and op are the same
     variable, otherwise a rounding might occur if the precision of rop is less
@@ -238,7 +252,8 @@ def mpfr_abs(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
     return cmpfr.mpfr_abs(rop._value, op._value, rnd)
 
 def mpfr_sqrt(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
-    """ Set rop to the square root of op, rounded in the direction rnd.
+    """
+    Set rop to the square root of op, rounded in the direction rnd.
 
     Set rop to −0 if op is −0, to be consistent with the IEEE 754 standard. Set
     rop to NaN if op is negative.
@@ -248,19 +263,24 @@ def mpfr_sqrt(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
     return cmpfr.mpfr_sqrt(rop._value, op._value, rnd)
 
 def mpfr_exp(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
-    """ Set rop to the exponential of op, rounded in the direction rnd. """
+    """
+    Set rop to the exponential of op, rounded in the direction rnd.
+
+    """
     check_rounding_mode(rnd)
     return cmpfr.mpfr_exp(rop._value, op._value, rnd)
 
 def mpfr_log(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
-    """ Set rop to the natural logarithm of op, rounded in the direction rnd.
+    """
+    Set rop to the natural logarithm of op, rounded in the direction rnd.
 
     """
     check_rounding_mode(rnd)
     return cmpfr.mpfr_log(rop._value, op._value, rnd)
 
 def mpfr_log2(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
-    """ Set rop to the base-2 logarithm of op, rounded in the direction rnd.
+    """
+    Set rop to the base-2 logarithm of op, rounded in the direction rnd.
 
     """
     check_rounding_mode(rnd)
@@ -270,19 +290,28 @@ def mpfr_log2(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
 
 def mpfr_add(Mpfr rop not None, Mpfr op1 not None, Mpfr op2 not None,
              cmpfr.mpfr_rnd_t rnd):
-    """ Set rop to op1 + op2 rounded in the direction rnd. """
+    """
+    Set rop to op1 + op2 rounded in the direction rnd.
+
+    """
     check_rounding_mode(rnd)
     return cmpfr.mpfr_add(rop._value, op1._value, op2._value, rnd)
 
 def mpfr_sub(Mpfr rop not None, Mpfr op1 not None, Mpfr op2 not None,
              cmpfr.mpfr_rnd_t rnd):
-    """ Set rop to op1 - op2, rounded in the direction rnd. """
+    """
+    Set rop to op1 - op2, rounded in the direction rnd.
+
+    """
     check_rounding_mode(rnd)
     return cmpfr.mpfr_sub(rop._value, op1._value, op2._value, rnd)
 
 def mpfr_mul(Mpfr rop not None, Mpfr op1 not None, Mpfr op2 not None,
              cmpfr.mpfr_rnd_t rnd):
-    """ Set rop to op1 times op2, rounded in the direction rnd. """
+    """
+    Set rop to op1 times op2, rounded in the direction rnd.
+
+    """
     check_rounding_mode(rnd)
     return cmpfr.mpfr_mul(rop._value, op1._value, op2._value, rnd)
 
@@ -294,7 +323,8 @@ def mpfr_div(Mpfr rop not None, Mpfr op1 not None, Mpfr op2 not None,
 
 def mpfr_fmod(Mpfr rop not None, Mpfr op1 not None, Mpfr op2 not None,
               cmpfr.mpfr_rnd_t rnd):
-    """ Set rop to op1 reduced modulo op2, rounded in direction rnd.
+    """
+    Set rop to op1 reduced modulo op2, rounded in direction rnd.
 
     Set rop to the value of op1 - n * op2, rounded according to the direction
     rnd, where n is the integer quotient of op1 divided by op2, rounded toward
@@ -312,7 +342,8 @@ def mpfr_fmod(Mpfr rop not None, Mpfr op1 not None, Mpfr op2 not None,
 
 def mpfr_pow(Mpfr rop not None, Mpfr op1 not None, Mpfr op2 not None,
              cmpfr.mpfr_rnd_t rnd):
-    """ Set rop to op1 raised to the power op2, rounded in the direction rnd.
+    """
+    Set rop to op1 raised to the power op2, rounded in the direction rnd.
 
     Special values are handled as described in the ISO C99 and IEEE 754-2008
     standards for the pow function.
