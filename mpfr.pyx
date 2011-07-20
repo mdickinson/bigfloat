@@ -18,8 +18,6 @@ MPFR_RNDZ =  cmpfr.MPFR_RNDZ
 MPFR_RNDU =  cmpfr.MPFR_RNDU
 MPFR_RNDD =  cmpfr.MPFR_RNDD
 MPFR_RNDA =  cmpfr.MPFR_RNDA
-MPFR_RNDF =  cmpfr.MPFR_RNDF
-MPFR_RNDNA =  cmpfr.MPFR_RNDNA
 
 # Default values for Emax and Emin
 MPFR_EMAX_DEFAULT = cmpfr.MPFR_EMAX_DEFAULT
