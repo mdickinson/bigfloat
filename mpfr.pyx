@@ -58,7 +58,13 @@ cdef check_precision(cmpfr.mpfr_prec_t precision):
 
 cdef class Mpfr:
     """
-    Mutable arbitrary-precision floating-point type.
+    Class representing a mutable arbitrary-precision floating-point number.
+
+    Mpfr(prec) -> new Mpfr object
+
+    Creates a new Mpfr object and sets its precision to be exactly 'prec' bits
+    and its value to NaN.  The precision must be an integer between
+    MPFR_PREC_MIN and MPFR_PREC_MAX; otherwise a ValueError is raised.
 
     """
     cdef cmpfr.mpfr_t _value
