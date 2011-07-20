@@ -141,13 +141,64 @@ def mpfr_set_exp(Mpfr op not None, cmpfr.mpfr_exp_t exp):
     if error_code:
         raise ValueError("exponent not in current exponent range")
 
+
+def mpfr_const_log2(Mpfr rop not None, cmpfr.mpfr_rnd_t rnd):
+    """ Set rop to log(2), rounded in the direction rnd.
+
+    Set rop to the natural logarithm of 2, rounded in the direction rnd.  This
+    function caches the computed values to avoid other calculations if a lower
+    or equal precision is requested.  To free this cache, use mpfr_free_cache.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_const_log2(rop._value, rnd)
+
 def mpfr_const_pi(Mpfr rop not None, cmpfr.mpfr_rnd_t rnd):
+    """ Set rop to Pi, rounded in the direction rnd.
+
+    Set rop to the value of Pi, rounded in the direction rnd.  This function
+    caches the computed value to avoid other calculations if a lower or equal
+    precision is requested.  To free this cache, use mpfr_free_cache.
+
+    """
     check_rounding_mode(rnd)
     return cmpfr.mpfr_const_pi(rop._value, rnd)
 
+def mpfr_const_euler(Mpfr rop not None, cmpfr.mpfr_rnd_t rnd):
+    """ Set rop to Euler's constant, rounded in the direction rnd.
+
+    Set rop to the value of Euler's constant 0.577..., rounded in the direction
+    rnd.  This function caches the computed value to avoid other calculations
+    if a lower or equal precision is requested.  To free this cache, use
+    mpfr_free_cache.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_const_euler(rop._value, rnd)
+
 def mpfr_const_catalan(Mpfr rop not None, cmpfr.mpfr_rnd_t rnd):
+    """ Set rop to Catalan's constant, rounded in the direction rnd.
+
+    Set rop to the value of Catalan's constant 0.915..., rounded in the
+    direction rnd.  This function caches the computed value to avoid other
+    calculations if a lower or equal precision is requested.  To free this
+    cache, use mpfr_free_cache.
+
+    """
     check_rounding_mode(rnd)
     return cmpfr.mpfr_const_catalan(rop._value, rnd)
+
+def mpfr_free_cache():
+    """ Free internal MPFR caches.
+
+    Free various caches used by MPFR internally, in particular the caches
+    used by the functions computing constants (mpfr_const_log2, mpfr_const_pi,
+    mpfr_const_euler and mpfr_const_catalan). You should call this function
+    before terminating a thread, even if you did not call these functions
+    directly (they could have been called internally).
+
+    """
+    cmpfr.mpfr_free_cache()
 
 def mpfr_set(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
     check_rounding_mode(rnd)

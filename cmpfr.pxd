@@ -76,8 +76,12 @@ cdef extern from "mpfr.h":
     mpfr_exp_t mpfr_get_exp(mpfr_t x)
     int mpfr_set_exp(mpfr_t x, mpfr_exp_t exp)
 
+    int mpfr_const_log2(mpfr_t rop, mpfr_rnd_t rnd)
     int mpfr_const_pi(mpfr_t rop, mpfr_rnd_t rnd)
+    int mpfr_const_euler(mpfr_t rop, mpfr_rnd_t rnd)
     int mpfr_const_catalan(mpfr_t rop, mpfr_rnd_t rnd)
+
+    void mpfr_free_cache()
 
     void mpfr_clear_flags()
     void mpfr_clear_underflow()

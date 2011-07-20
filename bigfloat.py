@@ -62,6 +62,13 @@ __all__ = [
 
     # numeric functions
     'next_up', 'next_down',
+
+    # constants
+    'const_log2',
+    'const_pi',
+    'const_euler',
+    'const_catalan',
+
 ]
 
 import sys as _sys
@@ -1107,32 +1114,13 @@ def _saved_flags():
     finally:
         set_flagstate(old_flags)
 
-# dictionary translating MPFR function names (excluding the 'mpfr_'
-# prefix) to Python function names.  Names that don't start with '_' will
-# be added to __all__.
-
-_name_translation = {
-    # rename 'fmod' to 'mod', to correspond with the Python binary operation
-    'fmod' : 'mod',
-
-    # fac_ui -> factorial
-    'fac_ui': 'factorial',
-
-    # lgamma
-    'lgamma_nosign': 'lgamma',
-
-    # conversions to integer
-    'rint_floor': 'floor',
-    'rint_ceil': 'ceil',
-    'rint_round': 'round',
-    'rint_trunc': 'trunc',
-}
-
 
 _set_d = _wrap_standard_function(mpfr.mpfr_set_d, [float])
 set_str2 = _wrap_standard_function(mpfr_set_str2, [str, int])
 
+const_log2 = _wrap_standard_function(mpfr.mpfr_const_log2, [])
 const_pi = _wrap_standard_function(mpfr.mpfr_const_pi, [])
+const_euler = _wrap_standard_function(mpfr.mpfr_const_euler, [])
 const_catalan = _wrap_standard_function(mpfr.mpfr_const_catalan, [])
 
 pos = _wrap_standard_function(mpfr.mpfr_set, [mpfr.Mpfr])
