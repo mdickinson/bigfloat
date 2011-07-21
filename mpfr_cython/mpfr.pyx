@@ -132,6 +132,7 @@ def mpfr_get_str(int b, size_t n, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
     """
     cdef cmpfr.mpfr_exp_t exp
     cdef bytes digits
+    cdef char *c_digits
 
     check_base(b, False)
     check_get_str_n(n)
