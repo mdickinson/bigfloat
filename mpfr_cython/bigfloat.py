@@ -115,14 +115,16 @@ def mpfr_get_str2(rop, base, ndigits, rounding_mode):
 @_contextlib.contextmanager
 def eminmax(emin, emax):
     old_emin = mpfr.mpfr_get_emin()
-    old_emax = mpfr.mpfr_get_emax()
     mpfr.mpfr_set_emin(emin)
-    mpfr.mpfr_set_emax(emax)
     try:
-        yield
+        old_emax = mpfr.mpfr_get_emax()
+        mpfr.mpfr_set_emax(emax)
+        try:
+            yield
+        finally:
+            mpfr.mpfr_set_emax(old_emax)
     finally:
         mpfr.mpfr_set_emin(old_emin)
-        mpfr.mpfr_set_emax(old_emax)
 
 # builtin abs, max, min and pow functions are shadowed by BigFloat
 # max, min and pow functions later on; keep a copy of the builtin
