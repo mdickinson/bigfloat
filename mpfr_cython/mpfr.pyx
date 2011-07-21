@@ -25,30 +25,39 @@ MPFR_EMIN_DEFAULT = cmpfr.MPFR_EMIN_DEFAULT
 
 
 # Checks for valid parameter ranges
-cdef check_rounding_mode(cmpfr.mpfr_rnd_t rnd):
-    # MPFR_RNDF not implemented yet; MPFR_RNDNA should not be used.
-    if not MPFR_RNDN <= rnd <= MPFR_RNDA:
+cdef int check_rounding_mode(cmpfr.mpfr_rnd_t rnd) except -1:
+    if MPFR_RNDN <= rnd <= MPFR_RNDA:
+        return 0
+    else:
         raise ValueError("invalid rounding mode {}".format(rnd))
 
 
-cdef check_base(int b, int allow_zero):
+cdef int check_base(int b, int allow_zero) except -1:
     if allow_zero:
-        if not ((2 <= b <= 62) or (b == 0)):
+        if 2 <= b <= 62 or b == 0:
+            return 0
+        else:
             raise ValueError(
                 "base should be zero or in the range 2 to 62 (inclusive)"
             )
     else:
-        if not (2 <= b <= 62):
+        if 2 <= b <= 62:
+            return 0
+        else:
             raise ValueError("base should be in the range 2 to 62 (inclusive)")
 
 
-cdef check_get_str_n(size_t n):
-    if not (n == 0 or 2 <= n):
+cdef int check_get_str_n(size_t n) except -1:
+    if n == 0 or 2 <= n:
+        return 0
+    else:
         raise ValueError("n should be either 0 or at least 2")
 
 
-cdef check_precision(cmpfr.mpfr_prec_t precision):
-    if not MPFR_PREC_MIN <= precision <= MPFR_PREC_MAX:
+cdef int check_precision(cmpfr.mpfr_prec_t precision) except -1:
+    if MPFR_PREC_MIN <= precision <= MPFR_PREC_MAX:
+        return 0
+    else:
         raise ValueError(
             "precision should be between {} and {}".format(
                 MPFR_PREC_MIN, MPFR_PREC_MAX
