@@ -508,53 +508,104 @@ _rounding_mode_dict = {
     # XXX Add RoundAwayFromZero
 }
 
-def _wrap_standard_function(f, argtypes, name=None):
-    def wrapped_f(*args, **kwargs):
-        context = getcontext()
-        if 'context' in kwargs:
-            context += kwargs['context']
-        elif len(args) == len(argtypes) + 1:
-            context += args[-1]
-            args = args[:-1]
 
-        if len(args) != len(argtypes):
-            raise TypeError("Wrong number of arguments")
-        converted_args = []
-        for arg, arg_t in zip(args, argtypes):
-            if arg_t is mpfr.Mpfr:
-                arg = BigFloat._implicit_convert(arg)._value
-            converted_args.append(arg)
+def _fit_to_context(f, args, context):
+    """ Fit an Mpfr instance (at the correct precision) to the given context.
+
+    Given an Mpfr instance 'bf', and a context 'context',
+    return an Mpfr instance fit to the current context.
+
+    Here 'bf' resulted from a computation performed at the
+    context precision, but with no bound on exponent range,
+    and no subnormalization.
+
+    The value 'ternary' supplies the ternary value result of the operation that
+    produced this Mpfr instance.
+
+    """
+    rounding = _rounding_mode_dict[context.rounding]
+    bf = mpfr.Mpfr(context.precision)
+    args = (bf,) + args + (rounding,)
+    ternary = f(*args)
+    with eminmax(context.emin, context.emax):
         rounding = _rounding_mode_dict[context.rounding]
-        converted_args.append(rounding)
-        bf = mpfr.Mpfr(context.precision)
-        ternary = f(bf, *converted_args)
+        ternary = mpfr.mpfr_check_range(bf, ternary, rounding)
+        if context.subnormalize:
+            # mpfr_subnormalize doesn't set underflow and
+            # subnormal flags, so we do that ourselves.  We choose
+            # to set the underflow flag for *all* cases where the
+            # 'after rounding' result is smaller than the smallest
+            # normal number, even if that result is exact.
 
-        # fit result to current context
-        with eminmax(context.emin, context.emax):
-            ternary = mpfr.mpfr_check_range(bf, ternary, rounding)
-            if context.subnormalize:
-                # mpfr_subnormalize doesn't set underflow and
-                # subnormal flags, so we do that ourselves.  We choose
-                # to set the underflow flag for *all* cases where the
-                # 'after rounding' result is smaller than the smallest
-                # normal number, even if that result is exact.
+            # if bf is zero but ternary is nonzero, the underflow
+            # flag will already have been set by mpfr_check_range;
+            if (mpfr.mpfr_number_p(bf) and
+                not mpfr.mpfr_zero_p(bf) and
+                mpfr.mpfr_get_exp(bf) < context.precision-1+context.emin):
+                mpfr.mpfr_set_underflow()
+            ternary = mpfr.mpfr_subnormalize(bf, ternary, rounding)
+            if ternary:
+                mpfr.mpfr_set_inexflag()
+    return bf
 
-                # if bf is zero but ternary is nonzero, the underflow
-                # flag will already have been set by mpfr_check_range;
-                if (mpfr.mpfr_number_p(bf) and
-                    not mpfr.mpfr_zero_p(bf) and
-                    mpfr.mpfr_get_exp(bf) < context.precision-1+context.emin):
-                    mpfr.mpfr_set_underflow()
-                ternary = mpfr.mpfr_subnormalize(bf, ternary, rounding)
-                if ternary:
-                    mpfr.mpfr_set_inexflag()
 
+def _wrap_constant(f, name=None):
+    def wrapped_f(context=None):
+        current_context = getcontext()
+        if context is not None:
+            context = current_context + context
+        else:
+            context = current_context
+
+        bf = _fit_to_context(f, (), context)
         return BigFloat._from_Mpfr(bf)
 
     if name is None:
         assert f.__name__.startswith('mpfr_')
         name = f.__name__[len('mpfr_'):]
     wrapped_f.__name__ = name
+    wrapped_f.__doc__ = f.__doc__
+    return wrapped_f
+
+def _wrap_unary_function(f, name=None):
+    def wrapped_f(op, context=None):
+        current_context = getcontext()
+        if context is not None:
+            context = current_context + context
+        else:
+            context = current_context
+
+        args = (BigFloat._implicit_convert(op)._value,)
+        bf = _fit_to_context(f, args, context)
+        return BigFloat._from_Mpfr(bf)
+
+    if name is None:
+        assert f.__name__.startswith('mpfr_')
+        name = f.__name__[len('mpfr_'):]
+    wrapped_f.__name__ = name
+    wrapped_f.__doc__ = f.__doc__
+    return wrapped_f
+
+def _wrap_binary_function(f, name=None):
+    def wrapped_f(op1, op2, context=None):
+        current_context = getcontext()
+        if context is not None:
+            context = current_context + context
+        else:
+            context = current_context
+
+        args = (
+            BigFloat._implicit_convert(op1)._value,
+            BigFloat._implicit_convert(op2)._value,
+        )
+        bf = _fit_to_context(f, args, context)
+        return BigFloat._from_Mpfr(bf)
+
+    if name is None:
+        assert f.__name__.startswith('mpfr_')
+        name = f.__name__[len('mpfr_'):]
+    wrapped_f.__name__ = name
+    wrapped_f.__doc__ = f.__doc__
     return wrapped_f
 
 def _wrap_predicate(f, argtypes):
@@ -641,10 +692,9 @@ class BigFloat(object):
     @staticmethod
     def _fromhex_exact(value):
         """Private function used in testing"""
-        # private low-level version of fromhex that always does an
-        # exact conversion.  Avoids using any heavy machinery
-        # (contexts, _wrap_standard_function), since its main use is in
-        # the testing of that machinery.
+        # private low-level version of fromhex that always does an exact
+        # conversion.  Avoids using any heavy machinery (contexts, function
+        # wrapping), since its main use is in the testing of that machinery.
 
         # XXX Maybe we should move this function into test_bigfloat
         bf = mpfr.Mpfr(len(value)*4) # should be sufficient precision
@@ -1130,28 +1180,46 @@ def _saved_flags():
         set_flagstate(old_flags)
 
 
-_set_d = _wrap_standard_function(mpfr.mpfr_set_d, [float])
-set_str2 = _wrap_standard_function(mpfr_set_str2, [str, int])
+def _set_d(x, context=None):
+    current_context = getcontext()
+    if context is not None:
+        context = current_context + context
+    else:
+        context = current_context
+    
+    bf = _fit_to_context(mpfr.mpfr_set_d, (x,), context)
+    return BigFloat._from_Mpfr(bf)
 
-const_log2 = _wrap_standard_function(mpfr.mpfr_const_log2, [])
-const_pi = _wrap_standard_function(mpfr.mpfr_const_pi, [])
-const_euler = _wrap_standard_function(mpfr.mpfr_const_euler, [])
-const_catalan = _wrap_standard_function(mpfr.mpfr_const_catalan, [])
+def set_str2(s, base, context=None):
+    current_context = getcontext()
+    if context is not None:
+        context = current_context + context
+    else:
+        context = current_context
+    
+    bf = _fit_to_context(mpfr_set_str2, (s, base), context)
+    return BigFloat._from_Mpfr(bf)
+    
 
-pos = _wrap_standard_function(mpfr.mpfr_set, [mpfr.Mpfr], name='pos')
-neg = _wrap_standard_function(mpfr.mpfr_neg, [mpfr.Mpfr])
-abs = _wrap_standard_function(mpfr.mpfr_abs, [mpfr.Mpfr])
-sqrt = _wrap_standard_function(mpfr.mpfr_sqrt, [mpfr.Mpfr])
-exp = _wrap_standard_function(mpfr.mpfr_exp, [mpfr.Mpfr])
-log = _wrap_standard_function(mpfr.mpfr_log, [mpfr.Mpfr])
-log2 = _wrap_standard_function(mpfr.mpfr_log2, [mpfr.Mpfr])
+const_log2 = _wrap_constant(mpfr.mpfr_const_log2)
+const_pi = _wrap_constant(mpfr.mpfr_const_pi)
+const_euler = _wrap_constant(mpfr.mpfr_const_euler)
+const_catalan = _wrap_constant(mpfr.mpfr_const_catalan)
 
-add = _wrap_standard_function(mpfr.mpfr_add, [mpfr.Mpfr, mpfr.Mpfr])
-sub = _wrap_standard_function(mpfr.mpfr_sub, [mpfr.Mpfr, mpfr.Mpfr])
-mul = _wrap_standard_function(mpfr.mpfr_mul, [mpfr.Mpfr, mpfr.Mpfr])
-div = _wrap_standard_function(mpfr.mpfr_div, [mpfr.Mpfr, mpfr.Mpfr])
-pow = _wrap_standard_function(mpfr.mpfr_pow, [mpfr.Mpfr, mpfr.Mpfr])
-mod = _wrap_standard_function(mpfr.mpfr_fmod, [mpfr.Mpfr, mpfr.Mpfr], name='mod')
+pos = _wrap_unary_function(mpfr.mpfr_set, name='pos')
+neg = _wrap_unary_function(mpfr.mpfr_neg)
+abs = _wrap_unary_function(mpfr.mpfr_abs)
+sqrt = _wrap_unary_function(mpfr.mpfr_sqrt)
+exp = _wrap_unary_function(mpfr.mpfr_exp)
+log = _wrap_unary_function(mpfr.mpfr_log)
+log2 = _wrap_unary_function(mpfr.mpfr_log2)
+
+add = _wrap_binary_function(mpfr.mpfr_add)
+sub = _wrap_binary_function(mpfr.mpfr_sub)
+mul = _wrap_binary_function(mpfr.mpfr_mul)
+div = _wrap_binary_function(mpfr.mpfr_div)
+pow = _wrap_binary_function(mpfr.mpfr_pow)
+mod = _wrap_binary_function(mpfr.mpfr_fmod, name='mod')
 
 
 # Wrap predicates
