@@ -608,16 +608,19 @@ def _wrap_binary_function(f, name=None):
     wrapped_f.__doc__ = f.__doc__
     return wrapped_f
 
-def _wrap_predicate(f, argtypes):
-    def wrapped_f(*args):
-        if len(args) != len(argtypes):
-            raise TypeError("Wrong number of arguments")
-        converted_args = []
-        for arg, arg_t in zip(args, argtypes):
-            if arg_t is mpfr.Mpfr:
-                arg = BigFloat._implicit_convert(arg)._value
-            converted_args.append(arg)
-        return f(*converted_args)
+def _wrap_unary_predicate(f):
+    def wrapped_f(op):
+        return f(
+            BigFloat._implicit_convert(op)._value,
+        )
+    return wrapped_f
+
+def _wrap_binary_predicate(f):
+    def wrapped_f(op1, op2):
+        return f(
+            BigFloat._implicit_convert(op1)._value,
+            BigFloat._implicit_convert(op2)._value,
+        )
     return wrapped_f
 
 def _binop(op):
@@ -1223,22 +1226,22 @@ mod = _wrap_binary_function(mpfr.mpfr_fmod, name='mod')
 
 
 # Wrap predicates
-is_nan = _wrap_predicate(mpfr.mpfr_nan_p, [mpfr.Mpfr])
-is_inf = _wrap_predicate(mpfr.mpfr_inf_p, [mpfr.Mpfr])
-is_zero = _wrap_predicate(mpfr.mpfr_zero_p, [mpfr.Mpfr])
-is_finite = _wrap_predicate(mpfr.mpfr_number_p, [mpfr.Mpfr])
-is_integer = _wrap_predicate(mpfr.mpfr_integer_p, [mpfr.Mpfr])
-is_negative = _wrap_predicate(mpfr.mpfr_signbit, [mpfr.Mpfr])
-is_inf = _wrap_predicate(mpfr.mpfr_inf_p, [mpfr.Mpfr])
-is_regular = _wrap_predicate(mpfr.mpfr_regular_p, [mpfr.Mpfr])
+is_nan = _wrap_unary_predicate(mpfr.mpfr_nan_p)
+is_inf = _wrap_unary_predicate(mpfr.mpfr_inf_p)
+is_zero = _wrap_unary_predicate(mpfr.mpfr_zero_p)
+is_finite = _wrap_unary_predicate(mpfr.mpfr_number_p)
+is_integer = _wrap_unary_predicate(mpfr.mpfr_integer_p)
+is_negative = _wrap_unary_predicate(mpfr.mpfr_signbit)
+is_inf = _wrap_unary_predicate(mpfr.mpfr_inf_p)
+is_regular = _wrap_unary_predicate(mpfr.mpfr_regular_p)
 
-_is_equal = _wrap_predicate(mpfr.mpfr_equal_p, [mpfr.Mpfr, mpfr.Mpfr])
-_is_greater = _wrap_predicate(mpfr.mpfr_greater_p, [mpfr.Mpfr, mpfr.Mpfr])
-_is_greaterequal = _wrap_predicate(mpfr.mpfr_greaterequal_p, [mpfr.Mpfr, mpfr.Mpfr])
-_is_less = _wrap_predicate(mpfr.mpfr_less_p, [mpfr.Mpfr, mpfr.Mpfr])
-_is_lessequal = _wrap_predicate(mpfr.mpfr_lessequal_p, [mpfr.Mpfr, mpfr.Mpfr])
-lessgreater = _wrap_predicate(mpfr.mpfr_lessgreater_p, [mpfr.Mpfr, mpfr.Mpfr])
-unordered = _wrap_predicate(mpfr.mpfr_unordered_p, [mpfr.Mpfr, mpfr.Mpfr])
+_is_equal = _wrap_binary_predicate(mpfr.mpfr_equal_p)
+_is_greater = _wrap_binary_predicate(mpfr.mpfr_greater_p)
+_is_greaterequal = _wrap_binary_predicate(mpfr.mpfr_greaterequal_p)
+_is_less = _wrap_binary_predicate(mpfr.mpfr_less_p)
+_is_lessequal = _wrap_binary_predicate(mpfr.mpfr_lessequal_p)
+lessgreater = _wrap_binary_predicate(mpfr.mpfr_lessgreater_p)
+unordered = _wrap_binary_predicate(mpfr.mpfr_unordered_p)
 
 # unary arithmetic operations
 BigFloat.__pos__ = pos
