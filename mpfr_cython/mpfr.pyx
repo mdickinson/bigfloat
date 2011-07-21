@@ -531,10 +531,60 @@ def mpfr_erangeflag_p():
     return bool(cmpfr.mpfr_erangeflag_p())
 
 def mpfr_check_range(Mpfr x not None, int t, cmpfr.mpfr_rnd_t rnd):
+    """
+    Modify x if necessary to fit into the current exponent range.
+
+    This function assumes that x is the correctly-rounded value of some real
+    value y in the direction rnd and some extended exponent range, and that t
+    is the corresponding ternary value. For example, one performed t = mpfr_log
+    (x, u, rnd), and y is the exact logarithm of u. Thus t is negative if x is
+    smaller than y, positive if x is larger than y, and zero if x equals
+    y. This function modifies x if needed to be in the current range of
+    acceptable values: It generates an underflow or an overflow if the exponent
+    of x is outside the current allowed range; the value of t may be used to
+    avoid a double rounding. This function returns zero if the new value of x
+    equals the exact one y, a positive value if that new value is larger than
+    y, and a negative value if it is smaller than y. Note that unlike most
+    functions, the new result x is compared to the (unknown) exact one y, not
+    the input value x, i.e., the ternary value is propagated.
+
+    Note: If x is an infinity and t is different from zero (i.e., if the
+    rounded result is an inexact infinity), then the overflow flag is set. This
+    is useful because mpfr_check_range is typically called (at least in MPFR
+    functions) after restoring the flags that could have been set due to
+    internal computations.
+
+    """
     check_rounding_mode(rnd)
     return cmpfr.mpfr_check_range(x._value, t, rnd)
 
 def mpfr_subnormalize(Mpfr x not None, int t, cmpfr.mpfr_rnd_t rnd):
+    """
+    Modify x if necessary to account for subnormalization.
+
+    This function rounds x emulating subnormal number arithmetic: if x is
+    outside the subnormal exponent range, it just propagates the ternary value
+    t; otherwise, it rounds x to precision EXP(x)-emin+1 according to rounding
+    mode rnd and previous ternary value t, avoiding double rounding
+    problems. More precisely in the subnormal domain, denoting by e the value
+    of emin, x is rounded in fixed-point arithmetic to an integer multiple of
+    two to the power e−1; as a consequence, 1.5 multiplied by two to the power
+    e−1 when t is zero is rounded to two to the power e with rounding to
+    nearest.
+
+    PREC(x) is not modified by this function. rnd and t must be the rounding
+    mode and the returned ternary value used when computing x (as in
+    mpfr_check_range). The subnormal exponent range is from emin to
+    emin+PREC(x)-1. If the result cannot be represented in the current exponent
+    range (due to a too small emax), the behavior is undefined. Note that
+    unlike most functions, the result is compared to the exact one, not the
+    input value x, i.e., the ternary value is propagated.
+
+    As usual, if the returned ternary value is non zero, the inexact flag is
+    set. Moreover, if a second rounding occurred (because the input x was in
+    the subnormal range), the underflow flag is set.
+
+    """
     check_rounding_mode(rnd)
     return cmpfr.mpfr_subnormalize(x._value, t, rnd)
 
