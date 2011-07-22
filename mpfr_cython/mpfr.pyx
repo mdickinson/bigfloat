@@ -599,24 +599,55 @@ def mpfr_subnormalize(Mpfr x not None, int t, cmpfr.mpfr_rnd_t rnd):
     return cmpfr.mpfr_subnormalize(x._value, t, rnd)
 
 def mpfr_nan_p(Mpfr op not None):
+    """
+    Return True if op is a NaN.  Return False otherwise.
+
+    """
     return bool(cmpfr.mpfr_nan_p(op._value))
 
 def mpfr_inf_p(Mpfr op not None):
+    """
+    Return True if op is an infinity.  Return False otherwise.
+
+    """
     return bool(cmpfr.mpfr_inf_p(op._value))
 
 def mpfr_number_p(Mpfr op not None):
+    """
+    Return True if op is an ordinary number (neither a NaN nor an infinity).
+    Return False otherwise.
+
+    """
     return bool(cmpfr.mpfr_number_p(op._value))
 
-def mpfr_integer_p(Mpfr op not None):
-    return bool(cmpfr.mpfr_integer_p(op._value))
-
 def mpfr_zero_p(Mpfr op not None):
+    """
+    Return True if op is zero.  Return False otherwise.
+
+    """
     return bool(cmpfr.mpfr_zero_p(op._value))
 
 def mpfr_regular_p(Mpfr op not None):
+    """
+    Return True if op is a regular number (neither a NaN, nor an infinity, nor
+    zero.)  Return False otherwise.
+
+    """
     return bool(cmpfr.mpfr_regular_p(op._value))
 
+def mpfr_integer_p(Mpfr op not None):
+    """
+    Return True if op is an integer.  Return False otherwise.
+
+    """
+    return bool(cmpfr.mpfr_integer_p(op._value))
+
 def mpfr_signbit(Mpfr op not None):
+    """
+    Return True if op has its sign bit set (that is, if it is negative, -0, or
+    a NaN whose representation has its sign bit set).  Return False otherwise.
+
+    """
     return bool(cmpfr.mpfr_signbit(op._value))
 
 def mpfr_greater_p(Mpfr op1 not None, Mpfr op2 not None):
