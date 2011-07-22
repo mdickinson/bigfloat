@@ -216,12 +216,12 @@ class BigFloatTests(unittest.TestCase):
                         for fn in fns:
                             # test without rounding mode
                             res = fn(v, w)
-                            self.assertEqual(type(res), BigFloat)
+                            self.assertIs(type(res), BigFloat)
                             self.assertEqual(res.precision, p)
                             # test with rounding mode
                             for rnd in all_rounding_modes:
                                 res = fn(v, w, context=rnd)
-                                self.assertEqual(type(res), BigFloat)
+                                self.assertIs(type(res), BigFloat)
                                 self.assertEqual(res.precision, p)
 
         # should be able to specify rounding mode directly,
@@ -260,86 +260,86 @@ class BigFloatTests(unittest.TestCase):
                 with precision(p):
                     for op in operations:
                         bf = op(x, value)
-                        self.assertEqual(type(bf), BigFloat)
+                        self.assertIs(type(bf), BigFloat)
                         self.assertEqual(bf.precision, p)
                         bf = op(value, x)
-                        self.assertEqual(type(bf), BigFloat)
+                        self.assertIs(type(bf), BigFloat)
                         self.assertEqual(bf.precision, p)
 
     def test_bool(self):
         # test __nonzero__ / __bool__
-        self.assertEqual(bool(BigFloat(0)), False)
-        self.assertEqual(bool(BigFloat('-0')), False)
-        self.assertEqual(bool(BigFloat(1.0)), True)
-        self.assertEqual(bool(BigFloat(-123)), True)
-        self.assertEqual(bool(BigFloat('nan')), True)
-        self.assertEqual(bool(BigFloat('inf')), True)
-        self.assertEqual(bool(BigFloat('-inf')), True)
+        self.assertIs(bool(BigFloat(0)), False)
+        self.assertIs(bool(BigFloat('-0')), False)
+        self.assertIs(bool(BigFloat(1.0)), True)
+        self.assertIs(bool(BigFloat(-123)), True)
+        self.assertIs(bool(BigFloat('nan')), True)
+        self.assertIs(bool(BigFloat('inf')), True)
+        self.assertIs(bool(BigFloat('-inf')), True)
 
     def test_classifications(self):
         # test classification functions (is_nan, is_inf, is_zero,
         # is_finite, is_integer, is_negative)
 
         for x in [float('nan'), BigFloat('nan'), float('-nan'), -BigFloat('nan')]:
-            self.assertEqual(is_nan(x), True)
-            self.assertEqual(is_inf(x), False)
-            self.assertEqual(is_zero(x), False)
-            self.assertEqual(is_finite(x), False)
-            self.assertEqual(is_integer(x), False)
-            self.assertEqual(is_regular(x), False)
+            self.assertIs(is_nan(x), True)
+            self.assertIs(is_inf(x), False)
+            self.assertIs(is_zero(x), False)
+            self.assertIs(is_finite(x), False)
+            self.assertIs(is_integer(x), False)
+            self.assertIs(is_regular(x), False)
 
         for x in [float('inf'), float('-inf'), BigFloat('inf'), BigFloat('-inf')]:
-            self.assertEqual(is_nan(x), False)
-            self.assertEqual(is_inf(x), True)
-            self.assertEqual(is_zero(x), False)
-            self.assertEqual(is_finite(x), False)
-            self.assertEqual(is_integer(x), False)
-            self.assertEqual(is_regular(x), False)
+            self.assertIs(is_nan(x), False)
+            self.assertIs(is_inf(x), True)
+            self.assertIs(is_zero(x), False)
+            self.assertIs(is_finite(x), False)
+            self.assertIs(is_integer(x), False)
+            self.assertIs(is_regular(x), False)
 
         for x in [0, 0L, float('0.0'), float('-0.0'), BigFloat('0.0'), BigFloat('-0.0')]:
-            self.assertEqual(is_nan(x), False)
-            self.assertEqual(is_inf(x), False)
-            self.assertEqual(is_zero(x), True)
-            self.assertEqual(is_finite(x), True)
-            self.assertEqual(is_integer(x), True)
-            self.assertEqual(is_regular(x), False)
+            self.assertIs(is_nan(x), False)
+            self.assertIs(is_inf(x), False)
+            self.assertIs(is_zero(x), True)
+            self.assertIs(is_finite(x), True)
+            self.assertIs(is_integer(x), True)
+            self.assertIs(is_regular(x), False)
 
         for x in [-31L, -5.13, BigFloat('-2.34e1000')]:
-            self.assertEqual(is_nan(x), False)
-            self.assertEqual(is_inf(x), False)
-            self.assertEqual(is_zero(x), False)
-            self.assertEqual(is_finite(x), True)
-            self.assertEqual(is_regular(x), True)
-            self.assertEqual(is_negative(x), True)
+            self.assertIs(is_nan(x), False)
+            self.assertIs(is_inf(x), False)
+            self.assertIs(is_zero(x), False)
+            self.assertIs(is_finite(x), True)
+            self.assertIs(is_regular(x), True)
+            self.assertIs(is_negative(x), True)
 
         for x in [2, 24.0, BigFloat('1e-1000')]:
-            self.assertEqual(is_nan(x), False)
-            self.assertEqual(is_inf(x), False)
-            self.assertEqual(is_zero(x), False)
-            self.assertEqual(is_finite(x), True)
-            self.assertEqual(is_regular(x), True)
-            self.assertEqual(is_negative(x), False)
+            self.assertIs(is_nan(x), False)
+            self.assertIs(is_inf(x), False)
+            self.assertIs(is_zero(x), False)
+            self.assertIs(is_finite(x), True)
+            self.assertIs(is_regular(x), True)
+            self.assertIs(is_negative(x), False)
 
         # test is_integer for finite nonzero values
         for x in [2, -31L, 24.0, BigFloat('1e100'), sqrt(BigFloat('2e100'))]:
-            self.assertEqual(is_integer(x), True)
+            self.assertIs(is_integer(x), True)
 
         for x in [2.1, BigFloat(-1.345), sqrt(BigFloat(2))]:
-            self.assertEqual(is_integer(x), False)
+            self.assertIs(is_integer(x), False)
 
         # test is_negative
         for x in [float('-inf'), float('-0.0'), BigFloat('-inf'), BigFloat('-0.0'),
                   BigFloat(-2.3), -31, -1L]:
-            self.assertEqual(is_negative(x), True)
+            self.assertIs(is_negative(x), True)
 
         for x in [float('inf'), BigFloat('inf'), float('0.0'), 0, 0L, 2L, 123,
                   BigFloat(1.23)]:
-            self.assertEqual(is_negative(x), False)
+            self.assertIs(is_negative(x), False)
 
         # test signs of NaNs.  (Warning: the MPFR library doesn't guarantee much
         # here;  these tests may break.)
-        self.assertEqual(is_negative(BigFloat('nan')), False)
-        self.assertEqual(is_negative(-BigFloat('nan')), True)
+        self.assertIs(is_negative(BigFloat('nan')), False)
+        self.assertIs(is_negative(-BigFloat('nan')), True)
 
 
     def test_comparisons(self):
@@ -385,44 +385,44 @@ class BigFloatTests(unittest.TestCase):
                 UN_PAIRS.append((n1, n2))
 
         for x, y in LT_PAIRS:
-            self.assertEqual(x < y, True)
-            self.assertEqual(x <= y, True)
-            self.assertEqual(x != y, True)
-            self.assertEqual(x > y, False)
-            self.assertEqual(x >= y, False)
-            self.assertEqual(x == y, False)
-            self.assertEqual(lessgreater(x, y), True)
-            self.assertEqual(unordered(x, y), False)
+            self.assertIs(x < y, True)
+            self.assertIs(x <= y, True)
+            self.assertIs(x != y, True)
+            self.assertIs(x > y, False)
+            self.assertIs(x >= y, False)
+            self.assertIs(x == y, False)
+            self.assertIs(lessgreater(x, y), True)
+            self.assertIs(unordered(x, y), False)
 
         for x, y in EQ_PAIRS:
-            self.assertEqual(x <= y, True)
-            self.assertEqual(x >= y, True)
-            self.assertEqual(x == y, True)
-            self.assertEqual(x < y, False)
-            self.assertEqual(x > y, False)
-            self.assertEqual(x != y, False)
-            self.assertEqual(lessgreater(x, y), False)
-            self.assertEqual(unordered(x, y), False)
+            self.assertIs(x <= y, True)
+            self.assertIs(x >= y, True)
+            self.assertIs(x == y, True)
+            self.assertIs(x < y, False)
+            self.assertIs(x > y, False)
+            self.assertIs(x != y, False)
+            self.assertIs(lessgreater(x, y), False)
+            self.assertIs(unordered(x, y), False)
 
         for x, y in GT_PAIRS:
-            self.assertEqual(x > y, True)
-            self.assertEqual(x >= y, True)
-            self.assertEqual(x != y, True)
-            self.assertEqual(x < y, False)
-            self.assertEqual(x <= y, False)
-            self.assertEqual(x == y, False)
-            self.assertEqual(lessgreater(x, y), True)
-            self.assertEqual(unordered(x, y), False)
+            self.assertIs(x > y, True)
+            self.assertIs(x >= y, True)
+            self.assertIs(x != y, True)
+            self.assertIs(x < y, False)
+            self.assertIs(x <= y, False)
+            self.assertIs(x == y, False)
+            self.assertIs(lessgreater(x, y), True)
+            self.assertIs(unordered(x, y), False)
 
         for x, y in UN_PAIRS:
-            self.assertEqual(x < y, False)
-            self.assertEqual(x <= y, False)
-            self.assertEqual(x > y, False)
-            self.assertEqual(x >= y, False)
-            self.assertEqual(x == y, False)
-            self.assertEqual(x != y, True)
-            self.assertEqual(lessgreater(x, y), False)
-            self.assertEqual(unordered(x, y), True)
+            self.assertIs(x < y, False)
+            self.assertIs(x <= y, False)
+            self.assertIs(x > y, False)
+            self.assertIs(x >= y, False)
+            self.assertIs(x == y, False)
+            self.assertIs(x != y, True)
+            self.assertIs(lessgreater(x, y), False)
+            self.assertIs(unordered(x, y), True)
 
     def test_creation_from_integer(self):
         test_values = [-23, 0, 100, 7**100, -23L, 0L, 100L]
@@ -431,11 +431,11 @@ class BigFloatTests(unittest.TestCase):
             for p in test_precisions:
                 with precision(p):
                     bf = BigFloat(value)
-                    self.assertEqual(type(bf), BigFloat)
+                    self.assertIs(type(bf), BigFloat)
                     self.assertEqual(bf.precision, p)
                 # check directly-supplied context
                 bf = BigFloat(value, precision(p))
-                self.assertEqual(type(bf), BigFloat)
+                self.assertIs(type(bf), BigFloat)
                 self.assertEqual(bf.precision, p)
 
     def test_creation_from_float(self):
@@ -446,11 +446,11 @@ class BigFloatTests(unittest.TestCase):
             for p in test_precisions:
                 with precision(p):
                     bf = BigFloat(value)
-                    self.assertEqual(type(bf), BigFloat)
+                    self.assertIs(type(bf), BigFloat)
                     self.assertEqual(bf.precision, p)
                 # check directly-supplied context
                 bf = BigFloat(value, precision(p))
-                self.assertEqual(type(bf), BigFloat)
+                self.assertIs(type(bf), BigFloat)
                 self.assertEqual(bf.precision, p)
 
         # check directly-supplied rounding mode
@@ -475,11 +475,11 @@ class BigFloatTests(unittest.TestCase):
             for p in test_precisions:
                 with precision(p):
                     bf = BigFloat(value)
-                    self.assertEqual(type(bf), BigFloat)
+                    self.assertIs(type(bf), BigFloat)
                     self.assertEqual(bf.precision, p)
                 # check directly-supplied context
                 bf = BigFloat(value, precision(p))
-                self.assertEqual(type(bf), BigFloat)
+                self.assertIs(type(bf), BigFloat)
                 self.assertEqual(bf.precision, p)
 
         # check that rounding mode affects the conversion
@@ -519,11 +519,11 @@ class BigFloatTests(unittest.TestCase):
             for p in test_precisions:
                 with precision(p):
                     bf = BigFloat(value)
-                    self.assertEqual(type(bf), BigFloat)
+                    self.assertIs(type(bf), BigFloat)
                     self.assertEqual(bf.precision, p)
                 # check directly-supplied context
                 bf = BigFloat(value, precision(p))
-                self.assertEqual(type(bf), BigFloat)
+                self.assertIs(type(bf), BigFloat)
                 self.assertEqual(bf.precision, p)
 
     def test_exact_context_independent(self):
@@ -562,7 +562,7 @@ class BigFloatTests(unittest.TestCase):
             for p in test_precisions:
                 with precision(p):
                     bf = BigFloat.exact(value)
-                    self.assertEqual(type(bf), BigFloat)
+                    self.assertIs(type(bf), BigFloat)
                     # check that conversion back to an int recovers
                     # the same value, regardless of the precision of
                     # the current context
@@ -579,7 +579,7 @@ class BigFloatTests(unittest.TestCase):
             for p in test_precisions:
                 with precision(p):
                     bf = BigFloat.exact(value)
-                    self.assertEqual(type(bf), BigFloat)
+                    self.assertIs(type(bf), BigFloat)
                     # check that conversion back to float recovers
                     # the same value
                     self.assertIdenticalFloat(float(bf), value)
@@ -600,7 +600,7 @@ class BigFloatTests(unittest.TestCase):
             for p in test_precisions:
                 with precision(p):
                     bf = BigFloat.exact(value, precision=p)
-                    self.assertEqual(type(bf), BigFloat)
+                    self.assertIs(type(bf), BigFloat)
                     self.assertEqual(bf.precision, p)
 
         # check that rounding-mode doesn't affect the conversion
