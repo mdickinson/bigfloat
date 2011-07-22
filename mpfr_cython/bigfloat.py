@@ -518,18 +518,10 @@ _rounding_mode_dict = {
 }
 
 
-def _fit_to_context(f, args, context):
-    """ Fit an Mpfr instance (at the correct precision) to the given context.
-
-    Given an Mpfr instance 'bf', and a context 'context',
-    return an Mpfr instance fit to the current context.
-
-    Here 'bf' resulted from a computation performed at the
-    context precision, but with no bound on exponent range,
-    and no subnormalization.
-
-    The value 'ternary' supplies the ternary value result of the operation that
-    produced this Mpfr instance.
+def _apply_function_in_context(f, args, context):
+    """ Apply an MPFR function 'f' to the given arguments 'args', rounding to
+    the given context.  Returns a new Mpfr object with precision taken from
+    the current context.
 
     """
     rounding = _rounding_mode_dict[context.rounding]
@@ -566,7 +558,7 @@ def _wrap_constant(f, name=None):
         else:
             context = current_context
 
-        bf = _fit_to_context(f, (), context)
+        bf = _apply_function_in_context(f, (), context)
         return BigFloat._from_Mpfr(bf)
 
     if name is None:
@@ -585,7 +577,7 @@ def _wrap_unary_function(f, name=None):
             context = current_context
 
         args = (BigFloat._implicit_convert(op)._value,)
-        bf = _fit_to_context(f, args, context)
+        bf = _apply_function_in_context(f, args, context)
         return BigFloat._from_Mpfr(bf)
 
     if name is None:
@@ -607,7 +599,7 @@ def _wrap_binary_function(f, name=None):
             BigFloat._implicit_convert(op1)._value,
             BigFloat._implicit_convert(op2)._value,
         )
-        bf = _fit_to_context(f, args, context)
+        bf = _apply_function_in_context(f, args, context)
         return BigFloat._from_Mpfr(bf)
 
     if name is None:
@@ -1192,7 +1184,7 @@ def _set_d(x, context=None):
     else:
         context = current_context
     
-    bf = _fit_to_context(mpfr.mpfr_set_d, (x,), context)
+    bf = _apply_function_in_context(mpfr.mpfr_set_d, (x,), context)
     return BigFloat._from_Mpfr(bf)
 
 def set_str2(s, base, context=None):
@@ -1202,7 +1194,7 @@ def set_str2(s, base, context=None):
     else:
         context = current_context
     
-    bf = _fit_to_context(mpfr_set_str2, (s, base), context)
+    bf = _apply_function_in_context(mpfr_set_str2, (s, base), context)
     return BigFloat._from_Mpfr(bf)
     
 
