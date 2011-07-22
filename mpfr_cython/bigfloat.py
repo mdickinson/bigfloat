@@ -77,6 +77,15 @@ __all__ = [
     'exp',
     'log',
     'log2',
+
+    # predicates
+    'is_nan',
+    'is_inf',
+    'is_zero',
+    'is_finite',
+    'is_integer',
+    'is_regular',
+    'is_negative',
 ]
 
 import sys as _sys
@@ -606,13 +615,6 @@ def _wrap_binary_function(f, name=None):
         name = f.__name__[len('mpfr_'):]
     wrapped_f.__name__ = name
     wrapped_f.__doc__ = f.__doc__
-    return wrapped_f
-
-def _wrap_unary_predicate(f):
-    def wrapped_f(op):
-        return f(
-            BigFloat._implicit_convert(op)._value,
-        )
     return wrapped_f
 
 def _wrap_binary_predicate(f):
@@ -1225,15 +1227,55 @@ pow = _wrap_binary_function(mpfr.mpfr_pow)
 mod = _wrap_binary_function(mpfr.mpfr_fmod, name='mod')
 
 
-# Wrap predicates
-is_nan = _wrap_unary_predicate(mpfr.mpfr_nan_p)
-is_inf = _wrap_unary_predicate(mpfr.mpfr_inf_p)
-is_zero = _wrap_unary_predicate(mpfr.mpfr_zero_p)
-is_finite = _wrap_unary_predicate(mpfr.mpfr_number_p)
-is_integer = _wrap_unary_predicate(mpfr.mpfr_integer_p)
-is_negative = _wrap_unary_predicate(mpfr.mpfr_signbit)
-is_inf = _wrap_unary_predicate(mpfr.mpfr_inf_p)
-is_regular = _wrap_unary_predicate(mpfr.mpfr_regular_p)
+# Predicates
+def is_nan(x):
+    """ Return True if x is a NaN, else False. """
+
+    x = BigFloat._implicit_convert(x)._value
+    return mpfr.mpfr_nan_p(x)
+
+def is_inf(x):
+    """ Return True if x is an infinity, else False. """
+
+    x = BigFloat._implicit_convert(x)._value
+    return mpfr.mpfr_inf_p(x)
+
+def is_zero(x):
+    """ Return True if x is a zero, else False. """
+
+    x = BigFloat._implicit_convert(x)._value
+    return mpfr.mpfr_zero_p(x)
+
+def is_finite(x):
+    """ Return True if x is finite, else False.
+
+    A BigFloat instance is considered to be finite if it is neither an
+    infinity or a NaN.
+
+    """
+    x = BigFloat._implicit_convert(x)._value
+    return mpfr.mpfr_number_p(x)
+
+def is_integer(x):
+    """ Return True if x is an exact integer, else False. """
+
+    x = BigFloat._implicit_convert(x)._value
+    return mpfr.mpfr_integer_p(x)
+
+def is_regular(x):
+    """ Return True if x is finite and nonzero, else False. """
+
+    x = BigFloat._implicit_convert(x)._value
+    return mpfr.mpfr_regular_p(x)
+
+def is_negative(x):
+    """ Return True if x has its sign bit set, else False.
+
+    Note that this function returns True for negative zeros.
+
+    """
+    x = BigFloat._implicit_convert(x)._value
+    return mpfr.mpfr_signbit(x)
 
 _is_equal = _wrap_binary_predicate(mpfr.mpfr_equal_p)
 _is_greater = _wrap_binary_predicate(mpfr.mpfr_greater_p)

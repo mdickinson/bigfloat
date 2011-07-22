@@ -57,7 +57,7 @@ from bigfloat import (
     const_pi, const_catalan,
 
     # tests
-    is_nan, is_inf, is_zero, is_negative, is_finite, is_integer,
+    is_nan, is_inf, is_zero, is_negative, is_finite, is_integer, is_regular,
 
     # comparisons
     lessgreater, unordered,
@@ -286,6 +286,7 @@ class BigFloatTests(unittest.TestCase):
             self.assertEqual(is_zero(x), False)
             self.assertEqual(is_finite(x), False)
             self.assertEqual(is_integer(x), False)
+            self.assertEqual(is_regular(x), False)
 
         for x in [float('inf'), float('-inf'), BigFloat('inf'), BigFloat('-inf')]:
             self.assertEqual(is_nan(x), False)
@@ -293,6 +294,7 @@ class BigFloatTests(unittest.TestCase):
             self.assertEqual(is_zero(x), False)
             self.assertEqual(is_finite(x), False)
             self.assertEqual(is_integer(x), False)
+            self.assertEqual(is_regular(x), False)
 
         for x in [0, 0L, float('0.0'), float('-0.0'), BigFloat('0.0'), BigFloat('-0.0')]:
             self.assertEqual(is_nan(x), False)
@@ -300,12 +302,23 @@ class BigFloatTests(unittest.TestCase):
             self.assertEqual(is_zero(x), True)
             self.assertEqual(is_finite(x), True)
             self.assertEqual(is_integer(x), True)
+            self.assertEqual(is_regular(x), False)
 
-        for x in [2, -31L, 24.0, -5.13, BigFloat('1e-1000'), BigFloat('-2.34e1000')]:
+        for x in [-31L, -5.13, BigFloat('-2.34e1000')]:
             self.assertEqual(is_nan(x), False)
             self.assertEqual(is_inf(x), False)
             self.assertEqual(is_zero(x), False)
             self.assertEqual(is_finite(x), True)
+            self.assertEqual(is_regular(x), True)
+            self.assertEqual(is_negative(x), True)
+
+        for x in [2, 24.0, BigFloat('1e-1000')]:
+            self.assertEqual(is_nan(x), False)
+            self.assertEqual(is_inf(x), False)
+            self.assertEqual(is_zero(x), False)
+            self.assertEqual(is_finite(x), True)
+            self.assertEqual(is_regular(x), True)
+            self.assertEqual(is_negative(x), False)
 
         # test is_integer for finite nonzero values
         for x in [2, -31L, 24.0, BigFloat('1e100'), sqrt(BigFloat('2e100'))]:
@@ -322,6 +335,11 @@ class BigFloatTests(unittest.TestCase):
         for x in [float('inf'), BigFloat('inf'), float('0.0'), 0, 0L, 2L, 123,
                   BigFloat(1.23)]:
             self.assertEqual(is_negative(x), False)
+
+        # test signs of NaNs.  (Warning: the MPFR library doesn't guarantee much
+        # here;  these tests may break.)
+        self.assertEqual(is_negative(BigFloat('nan')), False)
+        self.assertEqual(is_negative(-BigFloat('nan')), True)
 
 
     def test_comparisons(self):
