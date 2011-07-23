@@ -44,6 +44,7 @@ __all__ = [
     'double_precision', 'quadruple_precision',
     'RoundTiesToEven', 'RoundTowardZero',
     'RoundTowardPositive', 'RoundTowardNegative',
+    'RoundAwayFromZero',
 
     # ... and functions
     'IEEEContext', 'precision', 'extra_precision',
@@ -245,10 +246,11 @@ _Context_attributes = [
 ]
 
 _available_rounding_modes = [
-    'RoundTiesToEven',
-    'RoundTowardPositive',
-    'RoundTowardNegative',
-    'RoundTowardZero',
+    mpfr.MPFR_RNDN,
+    mpfr.MPFR_RNDU,
+    mpfr.MPFR_RNDD,
+    mpfr.MPFR_RNDZ,
+    mpfr.MPFR_RNDA,
 ]
 
 class Context(object):
@@ -357,7 +359,7 @@ class Context(object):
 
 # DefaultContext is the context that the module always starts with.
 DefaultContext = Context(precision=53,
-                         rounding='RoundTiesToEven',
+                         rounding=mpfr.MPFR_RNDN,
                          emax=EMAX_MAX,
                          emin=EMIN_MIN,
                          subnormalize=False)
@@ -368,10 +370,11 @@ EmptyContext = Context()
 
 # provided rounding modes are implemented as contexts, so that
 # they can be used directly in with statements
-RoundTiesToEven = Context(rounding='RoundTiesToEven')
-RoundTowardPositive = Context(rounding='RoundTowardPositive')
-RoundTowardNegative = Context(rounding='RoundTowardNegative')
-RoundTowardZero = Context(rounding='RoundTowardZero')
+RoundTiesToEven = Context(rounding=mpfr.MPFR_RNDN)
+RoundTowardPositive = Context(rounding=mpfr.MPFR_RNDU)
+RoundTowardNegative = Context(rounding=mpfr.MPFR_RNDD)
+RoundTowardZero = Context(rounding=mpfr.MPFR_RNDZ)
+RoundAwayFromZero = Context(rounding=mpfr.MPFR_RNDA)
 
 # Contexts corresponding to IEEE 754-2008 binary interchange formats
 # (see section 3.6 of the standard for details).
@@ -509,27 +512,17 @@ def next_down(x, context=None):
             # apply + one more time to deal with subnormals
             return +y
 
-_rounding_mode_dict = {
-    'RoundTiesToEven': mpfr.MPFR_RNDN,
-    'RoundTowardZero': mpfr.MPFR_RNDZ,
-    'RoundTowardPositive': mpfr.MPFR_RNDU,
-    'RoundTowardNegative': mpfr.MPFR_RNDD,
-    # XXX Add RoundAwayFromZero
-}
-
-
 def _apply_function_in_context(f, args, context):
     """ Apply an MPFR function 'f' to the given arguments 'args', rounding to
     the given context.  Returns a new Mpfr object with precision taken from
     the current context.
 
     """
-    rounding = _rounding_mode_dict[context.rounding]
+    rounding = context.rounding
     bf = mpfr.Mpfr(context.precision)
     args = (bf,) + args + (rounding,)
     ternary = f(*args)
     with eminmax(context.emin, context.emax):
-        rounding = _rounding_mode_dict[context.rounding]
         ternary = mpfr.mpfr_check_range(bf, ternary, rounding)
         if context.subnormalize:
             # mpfr_subnormalize doesn't set underflow and

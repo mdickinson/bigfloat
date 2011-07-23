@@ -22,6 +22,7 @@ import __builtin__
 import unittest
 import operator
 
+import mpfr
 from bigfloat import (
     # main class
     BigFloat,
@@ -38,6 +39,7 @@ from bigfloat import (
     double_precision, quadruple_precision,
     RoundTiesToEven, RoundTowardZero,
     RoundTowardPositive, RoundTowardNegative,
+    RoundAwayFromZero,
 
     # ... and functions
     IEEEContext, precision,
@@ -67,9 +69,15 @@ from bigfloat import _all_flags
 from bigfloat import MPFR_VERSION_MAJOR, MPFR_VERSION_MINOR
 
 all_rounding_modes = [RoundTowardZero, RoundTowardNegative,
-                      RoundTowardPositive, RoundTiesToEven]
-all_rounding_mode_strings = ['RoundTowardZero', 'RoundTowardNegative',
-                             'RoundTowardPositive', 'RoundTiesToEven']
+                      RoundTowardPositive, RoundTiesToEven, RoundAwayFromZero]
+
+all_rounding_mode_strings = [
+    mpfr.MPFR_RNDN,
+    mpfr.MPFR_RNDD,
+    mpfr.MPFR_RNDU,
+    mpfr.MPFR_RNDZ,
+    mpfr.MPFR_RNDA,
+]
 
 
 def diffBigFloat(x, y, match_precisions=True):
@@ -114,7 +122,6 @@ class BigFloatTests(unittest.TestCase):
 
     def test_eminmax(self):
         from bigfloat import eminmax
-        import mpfr
 
         # Failed calls to eminmax shouldn't affect emin or emax.
         original_emin = mpfr.mpfr_get_emin()
@@ -1094,17 +1101,17 @@ class ContextTests(unittest.TestCase):
     def test_hashable(self):
         # create equal but non-identical contexts
         c1 = Context(emin=-999, emax=999, precision=100,
-                     subnormalize=True, rounding='RoundTowardPositive')
-        c2 = (Context(emax=999, emin=-999, rounding='RoundTowardPositive') + 
+                     subnormalize=True, rounding=mpfr.MPFR_RNDU)
+        c2 = (Context(emax=999, emin=-999, rounding=mpfr.MPFR_RNDU) + 
               Context(precision=100, subnormalize=True))
         self.assertEqual(hash(c1), hash(c2))
 
     def test_with(self):
         # check use of contexts in with statements
         c = Context(emin = -123, emax=456, precision=1729,
-                    subnormalize=True, rounding='RoundTowardPositive')
+                    subnormalize=True, rounding=mpfr.MPFR_RNDU)
         d = Context(emin = 0, emax=10585, precision=20,
-                    subnormalize=False, rounding='RoundTowardNegative')
+                    subnormalize=False, rounding=mpfr.MPFR_RNDD)
 
         with c:
             # check nested with
