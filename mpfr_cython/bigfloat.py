@@ -764,7 +764,7 @@ class BigFloat(object):
         if not is_finite(self):
             raise ValueError("Can't convert infinity or nan to integer")
 
-        # XXX Is this right?!  Shouldn't we be rounding towards zero?
+        # Conversion to base 16 is exact, so any rounding mode will do.
         negative, digits, e = mpfr_get_str2(self._value, 16, 0, ROUND_TIES_TO_EVEN)
         n = int(digits, 16)
         e = 4*(e-len(digits))
