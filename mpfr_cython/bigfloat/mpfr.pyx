@@ -197,9 +197,26 @@ def mpfr_strtofr(Mpfr rop not None, bytes s, int base, cmpfr.mpfr_rnd_t rnd):
     return ternary, endindex
 
 def mpfr_get_exp(Mpfr op not None):
+    """
+    Return the exponent of op.
+
+    Return the exponent of op, assuming that op is a non-zero ordinary number
+    and the significand is considered in [1/2, 1). The behavior for NaN,
+    infinity or zero is undefined.
+
+    """
     return cmpfr.mpfr_get_exp(op._value)
 
 def mpfr_set_exp(Mpfr op not None, cmpfr.mpfr_exp_t exp):
+    """
+    Set the exponent of op.
+
+    Set the exponent of op to exp if exp is in the current exponent range (even
+    if x is not a non-zero ordinary number).  If exp is not in the current
+    exponent range, raise ValueError.  The significand is assumed to be in
+    [1/2, 1).
+
+    """
     error_code = cmpfr.mpfr_set_exp(op._value, exp)
     if error_code:
         raise ValueError("exponent not in current exponent range")
@@ -465,35 +482,118 @@ def mpfr_set_d(Mpfr rop not None, double op, cmpfr.mpfr_rnd_t rnd):
     return cmpfr.mpfr_set_d(rop._value, op, rnd)
 
 def mpfr_set_str(Mpfr rop not None, bytes s, int base, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop from a string s.
+
+    Set rop to the value of the string s in base base, rounded in the direction
+    rnd. See the documentation of mpfr_strtofr for a detailed description of
+    the valid string formats. Contrary to mpfr_strtofr, mpfr_set_str requires
+    the whole string to represent a valid floating-point number. This function
+    returns 0 if the entire string up to the final null character is a valid
+    number in base base; otherwise it returns −1, and rop may have
+    changed. Note: it is preferable to use mpfr_strtofr if one wants to
+    distinguish between an infinite rop value coming from an infinite s or from
+    an overflow.
+
+    """
     check_base(base, False)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_set_str(rop._value, s, base, rnd)
 
 # Functions for getting exponent bounds.
 def mpfr_get_emin():
+    """
+    Return smallest exponent allowed.
+
+    Return the (current) smallest and exponent allowed for a floating-point
+    variable. The smallest positive value of a floating-point variable is one
+    half times 2 raised to the smallest exponent.
+
+    """
     return cmpfr.mpfr_get_emin()
 
+def mpfr_get_emax():
+    """
+    Return largest exponent allowed.
+
+    Return the (current) largest exponent allowed for a floating-point
+    variable. The largest positive value of a floating-point variable has the
+    form (1 - epsilon) times 2 raised to the largest exponent, where epsilon
+    depends on the precision of the considered variable.
+
+    """
+    return cmpfr.mpfr_get_emax()
+
 def mpfr_get_emin_min():
+    """
+    Return the minimum exponent allowed for mpfr_set_emin.
+
+    This value is implementation dependent, thus a program using
+    mpfr_set_emin(mpfr_get_emin_min()) may not be portable.
+
+    """
     return cmpfr.mpfr_get_emin_min()
 
 def mpfr_get_emin_max():
+    """
+    Return the maximum exponent allowed for mpfr_set_emin.
+
+    This value is implementation dependent, thus a program using
+    mpfr_set_emin(mpfr_get_emin_max()) may not be portable.
+
+    """
     return cmpfr.mpfr_get_emin_max()
 
-def mpfr_get_emax():
-    return cmpfr.mpfr_get_emax()
-
 def mpfr_get_emax_min():
+    """
+    Return the minimum exponent allowed for mpfr_set_emax.
+
+    This value is implementation dependent, thus a program using
+    mpfr_set_emax(mpfr_get_emax_min()) may not be portable.
+
+    """
     return cmpfr.mpfr_get_emax_min()
 
 def mpfr_get_emax_max():
+    """
+    Return the maximum exponent allowed for mpfr_set_emax.
+
+    This value is implementation dependent, thus a program using
+    mpfr_set_emax(mpfr_get_emax_max()) may not be portable.
+
+    """
     return cmpfr.mpfr_get_emax_max()
 
 def mpfr_set_emin(cmpfr.mpfr_exp_t exp):
+    """
+    Set the smallest exponent allowed for a floating-point variable.
+
+    Raises ValueError when exp is not in the range accepted by the
+    implementation (in that case the smallest exponent is not changed).
+
+    If the user changes the exponent range, it is her/his responsibility to
+    check that all current floating-point variables are in the new allowed
+    range (for example using mpfr_check_range), otherwise the subsequent
+    behavior will be undefined, in the sense of the ISO C standard.
+
+    """
     error_code = cmpfr.mpfr_set_emin(exp)
     if error_code:
         raise ValueError("new exponent for emin is outside allowable range")
 
 def mpfr_set_emax(cmpfr.mpfr_exp_t exp):
+    """
+    Set the largest exponent allowed for a floating-point variable.
+
+    Raises ValueError when exp is not in the range accepted by the
+    implementation (in that case the largest exponent is not changed).
+
+    If the user changes the exponent range, it is her/his responsibility to
+    check that all current floating-point variables are in the new allowed
+    range (for example using mpfr_check_range), otherwise the subsequent
+    behavior will be undefined, in the sense of the ISO C standard.
+
+    """
     error_code = cmpfr.mpfr_set_emax(exp)
     if error_code:
         raise ValueError("new exponent for emin is outside allowable range")
