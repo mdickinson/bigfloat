@@ -1,3 +1,5 @@
+# -*- coding: UTF-8
+
 # Copyright 2009--2011 Mark Dickinson.
 #
 # This file is part of the bigfloat module.
@@ -1195,6 +1197,14 @@ def mod(x, y, context=None):
     """
     Return x reduced modulo y, rounded according to the current context.
 
+    Returns the value of x - n * y, rounded according to the current context,
+    where n is the integer quotient of x divided by y, rounded toward zero.
+
+    Special values are handled as described in Section F.9.7.1 of the ISO C99
+    standard: If x is infinite or y is zero, the result is NaN. If y is
+    infinite and x is finite, the result is x rounded to the current context.
+    If the result is zero, it has the sign of x.
+
     """
     with (context if context is not None else EmptyContext):
         bf = _apply_function_in_context(
@@ -1211,6 +1221,43 @@ def mod(x, y, context=None):
 def pow(x, y, context=None):
     """
     Return x raised to the power y, rounded according to the current context.
+
+    Special values are handled as described in the ISO C99 and IEEE 754-2008
+    standards for the pow function.
+
+      * pow(±0, y) returns plus or minus infinity for y a negative odd integer.
+
+      * pow(±0, y) returns plus infinity for y negative and not an odd integer.
+
+      * pow(±0, y) returns plus or minus zero for y a positive odd integer.
+
+      * pow(±0, y) returns plus zero for y positive and not an odd integer.
+
+      * pow(-1, ±Inf) returns 1.
+
+      * pow(+1, y) returns 1 for any y, even a NaN.
+
+      * pow(x, ±0) returns 1 for any x, even a NaN.
+
+      * pow(x, y) returns NaN for finite negative x and finite non-integer y.
+
+      * pow(x, -Inf) returns plus infinity for 0 < abs(x) < 1, and plus zero
+        for abs(x) > 1.
+
+      * pow(x, +Inf) returns plus zero for 0 < abs(x) < 1, and plus infinity
+        for abs(x) > 1.
+
+      * pow(-Inf, y) returns minus zero for y a negative odd integer.
+
+      * pow(-Inf, y) returns plus zero for y negative and not an odd integer.
+
+      * pow(-Inf, y) returns minus infinity for y a positive odd integer.
+
+      * pow(-Inf, y) returns plus infinity for y positive and not an odd
+        integer.
+
+      * pow(+Inf, y) returns plus zero for y negative, and plus infinity for y
+        positive.
 
     """
     with (context if context is not None else EmptyContext):
