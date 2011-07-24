@@ -927,7 +927,7 @@ def mpfr_nexttoward(Mpfr x not None, Mpfr y not None):
     same sign. No underflow or overflow is generated.
 
     """
-    cmpfr.mpfr_nexttoward(x, y)
+    cmpfr.mpfr_nexttoward(x._value, y._value)
 
 def mpfr_nextabove(Mpfr op not None):
     """
