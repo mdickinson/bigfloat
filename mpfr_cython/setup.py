@@ -8,9 +8,10 @@ setup(
     cmdclass = {'build_ext': build_ext},
     ext_modules = [
         Extension(
-            "mpfr",
-            ["mpfr.pyx"],
+            "bigfloat.mpfr",
+            ["bigfloat/mpfr.pyx"],
             include_dirs = [
+                'bigfloat',
                 # FIXME: replace with something more general.
                 '/opt/local/include',
             ],

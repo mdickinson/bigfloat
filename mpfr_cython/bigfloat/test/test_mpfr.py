@@ -1,6 +1,6 @@
 import unittest
 
-from mpfr import (
+from bigfloat.mpfr import (
     MPFR_RNDN, MPFR_RNDZ, MPFR_RNDU, MPFR_RNDD, MPFR_RNDA,
 
     Mpfr,

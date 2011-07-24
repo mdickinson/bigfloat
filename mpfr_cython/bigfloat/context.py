@@ -1,8 +1,8 @@
 import contextlib as _contextlib
 
-import mpfr
+import bigfloat.mpfr as mpfr
 
-from rounding_mode import (
+from bigfloat.rounding_mode import (
     RoundingMode,
     ROUND_TIES_TO_EVEN,
     ROUND_TOWARD_POSITIVE,

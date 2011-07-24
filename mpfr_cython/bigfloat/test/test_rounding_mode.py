@@ -1,7 +1,7 @@
 import unittest
 
-import mpfr
-from rounding_mode import (
+import bigfloat.mpfr as mpfr
+from bigfloat.rounding_mode import (
     RoundingMode,
     ROUND_TIES_TO_EVEN,
     ROUND_TOWARD_ZERO,
