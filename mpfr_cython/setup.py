@@ -174,8 +174,6 @@ setup(
             ["bigfloat/mpfr.pyx"],
             include_dirs=[
                 'bigfloat',
-                # FIXME: replace with something more general.
-                '/opt/local/include',
             ],
             libraries=[
                 'mpfr', 'gmp',
