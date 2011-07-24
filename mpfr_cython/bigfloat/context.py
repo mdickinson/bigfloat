@@ -21,7 +21,6 @@ EMAX_MIN = max(mpfr.MPFR_EMIN_DEFAULT, mpfr.mpfr_get_emax_min())
 EMIN_MAX = min(mpfr.MPFR_EMAX_DEFAULT, mpfr.mpfr_get_emin_max())
 
 
-
 _Context_attributes = [
     'precision',
     'emin',
@@ -68,15 +67,15 @@ class Context(object):
         precedence."""
 
         return Context(
-            precision = (other.precision
+            precision=(other.precision
                          if other.precision is not None
                          else self.precision),
-            emin = other.emin if other.emin is not None else self.emin,
-            emax = other.emax if other.emax is not None else self.emax,
-            subnormalize = (other.subnormalize
+            emin=other.emin if other.emin is not None else self.emin,
+            emax=other.emax if other.emax is not None else self.emax,
+            subnormalize=(other.subnormalize
                             if other.subnormalize is not None
                             else self.subnormalize),
-            rounding = (other.rounding
+            rounding=(other.rounding
                         if other.rounding is not None
                         else self.rounding),
             )
@@ -94,19 +93,22 @@ class Context(object):
         return hash((self.precision, self.emin, self.emax,
                      self.subnormalize, self.rounding))
 
-
     @property
     def precision(self):
         return self._precision
+
     @property
     def rounding(self):
         return self._rounding
+
     @property
     def emin(self):
         return self._emin
+
     @property
     def emax(self):
         return self._emax
+
     @property
     def subnormalize(self):
         return self._subnormalize
@@ -164,24 +166,29 @@ local = threading.local()
 local.__bigfloat_context__ = DefaultContext
 local.__context_stack__ = []
 
-def getcontext(_local = local):
+
+def getcontext(_local=local):
     return _local.__bigfloat_context__
 
-def setcontext(context, _local = local):
+
+def setcontext(context, _local=local):
     # attributes provided by 'context' override those in the current
     # context; if 'context' doesn't specify a particular attribute,
     # the attribute from the current context shows through
     oldcontext = getcontext()
     _local.__bigfloat_context__ = oldcontext + context
 
-def _pushcontext(context, _local = local):
+
+def _pushcontext(context, _local=local):
     _local.__context_stack__.append(getcontext())
     setcontext(context)
 
-def _popcontext(_local = local):
+
+def _popcontext(_local=local):
     setcontext(_local.__context_stack__.pop())
 
 del threading, local
+
 
 def precision(prec):
     """Return context specifying the given precision.
@@ -191,11 +198,12 @@ def precision(prec):
     """
     return Context(precision=prec)
 
+
 def extra_precision(prec):
     """Return new context equal to the current context, but with
     precision increased by prec."""
     c = getcontext()
-    return Context(precision=c.precision+prec)
+    return Context(precision=c.precision + prec)
 
 
 @_contextlib.contextmanager
@@ -211,6 +219,7 @@ def eminmax(emin, emax):
             mpfr.mpfr_set_emax(old_emax)
     finally:
         mpfr.mpfr_set_emin(old_emin)
+
 
 def _apply_function_in_context(f, args, context):
     """ Apply an MPFR function 'f' to the given arguments 'args', rounding to
@@ -235,7 +244,7 @@ def _apply_function_in_context(f, args, context):
             # flag will already have been set by mpfr_check_range;
             if (mpfr.mpfr_number_p(bf) and
                 not mpfr.mpfr_zero_p(bf) and
-                mpfr.mpfr_get_exp(bf) < context.precision-1+context.emin):
+                mpfr.mpfr_get_exp(bf) < context.precision - 1 + context.emin):
                 mpfr.mpfr_set_underflow()
             ternary = mpfr.mpfr_subnormalize(bf, ternary, rounding)
             if ternary:

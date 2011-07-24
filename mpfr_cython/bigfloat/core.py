@@ -135,21 +135,20 @@ def IEEEContext(bitwidth):
         with DefaultContext + Context(emin=-1, subnormalize=True):
             # log2(bitwidth), rounded to the nearest quarter
             l = log2(bitwidth)
-        precision = 13 + bitwidth - int(4*l)
-
+        precision = 13 + bitwidth - int(4 * l)
 
     emax = 1 << bitwidth - precision - 1
-    return Context(precision=precision,
-                   emin=4-emax-precision,
-                   emax=emax,
-                   subnormalize=True)
+    return Context(
+        precision=precision,
+        emin=4 - emax - precision,
+        emax=emax,
+        subnormalize=True,
+    )
 
 half_precision = IEEEContext(16)
 single_precision = IEEEContext(32)
 double_precision = IEEEContext(64)
 quadruple_precision = IEEEContext(128)
-
-
 
 
 def mpfr_set_str2(rop, s, base, rnd):
@@ -177,7 +176,7 @@ def mpfr_get_str2(rop, base, ndigits, rounding_mode):
     return negative, digits, exp
 
 
-################################################################################
+###############################################################################
 # Context manager to give an easy way to change emin and emax temporarily.
 
 # builtin abs, max, min and pow functions are shadowed by BigFloat
@@ -248,10 +247,13 @@ _bit_length_correction = {
     '0': 4, '1': 3, '2': 2, '3': 2, '4': 1, '5': 1, '6': 1, '7': 1,
     '8': 0, '9': 0, 'a': 0, 'b': 0, 'c': 0, 'd': 0, 'e': 0, 'f': 0,
     }
+
+
 def _bit_length(n):
     """Bit length of an integer"""
     hex_n = '%x' % _builtin_abs(n)
     return 4 * len(hex_n) - _bit_length_correction[hex_n[0]]
+
 
 def _format_finite(negative, digits, dot_pos):
     """Given a (possibly empty) string of digits and an integer
@@ -267,19 +269,20 @@ def _format_finite(negative, digits, dot_pos):
     # value is 0.digits * 10**dot_pos
     use_exponent = dot_pos <= -4 or dot_pos > len(digits)
     if use_exponent:
-        exp = dot_pos-1 if digits else dot_pos
+        exp = dot_pos - 1 if digits else dot_pos
         dot_pos -= exp
 
     # left pad with zeros, insert decimal point, and add exponent
     if dot_pos <= 0:
-        digits = '0'*(1-dot_pos) + digits
-        dot_pos += 1-dot_pos
+        digits = '0' * (1 - dot_pos) + digits
+        dot_pos += 1 - dot_pos
     assert 1 <= dot_pos <= len(digits)
     if dot_pos < len(digits):
         digits = digits[:dot_pos] + '.' + digits[dot_pos:]
     if use_exponent:
         digits += "e%+d" % exp
     return '-' + digits if negative else digits
+
 
 def next_up(x, context=None):
     """next_up(x): return the least representable float that's
@@ -314,6 +317,7 @@ def next_up(x, context=None):
             # apply + one more time to deal with subnormals
             return +y
 
+
 def next_down(x, context=None):
     """next_down(x): return the greatest representable float that's
     strictly less than x.
@@ -347,6 +351,7 @@ def next_down(x, context=None):
             # apply + one more time to deal with subnormals
             return +y
 
+
 def _wrap_unary_function(f, name=None):
     def wrapped_f(op, context=None):
         current_context = getcontext()
@@ -365,6 +370,7 @@ def _wrap_unary_function(f, name=None):
     wrapped_f.__name__ = name
     wrapped_f.__doc__ = f.__doc__
     return wrapped_f
+
 
 def _wrap_binary_function(f, name=None):
     def wrapped_f(op1, op2, context=None):
@@ -388,6 +394,7 @@ def _wrap_binary_function(f, name=None):
     wrapped_f.__doc__ = f.__doc__
     return wrapped_f
 
+
 def _binop(op):
     def wrapped_op(self, other):
         try:
@@ -397,6 +404,7 @@ def _binop(op):
         return result
     return wrapped_op
 
+
 def _rbinop(op):
     def wrapped_op(self, other):
         try:
@@ -405,6 +413,7 @@ def _rbinop(op):
             result = NotImplemented
         return result
     return wrapped_op
+
 
 class BigFloat(object):
     @classmethod
@@ -465,7 +474,7 @@ class BigFloat(object):
         # wrapping), since its main use is in the testing of that machinery.
 
         # XXX Maybe we should move this function into test_bigfloat
-        bf = mpfr.Mpfr(len(value)*4) # should be sufficient precision
+        bf = mpfr.Mpfr(len(value) * 4)
         ternary = mpfr_set_str2(bf, value, 16, ROUND_TIES_TO_EVEN)
         if ternary:
             # conversion should have been exact, except possibly if
@@ -507,7 +516,7 @@ class BigFloat(object):
         # use Default context, with given precision
         with _saved_flags():
             set_flagstate(set())  # clear all flags
-            with DefaultContext + Context(precision = precision):
+            with DefaultContext + Context(precision=precision):
                 result = BigFloat(value)
             if test_flag(Overflow):
                 raise ValueError("value too large to represent as a BigFloat")
@@ -534,9 +543,14 @@ class BigFloat(object):
             raise ValueError("Can't convert infinity or nan to integer")
 
         # Conversion to base 16 is exact, so any rounding mode will do.
-        negative, digits, e = mpfr_get_str2(self._value, 16, 0, ROUND_TIES_TO_EVEN)
+        negative, digits, e = mpfr_get_str2(
+            self._value,
+            16,
+            0,
+            ROUND_TIES_TO_EVEN,
+        )
         n = int(digits, 16)
-        e = 4*(e-len(digits))
+        e = 4 * (e - len(digits))
         if e >= 0:
             n <<= e
         else:
@@ -637,7 +651,7 @@ class BigFloat(object):
         m = self._significand()
         _, digits, _ = mpfr_get_str2(m._value, 16, 0, ROUND_TIES_TO_EVEN)
         # only print the number of digits that are actually necessary
-        n = 1+(self.precision-1)//4
+        n = 1 + (self.precision - 1) // 4
         assert all(c == '0' for c in digits[n:])
         result = '%s0x0.%sp%+d' % (sign, digits[:n], e)
         return result
@@ -654,14 +668,19 @@ class BigFloat(object):
             return 0, 1
 
         # convert to a hex string, and from there to a fraction
-        negative, digits, e = mpfr_get_str2(self._value, 16, 0, ROUND_TIES_TO_EVEN)
+        negative, digits, e = mpfr_get_str2(
+            self._value,
+            16,
+            0,
+            ROUND_TIES_TO_EVEN,
+        )
         digits = digits.rstrip('0')
 
         # find number of trailing 0 bits in last hex digit
         v = int(digits[-1], 16)
         v &= -v
-        n, d = int(digits, 16)//v, 1
-        e = (e-len(digits) << 2) + {1: 0, 2: 1, 4: 2, 8: 3}[v]
+        n, d = int(digits, 16) // v, 1
+        e = (e - len(digits) << 2) + {1: 0, 2: 1, 4: 2, 8: 3}[v]
 
         # abs(number) now has value n * 2**e, and n is odd
         if e >= 0:
@@ -675,7 +694,12 @@ class BigFloat(object):
         if is_zero(self):
             return '-0' if is_negative(self) else '0'
         elif is_finite(self):
-            negative, digits, e = mpfr_get_str2(self._value, 10, 0, ROUND_TIES_TO_EVEN)
+            negative, digits, e = mpfr_get_str2(
+                self._value,
+                10,
+                0,
+                ROUND_TIES_TO_EVEN,
+            )
             return _format_finite(negative, digits, e)
         elif is_inf(self):
             return '-Infinity' if is_negative(self) else 'Infinity'
@@ -828,7 +852,6 @@ class BigFloat(object):
 
         return negative, digits, -precision
 
-
     def __hash__(self):
         # if self is exactly representable as a float, then its hash
         # should match that of the float.  Note that this covers the
@@ -854,9 +877,9 @@ class BigFloat(object):
         # 2**64-1).
 
         if e >= 0:
-            n = int(digits, 16)*_builtin_pow(16, e, 2**64-1)
+            n = int(digits, 16) * _builtin_pow(16, e, 2 ** 64 - 1)
         else:
-            n = int(digits, 16)*_builtin_pow(2**60, -e, 2**64-1)
+            n = int(digits, 16) * _builtin_pow(2 ** 60, -e, 2 ** 64 - 1)
         return hash(-n if negative else n)
 
     def __ne__(self, other):
@@ -895,15 +918,15 @@ class BigFloat(object):
 Inexact = 'Inexact'
 Overflow = 'Overflow'
 Underflow = 'Underflow'
-NanFlag ='NanFlag'
+NanFlag = 'NanFlag'
 
 _all_flags = set([Inexact, Overflow, Underflow, NanFlag])
 
 _flag_translate = {
-    'underflow' : Underflow,
-    'overflow' : Overflow,
-    'nanflag' : NanFlag,
-    'inexflag' : Inexact,
+    'underflow': Underflow,
+    'overflow': Overflow,
+    'nanflag': NanFlag,
+    'inexflag': Inexact,
 }
 
 _clear_flag_fns = dict((v, getattr(mpfr, 'mpfr_clear_' + k))
@@ -913,11 +936,14 @@ _set_flag_fns = dict((v, getattr(mpfr, 'mpfr_set_' + k))
 _test_flag_fns = dict((v, getattr(mpfr, 'mpfr_' + k + '_p'))
                      for k, v in _flag_translate.items())
 
+
 def test_flag(f):
     return _test_flag_fns[f]()
 
+
 def set_flag(f):
     return _set_flag_fns[f]()
+
 
 def clear_flag(f):
     return _clear_flag_fns[f]()
@@ -925,6 +951,7 @@ def clear_flag(f):
 
 def get_flagstate():
     return set(f for f in _all_flags if test_flag(f))
+
 
 def set_flagstate(flagset):
     # set all flags in the given flag set;  clear all flags not
@@ -934,8 +961,9 @@ def set_flagstate(flagset):
 
     for f in flagset:
         set_flag(f)
-    for f in _all_flags-flagset:
+    for f in _all_flags - flagset:
         clear_flag(f)
+
 
 @_contextlib.contextmanager
 def _saved_flags():
@@ -955,9 +983,10 @@ def _set_d(x, context=None):
         context = current_context + context
     else:
         context = current_context
-    
+
     bf = _apply_function_in_context(mpfr.mpfr_set_d, (x,), context)
     return BigFloat._from_Mpfr(bf)
+
 
 def set_str2(s, base, context=None):
     current_context = getcontext()
@@ -965,12 +994,12 @@ def set_str2(s, base, context=None):
         context = current_context + context
     else:
         context = current_context
-    
+
     bf = _apply_function_in_context(mpfr_set_str2, (s, base), context)
     return BigFloat._from_Mpfr(bf)
-    
 
-def const_log2(context = None):
+
+def const_log2(context=None):
     """
     Return log(2), rounded according to the current context.
 
@@ -986,7 +1015,8 @@ def const_log2(context = None):
         )
         return BigFloat._from_Mpfr(bf)
 
-def const_pi(context = None):
+
+def const_pi(context=None):
     """
     Return Pi, rounded according to the current context.
 
@@ -1002,7 +1032,8 @@ def const_pi(context = None):
         )
         return BigFloat._from_Mpfr(bf)
 
-def const_euler(context = None):
+
+def const_euler(context=None):
     """
     Return Euler's constant, rounded according to the current context.
 
@@ -1019,7 +1050,8 @@ def const_euler(context = None):
         )
         return BigFloat._from_Mpfr(bf)
 
-def const_catalan(context = None):
+
+def const_catalan(context=None):
     """
     Return Catalan's constant, rounded according to the current context.
 
@@ -1034,6 +1066,7 @@ def const_catalan(context = None):
             getcontext()
         )
         return BigFloat._from_Mpfr(bf)
+
 
 pos = _wrap_unary_function(mpfr.mpfr_set, name='pos')
 neg = _wrap_unary_function(mpfr.mpfr_neg)
@@ -1058,17 +1091,20 @@ def is_nan(x):
     x = BigFloat._implicit_convert(x)._value
     return mpfr.mpfr_nan_p(x)
 
+
 def is_inf(x):
     """ Return True if x is an infinity, else False. """
 
     x = BigFloat._implicit_convert(x)._value
     return mpfr.mpfr_inf_p(x)
 
+
 def is_zero(x):
     """ Return True if x is a zero, else False. """
 
     x = BigFloat._implicit_convert(x)._value
     return mpfr.mpfr_zero_p(x)
+
 
 def is_finite(x):
     """ Return True if x is finite, else False.
@@ -1080,17 +1116,20 @@ def is_finite(x):
     x = BigFloat._implicit_convert(x)._value
     return mpfr.mpfr_number_p(x)
 
+
 def is_integer(x):
     """ Return True if x is an exact integer, else False. """
 
     x = BigFloat._implicit_convert(x)._value
     return mpfr.mpfr_integer_p(x)
 
+
 def is_regular(x):
     """ Return True if x is finite and nonzero, else False. """
 
     x = BigFloat._implicit_convert(x)._value
     return mpfr.mpfr_regular_p(x)
+
 
 def is_negative(x):
     """ Return True if x has its sign bit set, else False.
@@ -1100,6 +1139,7 @@ def is_negative(x):
     """
     x = BigFloat._implicit_convert(x)._value
     return mpfr.mpfr_signbit(x)
+
 
 def _is_equal(x, y):
     """
@@ -1112,6 +1152,7 @@ def _is_equal(x, y):
     y = BigFloat._implicit_convert(y)._value
     return mpfr.mpfr_equal_p(x, y)
 
+
 def _is_greater(x, y):
     """
     Return True if op1 > op2 and False otherwise.
@@ -1122,6 +1163,7 @@ def _is_greater(x, y):
     x = BigFloat._implicit_convert(x)._value
     y = BigFloat._implicit_convert(y)._value
     return mpfr.mpfr_greater_p(x, y)
+
 
 def _is_greaterequal(x, y):
     """
@@ -1134,6 +1176,7 @@ def _is_greaterequal(x, y):
     y = BigFloat._implicit_convert(y)._value
     return mpfr.mpfr_greaterequal_p(x, y)
 
+
 def _is_less(x, y):
     """
     Return True if op1 < op2 and False otherwise.
@@ -1144,6 +1187,7 @@ def _is_less(x, y):
     x = BigFloat._implicit_convert(x)._value
     y = BigFloat._implicit_convert(y)._value
     return mpfr.mpfr_less_p(x, y)
+
 
 def _is_lessequal(x, y):
     """
@@ -1156,6 +1200,7 @@ def _is_lessequal(x, y):
     y = BigFloat._implicit_convert(y)._value
     return mpfr.mpfr_lessequal_p(x, y)
 
+
 def lessgreater(x, y):
     """
     Return True if op1 < op2 or op1 > op2 and False otherwise.
@@ -1166,6 +1211,7 @@ def lessgreater(x, y):
     x = BigFloat._implicit_convert(x)._value
     y = BigFloat._implicit_convert(y)._value
     return mpfr.mpfr_lessgreater_p(x, y)
+
 
 def unordered(x, y):
     """
