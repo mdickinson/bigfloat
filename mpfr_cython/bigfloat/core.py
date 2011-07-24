@@ -129,6 +129,14 @@ __all__ = [
 # (see section 3.6 of the standard for details).
 
 def IEEEContext(bitwidth):
+    """ Return IEEE 754-2008 context for a given bit width.
+
+    IEEE 754 specifies standard binary interchange formats with bitwidths
+    16, 32, 64, 128, and all multiples of 32 greater than 128.  This function
+    returns the context corresponding to the interchange format for the given
+    bitwidth.
+
+    """
     try:
         precision = {16: 11, 32: 24, 64: 53, 128: 113}[bitwidth]
     except KeyError:
