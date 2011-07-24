@@ -121,40 +121,6 @@ class BigFloatTests(unittest.TestCase):
     def setUp(self):
         setcontext(DefaultContext)
 
-    def test_eminmax(self):
-        from bigfloat.core import eminmax
-
-        # Failed calls to eminmax shouldn't affect emin or emax.
-        original_emin = mpfr.mpfr_get_emin()
-        original_emax = mpfr.mpfr_get_emax()
-
-        # Call to eminmax should restore original values.
-        with eminmax(-10, 10):
-            self.assertEqual(mpfr.mpfr_get_emin(), -10)
-            self.assertEqual(mpfr.mpfr_get_emax(), 10)
-        self.assertEqual(mpfr.mpfr_get_emin(), original_emin)
-        self.assertEqual(mpfr.mpfr_get_emax(), original_emax)
-
-        # Even erroneous calls should restore originals.
-        with self.assertRaises(OverflowError):
-            with eminmax(-10, 10**100):
-                pass
-        self.assertEqual(mpfr.mpfr_get_emin(), original_emin)
-        self.assertEqual(mpfr.mpfr_get_emax(), original_emax)
-
-        with self.assertRaises(OverflowError):
-            with eminmax(-10**100, 10):
-                pass
-        self.assertEqual(mpfr.mpfr_get_emin(), original_emin)
-        self.assertEqual(mpfr.mpfr_get_emax(), original_emax)
-
-        with self.assertRaises(OverflowError):
-            with eminmax(-10**100, 10**100):
-                pass
-        self.assertEqual(mpfr.mpfr_get_emin(), original_emin)
-        self.assertEqual(mpfr.mpfr_get_emax(), original_emax)
-
-
     def assertIdenticalFloat(self, x, y):
         if not (isinstance(x, float) and isinstance(y, float)):
             raise ValueError("Expected x and y to be floats "

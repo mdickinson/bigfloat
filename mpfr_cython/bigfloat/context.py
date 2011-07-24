@@ -207,7 +207,7 @@ def extra_precision(prec):
 
 
 @_contextlib.contextmanager
-def eminmax(emin, emax):
+def _temporary_exponent_bounds(emin, emax):
     old_emin = mpfr.mpfr_get_emin()
     mpfr.mpfr_set_emin(emin)
     try:
@@ -231,7 +231,7 @@ def _apply_function_in_context(f, args, context):
     bf = mpfr.Mpfr(context.precision)
     args = (bf,) + args + (rounding,)
     ternary = f(*args)
-    with eminmax(context.emin, context.emax):
+    with _temporary_exponent_bounds(context.emin, context.emax):
         ternary = mpfr.mpfr_check_range(bf, ternary, rounding)
         if context.subnormalize:
             # mpfr_subnormalize doesn't set underflow and
