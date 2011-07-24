@@ -44,17 +44,17 @@ from bigfloat.core import (
     # ... and functions
     IEEEContext, precision,
 
-    # get and set current context
-    getcontext, setcontext,
+    # set current context
+    setcontext,
 
     # flags
-    Inexact, Overflow, NanFlag, Underflow,
+    Inexact, Overflow,
     set_flagstate, get_flagstate,
 
     # standard arithmetic functions
     add, sub, mul, div, mod, pow,
 
-    sqrt, exp, next_up, pos,
+    sqrt, exp,
 
     const_log2, const_pi, const_euler, const_catalan,
 

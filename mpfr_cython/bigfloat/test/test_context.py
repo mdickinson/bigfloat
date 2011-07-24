@@ -38,7 +38,7 @@ class ContextTests(unittest.TestCase):
 
     def test_bad_rounding_mode(self):
         with self.assertRaises(ValueError):
-            c = Context(rounding=-1)
+            Context(rounding=-1)
 
     def test_hashable(self):
         # create equal but non-identical contexts

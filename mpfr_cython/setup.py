@@ -3,11 +3,11 @@
 from setuptools import setup, Extension
 from Cython.Distutils import build_ext
 
-DESCRIPTION="""\
+DESCRIPTION = """\
 Arbitrary precision correctly-rounded floating point arithmetic, via MPFR.\
 """
 
-LONG_DESCRIPTION="""\
+LONG_DESCRIPTION = """\
 The ``bigfloat`` package is a Python package providing arbitrary-precision
 correctly-rounded binary floating-point arithmetic.  It is currently
 implemented as a ctypes wrapper around the MPFR library (http://www.mpfr.org).
@@ -76,7 +76,7 @@ is to use Python's ``with`` statement::
 
     >>> with precision(1000):
     ...     print sqrt(2)
-    ... 
+    ...
     1.41421356237309504880168872420969807856967187537694807317667973
     7990732478462107038850387534327641572735013846230912297024924836
     0558507372126441214970999358314132226659275055927557999505011527
@@ -93,11 +93,11 @@ bounds for π, accurate to 53 significant bits::
 
     >>> with RoundTowardPositive:
     ...     const_pi()
-    ... 
+    ...
     BigFloat.exact('3.1415926535897936', precision=53)
     >>> with RoundTowardNegative:
     ...     const_pi()
-    ... 
+    ...
     BigFloat.exact('3.1415926535897931', precision=53)
 
 And as you'd expect, ``with`` statements like those above can be
@@ -105,7 +105,7 @@ nested.  ``Context`` objects can also be combined using addition::
 
     >>> with RoundTowardPositive + precision(24):
     ...     BigFloat(1) / 3
-    ... 
+    ...
     BigFloat.exact('0.333333343', precision=24)
 
 Various ``Context`` objects corresponding to IEEE 754 interchange
@@ -117,7 +117,7 @@ formats are predefined::
     Context(precision=11, emax=16, emin=-23, subnormalize=True)
     >>> with half_precision:
             log(2)
-    ... 
+    ...
     BigFloat.exact('0.69336', precision=11)
 
 
@@ -131,13 +131,13 @@ Links
 """
 
 setup(
-    name = 'BigFloat',
-    version = '0.3.0',
-    description = DESCRIPTION,
-    long_description = LONG_DESCRIPTION,
-    author = 'Mark Dickinson',
-    author_email = 'dickinsm@gmail.com',
-    url = 'http://bitbucket.org/dickinsm/bigfloat',
+    name='BigFloat',
+    version='0.3.0',
+    description=DESCRIPTION,
+    long_description=LONG_DESCRIPTION,
+    author='Mark Dickinson',
+    author_email='dickinsm@gmail.com',
+    url='http://bitbucket.org/dickinsm/bigfloat',
     classifiers=[
         'Development Status :: 3 - Alpha',
         'License :: OSI Approved :: '
@@ -145,27 +145,27 @@ setup(
         'Programming Language :: Python',
         'Topic :: Scientific/Engineering :: Mathematics',
     ],
-    platforms = [
+    platforms=[
         'Linux',
         'OS X',
     ],
-    license = 'GNU Library or Lesser General Public License (LGPL)',
-    cmdclass = {'build_ext': build_ext},
-    ext_modules = [
+    license='GNU Library or Lesser General Public License (LGPL)',
+    cmdclass={'build_ext': build_ext},
+    ext_modules=[
         Extension(
             "bigfloat.mpfr",
             ["bigfloat/mpfr.pyx"],
-            include_dirs = [
+            include_dirs=[
                 'bigfloat',
                 # FIXME: replace with something more general.
                 '/opt/local/include',
             ],
-            libraries = [
+            libraries=[
                 'mpfr', 'gmp',
             ],
         ),
     ],
-    packages = [
+    packages=[
         'bigfloat',
         'bigfloat.test',
     ]

@@ -25,12 +25,10 @@ import contextlib as _contextlib
 import bigfloat.mpfr as mpfr
 
 from bigfloat.rounding_mode import (
-    RoundingMode,
     ROUND_TIES_TO_EVEN,
+    ROUND_TOWARD_ZERO,
     ROUND_TOWARD_POSITIVE,
     ROUND_TOWARD_NEGATIVE,
-    ROUND_TOWARD_ZERO,
-    ROUND_AWAY_FROM_ZERO,
 )
 
 from bigfloat.context import (
@@ -44,13 +42,11 @@ from bigfloat.context import (
     RoundTowardZero,
     RoundAwayFromZero,
 
-    precision,
     extra_precision,
 
     getcontext,
     setcontext,
 
-    eminmax,
     _apply_function_in_context,
 )
 
@@ -82,7 +78,7 @@ __all__ = [
     'RoundAwayFromZero',
 
     # ... and functions
-    'IEEEContext', 'precision', 'extra_precision',
+    'IEEEContext', 'extra_precision',
 
     # get and set current context
     'getcontext', 'setcontext',
