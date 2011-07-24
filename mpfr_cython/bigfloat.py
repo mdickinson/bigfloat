@@ -544,24 +544,6 @@ def _apply_function_in_context(f, args, context):
     return bf
 
 
-def _wrap_constant(f, name=None):
-    def wrapped_f(context=None):
-        current_context = getcontext()
-        if context is not None:
-            context = current_context + context
-        else:
-            context = current_context
-
-        bf = _apply_function_in_context(f, (), context)
-        return BigFloat._from_Mpfr(bf)
-
-    if name is None:
-        assert f.__name__.startswith('mpfr_')
-        name = f.__name__[len('mpfr_'):]
-    wrapped_f.__name__ = name
-    wrapped_f.__doc__ = f.__doc__
-    return wrapped_f
-
 def _wrap_unary_function(f, name=None):
     def wrapped_f(op, context=None):
         current_context = getcontext()
@@ -1185,10 +1167,70 @@ def set_str2(s, base, context=None):
     return BigFloat._from_Mpfr(bf)
     
 
-const_log2 = _wrap_constant(mpfr.mpfr_const_log2)
-const_pi = _wrap_constant(mpfr.mpfr_const_pi)
-const_euler = _wrap_constant(mpfr.mpfr_const_euler)
-const_catalan = _wrap_constant(mpfr.mpfr_const_catalan)
+def const_log2(context = None):
+    """
+    Return log(2), rounded according to the current context.
+
+    Returns the natural logarithm of 2 = 0.693..., with precision and rounding
+    mode taken from the current context.
+
+    """
+    with (context if context is not None else EmptyContext):
+        bf = _apply_function_in_context(
+            mpfr.mpfr_const_log2,
+            (),
+            getcontext()
+        )
+        return BigFloat._from_Mpfr(bf)
+
+def const_pi(context = None):
+    """
+    Return Pi, rounded according to the current context.
+
+    Returns Pi = 3.141..., with precision and rounding mode taken from the
+    current context.
+
+    """
+    with (context if context is not None else EmptyContext):
+        bf = _apply_function_in_context(
+            mpfr.mpfr_const_pi,
+            (),
+            getcontext()
+        )
+        return BigFloat._from_Mpfr(bf)
+
+def const_euler(context = None):
+    """
+    Return Euler's constant, rounded according to the current context.
+
+    Returns the value of Euler's constant 0.577..., (also called the
+    Euler-Mascheroni constant) with precision and rounding mode taken from the
+    current context.
+
+    """
+    with (context if context is not None else EmptyContext):
+        bf = _apply_function_in_context(
+            mpfr.mpfr_const_euler,
+            (),
+            getcontext()
+        )
+        return BigFloat._from_Mpfr(bf)
+
+def const_catalan(context = None):
+    """
+    Return Catalan's constant, rounded according to the current context.
+
+    Returns the value of Catalan's constant 0.915..., with precision and
+    rounding mode taken from the current context.
+
+    """
+    with (context if context is not None else EmptyContext):
+        bf = _apply_function_in_context(
+            mpfr.mpfr_const_catalan,
+            (),
+            getcontext()
+        )
+        return BigFloat._from_Mpfr(bf)
 
 pos = _wrap_unary_function(mpfr.mpfr_set, name='pos')
 neg = _wrap_unary_function(mpfr.mpfr_neg)

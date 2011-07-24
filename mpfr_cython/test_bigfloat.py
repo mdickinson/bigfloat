@@ -56,7 +56,7 @@ from bigfloat import (
 
     sqrt, exp, next_up, pos,
 
-    const_pi, const_catalan,
+    const_log2, const_pi, const_euler, const_catalan,
 
     # tests
     is_nan, is_inf, is_zero, is_negative, is_finite, is_integer, is_regular,
@@ -832,6 +832,54 @@ class BigFloatTests(unittest.TestCase):
             self.assertEqual(BigFloat('3e-324'), pow(2, -1074))
             self.assertEqual(BigFloat('7.4e-324'), pow(2, -1074))
             self.assertEqual(BigFloat('7.5e-324'), pow(2, -1073))
+
+    def test_const_log2(self):
+        with double_precision:
+            self.assertEqual(
+                const_log2(),
+                BigFloat.exact('0.69314718055994531', precision=53),
+            )
+
+    def test_const_pi(self):
+        with double_precision:
+            self.assertEqual(
+                const_pi(),
+                BigFloat.exact('3.14159265358979323', precision=53)
+            )
+        with double_precision + RoundTowardNegative:
+            pi_lower = const_pi()
+        with double_precision + RoundTowardPositive:
+            pi_upper = const_pi()
+
+        self.assertLess(pi_lower, pi_upper)
+        # Test passing context argument.
+        with double_precision:
+            self.assertEqual(
+                const_pi(),
+                BigFloat.exact('3.1415926535897932', precision=53),
+            )
+            self.assertEqual(
+                const_pi(context=RoundTowardNegative),
+                pi_lower
+            )
+            self.assertEqual(
+                const_pi(context=RoundTowardPositive),
+                pi_upper
+            )
+
+    def test_const_euler(self):
+        with double_precision:
+            self.assertEqual(
+                const_euler(),
+                BigFloat.exact('0.57721566490153286', precision=53),
+            )
+
+    def test_const_catalan(self):
+        with double_precision:
+            self.assertEqual(
+                const_catalan(),
+                BigFloat.exact('0.91596559417721902', precision=53),
+            )
 
     def test_copy_abs(self):
         x = BigFloat.exact('1234091801830413840192384102394810329481324.3', precision=200)
