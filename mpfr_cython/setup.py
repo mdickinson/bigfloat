@@ -5,6 +5,8 @@ from distutils.extension import Extension
 from Cython.Distutils import build_ext
 
 setup(
+    name = 'BigFloat',
+    version = '0.3.0',
     cmdclass = {'build_ext': build_ext},
     ext_modules = [
         Extension(
@@ -20,4 +22,8 @@ setup(
             ],
         ),
     ],
+    packages = [
+        'bigfloat',
+        'bigfloat.test',
+    ]
 )

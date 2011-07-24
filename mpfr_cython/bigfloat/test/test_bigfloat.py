@@ -23,7 +23,7 @@ import unittest
 import operator
 
 import bigfloat.mpfr as mpfr
-from bigfloat.bigfloat import (
+from bigfloat.core import (
     # main class
     BigFloat,
 
@@ -65,8 +65,8 @@ from bigfloat.bigfloat import (
     lessgreater, unordered,
 )
 
-from bigfloat.bigfloat import _all_flags
-from bigfloat.bigfloat import MPFR_VERSION_MAJOR, MPFR_VERSION_MINOR
+from bigfloat.core import _all_flags
+from bigfloat.core import MPFR_VERSION_MAJOR, MPFR_VERSION_MINOR
 
 all_rounding_modes = [RoundTowardZero, RoundTowardNegative,
                       RoundTowardPositive, RoundTiesToEven, RoundAwayFromZero]
@@ -121,7 +121,7 @@ class BigFloatTests(unittest.TestCase):
         setcontext(DefaultContext)
 
     def test_eminmax(self):
-        from bigfloat.bigfloat import eminmax
+        from bigfloat.core import eminmax
 
         # Failed calls to eminmax shouldn't affect emin or emax.
         original_emin = mpfr.mpfr_get_emin()

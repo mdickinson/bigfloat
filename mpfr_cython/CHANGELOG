@@ -16,3 +16,5 @@ Changes from bigfloat v0.2
   with one valid exponent and one invalid. (eminmax)
 
 - Many more docstrings than originally; better function signatures.
+
+- Split out context, rounding_mode code into their own modules.
