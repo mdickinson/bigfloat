@@ -346,29 +346,6 @@ def next_down(x, context=None):
             return +y
 
 
-def _wrap_binary_function(f, name=None):
-    def wrapped_f(op1, op2, context=None):
-        current_context = getcontext()
-        if context is not None:
-            context = current_context + context
-        else:
-            context = current_context
-
-        args = (
-            BigFloat._implicit_convert(op1)._value,
-            BigFloat._implicit_convert(op2)._value,
-        )
-        bf = _apply_function_in_context(f, args, context)
-        return BigFloat._from_Mpfr(bf)
-
-    if name is None:
-        assert f.__name__.startswith('mpfr_')
-        name = f.__name__[len('mpfr_'):]
-    wrapped_f.__name__ = name
-    wrapped_f.__doc__ = f.__doc__
-    return wrapped_f
-
-
 def _binop(op):
     def wrapped_op(self, other):
         try:
@@ -973,6 +950,8 @@ def set_str2(s, base, context=None):
     return BigFloat._from_Mpfr(bf)
 
 
+# Constants.
+
 def const_log2(context=None):
     """
     Return log(2), rounded according to the current context.
@@ -1142,12 +1121,108 @@ def log2(x, context=None):
         return BigFloat._from_Mpfr(bf)
 
 
-add = _wrap_binary_function(mpfr.mpfr_add)
-sub = _wrap_binary_function(mpfr.mpfr_sub)
-mul = _wrap_binary_function(mpfr.mpfr_mul)
-div = _wrap_binary_function(mpfr.mpfr_div)
-pow = _wrap_binary_function(mpfr.mpfr_pow)
-mod = _wrap_binary_function(mpfr.mpfr_fmod, name='mod')
+# Binary functions.
+
+def add(x, y, context=None):
+    """
+    Return x + y, rounded according to the current context.
+
+    """
+    with (context if context is not None else EmptyContext):
+        bf = _apply_function_in_context(
+            mpfr.mpfr_add,
+            (
+                BigFloat._implicit_convert(x)._value,
+                BigFloat._implicit_convert(y)._value,
+            ),
+            getcontext(),
+        )
+        return BigFloat._from_Mpfr(bf)
+
+
+def sub(x, y, context=None):
+    """
+    Return x - y, rounded according to the current context.
+
+    """
+    with (context if context is not None else EmptyContext):
+        bf = _apply_function_in_context(
+            mpfr.mpfr_sub,
+            (
+                BigFloat._implicit_convert(x)._value,
+                BigFloat._implicit_convert(y)._value,
+            ),
+            getcontext(),
+        )
+        return BigFloat._from_Mpfr(bf)
+
+
+def mul(x, y, context=None):
+    """
+    Return x times y, rounded according to the current context.
+
+    """
+    with (context if context is not None else EmptyContext):
+        bf = _apply_function_in_context(
+            mpfr.mpfr_mul,
+            (
+                BigFloat._implicit_convert(x)._value,
+                BigFloat._implicit_convert(y)._value,
+            ),
+            getcontext(),
+        )
+        return BigFloat._from_Mpfr(bf)
+
+
+def div(x, y, context=None):
+    """
+    Return x divided by y, rounded according to the current context.
+
+    """
+    with (context if context is not None else EmptyContext):
+        bf = _apply_function_in_context(
+            mpfr.mpfr_div,
+            (
+                BigFloat._implicit_convert(x)._value,
+                BigFloat._implicit_convert(y)._value,
+            ),
+            getcontext(),
+        )
+        return BigFloat._from_Mpfr(bf)
+
+
+def mod(x, y, context=None):
+    """
+    Return x reduced modulo y, rounded according to the current context.
+
+    """
+    with (context if context is not None else EmptyContext):
+        bf = _apply_function_in_context(
+            mpfr.mpfr_fmod,
+            (
+                BigFloat._implicit_convert(x)._value,
+                BigFloat._implicit_convert(y)._value,
+            ),
+            getcontext(),
+        )
+        return BigFloat._from_Mpfr(bf)
+
+
+def pow(x, y, context=None):
+    """
+    Return x raised to the power y, rounded according to the current context.
+
+    """
+    with (context if context is not None else EmptyContext):
+        bf = _apply_function_in_context(
+            mpfr.mpfr_pow,
+            (
+                BigFloat._implicit_convert(x)._value,
+                BigFloat._implicit_convert(y)._value,
+            ),
+            getcontext(),
+        )
+        return BigFloat._from_Mpfr(bf)
 
 
 # Predicates
