@@ -1069,9 +1069,48 @@ def const_catalan(context=None):
         return BigFloat._from_Mpfr(bf)
 
 
-pos = _wrap_unary_function(mpfr.mpfr_set, name='pos')
-neg = _wrap_unary_function(mpfr.mpfr_neg)
-abs = _wrap_unary_function(mpfr.mpfr_abs)
+def pos(x, context=None):
+    """
+    Return x, rounded according to the current context.
+
+    """
+    with (context if context is not None else EmptyContext):
+        bf = _apply_function_in_context(
+            mpfr.mpfr_set,
+            (BigFloat._implicit_convert(x)._value,),
+            getcontext(),
+        )
+        return BigFloat._from_Mpfr(bf)
+
+
+def neg(x, context=None):
+    """
+    Return -x, rounded according to the current context.
+
+    """
+    with (context if context is not None else EmptyContext):
+        bf = _apply_function_in_context(
+            mpfr.mpfr_neg,
+            (BigFloat._implicit_convert(x)._value,),
+            getcontext(),
+        )
+        return BigFloat._from_Mpfr(bf)
+
+
+def abs(x, context=None):
+    """
+    Return abs(x), rounded according to the current context.
+
+    """
+    with (context if context is not None else EmptyContext):
+        bf = _apply_function_in_context(
+            mpfr.mpfr_abs,
+            (BigFloat._implicit_convert(x)._value,),
+            getcontext(),
+        )
+        return BigFloat._from_Mpfr(bf)
+
+
 sqrt = _wrap_unary_function(mpfr.mpfr_sqrt)
 exp = _wrap_unary_function(mpfr.mpfr_exp)
 log = _wrap_unary_function(mpfr.mpfr_log)
