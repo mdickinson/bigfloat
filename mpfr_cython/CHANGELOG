@@ -1,0 +1,16 @@
+Changes from bigfloat v0.2
+--------------------------
+
+- Rewrote core to use Cython rather than ctypes.
+
+- mpfr module now separately available as an extension type, with semantics very close
+  to the Mpfr library.
+
+- Added bigfloat support for new rounding mode MPFR_RNDA (round away from zero).
+
+- Rounding modes are now represented as named integers (instances of
+  RoundingMode, an int subclass), rather than strings.  This allows them to be passed
+  directly to Mpfr functions.
+
+- Fixed a bug that meant old context wasn't restored when changing exponents
+  with one valid exponent and one invalid. (eminmax)
