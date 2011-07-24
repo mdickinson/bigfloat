@@ -373,7 +373,10 @@ def mpfr_mul(Mpfr rop not None, Mpfr op1 not None, Mpfr op2 not None,
 
 def mpfr_div(Mpfr rop not None, Mpfr op1 not None, Mpfr op2 not None,
              cmpfr.mpfr_rnd_t rnd):
-    """ Set rop to op1 divided by op2, rounded in the direction rnd. """
+    """
+    Set rop to op1 divided by op2, rounded in the direction rnd.
+
+    """
     check_rounding_mode(rnd)
     return cmpfr.mpfr_div(rop._value, op1._value, op2._value, rnd)
 
