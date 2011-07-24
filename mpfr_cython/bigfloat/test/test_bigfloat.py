@@ -23,6 +23,7 @@ import unittest
 import operator
 
 import bigfloat.mpfr as mpfr
+import bigfloat.core
 from bigfloat.core import (
     # main class
     BigFloat,
@@ -1160,7 +1161,7 @@ def process_lines(lines):
             # now we've got a line that should be processed; possibly
             # a directive
             if l.startswith('context '):
-                context = globals()[l[8:]]
+                context = getattr(bigfloat.core, l[8:])
                 setcontext(context)
                 continue
 
@@ -1168,10 +1169,10 @@ def process_lines(lines):
             # the lhs is a function name followed by arguments, and
             # the rhs is an expected result followed by expected flags
             lhs_pieces, rhs_pieces = map(str.split, l.split('->'))
-            fn = globals()[lhs_pieces[0]]
+            fn = getattr(bigfloat.core, lhs_pieces[0])
             args = [BigFloat._fromhex_exact(arg) for arg in lhs_pieces[1:]]
             expected_result = BigFloat._fromhex_exact(rhs_pieces[0])
-            expected_flags = set(globals()[flag] for flag in rhs_pieces[1:])
+            expected_flags = set(getattr(bigfloat.core, flag) for flag in rhs_pieces[1:])
 
             # reset flags, and compute result
             set_flagstate(set())

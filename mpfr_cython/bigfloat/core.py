@@ -42,6 +42,7 @@ from bigfloat.context import (
     RoundTowardZero,
     RoundAwayFromZero,
 
+    precision,
     extra_precision,
 
     getcontext,
