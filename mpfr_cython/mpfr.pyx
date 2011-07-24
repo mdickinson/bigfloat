@@ -651,24 +651,64 @@ def mpfr_signbit(Mpfr op not None):
     return bool(cmpfr.mpfr_signbit(op._value))
 
 def mpfr_greater_p(Mpfr op1 not None, Mpfr op2 not None):
+    """
+    Return True if op1 > op2 and False otherwise.
+
+    This function returns False whenever op1 and/or op2 is a NaN.
+
+    """
     return bool(cmpfr.mpfr_greater_p(op1._value, op2._value))
 
 def mpfr_greaterequal_p(Mpfr op1 not None, Mpfr op2 not None):
+    """
+    Return True if op1 >= op2 and False otherwise.
+
+    This function returns False whenever op1 and/or op2 is a NaN.
+
+    """
     return bool(cmpfr.mpfr_greaterequal_p(op1._value, op2._value))
 
 def mpfr_less_p(Mpfr op1 not None, Mpfr op2 not None):
+    """
+    Return True if op1 < op2 and False otherwise.
+
+    This function returns False whenever op1 and/or op2 is a NaN.
+
+    """
     return bool(cmpfr.mpfr_less_p(op1._value, op2._value))
 
 def mpfr_lessequal_p(Mpfr op1 not None, Mpfr op2 not None):
+    """
+    Return True if op1 <= op2 and False otherwise.
+
+    This function returns False whenever op1 and/or op2 is a NaN.
+
+    """
     return bool(cmpfr.mpfr_lessequal_p(op1._value, op2._value))
 
 def mpfr_equal_p(Mpfr op1 not None, Mpfr op2 not None):
+    """
+    Return True if op1 == op2 and False otherwise.
+
+    This function returns False whenever op1 and/or op2 is a NaN.
+
+    """
     return bool(cmpfr.mpfr_equal_p(op1._value, op2._value))
 
 def mpfr_lessgreater_p(Mpfr op1 not None, Mpfr op2 not None):
+    """
+    Return True if op1 < op2 or op1 > op2 and False otherwise.
+
+    This function returns False whenever op1 and/or op2 is a NaN.
+
+    """
     return bool(cmpfr.mpfr_lessgreater_p(op1._value, op2._value))
 
 def mpfr_unordered_p(Mpfr op1 not None, Mpfr op2 not None):
+    """
+    Return True if op1 or op2 is a NaN and False otherwise.
+
+    """
     return bool(cmpfr.mpfr_unordered_p(op1._value, op2._value))
 
 def mpfr_nextabove(Mpfr op not None):

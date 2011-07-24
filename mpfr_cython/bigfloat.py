@@ -611,14 +611,6 @@ def _wrap_binary_function(f, name=None):
     wrapped_f.__doc__ = f.__doc__
     return wrapped_f
 
-def _wrap_binary_predicate(f):
-    def wrapped_f(op1, op2):
-        return f(
-            BigFloat._implicit_convert(op1)._value,
-            BigFloat._implicit_convert(op2)._value,
-        )
-    return wrapped_f
-
 def _binop(op):
     def wrapped_op(self, other):
         try:
@@ -1272,13 +1264,81 @@ def is_negative(x):
     x = BigFloat._implicit_convert(x)._value
     return mpfr.mpfr_signbit(x)
 
-_is_equal = _wrap_binary_predicate(mpfr.mpfr_equal_p)
-_is_greater = _wrap_binary_predicate(mpfr.mpfr_greater_p)
-_is_greaterequal = _wrap_binary_predicate(mpfr.mpfr_greaterequal_p)
-_is_less = _wrap_binary_predicate(mpfr.mpfr_less_p)
-_is_lessequal = _wrap_binary_predicate(mpfr.mpfr_lessequal_p)
-lessgreater = _wrap_binary_predicate(mpfr.mpfr_lessgreater_p)
-unordered = _wrap_binary_predicate(mpfr.mpfr_unordered_p)
+def _is_equal(x, y):
+    """
+    Return True if op1 == op2 and False otherwise.
+
+    This function returns False whenever op1 and/or op2 is a NaN.
+
+    """
+    x = BigFloat._implicit_convert(x)._value
+    y = BigFloat._implicit_convert(y)._value
+    return mpfr.mpfr_equal_p(x, y)
+
+def _is_greater(x, y):
+    """
+    Return True if op1 > op2 and False otherwise.
+
+    This function returns False whenever op1 and/or op2 is a NaN.
+
+    """
+    x = BigFloat._implicit_convert(x)._value
+    y = BigFloat._implicit_convert(y)._value
+    return mpfr.mpfr_greater_p(x, y)
+
+def _is_greaterequal(x, y):
+    """
+    Return True if op1 >= op2 and False otherwise.
+
+    This function returns False whenever op1 and/or op2 is a NaN.
+
+    """
+    x = BigFloat._implicit_convert(x)._value
+    y = BigFloat._implicit_convert(y)._value
+    return mpfr.mpfr_greaterequal_p(x, y)
+
+def _is_less(x, y):
+    """
+    Return True if op1 < op2 and False otherwise.
+
+    This function returns False whenever op1 and/or op2 is a NaN.
+
+    """
+    x = BigFloat._implicit_convert(x)._value
+    y = BigFloat._implicit_convert(y)._value
+    return mpfr.mpfr_less_p(x, y)
+
+def _is_lessequal(x, y):
+    """
+    Return True if op1 <= op2 and False otherwise.
+
+    This function returns False whenever op1 and/or op2 is a NaN.
+
+    """
+    x = BigFloat._implicit_convert(x)._value
+    y = BigFloat._implicit_convert(y)._value
+    return mpfr.mpfr_lessequal_p(x, y)
+
+def lessgreater(x, y):
+    """
+    Return True if op1 < op2 or op1 > op2 and False otherwise.
+
+    This function returns False whenever op1 and/or op2 is a NaN.
+
+    """
+    x = BigFloat._implicit_convert(x)._value
+    y = BigFloat._implicit_convert(y)._value
+    return mpfr.mpfr_lessgreater_p(x, y)
+
+def unordered(x, y):
+    """
+    Return True if op1 or op2 is a NaN and False otherwise.
+
+    """
+    x = BigFloat._implicit_convert(x)._value
+    y = BigFloat._implicit_convert(y)._value
+    return mpfr.mpfr_unordered_p(x, y)
+
 
 # unary arithmetic operations
 BigFloat.__pos__ = pos
