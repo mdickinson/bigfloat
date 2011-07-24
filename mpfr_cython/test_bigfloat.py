@@ -1080,24 +1080,6 @@ class ContextTests(unittest.TestCase):
         self.assert_(isinstance(c.subnormalize, bool))
         self.assert_(c.rounding in all_rounding_mode_strings)
 
-    #def test_callable(self):
-    #    # check that self is callable
-    #    c = Context(emin = -123, emax=456, precision=1729,
-    #                subnormalize=True, rounding=RoundTowardPositive)
-    #    d = c(precision=400)
-    #    self.assertEqual(d.precision, 400)
-    #    self.assertEqual(d.emax, c.emax)
-    #    self.assertEqual(d.emin, c.emin)
-    #    self.assertEqual(d.subnormalize, c.subnormalize)
-    #    self.assertEqual(d.rounding, c.rounding)
-    #
-    #    e = c(emax=16384, rounding=RoundTowardZero)
-    #    self.assertEqual(e.precision, c.precision)
-    #    self.assertEqual(e.emax, 16384)
-    #    self.assertEqual(e.emin, c.emin)
-    #    self.assertEqual(e.rounding, RoundTowardZero)
-    #    self.assertEqual(e.subnormalize, c.subnormalize)
-
     def test_bad_rounding_mode(self):
         with self.assertRaises(ValueError):
             c = Context(rounding=-1)
