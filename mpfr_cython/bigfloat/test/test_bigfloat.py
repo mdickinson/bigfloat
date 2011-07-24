@@ -22,9 +22,9 @@ import __builtin__
 import unittest
 import operator
 
-import bigfloat.mpfr as mpfr
-import bigfloat.core
-from bigfloat.core import (
+import bigfloat
+
+from bigfloat import (
     # main class
     BigFloat,
 
@@ -64,22 +64,16 @@ from bigfloat.core import (
 
     # comparisons
     lessgreater, unordered,
-)
 
-from bigfloat.core import _all_flags
-from bigfloat.core import MPFR_VERSION_MAJOR, MPFR_VERSION_MINOR
+    # List of all flags
+    _all_flags,
+
+    # Version information
+    MPFR_VERSION_MAJOR, MPFR_VERSION_MINOR,
+)
 
 all_rounding_modes = [RoundTowardZero, RoundTowardNegative,
                       RoundTowardPositive, RoundTiesToEven, RoundAwayFromZero]
-
-all_rounding_mode_strings = [
-    mpfr.MPFR_RNDN,
-    mpfr.MPFR_RNDD,
-    mpfr.MPFR_RNDU,
-    mpfr.MPFR_RNDZ,
-    mpfr.MPFR_RNDA,
-]
-
 
 def diffBigFloat(x, y, match_precisions=True):
     """Determine whether two BigFloat instances can be considered
@@ -1127,7 +1121,7 @@ def process_lines(lines):
             # now we've got a line that should be processed; possibly
             # a directive
             if l.startswith('context '):
-                context = getattr(bigfloat.core, l[8:])
+                context = getattr(bigfloat, l[8:])
                 setcontext(context)
                 continue
 
@@ -1135,10 +1129,10 @@ def process_lines(lines):
             # the lhs is a function name followed by arguments, and
             # the rhs is an expected result followed by expected flags
             lhs_pieces, rhs_pieces = map(str.split, l.split('->'))
-            fn = getattr(bigfloat.core, lhs_pieces[0])
+            fn = getattr(bigfloat, lhs_pieces[0])
             args = [BigFloat._fromhex_exact(arg) for arg in lhs_pieces[1:]]
             expected_result = BigFloat._fromhex_exact(rhs_pieces[0])
-            expected_flags = set(getattr(bigfloat.core, flag) for flag in rhs_pieces[1:])
+            expected_flags = set(getattr(bigfloat, flag) for flag in rhs_pieces[1:])
 
             # reset flags, and compute result
             set_flagstate(set())
