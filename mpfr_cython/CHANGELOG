@@ -14,3 +14,5 @@ Changes from bigfloat v0.2
 
 - Fixed a bug that meant old context wasn't restored when changing exponents
   with one valid exponent and one invalid. (eminmax)
+
+- Many more docstrings than originally; better function signatures.
