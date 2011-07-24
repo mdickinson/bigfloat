@@ -346,26 +346,6 @@ def next_down(x, context=None):
             return +y
 
 
-def _wrap_unary_function(f, name=None):
-    def wrapped_f(op, context=None):
-        current_context = getcontext()
-        if context is not None:
-            context = current_context + context
-        else:
-            context = current_context
-
-        args = (BigFloat._implicit_convert(op)._value,)
-        bf = _apply_function_in_context(f, args, context)
-        return BigFloat._from_Mpfr(bf)
-
-    if name is None:
-        assert f.__name__.startswith('mpfr_')
-        name = f.__name__[len('mpfr_'):]
-    wrapped_f.__name__ = name
-    wrapped_f.__doc__ = f.__doc__
-    return wrapped_f
-
-
 def _wrap_binary_function(f, name=None):
     def wrapped_f(op1, op2, context=None):
         current_context = getcontext()
@@ -1062,6 +1042,8 @@ def const_catalan(context=None):
         return BigFloat._from_Mpfr(bf)
 
 
+# Unary functions.
+
 def pos(x, context=None):
     """
     Return x, rounded according to the current context.
@@ -1104,10 +1086,61 @@ def abs(x, context=None):
         return BigFloat._from_Mpfr(bf)
 
 
-sqrt = _wrap_unary_function(mpfr.mpfr_sqrt)
-exp = _wrap_unary_function(mpfr.mpfr_exp)
-log = _wrap_unary_function(mpfr.mpfr_log)
-log2 = _wrap_unary_function(mpfr.mpfr_log2)
+def sqrt(x, context=None):
+    """
+    Return the square root of x, rounded according to the current context.
+
+    """
+    with (context if context is not None else EmptyContext):
+        bf = _apply_function_in_context(
+            mpfr.mpfr_sqrt,
+            (BigFloat._implicit_convert(x)._value,),
+            getcontext(),
+        )
+        return BigFloat._from_Mpfr(bf)
+
+
+def exp(x, context=None):
+    """
+    Return the exponential of x, rounded according to the current context.
+
+    """
+    with (context if context is not None else EmptyContext):
+        bf = _apply_function_in_context(
+            mpfr.mpfr_exp,
+            (BigFloat._implicit_convert(x)._value,),
+            getcontext(),
+        )
+        return BigFloat._from_Mpfr(bf)
+
+
+def log(x, context=None):
+    """
+    Return the natural logarithm of x, rounded according to the current context.
+
+    """
+    with (context if context is not None else EmptyContext):
+        bf = _apply_function_in_context(
+            mpfr.mpfr_log,
+            (BigFloat._implicit_convert(x)._value,),
+            getcontext(),
+        )
+        return BigFloat._from_Mpfr(bf)
+
+
+def log2(x, context=None):
+    """
+    Return the base-2 logarithm of x, rounded according to the current context.
+
+    """
+    with (context if context is not None else EmptyContext):
+        bf = _apply_function_in_context(
+            mpfr.mpfr_log2,
+            (BigFloat._implicit_convert(x)._value,),
+            getcontext(),
+        )
+        return BigFloat._from_Mpfr(bf)
+
 
 add = _wrap_binary_function(mpfr.mpfr_add)
 sub = _wrap_binary_function(mpfr.mpfr_sub)
