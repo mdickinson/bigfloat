@@ -91,8 +91,17 @@ __all__ = [
 
 import sys as _sys
 import contextlib as _contextlib
-
 import mpfr
+
+from rounding_mode import (
+    RoundingMode,
+    ROUND_TIES_TO_EVEN,
+    ROUND_TOWARD_POSITIVE,
+    ROUND_TOWARD_NEGATIVE,
+    ROUND_TOWARD_ZERO,
+    ROUND_AWAY_FROM_ZERO,
+)
+
 
 def mpfr_set_str2(rop, s, base, rnd):
     """Set value of rop from the string s, using given base and rounding mode.
@@ -118,23 +127,6 @@ def mpfr_get_str2(rop, base, ndigits, rounding_mode):
         digits = digits[1:]
     return negative, digits, exp
 
-
-################################################################################
-# Rounding modes
-
-ROUND_TIES_TO_EVEN = mpfr.MPFR_RNDN
-ROUND_TOWARD_POSITIVE = mpfr.MPFR_RNDU
-ROUND_TOWARD_NEGATIVE = mpfr.MPFR_RNDD
-ROUND_TOWARD_ZERO = mpfr.MPFR_RNDZ
-ROUND_AWAY_FROM_ZERO = mpfr.MPFR_RNDA
-
-_available_rounding_modes = [
-    ROUND_TIES_TO_EVEN,
-    ROUND_TOWARD_POSITIVE,
-    ROUND_TOWARD_NEGATIVE,
-    ROUND_TOWARD_ZERO,
-    ROUND_AWAY_FROM_ZERO,
-]
 
 ################################################################################
 # Context manager to give an easy way to change emin and emax temporarily.
@@ -280,8 +272,8 @@ class Context(object):
         if emax is not None and not EMAX_MIN <= emax <= EMAX_MAX:
             raise ValueError("exponent bound emax should satisfy "
                              "%d <= emax <= %d" % (EMAX_MIN, EMAX_MAX))
-        if rounding is not None and not rounding in _available_rounding_modes:
-            raise ValueError("unrecognised rounding mode")
+        if rounding is not None:
+            rounding = RoundingMode(rounding)
         if subnormalize is not None and not subnormalize in [False, True]:
             raise ValueError("subnormalize should be either False or True")
         self = object.__new__(cls)
