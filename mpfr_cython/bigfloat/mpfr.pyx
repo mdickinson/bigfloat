@@ -608,57 +608,135 @@ def mpfr_get_prec(Mpfr x not None):
     return cmpfr.mpfr_get_prec(x._value)
 
 def mpfr_setsign(Mpfr rop not None, Mpfr op not None, s, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set the value of rop from op and the sign of rop from s.
+
+    Set the value of rop from op, rounded toward the given direction rnd, then
+    set (resp. clear) its sign bit if s is non-zero (resp. zero), even when op
+    is a NaN.
+
+    """
     s = bool(s)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_setsign(rop._value, op._value, s, rnd)
 
 def mpfr_get_d(Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Convert op to a Python float.
+
+    Convert op to a Python float using the rounding mode rnd. If op is NaN,
+    some fixed NaN (either quiet or signaling) or the result of 0.0/0.0 is
+    returned. If op is ±Inf, an infinity of the same sign or the result of
+    ±1.0/0.0 is returned. If op is zero, this function returns a zero, trying
+    to preserve its sign, if possible.
+
+    """
     check_rounding_mode(rnd)
     return cmpfr.mpfr_get_d(op._value, rnd)
 
 def mpfr_clear_underflow():
+    """
+    Clear the underflow flag.
+
+    """
     cmpfr.mpfr_clear_underflow()
 
 def mpfr_clear_overflow():
+    """
+    Clear the overflow flag.
+
+    """
     cmpfr.mpfr_clear_overflow()
 
 def mpfr_clear_nanflag():
+    """
+    Clear the invalid flag.
+
+    """
     cmpfr.mpfr_clear_nanflag()
 
 def mpfr_clear_inexflag():
+    """
+    Clear the inexact flag.
+
+    """
     cmpfr.mpfr_clear_inexflag()
 
 def mpfr_clear_erangeflag():
+    """
+    Clear the erange flag.
+
+    """
     cmpfr.mpfr_clear_erangeflag()
 
 def mpfr_set_underflow():
+    """
+    Set the underflow flag.
+
+    """
     cmpfr.mpfr_set_underflow()
 
 def mpfr_set_overflow():
+    """
+    Set the overflow flag.
+
+    """
     cmpfr.mpfr_set_overflow()
 
 def mpfr_set_nanflag():
+    """
+    Set the invalid flag.
+
+    """
     cmpfr.mpfr_set_nanflag()
 
 def mpfr_set_inexflag():
+    """
+    Set the inexact flag.
+
+    """
     cmpfr.mpfr_set_inexflag()
 
 def mpfr_set_erangeflag():
+    """
+    Set the erange flag.
+
+    """
     cmpfr.mpfr_set_erangeflag()
 
 def mpfr_underflow_p():
+    """
+    Return True if the underflow flag is set, else False.
+
+    """
     return bool(cmpfr.mpfr_underflow_p())
 
 def mpfr_overflow_p():
+    """
+    Return True if the overflow flag is set, else False.
+
+    """
     return bool(cmpfr.mpfr_overflow_p())
 
 def mpfr_nanflag_p():
+    """
+    Return True if the invalid flag is set, else False.
+
+    """
     return bool(cmpfr.mpfr_nanflag_p())
 
 def mpfr_inexflag_p():
+    """
+    Return True if the inexact flag is set, else False.
+
+    """
     return bool(cmpfr.mpfr_inexflag_p())
 
 def mpfr_erangeflag_p():
+    """
+    Return True if the erange flag is set, else False.
+
+    """
     return bool(cmpfr.mpfr_erangeflag_p())
 
 def mpfr_check_range(Mpfr x not None, int t, cmpfr.mpfr_rnd_t rnd):
@@ -735,8 +813,9 @@ def mpfr_inf_p(Mpfr op not None):
 
 def mpfr_number_p(Mpfr op not None):
     """
-    Return True if op is an ordinary number (neither a NaN nor an infinity).
-    Return False otherwise.
+    Return True if op is an ordinary number.  Return False otherwise.
+
+    An ordinary number is a number which is neither a NaN nor an infinity.
 
     """
     return bool(cmpfr.mpfr_number_p(op._value))
@@ -750,8 +829,10 @@ def mpfr_zero_p(Mpfr op not None):
 
 def mpfr_regular_p(Mpfr op not None):
     """
-    Return True if op is a regular number (neither a NaN, nor an infinity, nor
-    zero.)  Return False otherwise.
+    Return True if op is a regular number.  Return False otherwise.
+
+    A regular number is a number which is neither a NaN, nor an infinity, nor a
+    zero.
 
     """
     return bool(cmpfr.mpfr_regular_p(op._value))
@@ -765,8 +846,10 @@ def mpfr_integer_p(Mpfr op not None):
 
 def mpfr_signbit(Mpfr op not None):
     """
-    Return True if op has its sign bit set (that is, if it is negative, -0, or
-    a NaN whose representation has its sign bit set).  Return False otherwise.
+    Return True if op has its sign bit set.  Return False otherwise.
+
+    This function returns True for negative numbers, negative infinity, -0,
+    or a NaN whose representation has its sign bit set.
 
     """
     return bool(cmpfr.mpfr_signbit(op._value))
@@ -832,8 +915,30 @@ def mpfr_unordered_p(Mpfr op1 not None, Mpfr op2 not None):
     """
     return bool(cmpfr.mpfr_unordered_p(op1._value, op2._value))
 
+def mpfr_nexttoward(Mpfr x not None, Mpfr y not None):
+    """
+    Replace x by the next floating-point number in the direction of y.
+
+    If x or y is NaN, set x to NaN. If x and y are equal, x is
+    unchanged. Otherwise, if x is different from y, replace x by the next
+    floating-point number (with the precision of x and the current exponent
+    range) in the direction of y (the infinite values are seen as the smallest
+    and largest floating-point numbers). If the result is zero, it keeps the
+    same sign. No underflow or overflow is generated.
+
+    """
+    cmpfr.mpfr_nexttoward(x, y)
+
 def mpfr_nextabove(Mpfr op not None):
+    """
+    Equivalent to mpfr_nexttoward(op, y) where y is plus infinity.
+
+    """
     cmpfr.mpfr_nextabove(op._value)
 
 def mpfr_nextbelow(Mpfr op not None):
+    """
+    Equivalent to mpfr_nexttoward(op, y) where y is minus infinity.
+
+    """
     cmpfr.mpfr_nextbelow(op._value)
