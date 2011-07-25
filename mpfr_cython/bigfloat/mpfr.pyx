@@ -302,6 +302,17 @@ def mpfr_swap(Mpfr x not None, Mpfr y not None):
     """
     cmpfr.mpfr_swap(&x._value, &y._value)
 
+def mpfr_fits_slong_p(Mpfr x not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Return True if op would fit into a Python int.
+
+    Return True if op would fit into a Python int when rounded to an integer
+    in the direction rnd.
+
+    """
+    check_rounding_mode(rnd)
+    return bool(cmpfr.mpfr_fits_slong_p(&x._value, rnd))
+
 def mpfr_get_exp(Mpfr op not None):
     """
     Return the exponent of op.

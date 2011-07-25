@@ -92,6 +92,8 @@ cdef extern from "mpfr.h":
         mpfr_ptr rop, char *nptr, char **endptr, int base, mpfr_rnd_t rnd
     )
 
+    int mpfr_fits_slong_p(mpfr_ptr x, mpfr_rnd_t rnd)
+
     char * mpfr_get_str(
         char *str, mpfr_exp_t *expptr, int b,
         size_t n, mpfr_ptr op, mpfr_rnd_t rnd

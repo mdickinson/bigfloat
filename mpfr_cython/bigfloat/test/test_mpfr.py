@@ -44,6 +44,8 @@ from bigfloat.mpfr import (
 
     mpfr_swap,
 
+    mpfr_fits_slong_p,
+
     mpfr_neg,
 
     mpfr_add,
@@ -146,6 +148,19 @@ class TestMpfr(unittest.TestCase):
         self.assertEqual(mpfr_get_si(y, MPFR_RNDN), 56789)
         self.assertEqual(mpfr_get_prec(x), 23)
         self.assertEqual(mpfr_get_prec(y), 17)
+
+    def test_fits_slong_p(self):
+        x = Mpfr(64)
+        mpfr_set_si(x, sys.maxint, MPFR_RNDN)
+        self.assertIs(mpfr_fits_slong_p(x, MPFR_RNDN), True)
+
+        x = Mpfr(64)
+        mpfr_set_si(x, -sys.maxint-1, MPFR_RNDN)
+        self.assertIs(mpfr_fits_slong_p(x, MPFR_RNDN), True)
+
+        x = Mpfr(64)
+        mpfr_set_d(x, sys.maxint+1, MPFR_RNDN)
+        self.assertIs(mpfr_fits_slong_p(x, MPFR_RNDN), False)
 
     def test_get_si_and_set_si(self):
         x = Mpfr(64)
