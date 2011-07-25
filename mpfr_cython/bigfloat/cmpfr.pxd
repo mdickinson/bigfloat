@@ -146,6 +146,7 @@ cdef extern from "mpfr.h":
     int mpfr_sub(mpfr_ptr rop, mpfr_ptr op1, mpfr_ptr op2, mpfr_rnd_t rnd)
     int mpfr_mul(mpfr_ptr rop, mpfr_ptr op1, mpfr_ptr op2, mpfr_rnd_t rnd)
     int mpfr_div(mpfr_ptr rop, mpfr_ptr op1, mpfr_ptr op2, mpfr_rnd_t rnd)
+    int mpfr_sqr(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_fmod(mpfr_ptr rop, mpfr_ptr op1, mpfr_ptr op2, mpfr_rnd_t rnd)
     int mpfr_pow(mpfr_ptr rop, mpfr_ptr op1, mpfr_ptr op2, mpfr_rnd_t rnd)
 

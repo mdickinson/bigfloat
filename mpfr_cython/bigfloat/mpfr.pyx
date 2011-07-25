@@ -485,6 +485,13 @@ def mpfr_mul(Mpfr rop not None, Mpfr op1 not None, Mpfr op2 not None,
     check_rounding_mode(rnd)
     return cmpfr.mpfr_mul(&rop._value, &op1._value, &op2._value, rnd)
 
+def mpfr_sqr(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the square of op, rounded in the direction rnd.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_sqr(&rop._value, &op._value, rnd)
 
 
 
