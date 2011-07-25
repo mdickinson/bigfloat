@@ -36,6 +36,7 @@ cdef extern from "mpfr.h":
         cgmp.mp_limb_t   *_mpfr_d
 
     ctypedef __mpfr_struct mpfr_t[1]
+    ctypedef __mpfr_struct *mpfr_ptr
 
     # MPFR rounding modes
     ctypedef enum mpfr_rnd_t:
@@ -64,39 +65,39 @@ cdef extern from "mpfr.h":
     int mpfr_set_emin(mpfr_exp_t exp)
     int mpfr_set_emax(mpfr_exp_t exp)
 
-    mpfr_prec_t mpfr_get_prec(mpfr_t x)
-    int mpfr_setsign(mpfr_t rop, mpfr_t op, int s, mpfr_rnd_t rnd)
+    mpfr_prec_t mpfr_get_prec(mpfr_ptr x)
+    int mpfr_setsign(mpfr_ptr rop, mpfr_ptr op, int s, mpfr_rnd_t rnd)
 
-    double mpfr_get_d(mpfr_t op, mpfr_rnd_t rnd)
+    double mpfr_get_d(mpfr_ptr op, mpfr_rnd_t rnd)
 
     # MPFR function definitions
-    void mpfr_init2(mpfr_t x, mpfr_prec_t prec)
-    void mpfr_clear(mpfr_t x)
-    int mpfr_set(mpfr_t rop, mpfr_t op, mpfr_rnd_t rnd)
-    int mpfr_set_d(mpfr_t rop, double op, mpfr_rnd_t rnd)
+    void mpfr_init2(mpfr_ptr x, mpfr_prec_t prec)
+    void mpfr_clear(mpfr_ptr x)
+    int mpfr_set(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_set_d(mpfr_ptr rop, double op, mpfr_rnd_t rnd)
 
     int mpfr_set_str(
-        mpfr_t rop, char *s, int base, mpfr_rnd_t rnd
+        mpfr_ptr rop, char *s, int base, mpfr_rnd_t rnd
     )
 
     int mpfr_strtofr(
-        mpfr_t rop, char *nptr, char **endptr, int base, mpfr_rnd_t rnd
+        mpfr_ptr rop, char *nptr, char **endptr, int base, mpfr_rnd_t rnd
     )
 
     char * mpfr_get_str(
         char *str, mpfr_exp_t *expptr, int b,
-        size_t n, mpfr_t op, mpfr_rnd_t rnd
+        size_t n, mpfr_ptr op, mpfr_rnd_t rnd
     )
 
     void mpfr_free_str(char *str)
 
-    mpfr_exp_t mpfr_get_exp(mpfr_t x)
-    int mpfr_set_exp(mpfr_t x, mpfr_exp_t exp)
+    mpfr_exp_t mpfr_get_exp(mpfr_ptr x)
+    int mpfr_set_exp(mpfr_ptr x, mpfr_exp_t exp)
 
-    int mpfr_const_log2(mpfr_t rop, mpfr_rnd_t rnd)
-    int mpfr_const_pi(mpfr_t rop, mpfr_rnd_t rnd)
-    int mpfr_const_euler(mpfr_t rop, mpfr_rnd_t rnd)
-    int mpfr_const_catalan(mpfr_t rop, mpfr_rnd_t rnd)
+    int mpfr_const_log2(mpfr_ptr rop, mpfr_rnd_t rnd)
+    int mpfr_const_pi(mpfr_ptr rop, mpfr_rnd_t rnd)
+    int mpfr_const_euler(mpfr_ptr rop, mpfr_rnd_t rnd)
+    int mpfr_const_catalan(mpfr_ptr rop, mpfr_rnd_t rnd)
 
     void mpfr_free_cache()
 
@@ -119,40 +120,40 @@ cdef extern from "mpfr.h":
     int mpfr_inexflag_p()
     int mpfr_erangeflag_p()
 
-    int mpfr_check_range(mpfr_t x, int t, mpfr_rnd_t rnd)
-    int mpfr_subnormalize(mpfr_t x, int t, mpfr_rnd_t rnd)
+    int mpfr_check_range(mpfr_ptr x, int t, mpfr_rnd_t rnd)
+    int mpfr_subnormalize(mpfr_ptr x, int t, mpfr_rnd_t rnd)
 
-    int mpfr_neg(mpfr_t rop, mpfr_t op, mpfr_rnd_t rnd)
-    int mpfr_abs(mpfr_t rop, mpfr_t op, mpfr_rnd_t rnd)
+    int mpfr_neg(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_abs(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
 
-    int mpfr_add(mpfr_t rop, mpfr_t op1, mpfr_t op2, mpfr_rnd_t rnd)
-    int mpfr_sub(mpfr_t rop, mpfr_t op1, mpfr_t op2, mpfr_rnd_t rnd)
-    int mpfr_mul(mpfr_t rop, mpfr_t op1, mpfr_t op2, mpfr_rnd_t rnd)
-    int mpfr_div(mpfr_t rop, mpfr_t op1, mpfr_t op2, mpfr_rnd_t rnd)
-    int mpfr_fmod(mpfr_t rop, mpfr_t op1, mpfr_t op2, mpfr_rnd_t rnd)
-    int mpfr_pow(mpfr_t rop, mpfr_t op1, mpfr_t op2, mpfr_rnd_t rnd)
+    int mpfr_add(mpfr_ptr rop, mpfr_ptr op1, mpfr_ptr op2, mpfr_rnd_t rnd)
+    int mpfr_sub(mpfr_ptr rop, mpfr_ptr op1, mpfr_ptr op2, mpfr_rnd_t rnd)
+    int mpfr_mul(mpfr_ptr rop, mpfr_ptr op1, mpfr_ptr op2, mpfr_rnd_t rnd)
+    int mpfr_div(mpfr_ptr rop, mpfr_ptr op1, mpfr_ptr op2, mpfr_rnd_t rnd)
+    int mpfr_fmod(mpfr_ptr rop, mpfr_ptr op1, mpfr_ptr op2, mpfr_rnd_t rnd)
+    int mpfr_pow(mpfr_ptr rop, mpfr_ptr op1, mpfr_ptr op2, mpfr_rnd_t rnd)
 
-    int mpfr_sqrt(mpfr_t rop, mpfr_t op, mpfr_rnd_t rnd)
-    int mpfr_exp(mpfr_t rop, mpfr_t op, mpfr_rnd_t rnd)
-    int mpfr_log(mpfr_t rop, mpfr_t op, mpfr_rnd_t rnd)
-    int mpfr_log2(mpfr_t rop, mpfr_t op, mpfr_rnd_t rnd)
+    int mpfr_sqrt(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_exp(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_log(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_log2(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
 
-    int mpfr_nan_p(mpfr_t op)
-    int mpfr_inf_p(mpfr_t op)
-    int mpfr_number_p(mpfr_t op)
-    int mpfr_integer_p(mpfr_t op)
-    int mpfr_zero_p(mpfr_t op)
-    int mpfr_regular_p(mpfr_t op)
-    int mpfr_signbit(mpfr_t op)
+    int mpfr_nan_p(mpfr_ptr op)
+    int mpfr_inf_p(mpfr_ptr op)
+    int mpfr_number_p(mpfr_ptr op)
+    int mpfr_integer_p(mpfr_ptr op)
+    int mpfr_zero_p(mpfr_ptr op)
+    int mpfr_regular_p(mpfr_ptr op)
+    int mpfr_signbit(mpfr_ptr op)
 
-    int mpfr_greater_p(mpfr_t op1, mpfr_t op2)
-    int mpfr_greaterequal_p(mpfr_t op1, mpfr_t op2)
-    int mpfr_less_p(mpfr_t op1, mpfr_t op2)
-    int mpfr_lessequal_p(mpfr_t op1, mpfr_t op2)
-    int mpfr_equal_p(mpfr_t op1, mpfr_t op2)
-    int mpfr_lessgreater_p(mpfr_t op1, mpfr_t op2)
-    int mpfr_unordered_p(mpfr_t op1, mpfr_t op2)
+    int mpfr_greater_p(mpfr_ptr op1, mpfr_ptr op2)
+    int mpfr_greaterequal_p(mpfr_ptr op1, mpfr_ptr op2)
+    int mpfr_less_p(mpfr_ptr op1, mpfr_ptr op2)
+    int mpfr_lessequal_p(mpfr_ptr op1, mpfr_ptr op2)
+    int mpfr_equal_p(mpfr_ptr op1, mpfr_ptr op2)
+    int mpfr_lessgreater_p(mpfr_ptr op1, mpfr_ptr op2)
+    int mpfr_unordered_p(mpfr_ptr op1, mpfr_ptr op2)
 
-    void mpfr_nexttoward(mpfr_t rop, mpfr_t op)
-    void mpfr_nextabove(mpfr_t op)
-    void mpfr_nextbelow(mpfr_t op)
+    void mpfr_nexttoward(mpfr_ptr rop, mpfr_ptr op)
+    void mpfr_nextabove(mpfr_ptr op)
+    void mpfr_nextbelow(mpfr_ptr op)
