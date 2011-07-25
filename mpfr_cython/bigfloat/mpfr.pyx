@@ -630,6 +630,151 @@ def mpfr_dim(Mpfr rop not None, Mpfr op1 not None, Mpfr op2 not None,
     return cmpfr.mpfr_dim(&rop._value, &op1._value, &op2._value, rnd)
 
 
+###############################################################################
+# 5.6 Comparison Functions
+###############################################################################
+
+def mpfr_cmp(Mpfr op1 not None, Mpfr op2 not None):
+    """
+    Perform a three-way comparison of op1 and op2.
+
+    Return a positive value if op1 > op2, zero if op1 = op2, and a negative
+    value if op1 < op2. Both op1 and op2 are considered to their full own
+    precision, which may differ. If one of the operands is NaN, set the erange
+    flag and return zero.
+
+    Note: This function may be useful to distinguish the three possible
+    cases. If you need to distinguish two cases only, it is recommended to use
+    the predicate functions (e.g., mpfr_equal_p for the equality) described
+    below; they behave like the IEEE 754 comparisons, in particular when one or
+    both arguments are NaN.
+
+    """
+    return cmpfr.mpfr_cmp(&op1._value, &op2._value)
+
+def mpfr_cmpabs(Mpfr op1 not None, Mpfr op2 not None):
+    """
+    Compare the absolute values of op1 and op2.
+
+    Compare |op1| and |op2|. Return a positive value if |op1| > |op2|, zero if
+    |op1| == |op2|, and a negative value if |op1| < |op2|. If one of the
+    operands is NaN, set the erange flag and return zero.
+
+    """
+    return cmpfr.mpfr_cmpabs(&op1._value, &op2._value)
+
+def mpfr_nan_p(Mpfr op not None):
+    """
+    Return True if op is a NaN.  Return False otherwise.
+
+    """
+    return bool(cmpfr.mpfr_nan_p(&op._value))
+
+def mpfr_inf_p(Mpfr op not None):
+    """
+    Return True if op is an infinity.  Return False otherwise.
+
+    """
+    return bool(cmpfr.mpfr_inf_p(&op._value))
+
+def mpfr_number_p(Mpfr op not None):
+    """
+    Return True if op is an ordinary number.  Return False otherwise.
+
+    An ordinary number is a number which is neither a NaN nor an infinity.
+
+    """
+    return bool(cmpfr.mpfr_number_p(&op._value))
+
+def mpfr_zero_p(Mpfr op not None):
+    """
+    Return True if op is zero.  Return False otherwise.
+
+    """
+    return bool(cmpfr.mpfr_zero_p(&op._value))
+
+def mpfr_regular_p(Mpfr op not None):
+    """
+    Return True if op is a regular number.  Return False otherwise.
+
+    A regular number is a number which is neither a NaN, nor an infinity, nor a
+    zero.
+
+    """
+    return bool(cmpfr.mpfr_regular_p(&op._value))
+
+def mpfr_sgn(Mpfr op not None):
+    """
+    Return the sign of op.
+
+    Return a positive value if op > 0, zero if op = 0, and a negative value if
+    op < 0. If the operand is NaN, set the erange flag and return zero. This is
+    equivalent to mpfr_cmp_ui (op, 0), but more efficient.
+
+    """
+    return cmpfr.mpfr_sgn(&op._value)
+
+def mpfr_greater_p(Mpfr op1 not None, Mpfr op2 not None):
+    """
+    Return True if op1 > op2 and False otherwise.
+
+    This function returns False whenever op1 and/or op2 is a NaN.
+
+    """
+    return bool(cmpfr.mpfr_greater_p(&op1._value, &op2._value))
+
+def mpfr_greaterequal_p(Mpfr op1 not None, Mpfr op2 not None):
+    """
+    Return True if op1 >= op2 and False otherwise.
+
+    This function returns False whenever op1 and/or op2 is a NaN.
+
+    """
+    return bool(cmpfr.mpfr_greaterequal_p(&op1._value, &op2._value))
+
+def mpfr_less_p(Mpfr op1 not None, Mpfr op2 not None):
+    """
+    Return True if op1 < op2 and False otherwise.
+
+    This function returns False whenever op1 and/or op2 is a NaN.
+
+    """
+    return bool(cmpfr.mpfr_less_p(&op1._value, &op2._value))
+
+def mpfr_lessequal_p(Mpfr op1 not None, Mpfr op2 not None):
+    """
+    Return True if op1 <= op2 and False otherwise.
+
+    This function returns False whenever op1 and/or op2 is a NaN.
+
+    """
+    return bool(cmpfr.mpfr_lessequal_p(&op1._value, &op2._value))
+
+def mpfr_equal_p(Mpfr op1 not None, Mpfr op2 not None):
+    """
+    Return True if op1 == op2 and False otherwise.
+
+    This function returns False whenever op1 and/or op2 is a NaN.
+
+    """
+    return bool(cmpfr.mpfr_equal_p(&op1._value, &op2._value))
+
+def mpfr_lessgreater_p(Mpfr op1 not None, Mpfr op2 not None):
+    """
+    Return True if op1 < op2 or op1 > op2 and False otherwise.
+
+    This function returns False whenever op1 and/or op2 is a NaN.
+
+    """
+    return bool(cmpfr.mpfr_lessgreater_p(&op1._value, &op2._value))
+
+def mpfr_unordered_p(Mpfr op1 not None, Mpfr op2 not None):
+    """
+    Return True if op1 or op2 is a NaN and False otherwise.
+
+    """
+    return bool(cmpfr.mpfr_unordered_p(&op1._value, &op2._value))
+
 
 # Functions that are documented in the MPFR 3.0.1 documentation, but aren't
 # (currently) wrapped:
@@ -717,11 +862,20 @@ def mpfr_dim(Mpfr rop not None, Mpfr op1 not None, Mpfr op2 not None,
 #  mpfr_fits_intmax_p
 #    -- only mpfr_fits_slong_p is wrapped from this section.
 #
+#
 # 5.5 Basic Arithmetic Functions
 # ------------------------------
 #
 # None of the functions involving types ui, si, d, z or q are implemented.
-# This may change for the _d and _si functions.
+# This may change for the d, ui and si functions.
+#
+#
+# 5.6 Comparison Functions
+# ------------------------
+#
+# None of the functions involving types ui, si, d, ld, z, q or f are
+# implemented.  This may change for the d, ui and si functions.
+
 
 def mpfr_get_exp(Mpfr op not None):
     """
@@ -1143,46 +1297,6 @@ def mpfr_subnormalize(Mpfr x not None, int t, cmpfr.mpfr_rnd_t rnd):
     check_rounding_mode(rnd)
     return cmpfr.mpfr_subnormalize(&x._value, t, rnd)
 
-def mpfr_nan_p(Mpfr op not None):
-    """
-    Return True if op is a NaN.  Return False otherwise.
-
-    """
-    return bool(cmpfr.mpfr_nan_p(&op._value))
-
-def mpfr_inf_p(Mpfr op not None):
-    """
-    Return True if op is an infinity.  Return False otherwise.
-
-    """
-    return bool(cmpfr.mpfr_inf_p(&op._value))
-
-def mpfr_number_p(Mpfr op not None):
-    """
-    Return True if op is an ordinary number.  Return False otherwise.
-
-    An ordinary number is a number which is neither a NaN nor an infinity.
-
-    """
-    return bool(cmpfr.mpfr_number_p(&op._value))
-
-def mpfr_zero_p(Mpfr op not None):
-    """
-    Return True if op is zero.  Return False otherwise.
-
-    """
-    return bool(cmpfr.mpfr_zero_p(&op._value))
-
-def mpfr_regular_p(Mpfr op not None):
-    """
-    Return True if op is a regular number.  Return False otherwise.
-
-    A regular number is a number which is neither a NaN, nor an infinity, nor a
-    zero.
-
-    """
-    return bool(cmpfr.mpfr_regular_p(&op._value))
-
 def mpfr_integer_p(Mpfr op not None):
     """
     Return True if op is an integer.  Return False otherwise.
@@ -1199,67 +1313,6 @@ def mpfr_signbit(Mpfr op not None):
 
     """
     return bool(cmpfr.mpfr_signbit(&op._value))
-
-def mpfr_greater_p(Mpfr op1 not None, Mpfr op2 not None):
-    """
-    Return True if op1 > op2 and False otherwise.
-
-    This function returns False whenever op1 and/or op2 is a NaN.
-
-    """
-    return bool(cmpfr.mpfr_greater_p(&op1._value, &op2._value))
-
-def mpfr_greaterequal_p(Mpfr op1 not None, Mpfr op2 not None):
-    """
-    Return True if op1 >= op2 and False otherwise.
-
-    This function returns False whenever op1 and/or op2 is a NaN.
-
-    """
-    return bool(cmpfr.mpfr_greaterequal_p(&op1._value, &op2._value))
-
-def mpfr_less_p(Mpfr op1 not None, Mpfr op2 not None):
-    """
-    Return True if op1 < op2 and False otherwise.
-
-    This function returns False whenever op1 and/or op2 is a NaN.
-
-    """
-    return bool(cmpfr.mpfr_less_p(&op1._value, &op2._value))
-
-def mpfr_lessequal_p(Mpfr op1 not None, Mpfr op2 not None):
-    """
-    Return True if op1 <= op2 and False otherwise.
-
-    This function returns False whenever op1 and/or op2 is a NaN.
-
-    """
-    return bool(cmpfr.mpfr_lessequal_p(&op1._value, &op2._value))
-
-def mpfr_equal_p(Mpfr op1 not None, Mpfr op2 not None):
-    """
-    Return True if op1 == op2 and False otherwise.
-
-    This function returns False whenever op1 and/or op2 is a NaN.
-
-    """
-    return bool(cmpfr.mpfr_equal_p(&op1._value, &op2._value))
-
-def mpfr_lessgreater_p(Mpfr op1 not None, Mpfr op2 not None):
-    """
-    Return True if op1 < op2 or op1 > op2 and False otherwise.
-
-    This function returns False whenever op1 and/or op2 is a NaN.
-
-    """
-    return bool(cmpfr.mpfr_lessgreater_p(&op1._value, &op2._value))
-
-def mpfr_unordered_p(Mpfr op1 not None, Mpfr op2 not None):
-    """
-    Return True if op1 or op2 is a NaN and False otherwise.
-
-    """
-    return bool(cmpfr.mpfr_unordered_p(&op1._value, &op2._value))
 
 def mpfr_nexttoward(Mpfr x not None, Mpfr y not None):
     """

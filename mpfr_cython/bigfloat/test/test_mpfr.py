@@ -62,16 +62,26 @@ from bigfloat.mpfr import (
     mpfr_fmod,
     mpfr_pow,
 
-    mpfr_inf_p,
+    # 5.6 Comparison Functions
+    mpfr_cmp,
+    mpfr_cmpabs,
     mpfr_nan_p,
+    mpfr_inf_p,
+    mpfr_number_p,
     mpfr_zero_p,
-    mpfr_signbit,
-    
-    mpfr_equal_p,
-    mpfr_less_p,
-    mpfr_lessequal_p,
+    mpfr_regular_p,
+    mpfr_sgn,
     mpfr_greater_p,
     mpfr_greaterequal_p,
+    mpfr_less_p,
+    mpfr_lessequal_p,
+    mpfr_equal_p,
+    mpfr_lessgreater_p,
+    mpfr_unordered_p,
+
+
+
+    mpfr_signbit,
 
     mpfr_get_emin,
     mpfr_get_emin_min,
@@ -369,6 +379,55 @@ class TestMpfr(unittest.TestCase):
             ('19773267440', 10),
         )
 
+    def test_cmp(self):
+        x = Mpfr(53)
+        y = Mpfr(53)
+        mpfr_set_si(x, 12, MPFR_RNDN)
+        mpfr_set_si(y, 13, MPFR_RNDN)
+        self.assertLess(mpfr_cmp(x, y), 0)
+        self.assertEqual(mpfr_cmp(x, x), 0)
+        self.assertGreater(mpfr_cmp(y, x), 0)
+
+    def test_cmpabs(self):
+        x = Mpfr(53)
+        y = Mpfr(53)
+        mpfr_set_si(x, 12, MPFR_RNDN)
+        mpfr_set_si(y, -13, MPFR_RNDN)
+        self.assertLess(mpfr_cmpabs(x, y), 0)
+        self.assertEqual(mpfr_cmpabs(x, x), 0)
+        self.assertGreater(mpfr_cmpabs(y, x), 0)
+
+    def test_sgn(self):
+        x = Mpfr(53)
+        mpfr_set_si(x, 12, MPFR_RNDN)
+        self.assertGreater(mpfr_sgn(x), 0)
+        mpfr_set_si(x, -12, MPFR_RNDN)
+        self.assertLess(mpfr_sgn(x), 0)
+        mpfr_set_si(x, 0, MPFR_RNDN)
+        self.assertEqual(mpfr_sgn(x), 0)
+
+    def test_regular_p(self):
+        x = Mpfr(53)
+        mpfr_set_nan(x)
+        self.assertIs(mpfr_regular_p(x), False)
+        mpfr_set_inf(x, 1)
+        self.assertIs(mpfr_regular_p(x), False)
+        mpfr_set_zero(x, 1)
+        self.assertIs(mpfr_regular_p(x), False)
+        mpfr_set_si(x, 1, MPFR_RNDN)
+        self.assertIs(mpfr_regular_p(x), True)
+
+    def test_number_p(self):
+        x = Mpfr(53)
+        mpfr_set_nan(x)
+        self.assertIs(mpfr_number_p(x), False)
+        mpfr_set_inf(x, 1)
+        self.assertIs(mpfr_number_p(x), False)
+        mpfr_set_zero(x, 1)
+        self.assertIs(mpfr_number_p(x), True)
+        mpfr_set_si(x, 1, MPFR_RNDN)
+        self.assertIs(mpfr_number_p(x), True)
+
     def test_equal_p(self):
         x = Mpfr(30)
         mpfr_const_pi(x, MPFR_RNDN)
@@ -406,6 +465,70 @@ class TestMpfr(unittest.TestCase):
         mpfr_const_pi(x, MPFR_RNDN)
         self.assertIs(
             mpfr_greater_p(x, x),
+            False,
+        )
+
+    def test_lessgreater_p(self):
+        x = Mpfr(53)
+        y = Mpfr(53)
+        z = Mpfr(53)
+        mpfr_set_si(x, 2, MPFR_RNDN)
+        mpfr_set_nan(y)
+        mpfr_set_inf(z, 1)
+        self.assertIs(
+            mpfr_lessgreater_p(x, x),
+            False,
+        )
+        self.assertIs(
+            mpfr_lessgreater_p(x, y),
+            False,
+        )
+        self.assertIs(
+            mpfr_lessgreater_p(x, z),
+            True,
+        )
+        self.assertIs(
+            mpfr_lessgreater_p(y, y),
+            False,
+        )
+        self.assertIs(
+            mpfr_lessgreater_p(y, z),
+            False,
+        )
+        self.assertIs(
+            mpfr_lessgreater_p(z, z),
+            False,
+        )
+
+    def test_unordered_p(self):
+        x = Mpfr(53)
+        y = Mpfr(53)
+        z = Mpfr(53)
+        mpfr_set_si(x, 2, MPFR_RNDN)
+        mpfr_set_nan(y)
+        mpfr_set_inf(z, 1)
+        self.assertIs(
+            mpfr_unordered_p(x, x),
+            False,
+        )
+        self.assertIs(
+            mpfr_unordered_p(x, y),
+            True,
+        )
+        self.assertIs(
+            mpfr_unordered_p(x, z),
+            False,
+        )
+        self.assertIs(
+            mpfr_unordered_p(y, y),
+            True,
+        )
+        self.assertIs(
+            mpfr_unordered_p(y, z),
+            True,
+        )
+        self.assertIs(
+            mpfr_unordered_p(z, z),
             False,
         )
 
