@@ -76,6 +76,8 @@ from bigfloat.mpfr import (
     mpfr_clear_inexflag,
     mpfr_clear_erangeflag,
 
+    mpfr_clear_flags,
+
     mpfr_set_underflow,
     mpfr_set_overflow,
     mpfr_set_nanflag,
@@ -91,6 +93,10 @@ from bigfloat.mpfr import (
 
 
 class TestMpfr(unittest.TestCase):
+    def setUp(self):
+        mpfr_clear_flags()
+
+
     def test_bad_constructor(self):
         with self.assertRaises(TypeError):
             Mpfr()
@@ -138,18 +144,29 @@ class TestMpfr(unittest.TestCase):
         with self.assertRaises(OverflowError):
             mpfr_set_si(x, -sys.maxint-2, MPFR_RNDN)
 
+        # None of the above should have set the erange flag.
+        self.assertIs(mpfr_erangeflag_p(), False)
+
         # Check get_si with out-of-range values.
         mpfr_set_inf(x, 0)
         self.assertEqual(mpfr_get_si(x, MPFR_RNDN), sys.maxint)
+        self.assertIs(mpfr_erangeflag_p(), True)
+        mpfr_clear_erangeflag()
 
         mpfr_set_inf(x, -1)
         self.assertEqual(mpfr_get_si(x, MPFR_RNDN), -sys.maxint-1)
+        self.assertIs(mpfr_erangeflag_p(), True)
+        mpfr_clear_erangeflag()
 
         mpfr_set_d(x, 1e100, MPFR_RNDN)
         self.assertEqual(mpfr_get_si(x, MPFR_RNDN), sys.maxint)
+        self.assertIs(mpfr_erangeflag_p(), True)
+        mpfr_clear_erangeflag()
 
         mpfr_set_d(x, -1e100, MPFR_RNDN)
         self.assertEqual(mpfr_get_si(x, MPFR_RNDN), -sys.maxint-1)
+        self.assertIs(mpfr_erangeflag_p(), True)
+        mpfr_clear_erangeflag()
 
     def test_none_argument(self):
         with self.assertRaises(TypeError):

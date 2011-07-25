@@ -746,6 +746,13 @@ def mpfr_clear_erangeflag():
     """
     cmpfr.mpfr_clear_erangeflag()
 
+def mpfr_clear_flags():
+    """
+    Clear all global flags.
+
+    """
+    cmpfr.mpfr_clear_flags()
+
 def mpfr_set_underflow():
     """
     Set the underflow flag.
