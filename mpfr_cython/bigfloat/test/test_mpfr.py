@@ -158,8 +158,8 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_si(x, -sys.maxint-1, MPFR_RNDN)
         self.assertIs(mpfr_fits_slong_p(x, MPFR_RNDN), True)
 
-        x = Mpfr(64)
-        mpfr_set_d(x, sys.maxint+1, MPFR_RNDN)
+        x = Mpfr(28)
+        mpfr_set_si(x, sys.maxint, MPFR_RNDN)
         self.assertIs(mpfr_fits_slong_p(x, MPFR_RNDN), False)
 
     def test_get_si_and_set_si(self):
