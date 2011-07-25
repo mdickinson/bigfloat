@@ -598,6 +598,22 @@ def mpfr_set_emax(cmpfr.mpfr_exp_t exp):
     if error_code:
         raise ValueError("new exponent for emin is outside allowable range")
 
+def mpfr_set_prec(Mpfr x not None, cmpfr.mpfr_prec_t prec):
+    """
+    Reset precision of x.
+
+    Reset the precision of x to be exactly prec bits, and set its value to
+    NaN. The previous value stored in x is lost. It is equivalent to a call to
+    mpfr_clear(x) followed by a call to mpfr_init2(x, prec), but more efficient
+    as no allocation is done in case the current allocated space for the
+    significand of x is enough. The precision prec can be any integer between
+    MPFR_PREC_MIN and MPFR_PREC_MAX. In case you want to keep the previous
+    value stored in x, use mpfr_prec_round instead.
+
+    """
+    check_precision(prec)
+    cmpfr.mpfr_set_prec(&x._value, prec)
+
 def mpfr_get_prec(Mpfr x not None):
     """
     Return the precision of x

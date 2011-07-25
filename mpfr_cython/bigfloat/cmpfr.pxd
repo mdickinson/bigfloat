@@ -65,6 +65,7 @@ cdef extern from "mpfr.h":
     int mpfr_set_emin(mpfr_exp_t exp)
     int mpfr_set_emax(mpfr_exp_t exp)
 
+    void mpfr_set_prec(mpfr_ptr x, mpfr_prec_t prec)
     mpfr_prec_t mpfr_get_prec(mpfr_ptr x)
     int mpfr_setsign(mpfr_ptr rop, mpfr_ptr op, int s, mpfr_rnd_t rnd)
 

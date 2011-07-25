@@ -22,6 +22,9 @@ from bigfloat.mpfr import (
 
     Mpfr,
 
+    mpfr_get_prec,
+    mpfr_set_prec,
+
     mpfr_const_pi,
     mpfr_get_str,
     mpfr_set,
@@ -93,6 +96,12 @@ class TestMpfr(unittest.TestCase):
         self.assertIsInstance(x, Mpfr)
         y = Mpfr(20L)
         self.assertIsInstance(y, Mpfr)
+
+    def test_get_and_set_prec(self):
+        x = Mpfr(10)
+        self.assertEqual(mpfr_get_prec(x), 10)
+        mpfr_set_prec(x, 20)
+        self.assertEqual(mpfr_get_prec(x), 20)
 
     def test_none_argument(self):
         with self.assertRaises(TypeError):
