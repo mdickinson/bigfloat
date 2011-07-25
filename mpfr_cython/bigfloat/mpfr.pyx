@@ -194,19 +194,38 @@ def mpfr_get_str(int b, size_t n, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
     """
     Compute a base 'b' string representation for 'op'.
 
-    'b' should be an integer between 2 and 62 (inclusive).
+    Convert op to a string of digits in base b, with rounding in the direction
+    rnd, where n is either zero (see below) or the number of significant digits
+    output in the string; in the latter case, n must be greater or equal to
+    2. The base may vary from 2 to 62.  Returns a pair (digits, exp) where
+    digits gives the base-b digits of op, and for an ordinary number, exp is
+    the exponent (for input 0, the current minimal exponent is written).
 
-    'rnd' gives the rounding mode to use.
+    The generated string is a fraction, with an implicit radix point
+    immediately to the left of the first digit. For example, the number −3.1416
+    would be returned as ("−31416", 1). If rnd is to nearest, and op is exactly
+    in the middle of two consecutive possible outputs, the one with an even
+    significand is chosen, where both significands are considered with the
+    exponent of op. Note that for an odd base, this may not correspond to an
+    even last digit: for example with 2 digits in base 7, (14) and a half is
+    rounded to (15) which is 12 in decimal, (16) and a half is rounded to (20)
+    which is 14 in decimal, and (26) and a half is rounded to (26) which is 20
+    in decimal.
 
-    Returns a pair (digits, exp) where:
+    If n is zero, the number of digits of the significand is chosen large
+    enough so that re-reading the printed value with the same precision,
+    assuming both output and input use rounding to nearest, will recover the
+    original value of op. More precisely, in most cases, the chosen precision
+    of str is the minimal precision m depending only on p = PREC(op) and b that
+    satisfies the above property, i.e., m = 1 + ceil(p*log(2)/log(b)), with p
+    replaced by p−1 if b is a power of 2, but in some very rare cases, it might
+    be m+1 (the smallest case for bases up to 62 is when p equals 186564318007
+    for bases 7 and 49).
 
-        'digits' gives the string of digits
-        exp is the exponent
+    Space for the digit string is automatically allocated, and freed by Python
+    when no longer needed.  There's no requirement to free this space manually.
 
-    The exponent is normalized so that 0.<digits>E<exp> approximates 'op'.
-
-    Note that the signature of this function does not match that of the
-    underlying MPFR function call.
+    RuntimeError is raised on error.
 
     """
     cdef cmpfr.mpfr_exp_t exp
