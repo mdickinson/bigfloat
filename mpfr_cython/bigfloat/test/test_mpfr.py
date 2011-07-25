@@ -138,6 +138,19 @@ class TestMpfr(unittest.TestCase):
         with self.assertRaises(OverflowError):
             mpfr_set_si(x, -sys.maxint-2, MPFR_RNDN)
 
+        # Check get_si with out-of-range values.
+        mpfr_set_inf(x, 0)
+        self.assertEqual(mpfr_get_si(x, MPFR_RNDN), sys.maxint)
+
+        mpfr_set_inf(x, -1)
+        self.assertEqual(mpfr_get_si(x, MPFR_RNDN), -sys.maxint-1)
+
+        mpfr_set_d(x, 1e100, MPFR_RNDN)
+        self.assertEqual(mpfr_get_si(x, MPFR_RNDN), sys.maxint)
+
+        mpfr_set_d(x, -1e100, MPFR_RNDN)
+        self.assertEqual(mpfr_get_si(x, MPFR_RNDN), -sys.maxint-1)
+
     def test_none_argument(self):
         with self.assertRaises(TypeError):
             mpfr_const_pi(None, MPFR_RNDN)
