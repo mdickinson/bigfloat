@@ -170,10 +170,25 @@ cdef class Mpfr:
 #  mpfr_get_ui
 #  mpfr_get_sj
 #  mpfr_get_uj
+#  mpfr_get_ld_2exp
+#  mpfr_get_z_2exp
+#  mpfr_get_z
+#  mpfr_get_f
 #    -- these concern types not readily available in Python.  Only mpfr_get_d
 #       and mpfr_get_si are wrapped.
 #
-#  
+#  mpfr_get_str and mpfr_free_str are used by the mpfr_get_str function here
+#  (which has a slightly different signature to MPFRs mpfr_get_str).  There's
+#  no need to wrap mpfr_free_str separately.
+#
+#  mpfr_fits_ulong_p
+#  mpfr_fits_uint_p
+#  mpfr_fits_sint_p
+#  mpfr_fits_ushort_p
+#  mpfr_fits_sshort_p
+#  mpfr_fits_uintmax_p
+#  mpfr_fits_intmax_p
+#    -- only mpfr_fits_slong_p is wrapped from this section.
 
 def mpfr_get_str(int b, size_t n, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
     """
