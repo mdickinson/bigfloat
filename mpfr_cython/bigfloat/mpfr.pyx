@@ -104,7 +104,11 @@ cdef class Mpfr:
         if self._value._mpfr_d != NULL:
             cmpfr.mpfr_clear(&self._value)
 
-# Functions that aren't wrapped:
+# Functions that are documented in the MPFR 3.0.1 documentation, but aren't
+# (currently) wrapped:
+#
+# 5.1 Initialization Functions
+# ----------------------------
 #
 # These functions are used by the Mpfr class, but not exported
 # independently by the mpfr module:
@@ -114,17 +118,20 @@ cdef class Mpfr:
 #
 # These functions aren't wrapped at all:
 #
-#   mpfr_init
 #   mpfr_inits2
 #   mpfr_clears
+#   mpfr_init
 #   mpfr_inits
 #     -- there's no direct use for these 4 functions, since initialization and
 #        finalization are already handled by the Mpfr class.
 #
-#   mpfr_get_default_prec
 #   mpfr_set_default_prec
+#   mpfr_get_default_prec
 #     -- we don't wrap any functions that make use of the default precision,
 #        so these aren't useful
+#
+# 5.2 Assignment functions
+# ------------------------
 #
 #   mpfr_set_ui
 #   mpfr_set_uj
@@ -135,8 +142,16 @@ cdef class Mpfr:
 #   mpfr_set_z
 #   mpfr_set_q
 #   mpfr_set_f
-#     -- these types not (currently) readily available in Python.  Only mpfr_set, mpfr_set_si
-#        and mpfr_set_d are wrapped.
+#     -- these types not (currently) readily available in Python.  Only
+#        mpfr_set, mpfr_set_si and mpfr_set_d are wrapped.
+#
+#   mpfr_set_ui_2exp
+#   mpfr_set_uj_2exp
+#   mpfr_set_sj_2exp
+#   mpfr_set_z_2exp
+#     -- these functions again concern types not readily available in Python.
+#        Only mpfr_set_si_2exp is wrapped.
+
 
 def mpfr_get_str(int b, size_t n, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
     """
