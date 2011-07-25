@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with the bigfloat module.  If not, see <http://www.gnu.org/licenses/>.
 
+import sys
 import unittest
 
 from bigfloat.mpfr import (
@@ -29,6 +30,9 @@ from bigfloat.mpfr import (
     mpfr_get_str,
     mpfr_set,
     mpfr_set_d,
+    mpfr_get_d,
+    mpfr_set_si,
+    mpfr_get_si,
     mpfr_set_str,
     mpfr_strtofr,
 
@@ -102,6 +106,28 @@ class TestMpfr(unittest.TestCase):
         self.assertEqual(mpfr_get_prec(x), 10)
         mpfr_set_prec(x, 20)
         self.assertEqual(mpfr_get_prec(x), 20)
+
+    def test_get_d_and_set_d(self):
+        x = Mpfr(53)
+        mpfr_set_d(x, 1.2345, MPFR_RNDN)
+        self.assertEqual(mpfr_get_d(x, MPFR_RNDN), 1.2345)
+
+    def test_get_si_and_set_si(self):
+        x = Mpfr(64)
+        # Check roundtrip.
+        mpfr_set_si(x, 2367, MPFR_RNDN)
+        self.assertEqual(mpfr_get_si(x, MPFR_RNDN), 2367)
+
+        # Check set_si from long
+        mpfr_set_si(x, 5789L, MPFR_RNDN)
+        self.assertEqual(mpfr_get_si(x, MPFR_RNDN), 5789)
+
+        # Check set_si from out-of-range arguments.
+        with self.assertRaises(OverflowError):
+            mpfr_set_si(x, sys.maxint+1, MPFR_RNDN)
+
+        with self.assertRaises(OverflowError):
+            mpfr_set_si(x, -sys.maxint-2, MPFR_RNDN)
 
     def test_none_argument(self):
         with self.assertRaises(TypeError):

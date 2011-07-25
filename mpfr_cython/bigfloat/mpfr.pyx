@@ -126,8 +126,17 @@ cdef class Mpfr:
 #     -- we don't wrap any functions that make use of the default precision,
 #        so these aren't useful
 #
-#   mpfr_set_prec
-
+#   mpfr_set_ui
+#   mpfr_set_uj
+#   mpfr_set_sj
+#   mpfr_set_flt
+#   mpfr_set_ld
+#   mpfr_set_decimal64
+#   mpfr_set_z
+#   mpfr_set_q
+#   mpfr_set_f
+#     -- these types not (currently) readily available in Python.  Only mpfr_set, mpfr_set_si
+#        and mpfr_set_d are wrapped.
 
 def mpfr_get_str(int b, size_t n, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
     """
@@ -463,6 +472,17 @@ def mpfr_pow(Mpfr rop not None, Mpfr op1 not None, Mpfr op2 not None,
     return cmpfr.mpfr_pow(&rop._value, &op1._value, &op2._value, rnd)
 
 
+def mpfr_set_si(Mpfr rop not None, long int op, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set the value of rop from a Python int, rounded in the direction rnd.
+
+    Set the value of rop from op, rounded toward the given direction rnd. Note
+    that the input 0 is converted to +0, regardless of the rounding mode.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_set_si(&rop._value, op, rnd)
+
 def mpfr_set_d(Mpfr rop not None, double op, cmpfr.mpfr_rnd_t rnd):
     """
     Set the value of rop from a Python float op, rounded in the direction rnd.
@@ -635,6 +655,20 @@ def mpfr_setsign(Mpfr rop not None, Mpfr op not None, s, cmpfr.mpfr_rnd_t rnd):
     s = bool(s)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_setsign(&rop._value, &op._value, s, rnd)
+
+def mpfr_get_si(Mpfr rop not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Convert op to a Python int.
+
+    Convert op to a Python int after rounding it with respect to rnd. If op is
+    NaN, 0 is returned and the erange flag is set. If op is too big for a
+    Python int, the function returns the maximum or the minimum representable
+    int, depending on the direction of the overflow; the erange flag is set
+    too.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_get_si(&rop._value, rnd)
 
 def mpfr_get_d(Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
     """
