@@ -36,6 +36,10 @@ from bigfloat.mpfr import (
     mpfr_set_str,
     mpfr_strtofr,
 
+    mpfr_set_nan,
+    mpfr_set_inf,
+    mpfr_set_zero,
+
     mpfr_neg,
 
     mpfr_add,
@@ -45,6 +49,11 @@ from bigfloat.mpfr import (
     mpfr_fmod,
     mpfr_pow,
 
+    mpfr_inf_p,
+    mpfr_nan_p,
+    mpfr_zero_p,
+    mpfr_signbit,
+    
     mpfr_equal_p,
     mpfr_less_p,
     mpfr_lessequal_p,
@@ -283,6 +292,39 @@ class TestMpfr(unittest.TestCase):
             mpfr_get_str(10, 0, x, MPFR_RNDN),
             ('99999999977', -1),
         )
+
+    def test_set_nan(self):
+        x = Mpfr(53)
+        mpfr_set_nan(x)
+        self.assertIs(mpfr_nan_p(x), True)
+
+    def test_set_inf(self):
+        x = Mpfr(53)
+        mpfr_set_inf(x, 0)
+        self.assertIs(mpfr_inf_p(x), True)
+        self.assertIs(mpfr_signbit(x), False)
+
+        mpfr_set_inf(x, 1)
+        self.assertIs(mpfr_inf_p(x), True)
+        self.assertIs(mpfr_signbit(x), False)
+
+        mpfr_set_inf(x, -1)
+        self.assertIs(mpfr_inf_p(x), True)
+        self.assertIs(mpfr_signbit(x), True)
+
+    def test_set_zero(self):
+        x = Mpfr(53)
+        mpfr_set_zero(x, 0)
+        self.assertIs(mpfr_zero_p(x), True)
+        self.assertIs(mpfr_signbit(x), False)
+
+        mpfr_set_zero(x, 1)
+        self.assertIs(mpfr_zero_p(x), True)
+        self.assertIs(mpfr_signbit(x), False)
+
+        mpfr_set_zero(x, -1)
+        self.assertIs(mpfr_zero_p(x), True)
+        self.assertIs(mpfr_signbit(x), True)
 
     def test_set_str(self):
         x = Mpfr(30)

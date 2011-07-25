@@ -94,6 +94,10 @@ cdef extern from "mpfr.h":
 
     void mpfr_free_str(char *str)
 
+    void mpfr_set_nan(mpfr_ptr x)
+    void mpfr_set_inf(mpfr_ptr x, int sign)
+    void mpfr_set_zero(mpfr_ptr x, int sign)
+
     mpfr_exp_t mpfr_get_exp(mpfr_ptr x)
     int mpfr_set_exp(mpfr_ptr x, mpfr_exp_t exp)
 

@@ -684,6 +684,33 @@ def mpfr_get_d(Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
     check_rounding_mode(rnd)
     return cmpfr.mpfr_get_d(&op._value, rnd)
 
+def mpfr_set_nan(Mpfr op not None):
+    """ Set x to a NaN.
+
+    Set the variable x to NaN (Not-a-Number).  The sign bit of the result is
+    unspecified.
+
+    """
+    cmpfr.mpfr_set_nan(&op._value)
+
+def mpfr_set_inf(Mpfr op not None, int sign):
+    """ Set x to an infinity.
+
+    Set the variable x to infinity.  x is set to positive infinity if the sign is
+    nonnegative, and negative infinity otherwise.
+
+    """
+    cmpfr.mpfr_set_inf(&op._value, sign)
+
+def mpfr_set_zero(Mpfr op not None, int sign):
+    """ Set x to a zero.
+
+    Set the variable x to zero.  x is set to positive zero if the sign is
+    nonnegative, and negative zero otherwise.
+
+    """
+    cmpfr.mpfr_set_zero(&op._value, sign)
+
 def mpfr_clear_underflow():
     """
     Clear the underflow flag.
