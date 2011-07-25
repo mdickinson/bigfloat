@@ -104,6 +104,390 @@ cdef class Mpfr:
         if self._value._mpfr_d != NULL:
             cmpfr.mpfr_clear(&self._value)
 
+# Start wrapping MPFR functions here.
+
+###############################################################################
+# 5.1 Initialization Functions
+###############################################################################
+
+def mpfr_set_prec(Mpfr x not None, cmpfr.mpfr_prec_t prec):
+    """
+    Reset precision of x.
+
+    Reset the precision of x to be exactly prec bits, and set its value to
+    NaN. The previous value stored in x is lost. It is equivalent to a call to
+    mpfr_clear(x) followed by a call to mpfr_init2(x, prec), but more efficient
+    as no allocation is done in case the current allocated space for the
+    significand of x is enough. The precision prec can be any integer between
+    MPFR_PREC_MIN and MPFR_PREC_MAX. In case you want to keep the previous
+    value stored in x, use mpfr_prec_round instead.
+
+    """
+    check_precision(prec)
+    cmpfr.mpfr_set_prec(&x._value, prec)
+
+def mpfr_get_prec(Mpfr x not None):
+    """
+    Return the precision of x
+
+    Returns the number of bits used to store the significand of x.
+
+    """
+    return cmpfr.mpfr_get_prec(&x._value)
+
+
+###############################################################################
+# 5.2 Assignment Functions
+###############################################################################
+
+def mpfr_set(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop from op, rounded in the direction rnd.
+
+    Set the value of rop from the value of the Mpfr object op, rounded toward
+    the given direction rnd.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_set(&rop._value, &op._value, rnd)
+
+def mpfr_set_si(Mpfr rop not None, long int op, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set the value of rop from a Python int, rounded in the direction rnd.
+
+    Set the value of rop from op, rounded toward the given direction rnd. Note
+    that the input 0 is converted to +0, regardless of the rounding mode.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_set_si(&rop._value, op, rnd)
+
+def mpfr_set_d(Mpfr rop not None, double op, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set the value of rop from a Python float op, rounded in the direction rnd.
+
+    Set the value of rop from op, rounded toward the given direction rnd.  If
+    the system does not support the IEEE 754 standard, mpfr_set_d might not
+    preserve the signed zeros.
+
+    Note: If you want to store a floating-point constant to an Mpfr object, you
+    should use mpfr_set_str (or one of the MPFR constant functions, such as
+    mpfr_const_pi for Pi) instead of mpfr_set_d.  Otherwise the floating-point
+    constant will be first converted into a reduced-precision (e.g., 53-bit)
+    binary number before MPFR can work with it.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_set_d(&rop._value, op, rnd)
+
+def mpfr_set_si_2exp(Mpfr rop not None, long int op,
+                     cmpfr.mpfr_exp_t e, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to op multiplied by a power of 2.
+
+    Set the value of rop from op multiplied by two to the power e, rounded
+    toward the given direction rnd. Note that the input 0 is converted to +0.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_set_si_2exp(&rop._value, op, e, rnd)
+
+def mpfr_set_str(Mpfr rop not None, bytes s, int base, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop from a string s.
+
+    Set rop to the value of the string s in base base, rounded in the direction
+    rnd. See the documentation of mpfr_strtofr for a detailed description of
+    the valid string formats. Contrary to mpfr_strtofr, mpfr_set_str requires
+    the whole string to represent a valid floating-point number. This function
+    returns 0 if the entire string up to the final null character is a valid
+    number in base base; otherwise it returns −1, and rop may have
+    changed. Note: it is preferable to use mpfr_strtofr if one wants to
+    distinguish between an infinite rop value coming from an infinite s or from
+    an overflow.
+
+    """
+    check_base(base, False)
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_set_str(&rop._value, s, base, rnd)
+
+def mpfr_strtofr(Mpfr rop not None, bytes s, int base, cmpfr.mpfr_rnd_t rnd):
+    """
+    Read a floating-point number from a string.
+
+    Read a floating-point number from a string s in base base, rounded in
+    the direction rnd; base must be either 0 (to detect the base, as described
+    below) or a number from 2 to 62 (otherwise the behavior is undefined).
+
+    If s starts with valid data, the result is stored in rop and the function
+    returns a pair (ternary, endindex) where ternary is the usual ternary
+    return value and endindex gives the index of the character just after the
+    valid data.  Otherwise rop is set to zero (for consistency with strtod) and
+    endindex is 0.
+
+    Parsing follows the standard C strtod function with some extensions. After
+    optional leading whitespace, one has a subject sequence consisting of an
+    optional sign (+ or -), and either numeric data or special data. The
+    subject sequence is defined as the longest initial subsequence of the input
+    string, starting with the first non-whitespace character, that is of the
+    expected form.
+
+    The form of numeric data is a non-empty sequence of significand digits with
+    an optional decimal point, and an optional exponent consisting of an
+    exponent prefix followed by an optional sign and a non-empty sequence of
+    decimal digits. A significand digit is either a decimal digit or a Latin
+    letter (62 possible characters), with A = 10, B = 11, ..., Z = 35; case is
+    ignored in bases less or equal to 36, in bases larger than 36, a = 36, b =
+    37, ..., z = 61. The value of a significand digit must be strictly less
+    than the base. The decimal point can be either the one defined by the
+    current locale or the period (the first one is accepted for consistency
+    with the C standard and the practice, the second one is accepted to allow
+    the programmer to provide MPFR numbers from strings in a way that does not
+    depend on the current locale). The exponent prefix can be e or E for bases
+    up to 10, or @ in any base; it indicates a multiplication by a power of the
+    base. In bases 2 and 16, the exponent prefix can also be p or P, in which
+    case the exponent, called binary exponent, indicates a multiplication by a
+    power of 2 instead of the base (there is a difference only for base 16); in
+    base 16 for example 1p2 represents 4 whereas 1@2 represents 256. The value
+    of an exponent is always written in base 10.
+
+    If the argument base is 0, then the base is automatically detected as
+    follows. If the significand starts with 0b or 0B, base 2 is assumed. If the
+    significand starts with 0x or 0X, base 16 is assumed. Otherwise base 10 is
+    assumed.
+
+    Note: The exponent (if present) must contain at least a digit. Otherwise
+    the possible exponent prefix and sign are not part of the number (which
+    ends with the significand). Similarly, if 0b, 0B, 0x or 0X is not followed
+    by a binary/hexadecimal digit, then the subject sequence stops at the
+    character 0, thus 0 is read.
+
+    Special data (for infinities and NaN) can be @inf@ or
+    @nan@(n-char-sequence-opt), and if base <= 16, it can also be infinity,
+    inf, nan or nan(n-char-sequence-opt), all case insensitive. A
+    n-char-sequence-opt is a possibly empty string containing only digits,
+    Latin letters and the underscore (0, 1, 2, ..., 9, a, b, ..., z, A, B, ...,
+    Z, _). Note: one has an optional sign for all data, even NaN. For example,
+    -@nAn@(This_Is_Not_17) is a valid representation for NaN in base 17.
+
+    """
+    cdef char* endptr
+    cdef char* startptr
+
+    startptr = s
+
+    check_base(base, True)
+    check_rounding_mode(rnd)
+    ternary = cmpfr.mpfr_strtofr(
+        &rop._value,
+        s,
+        &endptr,
+        base,
+        rnd,
+    )
+    endindex = endptr - startptr
+    return ternary, endindex
+
+def mpfr_set_nan(Mpfr op not None):
+    """ Set x to a NaN.
+
+    Set the variable x to NaN (Not-a-Number).  The sign bit of the result is
+    unspecified.
+
+    """
+    cmpfr.mpfr_set_nan(&op._value)
+
+def mpfr_set_inf(Mpfr op not None, int sign):
+    """ Set x to an infinity.
+
+    Set the variable x to infinity.  x is set to positive infinity if the sign
+    is nonnegative, and negative infinity otherwise.
+
+    """
+    cmpfr.mpfr_set_inf(&op._value, sign)
+
+def mpfr_set_zero(Mpfr op not None, int sign):
+    """ Set x to a zero.
+
+    Set the variable x to zero.  x is set to positive zero if the sign is
+    nonnegative, and negative zero otherwise.
+
+    """
+    cmpfr.mpfr_set_zero(&op._value, sign)
+
+def mpfr_swap(Mpfr x not None, Mpfr y not None):
+    """
+    Swap the values of x and y efficiently.
+
+    Warning: the precisions are exchanged too; in case the precisions are
+    different, mpfr_swap is thus not equivalent to three mpfr_set calls using a
+    third auxiliary variable.
+
+    """
+    cmpfr.mpfr_swap(&x._value, &y._value)
+
+
+###############################################################################
+# 5.3 Combined Initialization and Assignment Functions
+###############################################################################
+
+
+###############################################################################
+# 5.4 Conversion Functions
+###############################################################################
+
+def mpfr_get_d(Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Convert op to a Python float.
+
+    Convert op to a Python float using the rounding mode rnd. If op is NaN,
+    some fixed NaN (either quiet or signaling) or the result of 0.0/0.0 is
+    returned. If op is ±Inf, an infinity of the same sign or the result of
+    ±1.0/0.0 is returned. If op is zero, this function returns a zero, trying
+    to preserve its sign, if possible.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_get_d(&op._value, rnd)
+
+def mpfr_get_si(Mpfr rop not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Convert op to a Python int.
+
+    Convert op to a Python int after rounding it with respect to rnd. If op is
+    NaN, 0 is returned and the erange flag is set. If op is too big for a
+    Python int, the function returns the maximum or the minimum representable
+    int, depending on the direction of the overflow; the erange flag is set
+    too.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_get_si(&rop._value, rnd)
+
+def mpfr_get_d_2exp(Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Convert op to a Python float and an exponent.
+
+    Return a pair (d, exp) consisting of a Python float d and an exponent exp
+    such that 0.5<=abs(d)<1 and d times 2 raised to exp equals op rounded to
+    double (resp. long double) precision, using the given rounding mode. If op
+    is zero, then a zero of the same sign (or an unsigned zero, if the
+    implementation does not have signed zeros) is returned, and exp is set to
+    0. If op is NaN or an infinity, then the corresponding double precision
+    (resp. long-double precision) value is returned, and exp is undefined.
+
+    """
+    cdef long int exp
+    cdef double d
+
+    check_rounding_mode(rnd)
+    d =  cmpfr.mpfr_get_d_2exp(&exp, &op._value, rnd)
+    return d, exp
+
+def mpfr_get_str(int b, size_t n, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Compute a base 'b' string representation for 'op'.
+
+    Convert op to a string of digits in base b, with rounding in the direction
+    rnd, where n is either zero (see below) or the number of significant digits
+    output in the string; in the latter case, n must be greater or equal to
+    2. The base may vary from 2 to 62.  Returns a pair (digits, exp) where
+    digits gives the base-b digits of op, and for an ordinary number, exp is
+    the exponent (for input 0, the current minimal exponent is written).
+
+    The generated string is a fraction, with an implicit radix point
+    immediately to the left of the first digit. For example, the number −3.1416
+    would be returned as ("−31416", 1). If rnd is to nearest, and op is exactly
+    in the middle of two consecutive possible outputs, the one with an even
+    significand is chosen, where both significands are considered with the
+    exponent of op. Note that for an odd base, this may not correspond to an
+    even last digit: for example with 2 digits in base 7, (14) and a half is
+    rounded to (15) which is 12 in decimal, (16) and a half is rounded to (20)
+    which is 14 in decimal, and (26) and a half is rounded to (26) which is 20
+    in decimal.
+
+    If n is zero, the number of digits of the significand is chosen large
+    enough so that re-reading the printed value with the same precision,
+    assuming both output and input use rounding to nearest, will recover the
+    original value of op. More precisely, in most cases, the chosen precision
+    of str is the minimal precision m depending only on p = PREC(op) and b that
+    satisfies the above property, i.e., m = 1 + ceil(p*log(2)/log(b)), with p
+    replaced by p−1 if b is a power of 2, but in some very rare cases, it might
+    be m+1 (the smallest case for bases up to 62 is when p equals 186564318007
+    for bases 7 and 49).
+
+    Space for the digit string is automatically allocated, and freed by Python
+    when no longer needed.  There's no requirement to free this space manually.
+
+    RuntimeError is raised on error.
+
+    """
+    cdef cmpfr.mpfr_exp_t exp
+    cdef bytes digits
+    cdef char *c_digits
+
+    check_base(b, False)
+    check_get_str_n(n)
+    check_rounding_mode(rnd)
+    c_digits = cmpfr.mpfr_get_str(NULL, &exp, b, n, &op._value, rnd)
+    if c_digits == NULL:
+        raise RuntimeError("Error during string conversion.")
+
+    # It's possible for the conversion from c_digits to digits to raise, so use
+    # a try-finally block to ensure that c_digits always gets freed.
+    try:
+        digits = str(c_digits)
+    finally:
+        cmpfr.mpfr_free_str(c_digits)
+
+    return digits, exp
+
+def mpfr_fits_slong_p(Mpfr x not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Return True if op would fit into a Python int.
+
+    Return True if op would fit into a Python int when rounded to an integer
+    in the direction rnd.
+
+    """
+    check_rounding_mode(rnd)
+    return bool(cmpfr.mpfr_fits_slong_p(&x._value, rnd))
+
+
+###############################################################################
+# 5.5 Basic Arithmetic Functions
+###############################################################################
+
+def mpfr_add(Mpfr rop not None, Mpfr op1 not None, Mpfr op2 not None,
+             cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to op1 + op2 rounded in the direction rnd.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_add(&rop._value, &op1._value, &op2._value, rnd)
+
+def mpfr_sub(Mpfr rop not None, Mpfr op1 not None, Mpfr op2 not None,
+             cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to op1 - op2, rounded in the direction rnd.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_sub(&rop._value, &op1._value, &op2._value, rnd)
+
+def mpfr_mul(Mpfr rop not None, Mpfr op1 not None, Mpfr op2 not None,
+             cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to op1 times op2, rounded in the direction rnd.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_mul(&rop._value, &op1._value, &op2._value, rnd)
+
+
+
+
 # Functions that are documented in the MPFR 3.0.1 documentation, but aren't
 # (currently) wrapped:
 #
@@ -189,163 +573,12 @@ cdef class Mpfr:
 #  mpfr_fits_uintmax_p
 #  mpfr_fits_intmax_p
 #    -- only mpfr_fits_slong_p is wrapped from this section.
-
-def mpfr_get_str(int b, size_t n, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
-    """
-    Compute a base 'b' string representation for 'op'.
-
-    Convert op to a string of digits in base b, with rounding in the direction
-    rnd, where n is either zero (see below) or the number of significant digits
-    output in the string; in the latter case, n must be greater or equal to
-    2. The base may vary from 2 to 62.  Returns a pair (digits, exp) where
-    digits gives the base-b digits of op, and for an ordinary number, exp is
-    the exponent (for input 0, the current minimal exponent is written).
-
-    The generated string is a fraction, with an implicit radix point
-    immediately to the left of the first digit. For example, the number −3.1416
-    would be returned as ("−31416", 1). If rnd is to nearest, and op is exactly
-    in the middle of two consecutive possible outputs, the one with an even
-    significand is chosen, where both significands are considered with the
-    exponent of op. Note that for an odd base, this may not correspond to an
-    even last digit: for example with 2 digits in base 7, (14) and a half is
-    rounded to (15) which is 12 in decimal, (16) and a half is rounded to (20)
-    which is 14 in decimal, and (26) and a half is rounded to (26) which is 20
-    in decimal.
-
-    If n is zero, the number of digits of the significand is chosen large
-    enough so that re-reading the printed value with the same precision,
-    assuming both output and input use rounding to nearest, will recover the
-    original value of op. More precisely, in most cases, the chosen precision
-    of str is the minimal precision m depending only on p = PREC(op) and b that
-    satisfies the above property, i.e., m = 1 + ceil(p*log(2)/log(b)), with p
-    replaced by p−1 if b is a power of 2, but in some very rare cases, it might
-    be m+1 (the smallest case for bases up to 62 is when p equals 186564318007
-    for bases 7 and 49).
-
-    Space for the digit string is automatically allocated, and freed by Python
-    when no longer needed.  There's no requirement to free this space manually.
-
-    RuntimeError is raised on error.
-
-    """
-    cdef cmpfr.mpfr_exp_t exp
-    cdef bytes digits
-    cdef char *c_digits
-
-    check_base(b, False)
-    check_get_str_n(n)
-    check_rounding_mode(rnd)
-    c_digits = cmpfr.mpfr_get_str(NULL, &exp, b, n, &op._value, rnd)
-    if c_digits == NULL:
-        raise RuntimeError("Error during string conversion.")
-
-    # It's possible for the conversion from c_digits to digits to raise, so use
-    # a try-finally block to ensure that c_digits always gets freed.
-    try:
-        digits = str(c_digits)
-    finally:
-        cmpfr.mpfr_free_str(c_digits)
-
-    return digits, exp
-
-def mpfr_strtofr(Mpfr rop not None, bytes s, int base, cmpfr.mpfr_rnd_t rnd):
-    """
-    Read a floating-point number from a string.
-
-    Read a floating-point number from a string s in base base, rounded in
-    the direction rnd; base must be either 0 (to detect the base, as described
-    below) or a number from 2 to 62 (otherwise the behavior is undefined).
-
-    If s starts with valid data, the result is stored in rop and the function
-    returns a pair (ternary, endindex) where ternary is the usual ternary
-    return value and endindex gives the index of the character just after the
-    valid data.  Otherwise rop is set to zero (for consistency with strtod) and
-    endindex is 0.
-
-    Parsing follows the standard C strtod function with some extensions. After
-    optional leading whitespace, one has a subject sequence consisting of an
-    optional sign (+ or -), and either numeric data or special data. The
-    subject sequence is defined as the longest initial subsequence of the input
-    string, starting with the first non-whitespace character, that is of the
-    expected form.
-
-    The form of numeric data is a non-empty sequence of significand digits with
-    an optional decimal point, and an optional exponent consisting of an
-    exponent prefix followed by an optional sign and a non-empty sequence of
-    decimal digits. A significand digit is either a decimal digit or a Latin
-    letter (62 possible characters), with A = 10, B = 11, ..., Z = 35; case is
-    ignored in bases less or equal to 36, in bases larger than 36, a = 36, b =
-    37, ..., z = 61. The value of a significand digit must be strictly less
-    than the base. The decimal point can be either the one defined by the
-    current locale or the period (the first one is accepted for consistency
-    with the C standard and the practice, the second one is accepted to allow
-    the programmer to provide MPFR numbers from strings in a way that does not
-    depend on the current locale). The exponent prefix can be e or E for bases
-    up to 10, or @ in any base; it indicates a multiplication by a power of the
-    base. In bases 2 and 16, the exponent prefix can also be p or P, in which
-    case the exponent, called binary exponent, indicates a multiplication by a
-    power of 2 instead of the base (there is a difference only for base 16); in
-    base 16 for example 1p2 represents 4 whereas 1@2 represents 256. The value
-    of an exponent is always written in base 10.
-
-    If the argument base is 0, then the base is automatically detected as
-    follows. If the significand starts with 0b or 0B, base 2 is assumed. If the
-    significand starts with 0x or 0X, base 16 is assumed. Otherwise base 10 is
-    assumed.
-
-    Note: The exponent (if present) must contain at least a digit. Otherwise
-    the possible exponent prefix and sign are not part of the number (which
-    ends with the significand). Similarly, if 0b, 0B, 0x or 0X is not followed
-    by a binary/hexadecimal digit, then the subject sequence stops at the
-    character 0, thus 0 is read.
-
-    Special data (for infinities and NaN) can be @inf@ or
-    @nan@(n-char-sequence-opt), and if base <= 16, it can also be infinity,
-    inf, nan or nan(n-char-sequence-opt), all case insensitive. A
-    n-char-sequence-opt is a possibly empty string containing only digits,
-    Latin letters and the underscore (0, 1, 2, ..., 9, a, b, ..., z, A, B, ...,
-    Z, _). Note: one has an optional sign for all data, even NaN. For example,
-    -@nAn@(This_Is_Not_17) is a valid representation for NaN in base 17.
-
-    """
-    cdef char* endptr
-    cdef char* startptr
-
-    startptr = s
-
-    check_base(base, True)
-    check_rounding_mode(rnd)
-    ternary = cmpfr.mpfr_strtofr(
-        &rop._value,
-        s,
-        &endptr,
-        base,
-        rnd,
-    )
-    endindex = endptr - startptr
-    return ternary, endindex
-
-def mpfr_swap(Mpfr x not None, Mpfr y not None):
-    """
-    Swap the values of x and y efficiently.
-
-    Warning: the precisions are exchanged too; in case the precisions are
-    different, mpfr_swap is thus not equivalent to three mpfr_set calls using a
-    third auxiliary variable.
-
-    """
-    cmpfr.mpfr_swap(&x._value, &y._value)
-
-def mpfr_fits_slong_p(Mpfr x not None, cmpfr.mpfr_rnd_t rnd):
-    """
-    Return True if op would fit into a Python int.
-
-    Return True if op would fit into a Python int when rounded to an integer
-    in the direction rnd.
-
-    """
-    check_rounding_mode(rnd)
-    return bool(cmpfr.mpfr_fits_slong_p(&x._value, rnd))
+#
+# 5.5 Basic Arithmetic Functions
+# ------------------------------
+#
+# None of the functions involving types ui, si, d, z or q are implemented.
+# This may change for the _d and _si functions.
 
 def mpfr_get_exp(Mpfr op not None):
     """
@@ -440,17 +673,6 @@ def mpfr_const_catalan(Mpfr rop not None, cmpfr.mpfr_rnd_t rnd):
 
 # MPFR functions taking a single argument, returning a ternary value.
 
-def mpfr_set(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
-    """
-    Set rop from op, rounded in the direction rnd.
-
-    Set the value of rop from the value of the Mpfr object op, rounded toward
-    the given direction rnd.
-
-    """
-    check_rounding_mode(rnd)
-    return cmpfr.mpfr_set(&rop._value, &op._value, rnd)
-
 def mpfr_neg(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
     """
     Set rop to -op, rounded in the direction rnd.
@@ -511,33 +733,6 @@ def mpfr_log2(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
     return cmpfr.mpfr_log2(&rop._value, &op._value, rnd)
 
 # MPFR functions taking two arguments, returning a ternary value.
-
-def mpfr_add(Mpfr rop not None, Mpfr op1 not None, Mpfr op2 not None,
-             cmpfr.mpfr_rnd_t rnd):
-    """
-    Set rop to op1 + op2 rounded in the direction rnd.
-
-    """
-    check_rounding_mode(rnd)
-    return cmpfr.mpfr_add(&rop._value, &op1._value, &op2._value, rnd)
-
-def mpfr_sub(Mpfr rop not None, Mpfr op1 not None, Mpfr op2 not None,
-             cmpfr.mpfr_rnd_t rnd):
-    """
-    Set rop to op1 - op2, rounded in the direction rnd.
-
-    """
-    check_rounding_mode(rnd)
-    return cmpfr.mpfr_sub(&rop._value, &op1._value, &op2._value, rnd)
-
-def mpfr_mul(Mpfr rop not None, Mpfr op1 not None, Mpfr op2 not None,
-             cmpfr.mpfr_rnd_t rnd):
-    """
-    Set rop to op1 times op2, rounded in the direction rnd.
-
-    """
-    check_rounding_mode(rnd)
-    return cmpfr.mpfr_mul(&rop._value, &op1._value, &op2._value, rnd)
 
 def mpfr_div(Mpfr rop not None, Mpfr op1 not None, Mpfr op2 not None,
              cmpfr.mpfr_rnd_t rnd):
@@ -613,66 +808,6 @@ def mpfr_pow(Mpfr rop not None, Mpfr op1 not None, Mpfr op2 not None,
     check_rounding_mode(rnd)
     return cmpfr.mpfr_pow(&rop._value, &op1._value, &op2._value, rnd)
 
-
-def mpfr_set_si(Mpfr rop not None, long int op, cmpfr.mpfr_rnd_t rnd):
-    """
-    Set the value of rop from a Python int, rounded in the direction rnd.
-
-    Set the value of rop from op, rounded toward the given direction rnd. Note
-    that the input 0 is converted to +0, regardless of the rounding mode.
-
-    """
-    check_rounding_mode(rnd)
-    return cmpfr.mpfr_set_si(&rop._value, op, rnd)
-
-def mpfr_set_si_2exp(Mpfr rop not None, long int op,
-                     cmpfr.mpfr_exp_t e, cmpfr.mpfr_rnd_t rnd):
-    """
-    Set rop to op multiplied by a power of 2.
-
-    Set the value of rop from op multiplied by two to the power e, rounded
-    toward the given direction rnd. Note that the input 0 is converted to +0.
-
-    """
-    check_rounding_mode(rnd)
-    return cmpfr.mpfr_set_si_2exp(&rop._value, op, e, rnd)
-
-def mpfr_set_d(Mpfr rop not None, double op, cmpfr.mpfr_rnd_t rnd):
-    """
-    Set the value of rop from a Python float op, rounded in the direction rnd.
-
-    Set the value of rop from op, rounded toward the given direction rnd.  If
-    the system does not support the IEEE 754 standard, mpfr_set_d might not
-    preserve the signed zeros.
-
-    Note: If you want to store a floating-point constant to an Mpfr object, you
-    should use mpfr_set_str (or one of the MPFR constant functions, such as
-    mpfr_const_pi for Pi) instead of mpfr_set_d.  Otherwise the floating-point
-    constant will be first converted into a reduced-precision (e.g., 53-bit)
-    binary number before MPFR can work with it.
-
-    """
-    check_rounding_mode(rnd)
-    return cmpfr.mpfr_set_d(&rop._value, op, rnd)
-
-def mpfr_set_str(Mpfr rop not None, bytes s, int base, cmpfr.mpfr_rnd_t rnd):
-    """
-    Set rop from a string s.
-
-    Set rop to the value of the string s in base base, rounded in the direction
-    rnd. See the documentation of mpfr_strtofr for a detailed description of
-    the valid string formats. Contrary to mpfr_strtofr, mpfr_set_str requires
-    the whole string to represent a valid floating-point number. This function
-    returns 0 if the entire string up to the final null character is a valid
-    number in base base; otherwise it returns −1, and rop may have
-    changed. Note: it is preferable to use mpfr_strtofr if one wants to
-    distinguish between an infinite rop value coming from an infinite s or from
-    an overflow.
-
-    """
-    check_base(base, False)
-    check_rounding_mode(rnd)
-    return cmpfr.mpfr_set_str(&rop._value, s, base, rnd)
 
 # Functions for getting exponent bounds.
 def mpfr_get_emin():
@@ -772,31 +907,6 @@ def mpfr_set_emax(cmpfr.mpfr_exp_t exp):
     if error_code:
         raise ValueError("new exponent for emin is outside allowable range")
 
-def mpfr_set_prec(Mpfr x not None, cmpfr.mpfr_prec_t prec):
-    """
-    Reset precision of x.
-
-    Reset the precision of x to be exactly prec bits, and set its value to
-    NaN. The previous value stored in x is lost. It is equivalent to a call to
-    mpfr_clear(x) followed by a call to mpfr_init2(x, prec), but more efficient
-    as no allocation is done in case the current allocated space for the
-    significand of x is enough. The precision prec can be any integer between
-    MPFR_PREC_MIN and MPFR_PREC_MAX. In case you want to keep the previous
-    value stored in x, use mpfr_prec_round instead.
-
-    """
-    check_precision(prec)
-    cmpfr.mpfr_set_prec(&x._value, prec)
-
-def mpfr_get_prec(Mpfr x not None):
-    """
-    Return the precision of x
-
-    Returns the number of bits used to store the significand of x.
-
-    """
-    return cmpfr.mpfr_get_prec(&x._value)
-
 def mpfr_setsign(Mpfr rop not None, Mpfr op not None, s, cmpfr.mpfr_rnd_t rnd):
     """
     Set the value of rop from op and the sign of rop from s.
@@ -809,81 +919,6 @@ def mpfr_setsign(Mpfr rop not None, Mpfr op not None, s, cmpfr.mpfr_rnd_t rnd):
     s = bool(s)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_setsign(&rop._value, &op._value, s, rnd)
-
-def mpfr_get_si(Mpfr rop not None, cmpfr.mpfr_rnd_t rnd):
-    """
-    Convert op to a Python int.
-
-    Convert op to a Python int after rounding it with respect to rnd. If op is
-    NaN, 0 is returned and the erange flag is set. If op is too big for a
-    Python int, the function returns the maximum or the minimum representable
-    int, depending on the direction of the overflow; the erange flag is set
-    too.
-
-    """
-    check_rounding_mode(rnd)
-    return cmpfr.mpfr_get_si(&rop._value, rnd)
-
-def mpfr_get_d(Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
-    """
-    Convert op to a Python float.
-
-    Convert op to a Python float using the rounding mode rnd. If op is NaN,
-    some fixed NaN (either quiet or signaling) or the result of 0.0/0.0 is
-    returned. If op is ±Inf, an infinity of the same sign or the result of
-    ±1.0/0.0 is returned. If op is zero, this function returns a zero, trying
-    to preserve its sign, if possible.
-
-    """
-    check_rounding_mode(rnd)
-    return cmpfr.mpfr_get_d(&op._value, rnd)
-
-def mpfr_get_d_2exp(Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
-    """
-    Convert op to a Python float and an exponent.
-
-    Return a pair (d, exp) consisting of a Python float d and an exponent exp
-    such that 0.5<=abs(d)<1 and d times 2 raised to exp equals op rounded to
-    double (resp. long double) precision, using the given rounding mode. If op
-    is zero, then a zero of the same sign (or an unsigned zero, if the
-    implementation does not have signed zeros) is returned, and exp is set to
-    0. If op is NaN or an infinity, then the corresponding double precision
-    (resp. long-double precision) value is returned, and exp is undefined.
-
-    """
-    cdef long int exp
-    cdef double d
-
-    check_rounding_mode(rnd)
-    d =  cmpfr.mpfr_get_d_2exp(&exp, &op._value, rnd)
-    return d, exp
-
-def mpfr_set_nan(Mpfr op not None):
-    """ Set x to a NaN.
-
-    Set the variable x to NaN (Not-a-Number).  The sign bit of the result is
-    unspecified.
-
-    """
-    cmpfr.mpfr_set_nan(&op._value)
-
-def mpfr_set_inf(Mpfr op not None, int sign):
-    """ Set x to an infinity.
-
-    Set the variable x to infinity.  x is set to positive infinity if the sign
-    is nonnegative, and negative infinity otherwise.
-
-    """
-    cmpfr.mpfr_set_inf(&op._value, sign)
-
-def mpfr_set_zero(Mpfr op not None, int sign):
-    """ Set x to a zero.
-
-    Set the variable x to zero.  x is set to positive zero if the sign is
-    nonnegative, and negative zero otherwise.
-
-    """
-    cmpfr.mpfr_set_zero(&op._value, sign)
 
 def mpfr_clear_underflow():
     """
