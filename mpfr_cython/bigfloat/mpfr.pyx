@@ -493,7 +493,45 @@ def mpfr_sqr(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
     check_rounding_mode(rnd)
     return cmpfr.mpfr_sqr(&rop._value, &op._value, rnd)
 
+def mpfr_div(Mpfr rop not None, Mpfr op1 not None, Mpfr op2 not None,
+             cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to op1 divided by op2, rounded in the direction rnd.
 
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_div(&rop._value, &op1._value, &op2._value, rnd)
+
+def mpfr_sqrt(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the square root of op, rounded in the direction rnd.
+
+    Set rop to −0 if op is −0, to be consistent with the IEEE 754 standard. Set
+    rop to NaN if op is negative.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_sqrt(&rop._value, &op._value, rnd)
+
+def mpfr_rec_sqrt(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the reciprocal square root of op, rounded in the direction rnd.
+
+    Set rop to +Inf if op is ±0, +0 if op is +Inf, and NaN if op is negative.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_rec_sqrt(&rop._value, &op._value, rnd)
+
+def mpfr_cbrt(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the reciprocal square root of op, rounded in the direction rnd.
+
+    Set rop to +Inf if op is ±0, +0 if op is +Inf, and NaN if op is negative.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_cbrt(&rop._value, &op._value, rnd)
 
 # Functions that are documented in the MPFR 3.0.1 documentation, but aren't
 # (currently) wrapped:
@@ -704,17 +742,6 @@ def mpfr_abs(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
     check_rounding_mode(rnd)
     return cmpfr.mpfr_abs(&rop._value, &op._value, rnd)
 
-def mpfr_sqrt(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
-    """
-    Set rop to the square root of op, rounded in the direction rnd.
-
-    Set rop to −0 if op is −0, to be consistent with the IEEE 754 standard. Set
-    rop to NaN if op is negative.
-
-    """
-    check_rounding_mode(rnd)
-    return cmpfr.mpfr_sqrt(&rop._value, &op._value, rnd)
-
 def mpfr_exp(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
     """
     Set rop to the exponential of op, rounded in the direction rnd.
@@ -740,15 +767,6 @@ def mpfr_log2(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
     return cmpfr.mpfr_log2(&rop._value, &op._value, rnd)
 
 # MPFR functions taking two arguments, returning a ternary value.
-
-def mpfr_div(Mpfr rop not None, Mpfr op1 not None, Mpfr op2 not None,
-             cmpfr.mpfr_rnd_t rnd):
-    """
-    Set rop to op1 divided by op2, rounded in the direction rnd.
-
-    """
-    check_rounding_mode(rnd)
-    return cmpfr.mpfr_div(&rop._value, &op1._value, &op2._value, rnd)
 
 def mpfr_fmod(Mpfr rop not None, Mpfr op1 not None, Mpfr op2 not None,
               cmpfr.mpfr_rnd_t rnd):

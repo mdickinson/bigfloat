@@ -52,6 +52,10 @@ from bigfloat.mpfr import (
     mpfr_sub,
     mpfr_mul,
     mpfr_sqr,
+    mpfr_sqrt,
+    mpfr_rec_sqrt,
+    mpfr_cbrt,
+
     mpfr_div,
     mpfr_fmod,
     mpfr_pow,
@@ -275,6 +279,13 @@ class TestMpfr(unittest.TestCase):
             ('77000000000', 2),
         )
 
+    def test_sqr(self):
+        x = Mpfr(53)
+        y = Mpfr(53)
+        mpfr_set_si(x, 23, MPFR_RNDN)
+        mpfr_sqr(y, x, MPFR_RNDN)
+        self.assertEqual(mpfr_get_si(y, MPFR_RNDN), 23**2)
+
     def test_div(self):
         x = Mpfr(30)
         y = Mpfr(30)
@@ -287,12 +298,26 @@ class TestMpfr(unittest.TestCase):
             ('63636363670', 0),
         )
 
-    def test_sqr(self):
+    def test_sqrt(self):
         x = Mpfr(53)
         y = Mpfr(53)
-        mpfr_set_si(x, 23, MPFR_RNDN)
-        mpfr_sqr(y, x, MPFR_RNDN)
-        self.assertEqual(mpfr_get_si(y, MPFR_RNDN), 23**2)
+        mpfr_set_si(x, 23**2, MPFR_RNDN)
+        mpfr_sqrt(y, x, MPFR_RNDN)
+        self.assertEqual(mpfr_get_si(y, MPFR_RNDN), 23)
+
+    def test_rec_sqrt(self):
+        x = Mpfr(53)
+        y = Mpfr(53)
+        mpfr_set_si(x, 23**2, MPFR_RNDN)
+        mpfr_rec_sqrt(y, x, MPFR_RNDN)
+        self.assertEqual(mpfr_get_d(y, MPFR_RNDN), 0.043478260869565216)
+
+    def test_cbrt(self):
+        x = Mpfr(53)
+        y = Mpfr(53)
+        mpfr_set_si(x, 23**3, MPFR_RNDN)
+        mpfr_cbrt(y, x, MPFR_RNDN)
+        self.assertEqual(mpfr_get_si(y, MPFR_RNDN), 23)
 
     def test_fmod(self):
         x = Mpfr(30)
