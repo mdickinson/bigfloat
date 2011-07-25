@@ -79,6 +79,10 @@ cdef extern from "mpfr.h":
     int mpfr_set_si(mpfr_ptr rop, long int op, mpfr_rnd_t rnd)
     int mpfr_set_d(mpfr_ptr rop, double op, mpfr_rnd_t rnd)
 
+    int mpfr_set_si_2exp(
+        mpfr_ptr rop, long int op, mpfr_exp_t e, mpfr_rnd_t rnd
+    )
+
     int mpfr_set_str(
         mpfr_ptr rop, char *s, int base, mpfr_rnd_t rnd
     )

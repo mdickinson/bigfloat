@@ -32,6 +32,7 @@ from bigfloat.mpfr import (
     mpfr_set_d,
     mpfr_get_d,
     mpfr_set_si,
+    mpfr_set_si_2exp,
     mpfr_get_si,
     mpfr_set_str,
     mpfr_strtofr,
@@ -126,6 +127,11 @@ class TestMpfr(unittest.TestCase):
         x = Mpfr(53)
         mpfr_set_d(x, 1.2345, MPFR_RNDN)
         self.assertEqual(mpfr_get_d(x, MPFR_RNDN), 1.2345)
+
+    def test_set_si_2exp(self):
+        x = Mpfr(64)
+        mpfr_set_si_2exp(x, 11, 5, MPFR_RNDN)
+        self.assertEqual(mpfr_get_si(x, MPFR_RNDN), 352)
 
     def test_get_si_and_set_si(self):
         x = Mpfr(64)

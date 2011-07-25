@@ -483,6 +483,18 @@ def mpfr_set_si(Mpfr rop not None, long int op, cmpfr.mpfr_rnd_t rnd):
     check_rounding_mode(rnd)
     return cmpfr.mpfr_set_si(&rop._value, op, rnd)
 
+def mpfr_set_si_2exp(Mpfr rop not None, long int op,
+                     cmpfr.mpfr_exp_t e, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to op multiplied by a power of 2.
+
+    Set the value of rop from op multiplied by two to the power e, rounded
+    toward the given direction rnd. Note that the input 0 is converted to +0.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_set_si_2exp(&rop._value, op, e, rnd)
+
 def mpfr_set_d(Mpfr rop not None, double op, cmpfr.mpfr_rnd_t rnd):
     """
     Set the value of rop from a Python float op, rounded in the direction rnd.
