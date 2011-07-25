@@ -102,6 +102,8 @@ cdef extern from "mpfr.h":
     void mpfr_set_inf(mpfr_ptr x, int sign)
     void mpfr_set_zero(mpfr_ptr x, int sign)
 
+    void mpfr_swap(mpfr_ptr x, mpfr_ptr y)
+
     mpfr_exp_t mpfr_get_exp(mpfr_ptr x)
     int mpfr_set_exp(mpfr_ptr x, mpfr_exp_t exp)
 

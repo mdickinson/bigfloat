@@ -269,6 +269,17 @@ def mpfr_strtofr(Mpfr rop not None, bytes s, int base, cmpfr.mpfr_rnd_t rnd):
     endindex = endptr - startptr
     return ternary, endindex
 
+def mpfr_swap(Mpfr x not None, Mpfr y not None):
+    """
+    Swap the values of x and y efficiently.
+
+    Warning: the precisions are exchanged too; in case the precisions are
+    different, mpfr_swap is thus not equivalent to three mpfr_set calls using a
+    third auxiliary variable.
+
+    """
+    cmpfr.mpfr_swap(&x._value, &y._value)
+
 def mpfr_get_exp(Mpfr op not None):
     """
     Return the exponent of op.
