@@ -525,13 +525,28 @@ def mpfr_rec_sqrt(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
 
 def mpfr_cbrt(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
     """
-    Set rop to the reciprocal square root of op, rounded in the direction rnd.
+    Set rop to the cube root of op rounded in the direction rnd.
 
-    Set rop to +Inf if op is ±0, +0 if op is +Inf, and NaN if op is negative.
+    For op negative, set rop to a negative number.  The cube root of -0 is
+    defined to be -0.
 
     """
     check_rounding_mode(rnd)
     return cmpfr.mpfr_cbrt(&rop._value, &op._value, rnd)
+
+def mpfr_root(Mpfr rop not None, Mpfr op not None,
+              unsigned long int k, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the kth root of op, rounding in the direction rnd.
+
+    For k odd (resp. even) and op negative (including −Inf), set rop to a
+    negative number (resp. NaN). The kth root of −0 is defined to be −0,
+    whatever the parity of k.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_root(&rop._value, &op._value, k, rnd)
+
 
 # Functions that are documented in the MPFR 3.0.1 documentation, but aren't
 # (currently) wrapped:

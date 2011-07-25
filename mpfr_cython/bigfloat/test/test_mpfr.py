@@ -55,6 +55,7 @@ from bigfloat.mpfr import (
     mpfr_sqrt,
     mpfr_rec_sqrt,
     mpfr_cbrt,
+    mpfr_root,
 
     mpfr_div,
     mpfr_fmod,
@@ -318,6 +319,13 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_si(x, 23**3, MPFR_RNDN)
         mpfr_cbrt(y, x, MPFR_RNDN)
         self.assertEqual(mpfr_get_si(y, MPFR_RNDN), 23)
+
+    def test_root(self):
+        x = Mpfr(53)
+        y = Mpfr(53)
+        mpfr_set_si(x, -(23**5), MPFR_RNDN)
+        mpfr_root(y, x, 5, MPFR_RNDN)
+        self.assertEqual(mpfr_get_d(y, MPFR_RNDN), -23.0)
 
     def test_fmod(self):
         x = Mpfr(30)
