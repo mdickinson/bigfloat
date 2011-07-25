@@ -70,6 +70,7 @@ cdef extern from "mpfr.h":
     int mpfr_setsign(mpfr_ptr rop, mpfr_ptr op, int s, mpfr_rnd_t rnd)
 
     double mpfr_get_d(mpfr_ptr op, mpfr_rnd_t rnd)
+    double mpfr_get_d_2exp(long int *exp, mpfr_ptr op, mpfr_rnd_t rnd)
     long mpfr_get_si(mpfr_ptr op, mpfr_rnd_t rnd)
 
     # MPFR function definitions

@@ -107,6 +107,7 @@ cdef class Mpfr:
 # Functions that are documented in the MPFR 3.0.1 documentation, but aren't
 # (currently) wrapped:
 #
+#
 # 5.1 Initialization Functions
 # ----------------------------
 #
@@ -130,6 +131,7 @@ cdef class Mpfr:
 #     -- we don't wrap any functions that make use of the default precision,
 #        so these aren't useful
 #
+#
 # 5.2 Assignment functions
 # ------------------------
 #
@@ -151,7 +153,27 @@ cdef class Mpfr:
 #   mpfr_set_z_2exp
 #     -- these functions again concern types not readily available in Python.
 #        Only mpfr_set_si_2exp is wrapped.
-
+#
+#
+# 5.3 Combined initialization and assignment functions
+# ----------------------------------------------------
+#
+# None of these functions are currently wrapped.
+#
+#
+# 5.4 Conversion functions
+# ------------------------
+#
+#  mpfr_get_flt
+#  mpfr_get_ld
+#  mpfr_get_decimal64
+#  mpfr_get_ui
+#  mpfr_get_sj
+#  mpfr_get_uj
+#    -- these concern types not readily available in Python.  Only mpfr_get_d
+#       and mpfr_get_si are wrapped.
+#
+#  
 
 def mpfr_get_str(int b, size_t n, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
     """
@@ -770,6 +792,26 @@ def mpfr_get_d(Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
     """
     check_rounding_mode(rnd)
     return cmpfr.mpfr_get_d(&op._value, rnd)
+
+def mpfr_get_d_2exp(Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Convert op to a Python float and an exponent.
+
+    Return a pair (d, exp) consisting of a Python float d and an exponent exp
+    such that 0.5<=abs(d)<1 and d times 2 raised to exp equals op rounded to
+    double (resp. long double) precision, using the given rounding mode. If op
+    is zero, then a zero of the same sign (or an unsigned zero, if the
+    implementation does not have signed zeros) is returned, and exp is set to
+    0. If op is NaN or an infinity, then the corresponding double precision
+    (resp. long-double precision) value is returned, and exp is undefined.
+
+    """
+    cdef long int exp
+    cdef double d
+
+    check_rounding_mode(rnd)
+    d =  cmpfr.mpfr_get_d_2exp(&exp, &op._value, rnd)
+    return d, exp
 
 def mpfr_set_nan(Mpfr op not None):
     """ Set x to a NaN.

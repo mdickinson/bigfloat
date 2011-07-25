@@ -31,6 +31,7 @@ from bigfloat.mpfr import (
     mpfr_set,
     mpfr_set_d,
     mpfr_get_d,
+    mpfr_get_d_2exp,
     mpfr_set_si,
     mpfr_set_si_2exp,
     mpfr_get_si,
@@ -404,6 +405,13 @@ class TestMpfr(unittest.TestCase):
             mpfr_get_str(10, 0, x, MPFR_RNDN),
             ('13559999990', 3),
         )
+
+    def test_get_d_2exp(self):
+        x = Mpfr(53)
+        mpfr_set_d(x, 3.141592653589793, MPFR_RNDN)
+        y, exp = mpfr_get_d_2exp(x, MPFR_RNDN)
+        self.assertEqual(exp, 2)
+        self.assertEqual(y, 0.7853981633974483)
 
     def test_get_str(self):
         x = Mpfr(20)
