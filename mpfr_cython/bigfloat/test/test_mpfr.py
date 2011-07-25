@@ -56,6 +56,7 @@ from bigfloat.mpfr import (
     mpfr_rec_sqrt,
     mpfr_cbrt,
     mpfr_root,
+    mpfr_dim,
 
     mpfr_div,
     mpfr_fmod,
@@ -266,6 +267,23 @@ class TestMpfr(unittest.TestCase):
         self.assertEqual(
             mpfr_get_str(10, 0, z, MPFR_RNDN),
             ('-40000000000', 1),
+        )
+
+    def test_dim(self):
+        x = Mpfr(30)
+        y = Mpfr(30)
+        z = Mpfr(30)
+        mpfr_set_d(x, 7.0, MPFR_RNDN)
+        mpfr_set_d(y, 11.0, MPFR_RNDN)
+        mpfr_dim(z, x, y, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(z, MPFR_RNDN),
+            0.0,
+        )
+        mpfr_dim(z, y, x, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(z, MPFR_RNDN),
+            4.0,
         )
 
     def test_mul(self):

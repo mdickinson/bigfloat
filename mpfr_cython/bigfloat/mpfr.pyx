@@ -547,6 +547,89 @@ def mpfr_root(Mpfr rop not None, Mpfr op not None,
     check_rounding_mode(rnd)
     return cmpfr.mpfr_root(&rop._value, &op._value, k, rnd)
 
+def mpfr_pow(Mpfr rop not None, Mpfr op1 not None, Mpfr op2 not None,
+             cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to op1 raised to the power op2, rounded in the direction rnd.
+
+    Special values are handled as described in the ISO C99 and IEEE 754-2008
+    standards for the pow function.
+
+      * pow(±0, y) returns plus or minus infinity for y a negative odd integer.
+
+      * pow(±0, y) returns plus infinity for y negative and not an odd integer.
+
+      * pow(±0, y) returns plus or minus zero for y a positive odd integer.
+
+      * pow(±0, y) returns plus zero for y positive and not an odd integer.
+
+      * pow(-1, ±Inf) returns 1.
+
+      * pow(+1, y) returns 1 for any y, even a NaN.
+
+      * pow(x, ±0) returns 1 for any x, even a NaN.
+
+      * pow(x, y) returns NaN for finite negative x and finite non-integer y.
+
+      * pow(x, -Inf) returns plus infinity for 0 < abs(x) < 1, and plus zero
+        for abs(x) > 1.
+
+      * pow(x, +Inf) returns plus zero for 0 < abs(x) < 1, and plus infinity
+        for abs(x) > 1.
+
+      * pow(-Inf, y) returns minus zero for y a negative odd integer.
+
+      * pow(-Inf, y) returns plus zero for y negative and not an odd integer.
+
+      * pow(-Inf, y) returns minus infinity for y a positive odd integer.
+
+      * pow(-Inf, y) returns plus infinity for y positive and not an odd
+        integer.
+
+      * pow(+Inf, y) returns plus zero for y negative, and plus infinity for y
+        positive.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_pow(&rop._value, &op1._value, &op2._value, rnd)
+
+def mpfr_neg(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to -op, rounded in the direction rnd.
+
+    This function just changes or adjusts the sign if rop and op are the same
+    variable, otherwise a rounding might occur if the precision of rop is less
+    than that of op.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_neg(&rop._value, &op._value, rnd)
+
+def mpfr_abs(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the absolute value of op, rounded in the direction rnd.
+
+    This function just changes or adjusts the sign if rop and op are the same
+    variable, otherwise a rounding might occur if the precision of rop is less
+    than that of op.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_abs(&rop._value, &op._value, rnd)
+
+def mpfr_dim(Mpfr rop not None, Mpfr op1 not None, Mpfr op2 not None,
+             cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to max(op1 - op2, 0), rounded in the direction rnd.
+
+    Set rop to op1 - op2 rounded in the direction rnd if op1 > op2, +0 if op1
+    <= op2, and NaN if op1 or op2 is NaN.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_dim(&rop._value, &op1._value, &op2._value, rnd)
+
+
 
 # Functions that are documented in the MPFR 3.0.1 documentation, but aren't
 # (currently) wrapped:
@@ -733,30 +816,6 @@ def mpfr_const_catalan(Mpfr rop not None, cmpfr.mpfr_rnd_t rnd):
 
 # MPFR functions taking a single argument, returning a ternary value.
 
-def mpfr_neg(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
-    """
-    Set rop to -op, rounded in the direction rnd.
-
-    This function just changes or adjusts the sign if rop and op are the same
-    variable, otherwise a rounding might occur if the precision of rop is less
-    than that of op.
-
-    """
-    check_rounding_mode(rnd)
-    return cmpfr.mpfr_neg(&rop._value, &op._value, rnd)
-
-def mpfr_abs(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
-    """
-    Set rop to the absolute value of op, rounded in the direction rnd.
-
-    This function just changes or adjusts the sign if rop and op are the same
-    variable, otherwise a rounding might occur if the precision of rop is less
-    than that of op.
-
-    """
-    check_rounding_mode(rnd)
-    return cmpfr.mpfr_abs(&rop._value, &op._value, rnd)
-
 def mpfr_exp(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
     """
     Set rop to the exponential of op, rounded in the direction rnd.
@@ -801,52 +860,6 @@ def mpfr_fmod(Mpfr rop not None, Mpfr op1 not None, Mpfr op2 not None,
     """
     check_rounding_mode(rnd)
     return cmpfr.mpfr_fmod(&rop._value, &op1._value, &op2._value, rnd)
-
-def mpfr_pow(Mpfr rop not None, Mpfr op1 not None, Mpfr op2 not None,
-             cmpfr.mpfr_rnd_t rnd):
-    """
-    Set rop to op1 raised to the power op2, rounded in the direction rnd.
-
-    Special values are handled as described in the ISO C99 and IEEE 754-2008
-    standards for the pow function.
-
-      * pow(±0, y) returns plus or minus infinity for y a negative odd integer.
-
-      * pow(±0, y) returns plus infinity for y negative and not an odd integer.
-
-      * pow(±0, y) returns plus or minus zero for y a positive odd integer.
-
-      * pow(±0, y) returns plus zero for y positive and not an odd integer.
-
-      * pow(-1, ±Inf) returns 1.
-
-      * pow(+1, y) returns 1 for any y, even a NaN.
-
-      * pow(x, ±0) returns 1 for any x, even a NaN.
-
-      * pow(x, y) returns NaN for finite negative x and finite non-integer y.
-
-      * pow(x, -Inf) returns plus infinity for 0 < abs(x) < 1, and plus zero
-        for abs(x) > 1.
-
-      * pow(x, +Inf) returns plus zero for 0 < abs(x) < 1, and plus infinity
-        for abs(x) > 1.
-
-      * pow(-Inf, y) returns minus zero for y a negative odd integer.
-
-      * pow(-Inf, y) returns plus zero for y negative and not an odd integer.
-
-      * pow(-Inf, y) returns minus infinity for y a positive odd integer.
-
-      * pow(-Inf, y) returns plus infinity for y positive and not an odd
-        integer.
-
-      * pow(+Inf, y) returns plus zero for y negative, and plus infinity for y
-        positive.
-
-    """
-    check_rounding_mode(rnd)
-    return cmpfr.mpfr_pow(&rop._value, &op1._value, &op2._value, rnd)
 
 
 # Functions for getting exponent bounds.

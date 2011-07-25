@@ -152,6 +152,8 @@ cdef extern from "mpfr.h":
     int mpfr_root(
         mpfr_ptr top, mpfr_ptr op, unsigned long int k, mpfr_rnd_t rnd
     )
+    int mpfr_dim(mpfr_ptr rop, mpfr_ptr op1, mpfr_ptr op2, mpfr_rnd_t rnd)
+
     int mpfr_fmod(mpfr_ptr rop, mpfr_ptr op1, mpfr_ptr op2, mpfr_rnd_t rnd)
     int mpfr_pow(mpfr_ptr rop, mpfr_ptr op1, mpfr_ptr op2, mpfr_rnd_t rnd)
 
