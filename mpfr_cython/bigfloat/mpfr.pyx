@@ -772,8 +772,8 @@ def mpfr_set_nan(Mpfr op not None):
 def mpfr_set_inf(Mpfr op not None, int sign):
     """ Set x to an infinity.
 
-    Set the variable x to infinity.  x is set to positive infinity if the sign is
-    nonnegative, and negative infinity otherwise.
+    Set the variable x to infinity.  x is set to positive infinity if the sign
+    is nonnegative, and negative infinity otherwise.
 
     """
     cmpfr.mpfr_set_inf(&op._value, sign)
