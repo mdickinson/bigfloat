@@ -776,6 +776,150 @@ def mpfr_unordered_p(Mpfr op1 not None, Mpfr op2 not None):
     return bool(cmpfr.mpfr_unordered_p(&op1._value, &op2._value))
 
 
+###############################################################################
+# 5.7 Special Functions
+###############################################################################
+
+def mpfr_log(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the natural logarithm of op, rounded in the direction rnd.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_log(&rop._value, &op._value, rnd)
+
+def mpfr_log2(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the base-two logarithm of op, rounded in the direction rnd.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_log2(&rop._value, &op._value, rnd)
+
+def mpfr_log10(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the base-ten logarithm of op, rounded in the direction rnd.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_log10(&rop._value, &op._value, rnd)
+
+def mpfr_exp(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the exponential of op, rounded in the direction rnd.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_exp(&rop._value, &op._value, rnd)
+
+def mpfr_exp2(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to two raised to the power op, rounded in the direction rnd.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_exp2(&rop._value, &op._value, rnd)
+
+def mpfr_exp10(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to ten raised to the power op, rounded in the direction rnd.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_exp10(&rop._value, &op._value, rnd)
+
+def mpfr_cos(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the cosine of op, rounded in the direction rnd.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_cos(&rop._value, &op._value, rnd)
+
+def mpfr_sin(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the sine of op, rounded in the direction rnd.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_sin(&rop._value, &op._value, rnd)
+
+def mpfr_tan(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the tangent of op, rounded in the direction rnd.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_tan(&rop._value, &op._value, rnd)
+
+
+def mpfr_sec(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the secant of op, rounded in the direction rnd.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_sec(&rop._value, &op._value, rnd)
+
+def mpfr_csc(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the cosecant of op, rounded in the direction rnd.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_csc(&rop._value, &op._value, rnd)
+
+def mpfr_cot(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the cotangent of op, rounded in the direction rnd.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_cot(&rop._value, &op._value, rnd)
+
+def mpfr_acos(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the arc-cosine of op, rounded in the direction rnd.
+
+    The result will usually be in the range [0, Pi].  However, note that since
+    acos(-1) returns the floating-point number closest to Pi according to the
+    given rounding mode, this number might not be in the output range [0, Pi];
+    still, the result lies in the image of this output range by the rounding
+    function.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_acos(&rop._value, &op._value, rnd)
+
+def mpfr_asin(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the arc-sine of op, rounded in the direction rnd.
+
+    The result will usually be in the range [-Pi/2, Pi/2].  However, note that
+    since asin(-1) and asin(1) return the floating-point numbers closest to
+    -Pi/2 and Pi/2 (respectively) according to the given rounding mode, these
+    numbers might not be in the output range [-Pi/2, Pi/2]; still, the result
+    lies in the image of this output range by the rounding function.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_asin(&rop._value, &op._value, rnd)
+
+def mpfr_atan(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the arc-tangent of op, rounded in the direction rnd.
+
+    The result will usually be in the range [-Pi/2, Pi/2].  However, note that
+    since atan(-inf) and atan(inf) return the floating-point numbers closest to
+    -Pi/2 and Pi/2 (respectively) according to the given rounding mode, these
+    numbers might not be in the output range [-Pi/2, Pi/2]; still, the result
+    lies in the image of this output range by the rounding function.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_atan(&rop._value, &op._value, rnd)
+
+
 # Functions that are documented in the MPFR 3.0.1 documentation, but aren't
 # (currently) wrapped:
 #
@@ -875,7 +1019,12 @@ def mpfr_unordered_p(Mpfr op1 not None, Mpfr op2 not None):
 #
 # None of the functions involving types ui, si, d, ld, z, q or f are
 # implemented.  This may change for the d, ui and si functions.
-
+#
+#
+# 5.7 Special Functions
+# ---------------------
+#
+#  mpfr_sin_cos is not currently wrapped
 
 def mpfr_get_exp(Mpfr op not None):
     """
@@ -969,30 +1118,6 @@ def mpfr_const_catalan(Mpfr rop not None, cmpfr.mpfr_rnd_t rnd):
     return cmpfr.mpfr_const_catalan(&rop._value, rnd)
 
 # MPFR functions taking a single argument, returning a ternary value.
-
-def mpfr_exp(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
-    """
-    Set rop to the exponential of op, rounded in the direction rnd.
-
-    """
-    check_rounding_mode(rnd)
-    return cmpfr.mpfr_exp(&rop._value, &op._value, rnd)
-
-def mpfr_log(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
-    """
-    Set rop to the natural logarithm of op, rounded in the direction rnd.
-
-    """
-    check_rounding_mode(rnd)
-    return cmpfr.mpfr_log(&rop._value, &op._value, rnd)
-
-def mpfr_log2(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
-    """
-    Set rop to the base-2 logarithm of op, rounded in the direction rnd.
-
-    """
-    check_rounding_mode(rnd)
-    return cmpfr.mpfr_log2(&rop._value, &op._value, rnd)
 
 # MPFR functions taking two arguments, returning a ternary value.
 

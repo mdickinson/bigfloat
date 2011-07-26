@@ -79,7 +79,22 @@ from bigfloat.mpfr import (
     mpfr_lessgreater_p,
     mpfr_unordered_p,
 
-
+    # 5.7 Special Functions
+    mpfr_log,
+    mpfr_log2,
+    mpfr_log10,
+    mpfr_exp,
+    mpfr_exp2,
+    mpfr_exp10,
+    mpfr_cos,
+    mpfr_sin,
+    mpfr_tan,
+    mpfr_sec,
+    mpfr_csc,
+    mpfr_cot,
+    mpfr_acos,
+    mpfr_asin,
+    mpfr_atan,
 
     mpfr_signbit,
 
@@ -377,6 +392,157 @@ class TestMpfr(unittest.TestCase):
         self.assertEqual(
             mpfr_get_str(10, 0, z, MPFR_RNDN),
             ('19773267440', 10),
+        )
+
+    # 5.7 Special Functions
+    def test_log(self):
+        x = Mpfr(53)
+        y = Mpfr(53)
+        mpfr_set_d(x, 7.3, MPFR_RNDN)
+        mpfr_log(y, x, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(y, MPFR_RNDN),
+            1.9878743481543455,
+        )
+
+    def test_log2(self):
+        x = Mpfr(53)
+        y = Mpfr(53)
+        mpfr_set_d(x, 7.3, MPFR_RNDN)
+        mpfr_log2(y, x, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(y, MPFR_RNDN),
+            2.867896463992655,
+        )
+
+    def test_log10(self):
+        x = Mpfr(53)
+        y = Mpfr(53)
+        mpfr_set_d(x, 7.3, MPFR_RNDN)
+        mpfr_log10(y, x, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(y, MPFR_RNDN),
+            0.8633228601204559,
+        )
+
+    def test_exp(self):
+        x = Mpfr(53)
+        y = Mpfr(53)
+        mpfr_set_d(x, 7.3, MPFR_RNDN)
+        mpfr_exp(y, x, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(y, MPFR_RNDN),
+            1480.299927584545,
+        )
+
+    def test_exp2(self):
+        x = Mpfr(53)
+        y = Mpfr(53)
+        mpfr_set_d(x, 7.3, MPFR_RNDN)
+        mpfr_exp2(y, x, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(y, MPFR_RNDN),
+            157.58648490814926,
+        )
+
+    def test_exp10(self):
+        x = Mpfr(53)
+        y = Mpfr(53)
+        mpfr_set_d(x, 7.3, MPFR_RNDN)
+        mpfr_exp10(y, x, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(y, MPFR_RNDN),
+            19952623.149688788,
+        )
+
+    def test_cos(self):
+        x = Mpfr(53)
+        y = Mpfr(53)
+        mpfr_set_d(x, 7.3, MPFR_RNDN)
+        mpfr_cos(y, x, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(y, MPFR_RNDN),
+            0.52607751738110533998,
+        )
+
+    def test_sin(self):
+        x = Mpfr(53)
+        y = Mpfr(53)
+        mpfr_set_d(x, 7.3, MPFR_RNDN)
+        mpfr_sin(y, x, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(y, MPFR_RNDN),
+            0.850436620628564424067,
+        )
+
+    def test_tan(self):
+        x = Mpfr(53)
+        y = Mpfr(53)
+        mpfr_set_d(x, 7.3, MPFR_RNDN)
+        mpfr_tan(y, x, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(y, MPFR_RNDN),
+            1.616561423993499104376,
+        )
+
+    def test_sec(self):
+        x = Mpfr(53)
+        y = Mpfr(53)
+        mpfr_set_d(x, 7.3, MPFR_RNDN)
+        mpfr_sec(y, x, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(y, MPFR_RNDN),
+            1.90086055184063662072,
+        )
+
+    def test_csc(self):
+        x = Mpfr(53)
+        y = Mpfr(53)
+        mpfr_set_d(x, 7.3, MPFR_RNDN)
+        mpfr_csc(y, x, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(y, MPFR_RNDN),
+            1.17586657928828617564,
+        )
+
+    def test_cot(self):
+        x = Mpfr(53)
+        y = Mpfr(53)
+        mpfr_set_d(x, 7.3, MPFR_RNDN)
+        mpfr_cot(y, x, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(y, MPFR_RNDN),
+            0.6185969708033942509443,
+        )
+
+    def test_acos(self):
+        x = Mpfr(53)
+        y = Mpfr(53)
+        mpfr_set_d(x, 0.625, MPFR_RNDN)
+        mpfr_acos(y, x, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(y, MPFR_RNDN),
+            0.895664793857864972022,
+        )
+
+    def test_asin(self):
+        x = Mpfr(53)
+        y = Mpfr(53)
+        mpfr_set_d(x, 0.625, MPFR_RNDN)
+        mpfr_asin(y, x, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(y, MPFR_RNDN),
+            0.675131532937031647209,
+        )
+
+    def test_atan(self):
+        x = Mpfr(53)
+        y = Mpfr(53)
+        mpfr_set_d(x, 0.625, MPFR_RNDN)
+        mpfr_atan(y, x, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(y, MPFR_RNDN),
+            0.558599315343562435972,
         )
 
     def test_cmp(self):

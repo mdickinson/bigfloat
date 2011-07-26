@@ -110,6 +110,31 @@ cdef extern from "mpfr.h":
     mpfr_exp_t mpfr_get_exp(mpfr_ptr x)
     int mpfr_set_exp(mpfr_ptr x, mpfr_exp_t exp)
 
+    ###########################################################################
+    # 5.7 Special Functions
+    ###########################################################################
+
+    int mpfr_log(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_log2(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_log10(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+
+    int mpfr_exp(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_exp2(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_exp10(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+
+    int mpfr_cos(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_sin(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_tan(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+
+    int mpfr_sec(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_csc(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_cot(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+
+    int mpfr_acos(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_asin(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_atan(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+
+
     int mpfr_const_log2(mpfr_ptr rop, mpfr_rnd_t rnd)
     int mpfr_const_pi(mpfr_ptr rop, mpfr_rnd_t rnd)
     int mpfr_const_euler(mpfr_ptr rop, mpfr_rnd_t rnd)
@@ -158,9 +183,6 @@ cdef extern from "mpfr.h":
     int mpfr_pow(mpfr_ptr rop, mpfr_ptr op1, mpfr_ptr op2, mpfr_rnd_t rnd)
 
     int mpfr_sqrt(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
-    int mpfr_exp(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
-    int mpfr_log(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
-    int mpfr_log2(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
 
     int mpfr_cmp(mpfr_ptr op1, mpfr_ptr op2)
     int mpfr_cmpabs(mpfr_ptr op1, mpfr_ptr op2)
