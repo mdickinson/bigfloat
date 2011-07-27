@@ -95,6 +95,7 @@ from bigfloat.mpfr import (
     mpfr_acos,
     mpfr_asin,
     mpfr_atan,
+    mpfr_atan2,
 
     mpfr_signbit,
 
@@ -543,6 +544,18 @@ class TestMpfr(unittest.TestCase):
         self.assertEqual(
             mpfr_get_d(y, MPFR_RNDN),
             0.558599315343562435972,
+        )
+
+    def test_atan2(self):
+        x = Mpfr(53)
+        y = Mpfr(53)
+        z = Mpfr(53)
+        mpfr_set_d(x, 0.35, MPFR_RNDN)
+        mpfr_set_d(y, 0.88, MPFR_RNDN)
+        mpfr_atan2(z, y, x, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(z, MPFR_RNDN),
+            1.1922507314834034,
         )
 
     def test_cmp(self):

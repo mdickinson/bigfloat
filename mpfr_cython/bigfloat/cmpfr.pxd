@@ -134,6 +134,7 @@ cdef extern from "mpfr.h":
     int mpfr_asin(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_atan(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
 
+    int mpfr_atan2(mpfr_ptr rop, mpfr_ptr y, mpfr_ptr x, mpfr_rnd_t rnd)
 
     int mpfr_const_log2(mpfr_ptr rop, mpfr_rnd_t rnd)
     int mpfr_const_pi(mpfr_ptr rop, mpfr_rnd_t rnd)
