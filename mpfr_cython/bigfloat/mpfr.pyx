@@ -1078,6 +1078,235 @@ def mpfr_atanh(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
     check_rounding_mode(rnd)
     return cmpfr.mpfr_atanh(&rop._value, &op._value, rnd)
 
+def mpfr_log1p(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the logarithm of one plus op, rounded in the direction rnd.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_log1p(&rop._value, &op._value, rnd)
+
+def mpfr_expm1(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the exponential of op followed by a subtraction by one, rounded
+    in the direction rnd.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_expm1(&rop._value, &op._value, rnd)
+
+def mpfr_eint(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the exponential integral of op, rounded in the direction
+    rnd.
+
+    For positive op, the exponential integral is the sum of Euler's constant,
+    of the logarithm of op, and of the sum for k from 1 to infinity of op to
+    the power k, divided by k and factorial(k). For negative op, rop is set to
+    NaN.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_eint(&rop._value, &op._value, rnd)
+
+def mpfr_li2(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to real part of the dilogarithm of op, rounded in the direction
+    rnd.
+
+    MPFR defines the dilogarithm function as the integral of -log(1-t)/t from 0
+    to op.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_li2(&rop._value, &op._value, rnd)
+
+def mpfr_gamma(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the value of the Gamma function on op, rounded in the direction
+    rnd.
+
+    When op is a negative integer, rop is set to NaN.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_gamma(&rop._value, &op._value, rnd)
+
+def mpfr_lngamma(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the value of the logarithm of the Gamma function on op, rounded
+    in the direction rnd.
+
+    When −2k−1 <= op <= −2k, k being a non-negative integer, rop is set to
+    NaN. See also mpfr_lgamma.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_lngamma(&rop._value, &op._value, rnd)
+
+def mpfr_digamma(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the value of the Digamma (sometimes also called Psi) function on
+    op, rounded in the direction rnd.
+
+    When op is a negative integer, set rop to NaN.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_digamma(&rop._value, &op._value, rnd)
+
+def mpfr_zeta(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the value of the Riemann Zeta function on op, rounded in the
+    direction rnd.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_zeta(&rop._value, &op._value, rnd)
+
+def mpfr_erf(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the value of the error function on op, rounded in the direction
+    rnd.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_erf(&rop._value, &op._value, rnd)
+
+def mpfr_erfc(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the value of the the complementary error function on op, rounded
+    in the direction rnd.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_erfc(&rop._value, &op._value, rnd)
+
+def mpfr_j0(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the value of the first kind Bessel function of order 0 on op,
+    rounded in the direction rnd. When op is NaN, rop is always set to
+    NaN. When op is plus or minus infinity, rop is set to +0.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_j0(&rop._value, &op._value, rnd)
+
+def mpfr_j1(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the value of the first kind Bessel function of order 1, on op,
+    rounded in the direction rnd. When op is NaN, rop is always set to
+    NaN. When op is plus or minus infinity, rop is set to +0. When op is zero,
+    rop is set to +0 or −0 depending on the sign of op.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_j1(&rop._value, &op._value, rnd)
+
+def mpfr_y0(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the value of the second kind Bessel function of order 0 on op,
+    rounded in the direction rnd.
+
+    When op is NaN or negative, rop is always set to NaN. When op is plus
+    infinity, rop is set to +0.  When op is zero, rop is set to +0 or -0
+    depending on the sign of op.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_y0(&rop._value, &op._value, rnd)
+
+def mpfr_y1(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the value of the second kind Bessel function of order 1 on op,
+    rounded in the direction rnd.
+
+    When op is NaN or negative, rop is always set to NaN. When op is plus
+    infinity, rop is set to +0.  When op is zero, rop is set to +0 or -0
+    depending on the sign of op.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_y1(&rop._value, &op._value, rnd)
+
+def mpfr_ai(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the value of the Airy function Ai on x, rounded in the direction
+    rnd.
+
+    When x is NaN, rop is always set to NaN. When x is +Inf or −Inf, rop
+    is +0. The current implementation is not intended to be used with large
+    arguments. It works with abs(x) typically smaller than 500. For larger
+    arguments, other methods should be used and will be implemented in a future
+    version.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_ai(&rop._value, &op._value, rnd)
+
+def mpfr_const_log2(Mpfr rop not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to log(2), rounded in the direction rnd.
+
+    Set rop to the natural logarithm of 2, rounded in the direction rnd.  This
+    function caches the computed values to avoid other calculations if a lower
+    or equal precision is requested.  To free this cache, use mpfr_free_cache.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_const_log2(&rop._value, rnd)
+
+def mpfr_const_pi(Mpfr rop not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to Pi, rounded in the direction rnd.
+
+    Set rop to the value of Pi, rounded in the direction rnd.  This function
+    caches the computed value to avoid other calculations if a lower or equal
+    precision is requested.  To free this cache, use mpfr_free_cache.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_const_pi(&rop._value, rnd)
+
+def mpfr_const_euler(Mpfr rop not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to Euler's constant, rounded in the direction rnd.
+
+    Set rop to the value of Euler's constant 0.577..., rounded in the direction
+    rnd.  This function caches the computed value to avoid other calculations
+    if a lower or equal precision is requested.  To free this cache, use
+    mpfr_free_cache.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_const_euler(&rop._value, rnd)
+
+def mpfr_const_catalan(Mpfr rop not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to Catalan's constant, rounded in the direction rnd.
+
+    Set rop to the value of Catalan's constant 0.915..., rounded in the
+    direction rnd.  This function caches the computed value to avoid other
+    calculations if a lower or equal precision is requested.  To free this
+    cache, use mpfr_free_cache.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_const_catalan(&rop._value, rnd)
+
+def mpfr_free_cache():
+    """
+    Free internal MPFR caches.
+
+    Free various caches used by MPFR internally, in particular the caches
+    used by the functions computing constants (mpfr_const_log2, mpfr_const_pi,
+    mpfr_const_euler and mpfr_const_catalan). You should call this function
+    before terminating a thread, even if you did not call these functions
+    directly (they could have been called internally).
+
+    """
+    cmpfr.mpfr_free_cache()
+
 
 # Functions that are documented in the MPFR 3.0.1 documentation, but aren't
 # (currently) wrapped:
@@ -1183,7 +1412,16 @@ def mpfr_atanh(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
 # 5.7 Special Functions
 # ---------------------
 #
-#  mpfr_sin_cos is not currently wrapped
+# The following are not yet implemented.
+#
+#  mpfr_fac_ui
+#  mpfr_lgamma
+#  mpfr_zeta_ui
+#  mpfr_jn
+#  mpfr_yn
+
+
+
 
 def mpfr_get_exp(Mpfr op not None):
     """
@@ -1210,71 +1448,6 @@ def mpfr_set_exp(Mpfr op not None, cmpfr.mpfr_exp_t exp):
     if error_code:
         raise ValueError("exponent not in current exponent range")
 
-def mpfr_free_cache():
-    """
-    Free internal MPFR caches.
-
-    Free various caches used by MPFR internally, in particular the caches
-    used by the functions computing constants (mpfr_const_log2, mpfr_const_pi,
-    mpfr_const_euler and mpfr_const_catalan). You should call this function
-    before terminating a thread, even if you did not call these functions
-    directly (they could have been called internally).
-
-    """
-    cmpfr.mpfr_free_cache()
-
-
-# MPFR functions for computing constants, returning a ternary value.
-
-def mpfr_const_log2(Mpfr rop not None, cmpfr.mpfr_rnd_t rnd):
-    """
-    Set rop to log(2), rounded in the direction rnd.
-
-    Set rop to the natural logarithm of 2, rounded in the direction rnd.  This
-    function caches the computed values to avoid other calculations if a lower
-    or equal precision is requested.  To free this cache, use mpfr_free_cache.
-
-    """
-    check_rounding_mode(rnd)
-    return cmpfr.mpfr_const_log2(&rop._value, rnd)
-
-def mpfr_const_pi(Mpfr rop not None, cmpfr.mpfr_rnd_t rnd):
-    """
-    Set rop to Pi, rounded in the direction rnd.
-
-    Set rop to the value of Pi, rounded in the direction rnd.  This function
-    caches the computed value to avoid other calculations if a lower or equal
-    precision is requested.  To free this cache, use mpfr_free_cache.
-
-    """
-    check_rounding_mode(rnd)
-    return cmpfr.mpfr_const_pi(&rop._value, rnd)
-
-def mpfr_const_euler(Mpfr rop not None, cmpfr.mpfr_rnd_t rnd):
-    """
-    Set rop to Euler's constant, rounded in the direction rnd.
-
-    Set rop to the value of Euler's constant 0.577..., rounded in the direction
-    rnd.  This function caches the computed value to avoid other calculations
-    if a lower or equal precision is requested.  To free this cache, use
-    mpfr_free_cache.
-
-    """
-    check_rounding_mode(rnd)
-    return cmpfr.mpfr_const_euler(&rop._value, rnd)
-
-def mpfr_const_catalan(Mpfr rop not None, cmpfr.mpfr_rnd_t rnd):
-    """
-    Set rop to Catalan's constant, rounded in the direction rnd.
-
-    Set rop to the value of Catalan's constant 0.915..., rounded in the
-    direction rnd.  This function caches the computed value to avoid other
-    calculations if a lower or equal precision is requested.  To free this
-    cache, use mpfr_free_cache.
-
-    """
-    check_rounding_mode(rnd)
-    return cmpfr.mpfr_const_catalan(&rop._value, rnd)
 
 # MPFR functions taking a single argument, returning a ternary value.
 

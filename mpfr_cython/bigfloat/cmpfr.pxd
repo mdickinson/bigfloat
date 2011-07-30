@@ -152,7 +152,21 @@ cdef extern from "mpfr.h":
     int mpfr_asinh(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_atanh(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
 
-
+    int mpfr_log1p(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_expm1(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_eint(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_li2(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_gamma(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_lngamma(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_digamma(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_zeta(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_erf(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_erfc(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_j0(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_j1(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_y0(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_y1(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_ai(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
 
     int mpfr_const_log2(mpfr_ptr rop, mpfr_rnd_t rnd)
     int mpfr_const_pi(mpfr_ptr rop, mpfr_rnd_t rnd)

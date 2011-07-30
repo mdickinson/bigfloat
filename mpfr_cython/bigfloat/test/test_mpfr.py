@@ -26,7 +26,6 @@ from bigfloat.mpfr import (
     mpfr_get_prec,
     mpfr_set_prec,
 
-    mpfr_const_pi,
     mpfr_get_str,
     mpfr_set,
     mpfr_set_d,
@@ -112,6 +111,28 @@ from bigfloat.mpfr import (
     mpfr_asinh,
     mpfr_atanh,
 
+    mpfr_log1p,
+    mpfr_expm1,
+    mpfr_eint,
+    mpfr_li2,
+    mpfr_gamma,
+    mpfr_lngamma,
+    mpfr_digamma,
+    mpfr_zeta,
+    mpfr_erf,
+    mpfr_erfc,
+    mpfr_j0,
+    mpfr_j1,
+    mpfr_y0,
+    mpfr_y1,
+    mpfr_ai,
+
+    mpfr_const_log2,
+    mpfr_const_pi,
+    mpfr_const_euler,
+    mpfr_const_catalan,
+
+    mpfr_free_cache,
 
 
     mpfr_signbit,
