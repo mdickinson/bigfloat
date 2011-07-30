@@ -278,14 +278,6 @@ class TestMpfr(unittest.TestCase):
         with self.assertRaises(TypeError):
             mpfr_const_pi(None, MPFR_RNDN)
 
-    def test_const_pi(self):
-        pi = Mpfr(10)
-        mpfr_const_pi(pi, MPFR_RNDN)
-        self.assertEqual(
-            mpfr_get_str(10, 0, pi, MPFR_RNDN),
-            ('31406', 1),
-        )
-
     def test_set(self):
         x = Mpfr(30)
         y = Mpfr(30)
@@ -741,6 +733,39 @@ class TestMpfr(unittest.TestCase):
             mpfr_get_d(y, MPFR_RNDN),
             1.0453705484668847151702051105754406143,
         )
+
+    def test_const_log2(self):
+        x = Mpfr(53)
+        mpfr_const_log2(x, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(x, MPFR_RNDN),
+            0.69314718055994530941723212145817656808,
+        )
+
+    def test_const_pi(self):
+        x = Mpfr(53)
+        mpfr_const_pi(x, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(x, MPFR_RNDN),
+            3.1415926535897932384626433832795028842,
+        )
+
+    def test_const_euler(self):
+        x = Mpfr(53)
+        mpfr_const_euler(x, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(x, MPFR_RNDN),
+            0.57721566490153286060651209008240243104,
+        )
+
+    def test_const_catalan(self):
+        x = Mpfr(53)
+        mpfr_const_catalan(x, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(x, MPFR_RNDN),
+            0.91596559417721901505460351493238411077,
+        )
+
 
     def test_cmp(self):
         x = Mpfr(53)
