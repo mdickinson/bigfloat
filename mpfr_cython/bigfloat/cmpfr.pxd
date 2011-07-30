@@ -55,60 +55,95 @@ cdef extern from "mpfr.h":
     mpfr_exp_t MPFR_EMIN_DEFAULT
     mpfr_exp_t MPFR_EMAX_DEFAULT
 
-    # Functions to get and set exponent min and max values.
-    mpfr_exp_t mpfr_get_emin()
-    mpfr_exp_t mpfr_get_emin_min()
-    mpfr_exp_t mpfr_get_emin_max()
-    mpfr_exp_t mpfr_get_emax()
-    mpfr_exp_t mpfr_get_emax_min()
-    mpfr_exp_t mpfr_get_emax_max()
-    int mpfr_set_emin(mpfr_exp_t exp)
-    int mpfr_set_emax(mpfr_exp_t exp)
 
-    void mpfr_set_prec(mpfr_ptr x, mpfr_prec_t prec)
-    mpfr_prec_t mpfr_get_prec(mpfr_ptr x)
-    int mpfr_setsign(mpfr_ptr rop, mpfr_ptr op, int s, mpfr_rnd_t rnd)
+    ###########################################################################
+    # 5.1 Initialization Functions
+    ###########################################################################
 
-    double mpfr_get_d(mpfr_ptr op, mpfr_rnd_t rnd)
-    double mpfr_get_d_2exp(long int *exp, mpfr_ptr op, mpfr_rnd_t rnd)
-    long mpfr_get_si(mpfr_ptr op, mpfr_rnd_t rnd)
-
-    # MPFR function definitions
     void mpfr_init2(mpfr_ptr x, mpfr_prec_t prec)
     void mpfr_clear(mpfr_ptr x)
+    void mpfr_set_prec(mpfr_ptr x, mpfr_prec_t prec)
+    mpfr_prec_t mpfr_get_prec(mpfr_ptr x)
+
+
+    ###########################################################################
+    # 5.2 Assignment Functions
+    ###########################################################################
+
     int mpfr_set(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_set_si(mpfr_ptr rop, long int op, mpfr_rnd_t rnd)
     int mpfr_set_d(mpfr_ptr rop, double op, mpfr_rnd_t rnd)
-
     int mpfr_set_si_2exp(
         mpfr_ptr rop, long int op, mpfr_exp_t e, mpfr_rnd_t rnd
     )
-
     int mpfr_set_str(
         mpfr_ptr rop, char *s, int base, mpfr_rnd_t rnd
     )
-
     int mpfr_strtofr(
         mpfr_ptr rop, char *nptr, char **endptr, int base, mpfr_rnd_t rnd
     )
+    void mpfr_set_nan(mpfr_ptr x)
+    void mpfr_set_inf(mpfr_ptr x, int sign)
+    void mpfr_set_zero(mpfr_ptr x, int sign)
+    void mpfr_swap(mpfr_ptr x, mpfr_ptr y)
 
-    int mpfr_fits_slong_p(mpfr_ptr x, mpfr_rnd_t rnd)
 
+    ###########################################################################
+    # 5.4 Conversion Functions
+    ###########################################################################
+
+    double mpfr_get_d(mpfr_ptr op, mpfr_rnd_t rnd)
+    long mpfr_get_si(mpfr_ptr op, mpfr_rnd_t rnd)
+    double mpfr_get_d_2exp(long int *exp, mpfr_ptr op, mpfr_rnd_t rnd)
     char * mpfr_get_str(
         char *str, mpfr_exp_t *expptr, int b,
         size_t n, mpfr_ptr op, mpfr_rnd_t rnd
     )
-
     void mpfr_free_str(char *str)
+    int mpfr_fits_slong_p(mpfr_ptr x, mpfr_rnd_t rnd)
 
-    void mpfr_set_nan(mpfr_ptr x)
-    void mpfr_set_inf(mpfr_ptr x, int sign)
-    void mpfr_set_zero(mpfr_ptr x, int sign)
 
-    void mpfr_swap(mpfr_ptr x, mpfr_ptr y)
+    ###########################################################################
+    # 5.5 Basic Arithmetic Functions
+    ###########################################################################
 
-    mpfr_exp_t mpfr_get_exp(mpfr_ptr x)
-    int mpfr_set_exp(mpfr_ptr x, mpfr_exp_t exp)
+    int mpfr_add(mpfr_ptr rop, mpfr_ptr op1, mpfr_ptr op2, mpfr_rnd_t rnd)
+    int mpfr_sub(mpfr_ptr rop, mpfr_ptr op1, mpfr_ptr op2, mpfr_rnd_t rnd)
+    int mpfr_mul(mpfr_ptr rop, mpfr_ptr op1, mpfr_ptr op2, mpfr_rnd_t rnd)
+    int mpfr_sqr(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_div(mpfr_ptr rop, mpfr_ptr op1, mpfr_ptr op2, mpfr_rnd_t rnd)
+    int mpfr_sqrt(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_rec_sqrt(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_cbrt(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_root(
+        mpfr_ptr top, mpfr_ptr op, unsigned long int k, mpfr_rnd_t rnd
+    )
+    int mpfr_pow(mpfr_ptr rop, mpfr_ptr op1, mpfr_ptr op2, mpfr_rnd_t rnd)
+    int mpfr_neg(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_abs(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_dim(mpfr_ptr rop, mpfr_ptr op1, mpfr_ptr op2, mpfr_rnd_t rnd)
+
+
+    ###########################################################################
+    # 5.6 Comparison Functions
+    ###########################################################################
+
+    int mpfr_cmp(mpfr_ptr op1, mpfr_ptr op2)
+    int mpfr_cmpabs(mpfr_ptr op1, mpfr_ptr op2)
+    int mpfr_nan_p(mpfr_ptr op)
+    int mpfr_inf_p(mpfr_ptr op)
+    int mpfr_number_p(mpfr_ptr op)
+    int mpfr_zero_p(mpfr_ptr op)
+    int mpfr_regular_p(mpfr_ptr op)
+    int mpfr_sgn(mpfr_ptr op)
+    int mpfr_greater_p(mpfr_ptr op1, mpfr_ptr op2)
+    int mpfr_greaterequal_p(mpfr_ptr op1, mpfr_ptr op2)
+    int mpfr_less_p(mpfr_ptr op1, mpfr_ptr op2)
+    int mpfr_lessequal_p(mpfr_ptr op1, mpfr_ptr op2)
+    int mpfr_equal_p(mpfr_ptr op1, mpfr_ptr op2)
+    int mpfr_lessgreater_p(mpfr_ptr op1, mpfr_ptr op2)
+    int mpfr_unordered_p(mpfr_ptr op1, mpfr_ptr op2)
+
 
     ###########################################################################
     # 5.7 Special Functions
@@ -172,8 +207,16 @@ cdef extern from "mpfr.h":
     int mpfr_const_pi(mpfr_ptr rop, mpfr_rnd_t rnd)
     int mpfr_const_euler(mpfr_ptr rop, mpfr_rnd_t rnd)
     int mpfr_const_catalan(mpfr_ptr rop, mpfr_rnd_t rnd)
-
     void mpfr_free_cache()
+
+
+
+
+
+
+
+
+
 
     void mpfr_clear_flags()
     void mpfr_clear_underflow()
@@ -197,46 +240,32 @@ cdef extern from "mpfr.h":
     int mpfr_check_range(mpfr_ptr x, int t, mpfr_rnd_t rnd)
     int mpfr_subnormalize(mpfr_ptr x, int t, mpfr_rnd_t rnd)
 
-    int mpfr_neg(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
-    int mpfr_abs(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
 
-    int mpfr_add(mpfr_ptr rop, mpfr_ptr op1, mpfr_ptr op2, mpfr_rnd_t rnd)
-    int mpfr_sub(mpfr_ptr rop, mpfr_ptr op1, mpfr_ptr op2, mpfr_rnd_t rnd)
-    int mpfr_mul(mpfr_ptr rop, mpfr_ptr op1, mpfr_ptr op2, mpfr_rnd_t rnd)
-    int mpfr_div(mpfr_ptr rop, mpfr_ptr op1, mpfr_ptr op2, mpfr_rnd_t rnd)
-    int mpfr_sqr(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
-    int mpfr_rec_sqrt(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
-    int mpfr_cbrt(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
-    int mpfr_root(
-        mpfr_ptr top, mpfr_ptr op, unsigned long int k, mpfr_rnd_t rnd
-    )
-    int mpfr_dim(mpfr_ptr rop, mpfr_ptr op1, mpfr_ptr op2, mpfr_rnd_t rnd)
 
     int mpfr_fmod(mpfr_ptr rop, mpfr_ptr op1, mpfr_ptr op2, mpfr_rnd_t rnd)
-    int mpfr_pow(mpfr_ptr rop, mpfr_ptr op1, mpfr_ptr op2, mpfr_rnd_t rnd)
 
-    int mpfr_sqrt(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
 
-    int mpfr_cmp(mpfr_ptr op1, mpfr_ptr op2)
-    int mpfr_cmpabs(mpfr_ptr op1, mpfr_ptr op2)
-    int mpfr_sgn(mpfr_ptr op)
 
-    int mpfr_nan_p(mpfr_ptr op)
-    int mpfr_inf_p(mpfr_ptr op)
-    int mpfr_number_p(mpfr_ptr op)
-    int mpfr_integer_p(mpfr_ptr op)
-    int mpfr_zero_p(mpfr_ptr op)
-    int mpfr_regular_p(mpfr_ptr op)
-    int mpfr_signbit(mpfr_ptr op)
 
-    int mpfr_greater_p(mpfr_ptr op1, mpfr_ptr op2)
-    int mpfr_greaterequal_p(mpfr_ptr op1, mpfr_ptr op2)
-    int mpfr_less_p(mpfr_ptr op1, mpfr_ptr op2)
-    int mpfr_lessequal_p(mpfr_ptr op1, mpfr_ptr op2)
-    int mpfr_equal_p(mpfr_ptr op1, mpfr_ptr op2)
-    int mpfr_lessgreater_p(mpfr_ptr op1, mpfr_ptr op2)
-    int mpfr_unordered_p(mpfr_ptr op1, mpfr_ptr op2)
 
     void mpfr_nexttoward(mpfr_ptr rop, mpfr_ptr op)
     void mpfr_nextabove(mpfr_ptr op)
     void mpfr_nextbelow(mpfr_ptr op)
+    int mpfr_signbit(mpfr_ptr op)
+    int mpfr_integer_p(mpfr_ptr op)
+
+    # Functions to get and set exponent min and max values.
+    mpfr_exp_t mpfr_get_emin()
+    mpfr_exp_t mpfr_get_emin_min()
+    mpfr_exp_t mpfr_get_emin_max()
+    mpfr_exp_t mpfr_get_emax()
+    mpfr_exp_t mpfr_get_emax_min()
+    mpfr_exp_t mpfr_get_emax_max()
+    int mpfr_set_emin(mpfr_exp_t exp)
+    int mpfr_set_emax(mpfr_exp_t exp)
+
+    int mpfr_setsign(mpfr_ptr rop, mpfr_ptr op, int s, mpfr_rnd_t rnd)
+
+    long mpfr_get_si(mpfr_ptr op, mpfr_rnd_t rnd)
+    mpfr_exp_t mpfr_get_exp(mpfr_ptr x)
+    int mpfr_set_exp(mpfr_ptr x, mpfr_exp_t exp)
