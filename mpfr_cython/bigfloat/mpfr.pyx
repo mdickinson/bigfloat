@@ -852,6 +852,28 @@ def mpfr_tan(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
     check_rounding_mode(rnd)
     return cmpfr.mpfr_tan(&rop._value, &op._value, rnd)
 
+def mpfr_sin_cos(Mpfr sop not None, Mpfr cop not None,
+                 Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Compute sin(op) and cos(op), rounded in the direction rnd.
+
+    Set simultaneously sop to the sine of op and cop to the cosine of op,
+    rounded in the direction rnd with the corresponding precisions of sop and
+    cop, which must be different variables.
+
+    Returns a pair (sin_ternary, cos_ternary) of the corresponding ternary
+    values.  Note that this differs from the original mpfr_sin_cos function
+    from MPFR, which combines the ternary values into a single int return.
+
+    """
+    cdef int combined_ternary, sin_ternary, cos_ternary
+
+    combined_ternary = cmpfr.mpfr_sin_cos(
+        &sop._value, &cop._value, &op._value, rnd
+    )
+    sin_ternary = [0, 1, -1][combined_ternary & 3]
+    cos_ternary = [0, 1, -1][combined_ternary >> 2]
+    return sin_ternary, cos_ternary
 
 def mpfr_sec(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
     """

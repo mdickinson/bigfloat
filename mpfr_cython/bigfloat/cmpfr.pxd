@@ -126,6 +126,8 @@ cdef extern from "mpfr.h":
     int mpfr_sin(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_tan(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
 
+    int mpfr_sin_cos(mpfr_ptr sop, mpfr_ptr cop, mpfr_ptr op, mpfr_rnd_t rnd)
+
     int mpfr_sec(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_csc(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_cot(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)

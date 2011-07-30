@@ -89,6 +89,7 @@ from bigfloat.mpfr import (
     mpfr_cos,
     mpfr_sin,
     mpfr_tan,
+    mpfr_sin_cos,
     mpfr_sec,
     mpfr_csc,
     mpfr_cot,
@@ -485,6 +486,35 @@ class TestMpfr(unittest.TestCase):
             mpfr_get_d(y, MPFR_RNDN),
             1.616561423993499104376,
         )
+
+    def test_sin_cos(self):
+        # Check that sin_cos results are identical to those provided by sin and cos
+        # independently (including the ternary values).
+        op = Mpfr(53)
+        sop = Mpfr(53)
+        cop = Mpfr(53)
+        sop_single = Mpfr(53)
+        cop_single = Mpfr(53)
+
+        # N.B.  All that's guaranteed by the docs about the ternary values is
+        # that they're +ve, 0 or -ve as appropriate; the assertEqual below may
+        # be a little too strong.
+        test_values = [x / 100.0 for x in range(-100, 100)]
+        for test_value in test_values:
+            mpfr_set_d(op, test_value, MPFR_RNDN)
+
+            st, ct = mpfr_sin_cos(sop, cop, op, MPFR_RNDN)
+            st_single = mpfr_sin(sop_single, op, MPFR_RNDN)
+            ct_single = mpfr_cos(cop_single, op, MPFR_RNDN)
+
+            # Check ternary values.
+            self.assertEqual(st, st_single)
+            self.assertEqual(ct, ct_single)
+
+            # Check sin and cos values.
+            self.assertTrue(mpfr_equal_p(sop, sop_single))
+            self.assertTrue(mpfr_equal_p(cop, cop_single))
+
 
     def test_sec(self):
         x = Mpfr(53)
