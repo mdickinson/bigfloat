@@ -83,9 +83,11 @@ from bigfloat.mpfr import (
     mpfr_log,
     mpfr_log2,
     mpfr_log10,
+
     mpfr_exp,
     mpfr_exp2,
     mpfr_exp10,
+
     mpfr_cos,
     mpfr_sin,
     mpfr_tan,
@@ -96,7 +98,21 @@ from bigfloat.mpfr import (
     mpfr_acos,
     mpfr_asin,
     mpfr_atan,
+
     mpfr_atan2,
+
+    mpfr_cosh,
+    mpfr_sinh,
+    mpfr_tanh,
+    mpfr_sinh_cosh,
+    mpfr_sech,
+    mpfr_csch,
+    mpfr_coth,
+    mpfr_acosh,
+    mpfr_asinh,
+    mpfr_atanh,
+
+
 
     mpfr_signbit,
 
@@ -488,8 +504,8 @@ class TestMpfr(unittest.TestCase):
         )
 
     def test_sin_cos(self):
-        # Check that sin_cos results are identical to those provided by sin and cos
-        # independently (including the ternary values).
+        # Check that sin_cos results are identical to those provided by sin and
+        # cos independently (including the ternary values).
         op = Mpfr(53)
         sop = Mpfr(53)
         cop = Mpfr(53)
@@ -514,7 +530,6 @@ class TestMpfr(unittest.TestCase):
             # Check sin and cos values.
             self.assertTrue(mpfr_equal_p(sop, sop_single))
             self.assertTrue(mpfr_equal_p(cop, cop_single))
-
 
     def test_sec(self):
         x = Mpfr(53)
@@ -586,6 +601,124 @@ class TestMpfr(unittest.TestCase):
         self.assertEqual(
             mpfr_get_d(z, MPFR_RNDN),
             1.1922507314834034,
+        )
+
+    def test_cosh(self):
+        x = Mpfr(53)
+        y = Mpfr(53)
+        mpfr_set_d(x, 7.3, MPFR_RNDN)
+        mpfr_cosh(y, x, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(y, MPFR_RNDN),
+            740.15030156166007686,
+        )
+
+    def test_sinh(self):
+        x = Mpfr(53)
+        y = Mpfr(53)
+        mpfr_set_d(x, 7.3, MPFR_RNDN)
+        mpfr_sinh(y, x, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(y, MPFR_RNDN),
+            740.14962602288488302,
+        )
+
+    def test_tanh(self):
+        x = Mpfr(53)
+        y = Mpfr(53)
+        mpfr_set_d(x, 7.3, MPFR_RNDN)
+        mpfr_tanh(y, x, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(y, MPFR_RNDN),
+            0.99999908729514293447,
+        )
+
+    def test_sinh_cosh(self):
+        # Check that sinh_cosh results are identical to those provided by sinh
+        # and cosh independently (including the ternary values).
+        op = Mpfr(53)
+        sop = Mpfr(53)
+        cop = Mpfr(53)
+        sop_single = Mpfr(53)
+        cop_single = Mpfr(53)
+
+        # N.B.  All that's guaranteed by the docs about the ternary values is
+        # that they're +ve, 0 or -ve as appropriate; the assertEqual below may
+        # be a little too strong.
+        test_values = [x / 100.0 for x in range(-100, 100)]
+        for test_value in test_values:
+            mpfr_set_d(op, test_value, MPFR_RNDN)
+
+            st, ct = mpfr_sinh_cosh(sop, cop, op, MPFR_RNDN)
+            st_single = mpfr_sinh(sop_single, op, MPFR_RNDN)
+            ct_single = mpfr_cosh(cop_single, op, MPFR_RNDN)
+
+            # Check ternary values.
+            self.assertEqual(st, st_single)
+            self.assertEqual(ct, ct_single)
+
+            # Check sinh and cosh values.
+            self.assertTrue(mpfr_equal_p(sop, sop_single))
+            self.assertTrue(mpfr_equal_p(cop, cop_single))
+
+    def test_sech(self):
+        x = Mpfr(53)
+        y = Mpfr(53)
+        mpfr_set_d(x, 7.3, MPFR_RNDN)
+        mpfr_sech(y, x, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(y, MPFR_RNDN),
+            0.0013510769338201674601516852324956868915,
+        )
+
+    def test_csch(self):
+        x = Mpfr(53)
+        y = Mpfr(53)
+        mpfr_set_d(x, 7.3, MPFR_RNDN)
+        mpfr_csch(y, x, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(y, MPFR_RNDN),
+            0.0013510781669557727158793600532906091079,
+        )
+
+    def test_coth(self):
+        x = Mpfr(53)
+        y = Mpfr(53)
+        mpfr_set_d(x, 7.3, MPFR_RNDN)
+        mpfr_coth(y, x, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(y, MPFR_RNDN),
+            1.0000009127056900964470593240457667881,
+        )
+
+    def test_acosh(self):
+        x = Mpfr(53)
+        y = Mpfr(53)
+        mpfr_set_d(x, 1.3, MPFR_RNDN)
+        mpfr_acosh(y, x, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(y, MPFR_RNDN),
+            0.75643291085695963970413518095370628592,
+        )
+
+    def test_asinh(self):
+        x = Mpfr(53)
+        y = Mpfr(53)
+        mpfr_set_d(x, 1.3, MPFR_RNDN)
+        mpfr_asinh(y, x, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(y, MPFR_RNDN),
+            1.0784510589548970088022680582217889485,
+        )
+
+    def test_atanh(self):
+        x = Mpfr(53)
+        y = Mpfr(53)
+        mpfr_set_d(x, 0.78, MPFR_RNDN)
+        mpfr_atanh(y, x, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(y, MPFR_RNDN),
+            1.0453705484668847151702051105754406143,
         )
 
     def test_cmp(self):

@@ -138,6 +138,22 @@ cdef extern from "mpfr.h":
 
     int mpfr_atan2(mpfr_ptr rop, mpfr_ptr y, mpfr_ptr x, mpfr_rnd_t rnd)
 
+    int mpfr_cosh(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_sinh(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_tanh(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+
+    int mpfr_sinh_cosh(mpfr_ptr sop, mpfr_ptr cop, mpfr_ptr op, mpfr_rnd_t rnd)
+
+    int mpfr_sech(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_csch(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_coth(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+
+    int mpfr_acosh(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_asinh(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_atanh(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+
+
+
     int mpfr_const_log2(mpfr_ptr rop, mpfr_rnd_t rnd)
     int mpfr_const_pi(mpfr_ptr rop, mpfr_rnd_t rnd)
     int mpfr_const_euler(mpfr_ptr rop, mpfr_rnd_t rnd)

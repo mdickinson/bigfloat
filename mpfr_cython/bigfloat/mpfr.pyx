@@ -868,6 +868,7 @@ def mpfr_sin_cos(Mpfr sop not None, Mpfr cop not None,
     """
     cdef int combined_ternary, sin_ternary, cos_ternary
 
+    check_rounding_mode(rnd)
     combined_ternary = cmpfr.mpfr_sin_cos(
         &sop._value, &cop._value, &op._value, rnd
     )
@@ -980,6 +981,102 @@ def mpfr_atan2(Mpfr rop not None, Mpfr y not None,
     """
     check_rounding_mode(rnd)
     return cmpfr.mpfr_atan2(&rop._value, &y._value, &x._value, rnd)
+
+def mpfr_cosh(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the hyperbolic cosine of op, rounded in the direction rnd.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_cosh(&rop._value, &op._value, rnd)
+
+def mpfr_sinh(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the hyperbolic sine of op, rounded in the direction rnd.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_sinh(&rop._value, &op._value, rnd)
+
+def mpfr_tanh(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the hyperbolic tangent of op, rounded in the direction rnd.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_tanh(&rop._value, &op._value, rnd)
+
+def mpfr_sinh_cosh(Mpfr sop not None, Mpfr cop not None,
+                   Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Compute sinh(op) and cosh(op), rounded in the direction rnd.
+
+    Set simultaneously sop to the hyperbolic sine of op and cop to the
+    hyperbolic cosine of op, rounded in the direction rnd with the
+    corresponding precisions of sop and cop, which must be different variables.
+
+    Returns a pair (sinh_ternary, cosh_ternary) of the corresponding ternary
+    values.  Note that this differs from the original mpfr_sinh_cosh function
+    from MPFR, which combines the ternary values into a single int return.
+
+    """
+    cdef int combined_ternary, sinh_ternary, cosh_ternary
+
+    check_rounding_mode(rnd)
+    combined_ternary = cmpfr.mpfr_sinh_cosh(
+        &sop._value, &cop._value, &op._value, rnd
+    )
+    sinh_ternary = [0, 1, -1][combined_ternary & 3]
+    cosh_ternary = [0, 1, -1][combined_ternary >> 2]
+    return sinh_ternary, cosh_ternary
+
+def mpfr_sech(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the hyperbolic secant of op, rounded in the direction rnd.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_sech(&rop._value, &op._value, rnd)
+
+def mpfr_csch(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the hyperbolic cosecant of op, rounded in the direction rnd.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_csch(&rop._value, &op._value, rnd)
+
+def mpfr_coth(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the hyperbolic cotangent of op, rounded in the direction rnd.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_coth(&rop._value, &op._value, rnd)
+
+def mpfr_acosh(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the inverse hyperbolic cosine of op, rounded in the direction rnd.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_acosh(&rop._value, &op._value, rnd)
+
+def mpfr_asinh(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the inverse hyperbolic sine of op, rounded in the direction rnd.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_asinh(&rop._value, &op._value, rnd)
+
+def mpfr_atanh(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the inverse hyperbolic tangent of op, rounded in the direction rnd.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_atanh(&rop._value, &op._value, rnd)
 
 
 # Functions that are documented in the MPFR 3.0.1 documentation, but aren't
