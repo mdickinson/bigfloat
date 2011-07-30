@@ -1419,6 +1419,35 @@ def mpfr_free_cache():
 #  mpfr_zeta_ui
 #  mpfr_jn
 #  mpfr_yn
+#
+#
+#  5.8 Input and Output Functions
+#  ------------------------------
+#
+#  mpfr_out_str
+#  mpfr_inp_str
+#
+#
+#  5.9 Formatted Output Functions
+#  ------------------------------
+#
+#  mpfr_fprintf
+#  mpfr_vfprintf
+#
+#  mpfr_printf
+#  mpfr_vprintf
+#
+#  mpfr_sprintf
+#  mpfr_vsprintf
+#
+#  mpfr_snprintf
+#  mpfr_vsnprintf
+#
+#  mpfr_asprintf
+#  mpfr_vasprintf
+#
+#
+#  Sections 5.10 and later only partially wrapped.  Details to come.
 
 
 
