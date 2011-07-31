@@ -1375,6 +1375,55 @@ def mpfr_rint(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
     representable in rop, 1 or −1 when op is an integer that is not
     representable in rop, 2 or −2 when op is not an integer.
 
+    Note that no double rounding is performed; for instance, 10.5 (1010.1 in
+    binary) is rounded by mpfr_rint with rounding to nearest to 12 (1100 in
+    binary) in 2-bit precision, because the two enclosing numbers representable
+    on two bits are 8 and 12, and the closest is 12. (If one first rounded to
+    an integer, one would round 10.5 to 10 with even rounding, and then 10
+    would be rounded to 8 again with even rounding.)
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_rint(&rop._value, &op._value, rnd)
+
+def mpfr_ceil(Mpfr rop not None, Mpfr op not None):
+    """
+    Set rop to op rounded to the next higher or equal representable integer.
+
+    The returned value is zero when the result is exact, positive when it is
+    greater than the original value of op, and negative when it is
+    smaller. More precisely, the returned value is 0 when op is an integer
+    representable in rop, 1 or −1 when op is an integer that is not
+    representable in rop, 2 or −2 when op is not an integer.
+
+    """
+    return cmpfr.mpfr_ceil(&rop._value, &op._value)
+
+def mpfr_floor(Mpfr rop not None, Mpfr op not None):
+    """
+    Set rop to op rounded to the next lower or equal representable integer.
+
+    The returned value is zero when the result is exact, positive when it is
+    greater than the original value of op, and negative when it is
+    smaller. More precisely, the returned value is 0 when op is an integer
+    representable in rop, 1 or −1 when op is an integer that is not
+    representable in rop, 2 or −2 when op is not an integer.
+
+    """
+    return cmpfr.mpfr_floor(&rop._value, &op._value)
+
+def mpfr_round(Mpfr rop not None, Mpfr op not None):
+    """
+    Set rop to op rounded to the nearest representable integer, rounding
+    halfway cases away from zero (as in the roundTiesToAway mode of IEEE
+    754-2008).
+
+    The returned value is zero when the result is exact, positive when it is
+    greater than the original value of op, and negative when it is
+    smaller. More precisely, the returned value is 0 when op is an integer
+    representable in rop, 1 or −1 when op is an integer that is not
+    representable in rop, 2 or −2 when op is not an integer.
+
     Note that mpfr_round is different from mpfr_rint called with the rounding
     to nearest mode (where halfway cases are rounded to an even integer or
     significand). Note also that no double rounding is performed; for instance,
@@ -1383,10 +1432,207 @@ def mpfr_rint(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
     representable on two bits are 8 and 12, and the closest is 12. (If one
     first rounded to an integer, one would round 10.5 to 10 with even rounding,
     and then 10 would be rounded to 8 again with even rounding.)
+    """
+    return cmpfr.mpfr_round(&rop._value, &op._value)
+
+def mpfr_trunc(Mpfr rop not None, Mpfr op not None):
+    """
+    Set rop to op rounded to the next representable integer toward zero.
+
+    The returned value is zero when the result is exact, positive when it is
+    greater than the original value of op, and negative when it is
+    smaller. More precisely, the returned value is 0 when op is an integer
+    representable in rop, 1 or −1 when op is an integer that is not
+    representable in rop, 2 or −2 when op is not an integer.
+
+    """
+    return cmpfr.mpfr_trunc(&rop._value, &op._value)
+
+def mpfr_rint_ceil(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to op rounded to the next higher or equal integer.
+
+    If the result is not representable, it is rounded in the direction rnd. The
+    returned value is the ternary value associated with the considered
+    round-to-integer function (regarded in the same way as any other
+    mathematical function).
+
+    Unlike mpfr_ceil, this function does perform a double rounding: first op is
+    rounded to the next higher or equal integer, then this integer (if not
+    representable) is rounded in the given direction rnd.
 
     """
     check_rounding_mode(rnd)
-    return cmpfr.mpfr_rint(&rop._value, &op._value, rnd)
+    return cmpfr.mpfr_rint_ceil(&rop._value, &op._value, rnd)
+
+def mpfr_rint_floor(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to op rounded to the next lower or equal integer.
+
+    If the result is not representable, it is rounded in the direction rnd. The
+    returned value is the ternary value associated with the considered
+    round-to-integer function (regarded in the same way as any other
+    mathematical function).
+
+    Unlike mpfr_floor, this function does perform a double rounding: first op
+    is rounded to the next lower or equal integer, then this integer (if not
+    representable) is rounded in the given direction rnd.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_rint_floor(&rop._value, &op._value, rnd)
+
+def mpfr_rint_round(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to op rounded to the nearest integer, rounding halfway cases
+    away from zero.
+
+    If the result is not representable, it is rounded in the direction rnd. The
+    returned value is the ternary value associated with the considered
+    round-to-integer function (regarded in the same way as any other
+    mathematical function).
+
+    Unlike mpfr_round, this function does perform a double rounding: first op
+    is rounded to the nearest integer, then this nearest integer (if not
+    representable) is rounded in the given direction rnd.
+
+    For example, mpfr_rint_round with rounding to nearest and a precision of
+    two bits rounds 6.5 to 7 (halfway cases away from zero), then 7 is rounded
+    to 8 by the round-even rule, despite the fact that 6 is also representable
+    on two bits, and is closer to 6.5 than 8.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_rint_round(&rop._value, &op._value, rnd)
+
+def mpfr_rint_trunc(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to op rounded to the next integer toward zero.
+
+    If the result is not representable, it is rounded in the direction rnd. The
+    returned value is the ternary value associated with the considered
+    round-to-integer function (regarded in the same way as any other
+    mathematical function).
+
+    Unlike mpfr_trunc, this function does perform a double rounding: first op
+    is rounded to the next integer toward zero, then this integer (if not
+    representable) is rounded in the given direction rnd.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_rint_trunc(&rop._value, &op._value, rnd)
+
+def mpfr_frac(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the fractional part of op, having the same sign as op, rounded
+    in the direction rnd (unlike in mpfr_rint, rnd affects only how the exact
+    fractional part is rounded, not how the fractional part is generated).
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_frac(&rop._value, &op._value, rnd)
+
+def mpfr_modf(Mpfr iop not None, Mpfr fop not None,
+              Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set simultaneously iop to the integral part of op and fop to the fractional
+    part of op, rounded in the direction rnd with the corresponding precision
+    of iop and fop.
+
+    Equivalent to mpfr_trunc(iop, op, rnd) and mpfr_frac(fop, op, rnd). The
+    variables iop and fop must be different.
+
+    Return a pair (int_ternary, frac_ternary) of the corresponding ternary
+    values.  Note that this differs from the original mpfr_modf function from
+    MPFR, which combines the ternary values into a single int return.
+
+    """
+    cdef int combined_ternary, int_ternary, frac_ternary
+
+    check_rounding_mode(rnd)
+    combined_ternary = cmpfr.mpfr_modf(
+        &iop._value, &fop._value, &op._value, rnd
+    )
+    int_ternary = [0, 1, -1][combined_ternary & 3]
+    frac_ternary = [0, 1, -1][combined_ternary >> 2]
+    return int_ternary, frac_ternary
+
+def mpfr_fmod(Mpfr r not None, Mpfr x not None,
+              Mpfr y not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set r to x reduced modulo y, rounded in direction rnd.
+
+    Set r to the value of x - n * y, rounded according to the direction
+    rnd, where n is the integer quotient of x divided by y, rounded toward
+    zero.
+
+    Special values are handled as described in Section F.9.7.1 of the ISO C99
+    standard: If x is infinite or y is zero, r is NaN. If y is infinite
+    and x is finite, r is x rounded to the precision of r. If r is
+    zero, it has the sign of x. The return value is the ternary value
+    corresponding to r.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_fmod(&r._value, &x._value, &y._value, rnd)
+
+def mpfr_remainder(Mpfr r not None, Mpfr x not None,
+                   Mpfr y not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set r to x reduced modulo y, rounded in direction rnd.
+
+    Set r to the value of x - n * y, rounded according to the direction rnd,
+    where n is the integer quotient of x divided by y, rounded to the nearest
+    integer (ties rounded to even).
+
+    Special values are handled as described in Section F.9.7.1 of the ISO C99
+    standard: If x is infinite or y is zero, r is NaN. If y is infinite
+    and x is finite, r is x rounded to the precision of r. If r is
+    zero, it has the sign of x. The return value is the ternary value
+    corresponding to r.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_remainder(&r._value, &x._value, &y._value, rnd)
+
+def mpfr_remquo(Mpfr r not None, Mpfr x not None,
+                Mpfr y not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set r to x reduced modulo y, rounded in the direction rnd.  Also return
+    low bits of quotient.
+
+    Set r to the value of x - n * y, rounded according to the direction rnd,
+    where n is the integer quotient of x divided by y, rounded to the nearest
+    integer (ties rounded to even).
+
+    Special values are handled as described in Section F.9.7.1 of the ISO C99
+    standard: If x is infinite or y is zero, r is NaN. If y is infinite and x
+    is finite, r is x rounded to the precision of r. If r is zero, it has the
+    sign of x. The return value is the ternary value corresponding to r.
+
+    Returns a pair (ternary, quotient) where ternary is the ternary value
+    corresponding to r, and q gives the low significant bits from the quotient
+    n (more precisely the number of bits in a long minus one), with the
+    sign of x divided by y (except if those low bits are all zero, in which
+    case zero is returned). Note that x may be so large in magnitude relative
+    to y that an exact representation of the quotient is not practical.
+
+    """
+    cdef long int quotient
+
+    check_rounding_mode(rnd)
+    ternary = cmpfr.mpfr_remquo(
+        &r._value, &quotient, &x._value, &y._value, rnd
+    )
+    return ternary, quotient
+
+def mpfr_integer_p(Mpfr op not None):
+    """
+    Return True if op is an integer.  Return False otherwise.
+
+    """
+    return bool(cmpfr.mpfr_integer_p(&op._value))
+
 
 
 # Functions that are documented in the MPFR 3.0.1 documentation, but aren't
@@ -1529,7 +1775,14 @@ def mpfr_rint(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
 #  mpfr_vasprintf
 #
 #
-#  Sections 5.10 and later only partially wrapped.  Details to come.
+#  5.10 Integer and Remainder Related Functions
+#  --------------------------------------------
+#
+#  All functions in this section wrapped.
+
+
+#
+#  Sections 5.11 and later: details to come.
 
 
 
@@ -1559,29 +1812,6 @@ def mpfr_set_exp(Mpfr op not None, cmpfr.mpfr_exp_t exp):
     if error_code:
         raise ValueError("exponent not in current exponent range")
 
-
-# MPFR functions taking a single argument, returning a ternary value.
-
-# MPFR functions taking two arguments, returning a ternary value.
-
-def mpfr_fmod(Mpfr rop not None, Mpfr op1 not None, Mpfr op2 not None,
-              cmpfr.mpfr_rnd_t rnd):
-    """
-    Set rop to op1 reduced modulo op2, rounded in direction rnd.
-
-    Set rop to the value of op1 - n * op2, rounded according to the direction
-    rnd, where n is the integer quotient of op1 divided by op2, rounded toward
-    zero.
-
-    Special values are handled as described in Section F.9.7.1 of the ISO C99
-    standard: If op1 is infinite or op2 is zero, rop is NaN. If op2 is infinite
-    and op1 is finite, rop is op1 rounded to the precision of rop. If rop is
-    zero, it has the sign of op1. The return value is the ternary value
-    corresponding to rop.
-
-    """
-    check_rounding_mode(rnd)
-    return cmpfr.mpfr_fmod(&rop._value, &op1._value, &op2._value, rnd)
 
 
 # Functions for getting exponent bounds.
@@ -1864,13 +2094,6 @@ def mpfr_subnormalize(Mpfr x not None, int t, cmpfr.mpfr_rnd_t rnd):
     """
     check_rounding_mode(rnd)
     return cmpfr.mpfr_subnormalize(&x._value, t, rnd)
-
-def mpfr_integer_p(Mpfr op not None):
-    """
-    Return True if op is an integer.  Return False otherwise.
-
-    """
-    return bool(cmpfr.mpfr_integer_p(&op._value))
 
 def mpfr_signbit(Mpfr op not None):
     """

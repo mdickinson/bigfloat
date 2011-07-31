@@ -23,8 +23,6 @@ from bigfloat.mpfr import (
 
     Mpfr,
 
-    mpfr_fmod,
-
     # 5.1 Initialization Functions
     mpfr_set_prec,
     mpfr_get_prec,
@@ -140,6 +138,28 @@ from bigfloat.mpfr import (
     mpfr_const_euler,
     mpfr_const_catalan,
     mpfr_free_cache,
+
+    # 5.10 Integer and Remainder Related Functions
+    mpfr_rint,
+    mpfr_ceil,
+    mpfr_floor,
+    mpfr_round,
+    mpfr_trunc,
+
+    mpfr_rint_ceil,
+    mpfr_rint_floor,
+    mpfr_rint_round,
+    mpfr_rint_trunc,
+
+    mpfr_frac,
+    mpfr_modf,
+
+    mpfr_fmod,
+    mpfr_remainder,
+    mpfr_remquo,
+    mpfr_integer_p,
+
+
 
     mpfr_signbit,
 
@@ -423,18 +443,6 @@ class TestMpfr(unittest.TestCase):
         mpfr_root(y, x, 5, MPFR_RNDN)
         self.assertEqual(mpfr_get_d(y, MPFR_RNDN), -23.0)
 
-    def test_fmod(self):
-        x = Mpfr(30)
-        y = Mpfr(30)
-        z = Mpfr(30)
-        mpfr_set_d(x, 7.0, MPFR_RNDN)
-        mpfr_set_d(y, 11.0, MPFR_RNDN)
-        mpfr_fmod(z, x, y, MPFR_RNDN)
-        self.assertEqual(
-            mpfr_get_str(10, 0, z, MPFR_RNDN),
-            ('70000000000', 1),
-        )
-
     def test_pow(self):
         x = Mpfr(30)
         y = Mpfr(30)
@@ -446,6 +454,162 @@ class TestMpfr(unittest.TestCase):
             mpfr_get_str(10, 0, z, MPFR_RNDN),
             ('19773267440', 10),
         )
+
+    # 5.6 Comparison Functions
+
+    def test_cmp(self):
+        x = Mpfr(53)
+        y = Mpfr(53)
+        mpfr_set_si(x, 12, MPFR_RNDN)
+        mpfr_set_si(y, 13, MPFR_RNDN)
+        self.assertLess(mpfr_cmp(x, y), 0)
+        self.assertEqual(mpfr_cmp(x, x), 0)
+        self.assertGreater(mpfr_cmp(y, x), 0)
+
+    def test_cmpabs(self):
+        x = Mpfr(53)
+        y = Mpfr(53)
+        mpfr_set_si(x, 12, MPFR_RNDN)
+        mpfr_set_si(y, -13, MPFR_RNDN)
+        self.assertLess(mpfr_cmpabs(x, y), 0)
+        self.assertEqual(mpfr_cmpabs(x, x), 0)
+        self.assertGreater(mpfr_cmpabs(y, x), 0)
+
+    def test_sgn(self):
+        x = Mpfr(53)
+        mpfr_set_si(x, 12, MPFR_RNDN)
+        self.assertGreater(mpfr_sgn(x), 0)
+        mpfr_set_si(x, -12, MPFR_RNDN)
+        self.assertLess(mpfr_sgn(x), 0)
+        mpfr_set_si(x, 0, MPFR_RNDN)
+        self.assertEqual(mpfr_sgn(x), 0)
+
+    def test_regular_p(self):
+        x = Mpfr(53)
+        mpfr_set_nan(x)
+        self.assertIs(mpfr_regular_p(x), False)
+        mpfr_set_inf(x, 1)
+        self.assertIs(mpfr_regular_p(x), False)
+        mpfr_set_zero(x, 1)
+        self.assertIs(mpfr_regular_p(x), False)
+        mpfr_set_si(x, 1, MPFR_RNDN)
+        self.assertIs(mpfr_regular_p(x), True)
+
+    def test_number_p(self):
+        x = Mpfr(53)
+        mpfr_set_nan(x)
+        self.assertIs(mpfr_number_p(x), False)
+        mpfr_set_inf(x, 1)
+        self.assertIs(mpfr_number_p(x), False)
+        mpfr_set_zero(x, 1)
+        self.assertIs(mpfr_number_p(x), True)
+        mpfr_set_si(x, 1, MPFR_RNDN)
+        self.assertIs(mpfr_number_p(x), True)
+
+    def test_equal_p(self):
+        x = Mpfr(30)
+        mpfr_const_pi(x, MPFR_RNDN)
+        self.assertIs(
+            mpfr_equal_p(x, x),
+            True,
+        )
+
+    def test_lessequal_p(self):
+        x = Mpfr(30)
+        mpfr_const_pi(x, MPFR_RNDN)
+        self.assertIs(
+            mpfr_lessequal_p(x, x),
+            True,
+        )
+
+    def test_less_p(self):
+        x = Mpfr(30)
+        mpfr_const_pi(x, MPFR_RNDN)
+        self.assertIs(
+            mpfr_less_p(x, x),
+            False,
+        )
+
+    def test_greaterequal_p(self):
+        x = Mpfr(30)
+        mpfr_const_pi(x, MPFR_RNDN)
+        self.assertIs(
+            mpfr_greaterequal_p(x, x),
+            True,
+        )
+
+    def test_greater_p(self):
+        x = Mpfr(30)
+        mpfr_const_pi(x, MPFR_RNDN)
+        self.assertIs(
+            mpfr_greater_p(x, x),
+            False,
+        )
+
+    def test_lessgreater_p(self):
+        x = Mpfr(53)
+        y = Mpfr(53)
+        z = Mpfr(53)
+        mpfr_set_si(x, 2, MPFR_RNDN)
+        mpfr_set_nan(y)
+        mpfr_set_inf(z, 1)
+        self.assertIs(
+            mpfr_lessgreater_p(x, x),
+            False,
+        )
+        self.assertIs(
+            mpfr_lessgreater_p(x, y),
+            False,
+        )
+        self.assertIs(
+            mpfr_lessgreater_p(x, z),
+            True,
+        )
+        self.assertIs(
+            mpfr_lessgreater_p(y, y),
+            False,
+        )
+        self.assertIs(
+            mpfr_lessgreater_p(y, z),
+            False,
+        )
+        self.assertIs(
+            mpfr_lessgreater_p(z, z),
+            False,
+        )
+
+    def test_unordered_p(self):
+        x = Mpfr(53)
+        y = Mpfr(53)
+        z = Mpfr(53)
+        mpfr_set_si(x, 2, MPFR_RNDN)
+        mpfr_set_nan(y)
+        mpfr_set_inf(z, 1)
+        self.assertIs(
+            mpfr_unordered_p(x, x),
+            False,
+        )
+        self.assertIs(
+            mpfr_unordered_p(x, y),
+            True,
+        )
+        self.assertIs(
+            mpfr_unordered_p(x, z),
+            False,
+        )
+        self.assertIs(
+            mpfr_unordered_p(y, y),
+            True,
+        )
+        self.assertIs(
+            mpfr_unordered_p(y, z),
+            True,
+        )
+        self.assertIs(
+            mpfr_unordered_p(z, z),
+            False,
+        )
+
 
     # 5.7 Special Functions
     def test_log(self):
@@ -876,158 +1040,175 @@ class TestMpfr(unittest.TestCase):
         # has been exported and is callable.
         mpfr_free_cache()
 
-    def test_cmp(self):
+
+    # 5.10 Integer and Remainder Related Functions
+    def test_rint(self):
+        x = Mpfr(2)
+        y = Mpfr(53)
+        mpfr_set_d(y, 10.5, MPFR_RNDN)
+        mpfr_rint(x, y, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(x, MPFR_RNDN),
+            12.0,
+        )
+
+    def test_rint_variants(self):
+        rop = Mpfr(2)
+        op = Mpfr(53)
+        test_triples = [
+            (mpfr_ceil, 8.5, 12.0),
+            (mpfr_ceil, -8.5, -8.0),
+            (mpfr_floor, 8.5, 8.0),
+            (mpfr_floor, -8.5, -12.0),
+            (mpfr_round, 10.0, 12.0),
+            (mpfr_round, -10.0, -12.0),
+            (mpfr_trunc, 11.5, 8.0),
+            (mpfr_trunc, -11.5, -8.0),
+        ]
+        for fn, input, expected_output in test_triples:
+            mpfr_set_d(op, input, MPFR_RNDN)
+            fn(rop, op)
+            actual_output = mpfr_get_d(rop, MPFR_RNDN)
+            self.assertEqual(
+                actual_output,
+                expected_output,
+                msg=(
+                    "Unexpected result for {}({}): expected {}, "
+                    "got {}.".format(
+                        fn.__name__, input, expected_output, actual_output,
+                    ),
+                ),
+            )
+
+    def test_rint_round_variants(self):
+        rop = Mpfr(2)
+        op = Mpfr(53)
+        test_triples = [
+            (mpfr_rint_ceil, 8.5, 8.0),
+            (mpfr_rint_ceil, -8.5, -8.0),
+            (mpfr_rint_floor, 8.5, 8.0),
+            (mpfr_rint_floor, -8.5, -8.0),
+            (mpfr_rint_round, 10.0, 8.0),
+            (mpfr_rint_round, -10.0, -8.0),
+            (mpfr_rint_trunc, 11.5, 12.0),
+            (mpfr_rint_trunc, -11.5, -12.0),
+        ]
+        for fn, input, expected_output in test_triples:
+            mpfr_set_d(op, input, MPFR_RNDN)
+            fn(rop, op, MPFR_RNDN)
+            actual_output = mpfr_get_d(rop, MPFR_RNDN)
+            self.assertEqual(
+                actual_output,
+                expected_output,
+                msg=(
+                    "Unexpected result for {}({}): expected {}, "
+                    "got {}.".format(
+                        fn.__name__, input, expected_output, actual_output,
+                    ),
+                ),
+            )
+
+    def test_frac(self):
+        op = Mpfr(53)
+        rop = Mpfr(53)
+        mpfr_set_d(op, 123.45678, MPFR_RNDN)
+        mpfr_frac(rop, op, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(rop, MPFR_RNDN),
+            0.45677999999999486,
+        )
+
+    def test_modf(self):
+        op = Mpfr(53)
+        fracop = Mpfr(53)
+        intop = Mpfr(53)
+        fracop_single = Mpfr(53)
+        intop_single = Mpfr(53)
+
+        test_values = [
+            1.0,
+            1.23,
+            1e-100,
+            1e100,
+            15.78,
+            -1.56,
+            float('inf'),
+            float('nan'),
+        ]
+        for test_value in test_values:
+            mpfr_set_d(op, test_value, MPFR_RNDN)
+
+            it, ft = mpfr_modf(intop, fracop, op, MPFR_RNDN)
+            it_single = mpfr_rint_trunc(intop_single, op, MPFR_RNDN)
+            ft_single = mpfr_frac(fracop_single, op, MPFR_RNDN)
+
+            # Check ternary values.
+            self.assertEqual(it, it_single)
+            self.assertEqual(ft, ft_single)
+
+            # Check trunc and cos values.
+            self.assertTrue(mpfr_equal_p(intop, intop_single) or
+                            mpfr_nan_p(intop) and mpfr_nan_p(intop_single))
+            self.assertTrue(mpfr_equal_p(fracop, fracop_single) or
+                            mpfr_nan_p(fracop) and mpfr_nan_p(fracop_single))
+
+    def test_fmod(self):
+        r = Mpfr(53)
         x = Mpfr(53)
         y = Mpfr(53)
-        mpfr_set_si(x, 12, MPFR_RNDN)
-        mpfr_set_si(y, 13, MPFR_RNDN)
-        self.assertLess(mpfr_cmp(x, y), 0)
-        self.assertEqual(mpfr_cmp(x, x), 0)
-        self.assertGreater(mpfr_cmp(y, x), 0)
+        mpfr_set_d(x, 9.0, MPFR_RNDN)
+        mpfr_set_d(y, 3.1415926535897931, MPFR_RNDN)
+        mpfr_fmod(r, x, y, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(r, MPFR_RNDN),
+            2.7168146928204138,
+        )
 
-    def test_cmpabs(self):
+    def test_remainder(self):
+        r = Mpfr(53)
         x = Mpfr(53)
         y = Mpfr(53)
-        mpfr_set_si(x, 12, MPFR_RNDN)
-        mpfr_set_si(y, -13, MPFR_RNDN)
-        self.assertLess(mpfr_cmpabs(x, y), 0)
-        self.assertEqual(mpfr_cmpabs(x, x), 0)
-        self.assertGreater(mpfr_cmpabs(y, x), 0)
-
-    def test_sgn(self):
-        x = Mpfr(53)
-        mpfr_set_si(x, 12, MPFR_RNDN)
-        self.assertGreater(mpfr_sgn(x), 0)
-        mpfr_set_si(x, -12, MPFR_RNDN)
-        self.assertLess(mpfr_sgn(x), 0)
-        mpfr_set_si(x, 0, MPFR_RNDN)
-        self.assertEqual(mpfr_sgn(x), 0)
-
-    def test_regular_p(self):
-        x = Mpfr(53)
-        mpfr_set_nan(x)
-        self.assertIs(mpfr_regular_p(x), False)
-        mpfr_set_inf(x, 1)
-        self.assertIs(mpfr_regular_p(x), False)
-        mpfr_set_zero(x, 1)
-        self.assertIs(mpfr_regular_p(x), False)
-        mpfr_set_si(x, 1, MPFR_RNDN)
-        self.assertIs(mpfr_regular_p(x), True)
-
-    def test_number_p(self):
-        x = Mpfr(53)
-        mpfr_set_nan(x)
-        self.assertIs(mpfr_number_p(x), False)
-        mpfr_set_inf(x, 1)
-        self.assertIs(mpfr_number_p(x), False)
-        mpfr_set_zero(x, 1)
-        self.assertIs(mpfr_number_p(x), True)
-        mpfr_set_si(x, 1, MPFR_RNDN)
-        self.assertIs(mpfr_number_p(x), True)
-
-    def test_equal_p(self):
-        x = Mpfr(30)
-        mpfr_const_pi(x, MPFR_RNDN)
-        self.assertIs(
-            mpfr_equal_p(x, x),
-            True,
+        mpfr_set_d(x, 9.0, MPFR_RNDN)
+        mpfr_set_d(y, 3.1415926535897931, MPFR_RNDN)
+        mpfr_remainder(r, x, y, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(r, MPFR_RNDN),
+            -0.42477796076937935,
         )
 
-    def test_lessequal_p(self):
-        x = Mpfr(30)
-        mpfr_const_pi(x, MPFR_RNDN)
-        self.assertIs(
-            mpfr_lessequal_p(x, x),
-            True,
-        )
-
-    def test_less_p(self):
-        x = Mpfr(30)
-        mpfr_const_pi(x, MPFR_RNDN)
-        self.assertIs(
-            mpfr_less_p(x, x),
-            False,
-        )
-
-    def test_greaterequal_p(self):
-        x = Mpfr(30)
-        mpfr_const_pi(x, MPFR_RNDN)
-        self.assertIs(
-            mpfr_greaterequal_p(x, x),
-            True,
-        )
-
-    def test_greater_p(self):
-        x = Mpfr(30)
-        mpfr_const_pi(x, MPFR_RNDN)
-        self.assertIs(
-            mpfr_greater_p(x, x),
-            False,
-        )
-
-    def test_lessgreater_p(self):
+    def test_remquo(self):
+        r = Mpfr(53)
         x = Mpfr(53)
         y = Mpfr(53)
-        z = Mpfr(53)
-        mpfr_set_si(x, 2, MPFR_RNDN)
-        mpfr_set_nan(y)
-        mpfr_set_inf(z, 1)
-        self.assertIs(
-            mpfr_lessgreater_p(x, x),
-            False,
+        mpfr_set_d(x, 9.0, MPFR_RNDN)
+        mpfr_set_d(y, 3.1415926535897931, MPFR_RNDN)
+        ternary, quotient = mpfr_remquo(r, x, y, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(r, MPFR_RNDN),
+            -0.42477796076937935,
         )
-        self.assertIs(
-            mpfr_lessgreater_p(x, y),
-            False,
-        )
-        self.assertIs(
-            mpfr_lessgreater_p(x, z),
-            True,
-        )
-        self.assertIs(
-            mpfr_lessgreater_p(y, y),
-            False,
-        )
-        self.assertIs(
-            mpfr_lessgreater_p(y, z),
-            False,
-        )
-        self.assertIs(
-            mpfr_lessgreater_p(z, z),
-            False,
-        )
+        # Result should be exact.
+        self.assertEqual(ternary, 0)
+        self.assertEqual(quotient, 3)
 
-    def test_unordered_p(self):
+    def test_integer_p(self):
+        non_integers = [5.3, 1e-100, float('nan'), float('-inf')]
+        integers = [2.0, -0.0, 1e100]
+
         x = Mpfr(53)
-        y = Mpfr(53)
-        z = Mpfr(53)
-        mpfr_set_si(x, 2, MPFR_RNDN)
-        mpfr_set_nan(y)
-        mpfr_set_inf(z, 1)
-        self.assertIs(
-            mpfr_unordered_p(x, x),
-            False,
-        )
-        self.assertIs(
-            mpfr_unordered_p(x, y),
-            True,
-        )
-        self.assertIs(
-            mpfr_unordered_p(x, z),
-            False,
-        )
-        self.assertIs(
-            mpfr_unordered_p(y, y),
-            True,
-        )
-        self.assertIs(
-            mpfr_unordered_p(y, z),
-            True,
-        )
-        self.assertIs(
-            mpfr_unordered_p(z, z),
-            False,
-        )
+        for non_integer in non_integers:
+            mpfr_set_d(x, non_integer, MPFR_RNDN)
+            self.assertIs(
+                mpfr_integer_p(x),
+                False,
+            )
+        for integer in integers:
+            mpfr_set_d(x, integer, MPFR_RNDN)
+            self.assertIs(
+                mpfr_integer_p(x),
+                True,
+            )
+
 
     def test_set_d(self):
         x = Mpfr(30)
@@ -1163,12 +1344,24 @@ class TestMpfr(unittest.TestCase):
         self.assertIsInstance(mpfr_get_emax_min(), (int, long))
         self.assertIsInstance(mpfr_get_emax_max(), (int, long))
 
+    def test_set_emin(self):
         # Setting exponent bounds
+        old_emin = mpfr_get_emin()
         mpfr_set_emin(-56)
-        self.assertEqual(mpfr_get_emin(), -56)
+        try:
+            self.assertEqual(mpfr_get_emin(), -56)
+        finally:
+            mpfr_set_emin(old_emin)
+        self.assertEqual(mpfr_get_emin(), old_emin)
 
+    def test_set_emax(self):
+        old_emax = mpfr_get_emax()
         mpfr_set_emax(777)
-        self.assertEqual(mpfr_get_emax(), 777)
+        try:
+            self.assertEqual(mpfr_get_emax(), 777)
+        finally:
+            mpfr_set_emax(old_emax)
+        self.assertEqual(mpfr_get_emax(), old_emax)
 
     def test_flags(self):
         # Exercise flag getting and setting methods.

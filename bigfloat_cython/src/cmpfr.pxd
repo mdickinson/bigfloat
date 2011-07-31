@@ -35,7 +35,14 @@ cdef extern from "mpfr.h":
         mpfr_exp_t  _mpfr_exp
         cgmp.mp_limb_t   *_mpfr_d
 
-    ctypedef __mpfr_struct mpfr_t[1]
+    # We don't export the mpfr_t type; it's not useful for Cython code, since
+    # Cython (as of version 0.14.1) doesn't seem to understand it properly: the
+    # generated C code includes temporary variables of type mpfr_t and
+    # assignments from one object of type mpfr_t to another, which isn't valid
+    # C.  So we comment out the definition here in order to catch any
+    # accidental declarations using mpfr_t below.
+
+    # ctypedef __mpfr_struct mpfr_t[1]
     ctypedef __mpfr_struct *mpfr_ptr
 
     # MPFR rounding modes
@@ -93,7 +100,7 @@ cdef extern from "mpfr.h":
     ###########################################################################
 
     double mpfr_get_d(mpfr_ptr op, mpfr_rnd_t rnd)
-    long mpfr_get_si(mpfr_ptr op, mpfr_rnd_t rnd)
+    long int mpfr_get_si(mpfr_ptr op, mpfr_rnd_t rnd)
     double mpfr_get_d_2exp(long int *exp, mpfr_ptr op, mpfr_rnd_t rnd)
     char * mpfr_get_str(
         char *str, mpfr_exp_t *expptr, int b,
@@ -220,9 +227,30 @@ cdef extern from "mpfr.h":
     void mpfr_free_cache()
 
 
+    ###########################################################################
+    # 5.10 Integer and Remainder Related Functions
+    ###########################################################################
 
+    int mpfr_rint(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_ceil(mpfr_ptr rop, mpfr_ptr op)
+    int mpfr_floor(mpfr_ptr rop, mpfr_ptr op)
+    int mpfr_round(mpfr_ptr rop, mpfr_ptr op)
+    int mpfr_trunc(mpfr_ptr rop, mpfr_ptr op)
 
-    int mpfr_rint(mpfr_t rop, mpfr_t op, mpfr_rnd_t rnd)
+    int mpfr_rint_ceil(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_rint_floor(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_rint_round(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_rint_trunc(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+
+    int mpfr_frac(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_modf(mpfr_ptr iop, mpfr_ptr fop, mpfr_ptr op, mpfr_rnd_t rnd)
+
+    int mpfr_fmod(mpfr_ptr r, mpfr_ptr x, mpfr_ptr y, mpfr_rnd_t rnd)
+    int mpfr_remainder(mpfr_ptr r, mpfr_ptr x, mpfr_ptr y, mpfr_rnd_t rnd)
+    int mpfr_remquo(
+        mpfr_ptr r, long int *q, mpfr_ptr x, mpfr_ptr y, mpfr_rnd_t rnd
+    )
+    int mpfr_integer_p(mpfr_ptr op)
 
 
 
@@ -252,7 +280,6 @@ cdef extern from "mpfr.h":
 
 
 
-    int mpfr_fmod(mpfr_ptr rop, mpfr_ptr op1, mpfr_ptr op2, mpfr_rnd_t rnd)
 
 
 
@@ -262,7 +289,6 @@ cdef extern from "mpfr.h":
     void mpfr_nextabove(mpfr_ptr op)
     void mpfr_nextbelow(mpfr_ptr op)
     int mpfr_signbit(mpfr_ptr op)
-    int mpfr_integer_p(mpfr_ptr op)
 
     # Functions to get and set exponent min and max values.
     mpfr_exp_t mpfr_get_emin()
@@ -276,6 +302,6 @@ cdef extern from "mpfr.h":
 
     int mpfr_setsign(mpfr_ptr rop, mpfr_ptr op, int s, mpfr_rnd_t rnd)
 
-    long mpfr_get_si(mpfr_ptr op, mpfr_rnd_t rnd)
+    long int mpfr_get_si(mpfr_ptr op, mpfr_rnd_t rnd)
     mpfr_exp_t mpfr_get_exp(mpfr_ptr x)
     int mpfr_set_exp(mpfr_ptr x, mpfr_exp_t exp)
