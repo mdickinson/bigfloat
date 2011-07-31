@@ -1,33 +1,38 @@
-PYTHON=python2.7
+PYTHON=python
 
-.PHONY: build clean dist install test upload
+.PHONY: build clean develop dist install test upload
 
-build: doc
+src/mpfr.c: src/mpfr.pyx src/cgmp.pxd src/cmpfr.pxd
+	cython -v $< -o $@
+
+build: src/mpfr.c
 	$(PYTHON) setup.py build
 
 clean:
 	-rm -fr build/
 	-rm -fr dist/
 	-rm MANIFEST
+	-rm src/mpfr.c
+	-rm bigfloat/mpfr.so
 	find . -name \*.pyc -exec rm {} \;
 	find . -name \*.orig -exec rm {} \;
 	find -d . -type d -empty -exec rmdir {} \;
 
-doc: $(DOCDIR)
+# in-place build
+develop: src/mpfr.c
+	$(PYTHON) setup.py build_ext --inplace
 
-dist: doc
+dist: src/mpfr.c
 	$(PYTHON) setup.py sdist
 
 install: build
 	$(PYTHON) setup.py install
 
-upload: doc
+upload: src/mpfr.c
 	$(PYTHON) setup.py sdist upload
 
-test: build
-	$(PYTHON) runtests.py
-
-$(DOCDIR): $(DOCSRC)/index.rst
-	cd $(DOCSRC) && $(MAKE) SPHINXBUILD=$(SPHINXBUILD) html
-	-rm -fr $(DOCDIR)
-	mv $(DOCSRC)/_build/html/ $(DOCDIR)
+test:
+	$(PYTHON) -m bigfloat.test.test_bigfloat
+	$(PYTHON) -m bigfloat.test.test_context
+	$(PYTHON) -m bigfloat.test.test_mpfr
+	$(PYTHON) -m bigfloat.test.test_rounding_mode
