@@ -58,7 +58,12 @@ from bigfloat.core import (
     IEEEContext,
 
     EMIN_MIN,
+    EMIN_MAX,
+    EMAX_MIN,
     EMAX_MAX,
+
+    PRECISION_MIN,
+    PRECISION_MAX,
 
     half_precision,
     single_precision,
@@ -78,6 +83,10 @@ from bigfloat.core import (
     set_flagstate,
     get_flagstate,
     _all_flags,
+
+    test_flag,
+    set_flag,
+    clear_flag,
 
     # Predicates: 1-ary
     is_nan,
@@ -117,6 +126,7 @@ from bigfloat.core import (
     mod,
 
     # Miscellaneous functions
+    next_down,
     next_up,
 )
 
@@ -135,6 +145,7 @@ from bigfloat.context import (
     EmptyContext,
 
     precision,
+    extra_precision,
 )
 
 from bigfloat.rounding_mode import (
