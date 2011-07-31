@@ -179,5 +179,15 @@ setup(
     packages=[
         'bigfloat',
         'bigfloat.test',
-    ]
+    ],
+    package_data={
+        'bigfloat': [
+            'docs/html/*.html',
+            'docs/html/*.inv',
+            'docs/html/*.js',
+            'docs/html/_sources/*',
+            'docs/html/_static/*',
+            'docs/pdf/*.pdf',
+        ],
+    },
 )

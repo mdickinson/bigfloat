@@ -1,17 +1,21 @@
 PYTHON=python
 
-.PHONY: build clean develop dist html install pdf test upload
-
-src/mpfr.c: src/mpfr.pyx src/cgmp.pxd src/cmpfr.pxd
-	cython -v $< -o $@
+.PHONY: build build_all clean develop dist html install pdf test upload
 
 build: src/mpfr.c
 	$(PYTHON) setup.py build
+
+build_all: build html pdf
+	mkdir -p bigfloat/docs
+	cp -a docs/_build/html bigfloat/docs
+	mkdir -p bigfloat/docs/pdf
+	cp docs/_build/latex/BigFloat.pdf bigfloat/docs/pdf/
 
 clean:
 	-rm -r build/
 	-rm -r dist/
 	-rm -r docs/_build
+	-rm -r bigfloat/docs
 	-rm MANIFEST
 	-rm src/mpfr.c
 	-rm bigfloat/mpfr.so
@@ -23,19 +27,15 @@ clean:
 develop: src/mpfr.c
 	$(PYTHON) setup.py build_ext --inplace
 
-dist: src/mpfr.c
+dist: build_all
 	$(PYTHON) setup.py sdist
 
-html:
-	cd docs && $(MAKE) html
+html: docs/_build/html/index.html
 
-
-install: build
+install: build_all
 	$(PYTHON) setup.py install
 
-pdf:
-	cd docs && $(MAKE) latex
-	cd docs/_build/latex && $(MAKE)
+pdf: docs/_build/latex/BigFloat.pdf
 
 test: develop
 	$(PYTHON) -m bigfloat.test.test_bigfloat
@@ -43,5 +43,15 @@ test: develop
 	$(PYTHON) -m bigfloat.test.test_mpfr
 	$(PYTHON) -m bigfloat.test.test_rounding_mode
 
-upload: src/mpfr.c
+upload: build_all
 	$(PYTHON) setup.py sdist upload
+
+src/mpfr.c: src/mpfr.pyx src/cgmp.pxd src/cmpfr.pxd
+	cython -v $< -o $@
+
+docs/_build/html/index.html: docs/index.rst
+	cd docs && $(MAKE) html
+
+docs/_build/latex/BigFloat.pdf: docs/index.rst
+	cd docs && $(MAKE) latex
+	cd docs/_build/latex && $(MAKE)
