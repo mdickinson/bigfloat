@@ -31,7 +31,7 @@ install: build
 upload: src/mpfr.c
 	$(PYTHON) setup.py sdist upload
 
-test:
+test: develop
 	$(PYTHON) -m bigfloat.test.test_bigfloat
 	$(PYTHON) -m bigfloat.test.test_context
 	$(PYTHON) -m bigfloat.test.test_mpfr
