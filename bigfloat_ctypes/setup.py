@@ -1,6 +1,6 @@
 # -*- coding: UTF-8
 
-# Copyright 2009, 2010 Mark Dickinson.
+# Copyright 2009--2011 Mark Dickinson.
 #
 # This file is part of the bigfloat module.
 #

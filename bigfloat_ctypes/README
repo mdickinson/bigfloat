@@ -1,4 +1,4 @@
-Copyright 2009, 2010 Mark Dickinson
+Copyright 2009--2011 Mark Dickinson
 
 The bigfloat module is a Python module providing arbitrary-precision
 correctly-rounded floating-point arithmetic.  It's implemented as a wrapper
