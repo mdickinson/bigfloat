@@ -1,0 +1,41 @@
+Notes on using MPFR
+-------------------
+
+1. Should always have mpfr_emin <= mpfr_emax, else results may be undefined.
+
+For example, if mpfr_emin > mpfr_emax then the only representable
+values are zeros, infinities and nans.  But then nextbelow(+Inf) should
+return 0.0.  It doesn't (at least in MPFR 2.4.1.)
+
+Suggest adding a note to the docs saying that mpfr_emin <= mpfr_emax is
+required.
+
+
+2. mpfr_set_ui_2exp doesn't check bounds on exponents; can induce
+undefined behaviour by taking exponent close to LONG_MAX.
+
+On my (32-bit) machine:
+
+mpfr_set_ui_2exp(x, 12345, LONG_MAX-10, RoundTiesToEven) gives
+'Infinity' (correct), but a ternary value of 0 (incorrect);
+mpfr_set_ui_2exp(x, 12345, LONG_MAX-14, RoundTiesToEven) is okay.
+mpfr_set_ui_2exp(x, 12345, LONG_MAX-9, RoundTiesToEven) gives a result
+of 0 (bad) and ternary value of -1.
+
+(1st case gives the magic exponent corr. to infinity...)
+
+Should document a range of exponents for which mpfr_set_ui_2exp is
+guaranteed to work correcly.
+
+3. mpfr_init_set, ... mpfr_init_set_f are macros.  Please document this.
+(mpfr_init_set_str appears not to be a macro)
+XXX.  It *is* documented!
+
+4. Using set_emax and set_emin:  the warning about making sure that all
+current variables are within the exponent bounds seems a little extreme (
+and in practice, unusable), but it appears to be true that some functions
+and operations (e.g., addition) assume that arguments are within bounds.
+
+The way to get around this seems to be to do all computations with
+unbounded exponent range, and then just set emax and emin before doing
+check_range.

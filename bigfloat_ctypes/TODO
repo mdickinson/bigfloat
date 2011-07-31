@@ -1,0 +1,29 @@
+Implement floordiv method for BigFloats
+---------------------------------------
+  x // y should behave as with any other operation or function, though
+  the sign convention should match that of x % y:  that is, x // y
+  should be the result of rounding the quotient towards zero.
+
+  As with any function that produces a single MPFR result, it's enough
+  to be able to compute with rounding mode RoundTowardZero and to be
+  able to detect exactness.  It's the second part that's tricky here:
+  floor(x / y) is exactly n iff n <= x // y < n + 1.  Since n may be
+  something huge, n + 1 shouldn't be computed exactly (since this
+  might involved billions of bits); instead we need to find an
+  indirect way of doing this comparison.
+
+Implement round for BigFloats
+-----------------------------
+  Should be straightforward;  go via string.
+
+* Better error messages
+
+* Docstrings for standard functions
+
+* Expose get_str;  make it a method
+
+* Rename set_str2; make it a classmethod
+
+* Deal sensibly with signs of NaNs on input and output
+
+* Return NotImplemented from binary methods where appropriate

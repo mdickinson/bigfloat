@@ -1,0 +1,45 @@
+Installation
+------------
+
+Instructions for installation from a distribution tarball.  We'll
+assume that you've downloaded a tarball whose name is something like
+"bigfloat-0.2.tar.gz".  The exact version number may differ; just
+substitute the real version number everywhere that "0.2" appears in
+what follows.
+
+(1) Unpack the tarball with something like:
+
+  tar -zxvf bigfloat-0.2.tar.gz
+
+This should create a directory bigfloat-0.2/ containing a setup.py
+script and the rest of the bigfloat source.
+
+(2) Enter the created directory, and execute the command
+
+  python setup.py install
+
+from the bigfloat-0.2/ directory.  For a site-wide installation, you
+may need to become superuser, or use the 'sudo' command.
+
+(3) (Optional).  Test the installation by doing:
+
+  python -m bigfloat.test.test_bigfloat
+
+If installation was successful, the bigfloat-0.2/ directory that you
+created can now be deleted.
+
+
+Prerequisites
+-------------
+
+This package requires Python 2.5 or later.  The MPFR and GMP libraries will
+need to be already installed on your system.
+
+The bigfloat module will attempt to find the MPFR library on your
+system at import time.  If it fails to find the library, or if you
+have multiple copies of the MPFR library on your system and setup.py
+finds the wrong one, you can edit the bigfloat_config.py file to
+specify the location of the MPFR library on your system directly.
+
+You may also need to edit this file if the MPFR or GMP libraries were
+built using a non-standard configuration.

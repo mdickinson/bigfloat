@@ -1,4 +1,6 @@
-# Copyright 2009, 2010 Mark Dickinson.
+# -*- coding: UTF-8
+
+# Copyright 2009--2011 Mark Dickinson.
 #
 # This file is part of the bigfloat module.
 #
@@ -18,6 +20,39 @@
 # Python wrapper for MPFR library
 
 from __future__ import with_statement  # for Python 2.5
+
+import __builtin__
+import sys as _sys
+import contextlib as _contextlib
+
+import bigfloat.mpfr as mpfr
+
+from bigfloat.rounding_mode import (
+    ROUND_TIES_TO_EVEN,
+    ROUND_TOWARD_ZERO,
+    ROUND_TOWARD_POSITIVE,
+    ROUND_TOWARD_NEGATIVE,
+)
+
+from bigfloat.context import (
+    Context,
+    DefaultContext,
+    EmptyContext,
+
+    RoundTiesToEven,
+    RoundTowardPositive,
+    RoundTowardNegative,
+    RoundTowardZero,
+    RoundAwayFromZero,
+
+    precision,
+    extra_precision,
+
+    getcontext,
+    setcontext,
+
+    _apply_function_in_context,
+)
 
 # Names to export when someone does 'from bigfloat import *'.  The
 # __all__ variable is extended to include standard functions later on.
@@ -44,9 +79,10 @@ __all__ = [
     'double_precision', 'quadruple_precision',
     'RoundTiesToEven', 'RoundTowardZero',
     'RoundTowardPositive', 'RoundTowardNegative',
+    'RoundAwayFromZero',
 
     # ... and functions
-    'IEEEContext', 'precision', 'extra_precision',
+    'IEEEContext', 'extra_precision',
 
     # get and set current context
     'getcontext', 'setcontext',
@@ -77,12 +113,55 @@ __all__ = [
     'exp',
     'log',
     'log2',
+
+    # predicates
+    'is_nan',
+    'is_inf',
+    'is_zero',
+    'is_finite',
+    'is_integer',
+    'is_regular',
+    'is_negative',
 ]
 
-import sys as _sys
-import contextlib as _contextlib
 
-import mpfr
+# Contexts corresponding to IEEE 754-2008 binary interchange formats
+# (see section 3.6 of the standard for details).
+
+def IEEEContext(bitwidth):
+    """ Return IEEE 754-2008 context for a given bit width.
+
+    IEEE 754 specifies standard binary interchange formats with bitwidths
+    16, 32, 64, 128, and all multiples of 32 greater than 128.  This function
+    returns the context corresponding to the interchange format for the given
+    bitwidth.
+
+    """
+    try:
+        precision = {16: 11, 32: 24, 64: 53, 128: 113}[bitwidth]
+    except KeyError:
+        if not (bitwidth >= 128 and bitwidth % 32 == 0):
+            raise ValueError("nonstandard bitwidth: bitwidth should be "
+                             "16, 32, 64, 128, or k*32 for some k >= 4")
+
+        with DefaultContext + Context(emin=-1, subnormalize=True):
+            # log2(bitwidth), rounded to the nearest quarter
+            l = log2(bitwidth)
+        precision = 13 + bitwidth - int(4 * l)
+
+    emax = 1 << bitwidth - precision - 1
+    return Context(
+        precision=precision,
+        emin=4 - emax - precision,
+        emax=emax,
+        subnormalize=True,
+    )
+
+half_precision = IEEEContext(16)
+single_precision = IEEEContext(32)
+double_precision = IEEEContext(64)
+quadruple_precision = IEEEContext(128)
+
 
 def mpfr_set_str2(rop, s, base, rnd):
     """Set value of rop from the string s, using given base and rounding mode.
@@ -109,28 +188,8 @@ def mpfr_get_str2(rop, base, ndigits, rounding_mode):
     return negative, digits, exp
 
 
-################################################################################
+###############################################################################
 # Context manager to give an easy way to change emin and emax temporarily.
-
-@_contextlib.contextmanager
-def eminmax(emin, emax):
-    old_emin = mpfr.mpfr_get_emin()
-    old_emax = mpfr.mpfr_get_emax()
-    mpfr.mpfr_set_emin(emin)
-    mpfr.mpfr_set_emax(emax)
-    try:
-        yield
-    finally:
-        mpfr.mpfr_set_emin(old_emin)
-        mpfr.mpfr_set_emax(old_emax)
-
-# builtin abs, max, min and pow functions are shadowed by BigFloat
-# max, min and pow functions later on; keep a copy of the builtin
-# functions for later use
-_builtin_abs = abs
-_builtin_max = max
-_builtin_min = min
-_builtin_pow = pow
 
 try:
     DBL_PRECISION = _sys.float_info.mant_dig
@@ -179,8 +238,8 @@ except AttributeError:
 EMAX_MAX = mpfr.MPFR_EMAX_DEFAULT
 EMIN_MIN = mpfr.MPFR_EMIN_DEFAULT
 
-EMAX_MIN = _builtin_max(mpfr.MPFR_EMIN_DEFAULT, mpfr.mpfr_get_emax_min())
-EMIN_MAX = _builtin_min(mpfr.MPFR_EMAX_DEFAULT, mpfr.mpfr_get_emin_max())
+EMAX_MIN = __builtin__.max(mpfr.MPFR_EMIN_DEFAULT, mpfr.mpfr_get_emax_min())
+EMIN_MAX = __builtin__.min(mpfr.MPFR_EMAX_DEFAULT, mpfr.mpfr_get_emin_max())
 
 mpfr.mpfr_set_emin(EMIN_MIN)
 mpfr.mpfr_set_emax(EMAX_MAX)
@@ -192,10 +251,13 @@ _bit_length_correction = {
     '0': 4, '1': 3, '2': 2, '3': 2, '4': 1, '5': 1, '6': 1, '7': 1,
     '8': 0, '9': 0, 'a': 0, 'b': 0, 'c': 0, 'd': 0, 'e': 0, 'f': 0,
     }
+
+
 def _bit_length(n):
     """Bit length of an integer"""
-    hex_n = '%x' % _builtin_abs(n)
+    hex_n = '%x' % __builtin__.abs(n)
     return 4 * len(hex_n) - _bit_length_correction[hex_n[0]]
+
 
 def _format_finite(negative, digits, dot_pos):
     """Given a (possibly empty) string of digits and an integer
@@ -211,13 +273,13 @@ def _format_finite(negative, digits, dot_pos):
     # value is 0.digits * 10**dot_pos
     use_exponent = dot_pos <= -4 or dot_pos > len(digits)
     if use_exponent:
-        exp = dot_pos-1 if digits else dot_pos
+        exp = dot_pos - 1 if digits else dot_pos
         dot_pos -= exp
 
     # left pad with zeros, insert decimal point, and add exponent
     if dot_pos <= 0:
-        digits = '0'*(1-dot_pos) + digits
-        dot_pos += 1-dot_pos
+        digits = '0' * (1 - dot_pos) + digits
+        dot_pos += 1 - dot_pos
     assert 1 <= dot_pos <= len(digits)
     if dot_pos < len(digits):
         digits = digits[:dot_pos] + '.' + digits[dot_pos:]
@@ -225,212 +287,6 @@ def _format_finite(negative, digits, dot_pos):
         digits += "e%+d" % exp
     return '-' + digits if negative else digits
 
-_Context_attributes = [
-    'precision',
-    'emin',
-    'emax',
-    'subnormalize',
-    'rounding',
-]
-
-_available_rounding_modes = [
-    'RoundTiesToEven',
-    'RoundTowardPositive',
-    'RoundTowardNegative',
-    'RoundTowardZero',
-]
-
-class Context(object):
-    # Contexts are supposed to be immutable.  We make the attributes
-    # of a Context private, and provide properties to access them in
-    # order to discourage users from trying to set the attributes
-    # directly.
-
-    def __new__(cls, precision=None, emin=None, emax=None, subnormalize=None,
-                rounding=None):
-        if precision is not None and \
-                not (PRECISION_MIN <= precision <= PRECISION_MAX):
-            raise ValueError("Precision p should satisfy %d <= p <= %d." %
-                             (PRECISION_MIN, PRECISION_MAX))
-        if emin is not None and not EMIN_MIN <= emin <= EMIN_MAX:
-            raise ValueError("exponent bound emin should satisfy "
-                             "%d <= emin <= %d" % (EMIN_MIN, EMIN_MAX))
-        if emax is not None and not EMAX_MIN <= emax <= EMAX_MAX:
-            raise ValueError("exponent bound emax should satisfy "
-                             "%d <= emax <= %d" % (EMAX_MIN, EMAX_MAX))
-        if rounding is not None and not rounding in _available_rounding_modes:
-            raise ValueError("unrecognised rounding mode")
-        if subnormalize is not None and not subnormalize in [False, True]:
-            raise ValueError("subnormalize should be either False or True")
-        self = object.__new__(cls)
-        self._precision = precision
-        self._emin = emin
-        self._emax = emax
-        self._subnormalize = subnormalize
-        self._rounding = rounding
-        return self
-
-    def __add__(self, other):
-        """For contexts self and other, self + other is a new Context
-        combining self and other: for attributes that are defined in
-        both self and other, the attribute from other takes
-        precedence."""
-
-        return Context(
-            precision = (other.precision
-                         if other.precision is not None
-                         else self.precision),
-            emin = other.emin if other.emin is not None else self.emin,
-            emax = other.emax if other.emax is not None else self.emax,
-            subnormalize = (other.subnormalize
-                            if other.subnormalize is not None
-                            else self.subnormalize),
-            rounding = (other.rounding
-                        if other.rounding is not None
-                        else self.rounding),
-            )
-
-    def __eq__(self, other):
-        return (
-            self.precision == other.precision and
-            self.emin == other.emin and
-            self.emax == other.emax and
-            self.subnormalize == other.subnormalize and
-            self.rounding == other.rounding
-            )
-
-    def __hash__(self):
-        return hash((self.precision, self.emin, self.emax,
-                     self.subnormalize, self.rounding))
-
-
-    @property
-    def precision(self):
-        return self._precision
-    @property
-    def rounding(self):
-        return self._rounding
-    @property
-    def emin(self):
-        return self._emin
-    @property
-    def emax(self):
-        return self._emax
-    @property
-    def subnormalize(self):
-        return self._subnormalize
-
-    def __repr__(self):
-        args = []
-        if self.precision is not None:
-            args.append('precision=%r' % self.precision)
-        if self.emax is not None:
-            args.append('emax=%r' % self.emax)
-        if self.emin is not None:
-            args.append('emin=%r' % self.emin)
-        if self.subnormalize is not None:
-            args.append('subnormalize=%r' % self.subnormalize)
-        if self.rounding is not None:
-            args.append('rounding=%r' % self.rounding)
-        return 'Context(%s)' % ', '.join(args)
-
-    __str__ = __repr__
-
-    def __enter__(self):
-        _pushcontext(self)
-
-    def __exit__(self, *args):
-        _popcontext()
-
-# some useful contexts
-
-# DefaultContext is the context that the module always starts with.
-DefaultContext = Context(precision=53,
-                         rounding='RoundTiesToEven',
-                         emax=EMAX_MAX,
-                         emin=EMIN_MIN,
-                         subnormalize=False)
-
-# EmptyContext is useful for situations where a context is
-# required, but no change to the current context is desirable
-EmptyContext = Context()
-
-# provided rounding modes are implemented as contexts, so that
-# they can be used directly in with statements
-RoundTiesToEven = Context(rounding='RoundTiesToEven')
-RoundTowardPositive = Context(rounding='RoundTowardPositive')
-RoundTowardNegative = Context(rounding='RoundTowardNegative')
-RoundTowardZero = Context(rounding='RoundTowardZero')
-
-# Contexts corresponding to IEEE 754-2008 binary interchange formats
-# (see section 3.6 of the standard for details).
-
-def IEEEContext(bitwidth):
-    try:
-        precision = {16: 11, 32: 24, 64: 53, 128: 113}[bitwidth]
-    except KeyError:
-        if bitwidth >= 128 and bitwidth % 32 == 0:
-            with DefaultContext + Context(emin=-1, subnormalize=True):
-                # log2(bitwidth), rounded to the nearest quarter
-                l = log2(bitwidth)
-            precision = 13 + bitwidth - int(4*l)
-        else:
-            raise ValueError("nonstandard bitwidth: bitwidth should be "
-                             "16, 32, 64, 128, or k*32 for some k >= 4")
-
-    emax = 1 << bitwidth - precision - 1
-    return Context(precision=precision,
-                   emin=4-emax-precision,
-                   emax=emax,
-                   subnormalize=True)
-
-half_precision = IEEEContext(16)
-single_precision = IEEEContext(32)
-double_precision = IEEEContext(64)
-quadruple_precision = IEEEContext(128)
-
-# thread local variables:
-#   __bigfloat_context__: current context
-#   __context_stack__: context stack, used by with statement
-
-import threading
-
-local = threading.local()
-local.__bigfloat_context__ = DefaultContext
-local.__context_stack__ = []
-
-def getcontext(_local = local):
-    return _local.__bigfloat_context__
-
-def setcontext(context, _local = local):
-    # attributes provided by 'context' override those in the current
-    # context; if 'context' doesn't specify a particular attribute,
-    # the attribute from the current context shows through
-    oldcontext = getcontext()
-    _local.__bigfloat_context__ = oldcontext + context
-
-def _pushcontext(context, _local = local):
-    _local.__context_stack__.append(getcontext())
-    setcontext(context)
-
-def _popcontext(_local = local):
-    setcontext(_local.__context_stack__.pop())
-
-del threading, local
-
-def precision(prec):
-    """Return context specifying the given precision.
-
-    precision(prec) is exactly equivalent to Context(precision=prec).
-
-    """
-    return Context(precision=prec)
-
-def extra_precision(prec):
-    """Return new context equal to the current context, but with
-    precision increased by prec."""
-    c = getcontext()
-    return Context(precision=c.precision+prec)
 
 def next_up(x, context=None):
     """next_up(x): return the least representable float that's
@@ -457,13 +313,14 @@ def next_up(x, context=None):
 
             # otherwise apply mpfr_nextabove
             bf = mpfr.Mpfr(y.precision)
-            ternary = mpfr.mpfr_set(bf, y._value, mpfr.MPFR_RNDN)
+            ternary = mpfr.mpfr_set(bf, y._value, ROUND_TIES_TO_EVEN)
             assert ternary == 0
             mpfr.mpfr_nextabove(bf)
             y = BigFloat._from_Mpfr(bf)
 
             # apply + one more time to deal with subnormals
             return +y
+
 
 def next_down(x, context=None):
     """next_down(x): return the greatest representable float that's
@@ -490,7 +347,7 @@ def next_down(x, context=None):
 
             # otherwise apply mpfr_nextabove
             bf = mpfr.Mpfr(y.precision)
-            ternary = mpfr.mpfr_set(bf, y._value, mpfr.MPFR_RNDN)
+            ternary = mpfr.mpfr_set(bf, y._value, ROUND_TIES_TO_EVEN)
             assert ternary == 0
             mpfr.mpfr_nextbelow(bf)
             y = BigFloat._from_Mpfr(bf)
@@ -498,74 +355,6 @@ def next_down(x, context=None):
             # apply + one more time to deal with subnormals
             return +y
 
-_rounding_mode_dict = {
-    'RoundTiesToEven': mpfr.MPFR_RNDN,
-    'RoundTowardZero': mpfr.MPFR_RNDZ,
-    'RoundTowardPositive': mpfr.MPFR_RNDU,
-    'RoundTowardNegative': mpfr.MPFR_RNDD,
-    # XXX Add RoundAwayFromZero
-}
-
-def _wrap_standard_function(f, argtypes, name=None):
-    def wrapped_f(*args, **kwargs):
-        context = getcontext()
-        if 'context' in kwargs:
-            context += kwargs['context']
-        elif len(args) == len(argtypes) + 1:
-            context += args[-1]
-            args = args[:-1]
-
-        if len(args) != len(argtypes):
-            raise TypeError("Wrong number of arguments")
-        converted_args = []
-        for arg, arg_t in zip(args, argtypes):
-            if arg_t is mpfr.Mpfr:
-                arg = BigFloat._implicit_convert(arg)._value
-            converted_args.append(arg)
-        rounding = _rounding_mode_dict[context.rounding]
-        converted_args.append(rounding)
-        bf = mpfr.Mpfr(context.precision)
-        ternary = f(bf, *converted_args)
-
-        # fit result to current context
-        with eminmax(context.emin, context.emax):
-            ternary = mpfr.mpfr_check_range(bf, ternary, rounding)
-            if context.subnormalize:
-                # mpfr_subnormalize doesn't set underflow and
-                # subnormal flags, so we do that ourselves.  We choose
-                # to set the underflow flag for *all* cases where the
-                # 'after rounding' result is smaller than the smallest
-                # normal number, even if that result is exact.
-
-                # if bf is zero but ternary is nonzero, the underflow
-                # flag will already have been set by mpfr_check_range;
-                if (mpfr.mpfr_number_p(bf) and
-                    not mpfr.mpfr_zero_p(bf) and
-                    mpfr.mpfr_get_exp(bf) < context.precision-1+context.emin):
-                    mpfr.mpfr_set_underflow()
-                ternary = mpfr.mpfr_subnormalize(bf, ternary, rounding)
-                if ternary:
-                    mpfr.mpfr_set_inexflag()
-
-        return BigFloat._from_Mpfr(bf)
-
-    if name is None:
-        assert f.__name__.startswith('mpfr_')
-        name = f.__name__[len('mpfr_'):]
-    wrapped_f.__name__ = name
-    return wrapped_f
-
-def _wrap_predicate(f, argtypes):
-    def wrapped_f(*args):
-        if len(args) != len(argtypes):
-            raise TypeError("Wrong number of arguments")
-        converted_args = []
-        for arg, arg_t in zip(args, argtypes):
-            if arg_t is mpfr.Mpfr:
-                arg = BigFloat._implicit_convert(arg)._value
-            converted_args.append(arg)
-        return f(*converted_args)
-    return wrapped_f
 
 def _binop(op):
     def wrapped_op(self, other):
@@ -576,6 +365,7 @@ def _binop(op):
         return result
     return wrapped_op
 
+
 def _rbinop(op):
     def wrapped_op(self, other):
         try:
@@ -584,6 +374,7 @@ def _rbinop(op):
             result = NotImplemented
         return result
     return wrapped_op
+
 
 class BigFloat(object):
     @classmethod
@@ -639,14 +430,13 @@ class BigFloat(object):
     @staticmethod
     def _fromhex_exact(value):
         """Private function used in testing"""
-        # private low-level version of fromhex that always does an
-        # exact conversion.  Avoids using any heavy machinery
-        # (contexts, _wrap_standard_function), since its main use is in
-        # the testing of that machinery.
+        # private low-level version of fromhex that always does an exact
+        # conversion.  Avoids using any heavy machinery (contexts, function
+        # wrapping), since its main use is in the testing of that machinery.
 
         # XXX Maybe we should move this function into test_bigfloat
-        bf = mpfr.Mpfr(len(value)*4) # should be sufficient precision
-        ternary = mpfr_set_str2(bf, value, 16, mpfr.MPFR_RNDN)
+        bf = mpfr.Mpfr(len(value) * 4)
+        ternary = mpfr_set_str2(bf, value, 16, ROUND_TIES_TO_EVEN)
         if ternary:
             # conversion should have been exact, except possibly if
             # value overflows or underflows
@@ -675,9 +465,9 @@ class BigFloat(object):
                                 "specified except when converting "
                                 "from a string")
             if isinstance(value, float):
-                precision = _builtin_max(DBL_PRECISION, PRECISION_MIN)
+                precision = __builtin__.max(DBL_PRECISION, PRECISION_MIN)
             elif isinstance(value, (int, long)):
-                precision = _builtin_max(_bit_length(value), PRECISION_MIN)
+                precision = __builtin__.max(_bit_length(value), PRECISION_MIN)
             elif isinstance(value, BigFloat):
                 precision = value.precision
             else:
@@ -687,7 +477,7 @@ class BigFloat(object):
         # use Default context, with given precision
         with _saved_flags():
             set_flagstate(set())  # clear all flags
-            with DefaultContext + Context(precision = precision):
+            with DefaultContext + Context(precision=precision):
                 result = BigFloat(value)
             if test_flag(Overflow):
                 raise ValueError("value too large to represent as a BigFloat")
@@ -713,9 +503,15 @@ class BigFloat(object):
         if not is_finite(self):
             raise ValueError("Can't convert infinity or nan to integer")
 
-        negative, digits, e = mpfr_get_str2(self._value, 16, 0, mpfr.MPFR_RNDN)
+        # Conversion to base 16 is exact, so any rounding mode will do.
+        negative, digits, e = mpfr_get_str2(
+            self._value,
+            16,
+            0,
+            ROUND_TIES_TO_EVEN,
+        )
         n = int(digits, 16)
-        e = 4*(e-len(digits))
+        e = 4 * (e - len(digits))
         if e >= 0:
             n <<= e
         else:
@@ -731,7 +527,7 @@ class BigFloat(object):
         Rounds using RoundTiesToEven, regardless of current rounding mode.
 
         """
-        return mpfr.mpfr_get_d(self._value, mpfr.MPFR_RNDN)
+        return mpfr.mpfr_get_d(self._value, ROUND_TIES_TO_EVEN)
 
     def _sign(self):
         return mpfr.mpfr_signbit(self._value)
@@ -753,10 +549,10 @@ class BigFloat(object):
         """
 
         m = mpfr.Mpfr(self.precision)
-        mpfr.mpfr_set(m, self._value, mpfr.MPFR_RNDN)
+        mpfr.mpfr_set(m, self._value, ROUND_TIES_TO_EVEN)
         if self and is_finite(self):
             mpfr.mpfr_set_exp(m, 0)
-        mpfr.mpfr_setsign(m, m, False, mpfr.MPFR_RNDN)
+        mpfr.mpfr_setsign(m, m, False, ROUND_TIES_TO_EVEN)
         return BigFloat._from_Mpfr(m)
 
     def _exponent(self):
@@ -791,7 +587,7 @@ class BigFloat(object):
         """
         result = mpfr.Mpfr(self.precision)
         new_sign = not self._sign()
-        mpfr.mpfr_setsign(result, self._value, new_sign, mpfr.MPFR_RNDN)
+        mpfr.mpfr_setsign(result, self._value, new_sign, ROUND_TIES_TO_EVEN)
         return BigFloat._from_Mpfr(result)
 
     def copy_abs(self):
@@ -802,7 +598,7 @@ class BigFloat(object):
 
         """
         result = mpfr.Mpfr(self.precision)
-        mpfr.mpfr_setsign(result, self._value, False, mpfr.MPFR_RNDN)
+        mpfr.mpfr_setsign(result, self._value, False, ROUND_TIES_TO_EVEN)
         return BigFloat._from_Mpfr(result)
 
     def hex(self):
@@ -814,9 +610,9 @@ class BigFloat(object):
             return sign + e
 
         m = self._significand()
-        _, digits, _ = mpfr_get_str2(m._value, 16, 0, mpfr.MPFR_RNDN)
+        _, digits, _ = mpfr_get_str2(m._value, 16, 0, ROUND_TIES_TO_EVEN)
         # only print the number of digits that are actually necessary
-        n = 1+(self.precision-1)//4
+        n = 1 + (self.precision - 1) // 4
         assert all(c == '0' for c in digits[n:])
         result = '%s0x0.%sp%+d' % (sign, digits[:n], e)
         return result
@@ -833,14 +629,19 @@ class BigFloat(object):
             return 0, 1
 
         # convert to a hex string, and from there to a fraction
-        negative, digits, e = mpfr_get_str2(self._value, 16, 0, mpfr.MPFR_RNDN)
+        negative, digits, e = mpfr_get_str2(
+            self._value,
+            16,
+            0,
+            ROUND_TIES_TO_EVEN,
+        )
         digits = digits.rstrip('0')
 
         # find number of trailing 0 bits in last hex digit
         v = int(digits[-1], 16)
         v &= -v
-        n, d = int(digits, 16)//v, 1
-        e = (e-len(digits) << 2) + {1: 0, 2: 1, 4: 2, 8: 3}[v]
+        n, d = int(digits, 16) // v, 1
+        e = (e - len(digits) << 2) + {1: 0, 2: 1, 4: 2, 8: 3}[v]
 
         # abs(number) now has value n * 2**e, and n is odd
         if e >= 0:
@@ -854,7 +655,12 @@ class BigFloat(object):
         if is_zero(self):
             return '-0' if is_negative(self) else '0'
         elif is_finite(self):
-            negative, digits, e = mpfr_get_str2(self._value, 10, 0, mpfr.MPFR_RNDN)
+            negative, digits, e = mpfr_get_str2(
+                self._value,
+                10,
+                0,
+                ROUND_TIES_TO_EVEN,
+            )
             return _format_finite(negative, digits, e)
         elif is_inf(self):
             return '-Infinity' if is_negative(self) else 'Infinity'
@@ -880,7 +686,7 @@ class BigFloat(object):
         # Start by formatting to 2 digits; we'll then truncate to one digit,
         # rounding appropriately.
         sign, digits, exp = mpfr_get_str2(
-            self._value, 10, 2, mpfr.MPFR_RNDD
+            self._value, 10, 2, ROUND_TOWARD_NEGATIVE
         )
 
         # If the last digit is 5, we can't tell which way to round; instead,
@@ -888,7 +694,7 @@ class BigFloat(object):
         # the result of that.
         if digits[-1] == '5':
             sign, digits, exp = mpfr_get_str2(
-                self._value, 10, 2, mpfr.MPFR_RNDU
+                self._value, 10, 2, ROUND_TOWARD_POSITIVE
             )
 
         if digits[-1] in '01234':
@@ -930,7 +736,7 @@ class BigFloat(object):
             return self._format_to_precision_one()
 
         sign, digits, exp = mpfr_get_str2(
-            self._value, 10, precision, mpfr.MPFR_RNDN
+            self._value, 10, precision, ROUND_TIES_TO_EVEN
         )
 
         return sign, digits, exp - len(digits)
@@ -971,7 +777,7 @@ class BigFloat(object):
 
         # Figure out the exponent by making a call to get_str2.  exp satisfies
         # 10**(exp-1) <= self < 10**exp
-        _, _, exp = mpfr_get_str2(self._value, 10, 2, mpfr.MPFR_RNDZ)
+        _, _, exp = mpfr_get_str2(self._value, 10, 2, ROUND_TOWARD_ZERO)
 
         sig_figs = exp + precision
 
@@ -983,12 +789,12 @@ class BigFloat(object):
             # Ex: 0.1 <= x < 1.0, rounding x to nearest multiple of 1.0.
             # Or: 100.0 <= x < 1000.0, rounding x to nearest multiple of 1000.0
             sign, digits, new_exp = mpfr_get_str2(
-                self._value, 10, 2, mpfr.MPFR_RNDD
+                self._value, 10, 2, ROUND_TOWARD_NEGATIVE
             )
             if int(digits) == 50:
                 # Halfway case
                 sign, digits, new_exp = mpfr_get_str2(
-                    self._value, 10, 2, mpfr.MPFR_RNDU
+                    self._value, 10, 2, ROUND_TOWARD_POSITIVE
                 )
 
             digits = '1' if int(digits) > 50 or new_exp == exp + 1 else '0'
@@ -1007,7 +813,6 @@ class BigFloat(object):
 
         return negative, digits, -precision
 
-
     def __hash__(self):
         # if self is exactly representable as a float, then its hash
         # should match that of the float.  Note that this covers the
@@ -1024,7 +829,7 @@ class BigFloat(object):
         # integer and take the hash of that, but that would be
         # painfully slow for something like BigFloat('1e1000000000').
         negative, digits, e = mpfr_get_str2(self._value, 16, 0,
-                                            mpfr.MPFR_RNDN)
+                                            ROUND_TIES_TO_EVEN)
         e -= len(digits)
         # The value of self is (-1)**negative * int(digits, 16) *
         # 16**e.  Compute a strictly positive integer n such that n is
@@ -1033,9 +838,9 @@ class BigFloat(object):
         # 2**64-1).
 
         if e >= 0:
-            n = int(digits, 16)*_builtin_pow(16, e, 2**64-1)
+            n = int(digits, 16) * __builtin__.pow(16, e, 2 ** 64 - 1)
         else:
-            n = int(digits, 16)*_builtin_pow(2**60, -e, 2**64-1)
+            n = int(digits, 16) * __builtin__.pow(2 ** 60, -e, 2 ** 64 - 1)
         return hash(-n if negative else n)
 
     def __ne__(self, other):
@@ -1074,15 +879,15 @@ class BigFloat(object):
 Inexact = 'Inexact'
 Overflow = 'Overflow'
 Underflow = 'Underflow'
-NanFlag ='NanFlag'
+NanFlag = 'NanFlag'
 
 _all_flags = set([Inexact, Overflow, Underflow, NanFlag])
 
 _flag_translate = {
-    'underflow' : Underflow,
-    'overflow' : Overflow,
-    'nanflag' : NanFlag,
-    'inexflag' : Inexact,
+    'underflow': Underflow,
+    'overflow': Overflow,
+    'nanflag': NanFlag,
+    'inexflag': Inexact,
 }
 
 _clear_flag_fns = dict((v, getattr(mpfr, 'mpfr_clear_' + k))
@@ -1092,11 +897,14 @@ _set_flag_fns = dict((v, getattr(mpfr, 'mpfr_set_' + k))
 _test_flag_fns = dict((v, getattr(mpfr, 'mpfr_' + k + '_p'))
                      for k, v in _flag_translate.items())
 
+
 def test_flag(f):
     return _test_flag_fns[f]()
 
+
 def set_flag(f):
     return _set_flag_fns[f]()
+
 
 def clear_flag(f):
     return _clear_flag_fns[f]()
@@ -1104,6 +912,7 @@ def clear_flag(f):
 
 def get_flagstate():
     return set(f for f in _all_flags if test_flag(f))
+
 
 def set_flagstate(flagset):
     # set all flags in the given flag set;  clear all flags not
@@ -1113,8 +922,9 @@ def set_flagstate(flagset):
 
     for f in flagset:
         set_flag(f)
-    for f in _all_flags-flagset:
+    for f in _all_flags - flagset:
         clear_flag(f)
+
 
 @_contextlib.contextmanager
 def _saved_flags():
@@ -1128,47 +938,486 @@ def _saved_flags():
         set_flagstate(old_flags)
 
 
-_set_d = _wrap_standard_function(mpfr.mpfr_set_d, [float])
-set_str2 = _wrap_standard_function(mpfr_set_str2, [str, int])
+def _set_d(x, context=None):
+    current_context = getcontext()
+    if context is not None:
+        context = current_context + context
+    else:
+        context = current_context
 
-const_log2 = _wrap_standard_function(mpfr.mpfr_const_log2, [])
-const_pi = _wrap_standard_function(mpfr.mpfr_const_pi, [])
-const_euler = _wrap_standard_function(mpfr.mpfr_const_euler, [])
-const_catalan = _wrap_standard_function(mpfr.mpfr_const_catalan, [])
-
-pos = _wrap_standard_function(mpfr.mpfr_set, [mpfr.Mpfr], name='pos')
-neg = _wrap_standard_function(mpfr.mpfr_neg, [mpfr.Mpfr])
-abs = _wrap_standard_function(mpfr.mpfr_abs, [mpfr.Mpfr])
-sqrt = _wrap_standard_function(mpfr.mpfr_sqrt, [mpfr.Mpfr])
-exp = _wrap_standard_function(mpfr.mpfr_exp, [mpfr.Mpfr])
-log = _wrap_standard_function(mpfr.mpfr_log, [mpfr.Mpfr])
-log2 = _wrap_standard_function(mpfr.mpfr_log2, [mpfr.Mpfr])
-
-add = _wrap_standard_function(mpfr.mpfr_add, [mpfr.Mpfr, mpfr.Mpfr])
-sub = _wrap_standard_function(mpfr.mpfr_sub, [mpfr.Mpfr, mpfr.Mpfr])
-mul = _wrap_standard_function(mpfr.mpfr_mul, [mpfr.Mpfr, mpfr.Mpfr])
-div = _wrap_standard_function(mpfr.mpfr_div, [mpfr.Mpfr, mpfr.Mpfr])
-pow = _wrap_standard_function(mpfr.mpfr_pow, [mpfr.Mpfr, mpfr.Mpfr])
-mod = _wrap_standard_function(mpfr.mpfr_fmod, [mpfr.Mpfr, mpfr.Mpfr], name='mod')
+    bf = _apply_function_in_context(mpfr.mpfr_set_d, (x,), context)
+    return BigFloat._from_Mpfr(bf)
 
 
-# Wrap predicates
-is_nan = _wrap_predicate(mpfr.mpfr_nan_p, [mpfr.Mpfr])
-is_inf = _wrap_predicate(mpfr.mpfr_inf_p, [mpfr.Mpfr])
-is_zero = _wrap_predicate(mpfr.mpfr_zero_p, [mpfr.Mpfr])
-is_finite = _wrap_predicate(mpfr.mpfr_number_p, [mpfr.Mpfr])
-is_integer = _wrap_predicate(mpfr.mpfr_integer_p, [mpfr.Mpfr])
-is_negative = _wrap_predicate(mpfr.mpfr_signbit, [mpfr.Mpfr])
-is_inf = _wrap_predicate(mpfr.mpfr_inf_p, [mpfr.Mpfr])
-is_regular = _wrap_predicate(mpfr.mpfr_regular_p, [mpfr.Mpfr])
+def set_str2(s, base, context=None):
+    current_context = getcontext()
+    if context is not None:
+        context = current_context + context
+    else:
+        context = current_context
 
-_is_equal = _wrap_predicate(mpfr.mpfr_equal_p, [mpfr.Mpfr, mpfr.Mpfr])
-_is_greater = _wrap_predicate(mpfr.mpfr_greater_p, [mpfr.Mpfr, mpfr.Mpfr])
-_is_greaterequal = _wrap_predicate(mpfr.mpfr_greaterequal_p, [mpfr.Mpfr, mpfr.Mpfr])
-_is_less = _wrap_predicate(mpfr.mpfr_less_p, [mpfr.Mpfr, mpfr.Mpfr])
-_is_lessequal = _wrap_predicate(mpfr.mpfr_lessequal_p, [mpfr.Mpfr, mpfr.Mpfr])
-lessgreater = _wrap_predicate(mpfr.mpfr_lessgreater_p, [mpfr.Mpfr, mpfr.Mpfr])
-unordered = _wrap_predicate(mpfr.mpfr_unordered_p, [mpfr.Mpfr, mpfr.Mpfr])
+    bf = _apply_function_in_context(mpfr_set_str2, (s, base), context)
+    return BigFloat._from_Mpfr(bf)
+
+
+# Constants.
+
+def const_log2(context=None):
+    """
+    Return log(2), rounded according to the current context.
+
+    Returns the natural logarithm of 2 = 0.693..., with precision and rounding
+    mode taken from the current context.
+
+    """
+    with (context if context is not None else EmptyContext):
+        bf = _apply_function_in_context(
+            mpfr.mpfr_const_log2,
+            (),
+            getcontext()
+        )
+        return BigFloat._from_Mpfr(bf)
+
+
+def const_pi(context=None):
+    """
+    Return Pi, rounded according to the current context.
+
+    Returns Pi = 3.141..., with precision and rounding mode taken from the
+    current context.
+
+    """
+    with (context if context is not None else EmptyContext):
+        bf = _apply_function_in_context(
+            mpfr.mpfr_const_pi,
+            (),
+            getcontext()
+        )
+        return BigFloat._from_Mpfr(bf)
+
+
+def const_euler(context=None):
+    """
+    Return Euler's constant, rounded according to the current context.
+
+    Returns the value of Euler's constant 0.577..., (also called the
+    Euler-Mascheroni constant) with precision and rounding mode taken from the
+    current context.
+
+    """
+    with (context if context is not None else EmptyContext):
+        bf = _apply_function_in_context(
+            mpfr.mpfr_const_euler,
+            (),
+            getcontext()
+        )
+        return BigFloat._from_Mpfr(bf)
+
+
+def const_catalan(context=None):
+    """
+    Return Catalan's constant, rounded according to the current context.
+
+    Returns the value of Catalan's constant 0.915..., with precision and
+    rounding mode taken from the current context.
+
+    """
+    with (context if context is not None else EmptyContext):
+        bf = _apply_function_in_context(
+            mpfr.mpfr_const_catalan,
+            (),
+            getcontext()
+        )
+        return BigFloat._from_Mpfr(bf)
+
+
+# Unary functions.
+
+def pos(x, context=None):
+    """
+    Return x, rounded according to the current context.
+
+    """
+    with (context if context is not None else EmptyContext):
+        bf = _apply_function_in_context(
+            mpfr.mpfr_set,
+            (BigFloat._implicit_convert(x)._value,),
+            getcontext(),
+        )
+        return BigFloat._from_Mpfr(bf)
+
+
+def neg(x, context=None):
+    """
+    Return -x, rounded according to the current context.
+
+    """
+    with (context if context is not None else EmptyContext):
+        bf = _apply_function_in_context(
+            mpfr.mpfr_neg,
+            (BigFloat._implicit_convert(x)._value,),
+            getcontext(),
+        )
+        return BigFloat._from_Mpfr(bf)
+
+
+def abs(x, context=None):
+    """
+    Return abs(x), rounded according to the current context.
+
+    """
+    with (context if context is not None else EmptyContext):
+        bf = _apply_function_in_context(
+            mpfr.mpfr_abs,
+            (BigFloat._implicit_convert(x)._value,),
+            getcontext(),
+        )
+        return BigFloat._from_Mpfr(bf)
+
+
+def sqrt(x, context=None):
+    """
+    Return the square root of x, rounded according to the current context.
+
+    """
+    with (context if context is not None else EmptyContext):
+        bf = _apply_function_in_context(
+            mpfr.mpfr_sqrt,
+            (BigFloat._implicit_convert(x)._value,),
+            getcontext(),
+        )
+        return BigFloat._from_Mpfr(bf)
+
+
+def exp(x, context=None):
+    """
+    Return the exponential of x, rounded according to the current context.
+
+    """
+    with (context if context is not None else EmptyContext):
+        bf = _apply_function_in_context(
+            mpfr.mpfr_exp,
+            (BigFloat._implicit_convert(x)._value,),
+            getcontext(),
+        )
+        return BigFloat._from_Mpfr(bf)
+
+
+def log(x, context=None):
+    """
+    Return the natural logarithm of x, rounded according to the current context.
+
+    """
+    with (context if context is not None else EmptyContext):
+        bf = _apply_function_in_context(
+            mpfr.mpfr_log,
+            (BigFloat._implicit_convert(x)._value,),
+            getcontext(),
+        )
+        return BigFloat._from_Mpfr(bf)
+
+
+def log2(x, context=None):
+    """
+    Return the base-2 logarithm of x, rounded according to the current context.
+
+    """
+    with (context if context is not None else EmptyContext):
+        bf = _apply_function_in_context(
+            mpfr.mpfr_log2,
+            (BigFloat._implicit_convert(x)._value,),
+            getcontext(),
+        )
+        return BigFloat._from_Mpfr(bf)
+
+
+# Binary functions.
+
+def add(x, y, context=None):
+    """
+    Return x + y, rounded according to the current context.
+
+    """
+    with (context if context is not None else EmptyContext):
+        bf = _apply_function_in_context(
+            mpfr.mpfr_add,
+            (
+                BigFloat._implicit_convert(x)._value,
+                BigFloat._implicit_convert(y)._value,
+            ),
+            getcontext(),
+        )
+        return BigFloat._from_Mpfr(bf)
+
+
+def sub(x, y, context=None):
+    """
+    Return x - y, rounded according to the current context.
+
+    """
+    with (context if context is not None else EmptyContext):
+        bf = _apply_function_in_context(
+            mpfr.mpfr_sub,
+            (
+                BigFloat._implicit_convert(x)._value,
+                BigFloat._implicit_convert(y)._value,
+            ),
+            getcontext(),
+        )
+        return BigFloat._from_Mpfr(bf)
+
+
+def mul(x, y, context=None):
+    """
+    Return x times y, rounded according to the current context.
+
+    """
+    with (context if context is not None else EmptyContext):
+        bf = _apply_function_in_context(
+            mpfr.mpfr_mul,
+            (
+                BigFloat._implicit_convert(x)._value,
+                BigFloat._implicit_convert(y)._value,
+            ),
+            getcontext(),
+        )
+        return BigFloat._from_Mpfr(bf)
+
+
+def div(x, y, context=None):
+    """
+    Return x divided by y, rounded according to the current context.
+
+    """
+    with (context if context is not None else EmptyContext):
+        bf = _apply_function_in_context(
+            mpfr.mpfr_div,
+            (
+                BigFloat._implicit_convert(x)._value,
+                BigFloat._implicit_convert(y)._value,
+            ),
+            getcontext(),
+        )
+        return BigFloat._from_Mpfr(bf)
+
+
+def mod(x, y, context=None):
+    """
+    Return x reduced modulo y, rounded according to the current context.
+
+    Returns the value of x - n * y, rounded according to the current context,
+    where n is the integer quotient of x divided by y, rounded toward zero.
+
+    Special values are handled as described in Section F.9.7.1 of the ISO C99
+    standard: If x is infinite or y is zero, the result is NaN. If y is
+    infinite and x is finite, the result is x rounded to the current context.
+    If the result is zero, it has the sign of x.
+
+    """
+    with (context if context is not None else EmptyContext):
+        bf = _apply_function_in_context(
+            mpfr.mpfr_fmod,
+            (
+                BigFloat._implicit_convert(x)._value,
+                BigFloat._implicit_convert(y)._value,
+            ),
+            getcontext(),
+        )
+        return BigFloat._from_Mpfr(bf)
+
+
+def pow(x, y, context=None):
+    """
+    Return x raised to the power y, rounded according to the current context.
+
+    Special values are handled as described in the ISO C99 and IEEE 754-2008
+    standards for the pow function.
+
+      * pow(±0, y) returns plus or minus infinity for y a negative odd integer.
+
+      * pow(±0, y) returns plus infinity for y negative and not an odd integer.
+
+      * pow(±0, y) returns plus or minus zero for y a positive odd integer.
+
+      * pow(±0, y) returns plus zero for y positive and not an odd integer.
+
+      * pow(-1, ±Inf) returns 1.
+
+      * pow(+1, y) returns 1 for any y, even a NaN.
+
+      * pow(x, ±0) returns 1 for any x, even a NaN.
+
+      * pow(x, y) returns NaN for finite negative x and finite non-integer y.
+
+      * pow(x, -Inf) returns plus infinity for 0 < abs(x) < 1, and plus zero
+        for abs(x) > 1.
+
+      * pow(x, +Inf) returns plus zero for 0 < abs(x) < 1, and plus infinity
+        for abs(x) > 1.
+
+      * pow(-Inf, y) returns minus zero for y a negative odd integer.
+
+      * pow(-Inf, y) returns plus zero for y negative and not an odd integer.
+
+      * pow(-Inf, y) returns minus infinity for y a positive odd integer.
+
+      * pow(-Inf, y) returns plus infinity for y positive and not an odd
+        integer.
+
+      * pow(+Inf, y) returns plus zero for y negative, and plus infinity for y
+        positive.
+
+    """
+    with (context if context is not None else EmptyContext):
+        bf = _apply_function_in_context(
+            mpfr.mpfr_pow,
+            (
+                BigFloat._implicit_convert(x)._value,
+                BigFloat._implicit_convert(y)._value,
+            ),
+            getcontext(),
+        )
+        return BigFloat._from_Mpfr(bf)
+
+
+# Predicates
+def is_nan(x):
+    """ Return True if x is a NaN, else False. """
+
+    x = BigFloat._implicit_convert(x)._value
+    return mpfr.mpfr_nan_p(x)
+
+
+def is_inf(x):
+    """ Return True if x is an infinity, else False. """
+
+    x = BigFloat._implicit_convert(x)._value
+    return mpfr.mpfr_inf_p(x)
+
+
+def is_zero(x):
+    """ Return True if x is a zero, else False. """
+
+    x = BigFloat._implicit_convert(x)._value
+    return mpfr.mpfr_zero_p(x)
+
+
+def is_finite(x):
+    """ Return True if x is finite, else False.
+
+    A BigFloat instance is considered to be finite if it is neither an
+    infinity or a NaN.
+
+    """
+    x = BigFloat._implicit_convert(x)._value
+    return mpfr.mpfr_number_p(x)
+
+
+def is_integer(x):
+    """ Return True if x is an exact integer, else False. """
+
+    x = BigFloat._implicit_convert(x)._value
+    return mpfr.mpfr_integer_p(x)
+
+
+def is_regular(x):
+    """ Return True if x is finite and nonzero, else False. """
+
+    x = BigFloat._implicit_convert(x)._value
+    return mpfr.mpfr_regular_p(x)
+
+
+def is_negative(x):
+    """ Return True if x has its sign bit set, else False.
+
+    Note that this function returns True for negative zeros.
+
+    """
+    x = BigFloat._implicit_convert(x)._value
+    return mpfr.mpfr_signbit(x)
+
+
+def _is_equal(x, y):
+    """
+    Return True if op1 == op2 and False otherwise.
+
+    This function returns False whenever op1 and/or op2 is a NaN.
+
+    """
+    x = BigFloat._implicit_convert(x)._value
+    y = BigFloat._implicit_convert(y)._value
+    return mpfr.mpfr_equal_p(x, y)
+
+
+def _is_greater(x, y):
+    """
+    Return True if op1 > op2 and False otherwise.
+
+    This function returns False whenever op1 and/or op2 is a NaN.
+
+    """
+    x = BigFloat._implicit_convert(x)._value
+    y = BigFloat._implicit_convert(y)._value
+    return mpfr.mpfr_greater_p(x, y)
+
+
+def _is_greaterequal(x, y):
+    """
+    Return True if op1 >= op2 and False otherwise.
+
+    This function returns False whenever op1 and/or op2 is a NaN.
+
+    """
+    x = BigFloat._implicit_convert(x)._value
+    y = BigFloat._implicit_convert(y)._value
+    return mpfr.mpfr_greaterequal_p(x, y)
+
+
+def _is_less(x, y):
+    """
+    Return True if op1 < op2 and False otherwise.
+
+    This function returns False whenever op1 and/or op2 is a NaN.
+
+    """
+    x = BigFloat._implicit_convert(x)._value
+    y = BigFloat._implicit_convert(y)._value
+    return mpfr.mpfr_less_p(x, y)
+
+
+def _is_lessequal(x, y):
+    """
+    Return True if op1 <= op2 and False otherwise.
+
+    This function returns False whenever op1 and/or op2 is a NaN.
+
+    """
+    x = BigFloat._implicit_convert(x)._value
+    y = BigFloat._implicit_convert(y)._value
+    return mpfr.mpfr_lessequal_p(x, y)
+
+
+def lessgreater(x, y):
+    """
+    Return True if op1 < op2 or op1 > op2 and False otherwise.
+
+    This function returns False whenever op1 and/or op2 is a NaN.
+
+    """
+    x = BigFloat._implicit_convert(x)._value
+    y = BigFloat._implicit_convert(y)._value
+    return mpfr.mpfr_lessgreater_p(x, y)
+
+
+def unordered(x, y):
+    """
+    Return True if op1 or op2 is a NaN and False otherwise.
+
+    """
+    x = BigFloat._implicit_convert(x)._value
+    y = BigFloat._implicit_convert(y)._value
+    return mpfr.mpfr_unordered_p(x, y)
+
 
 # unary arithmetic operations
 BigFloat.__pos__ = pos

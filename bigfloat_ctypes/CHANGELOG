@@ -1,0 +1,72 @@
+What's new in bigfloat 0.2.1?
+=============================
+
+Library
+-------
+
+- Simplify weakref callback scheme used to ensure BigFloat instances
+  are freed properly.
+
+- Make sure all python files in distribution have the LGPL header.
+
+
+What's new in bigfloat 0.2?
+===========================
+
+Library
+-------
+
+- The setup.py file no longer attempts to locate the MPFR library at
+  install time.  The configuration file still exists, and can be edited
+  to give a hard-coded location.  Alternatively, ctypes should find the
+  library if it's within the usual library search paths.  (If not, it
+  might be necessary to set LD_LIBRARY_PATH or DYLD_LIBRARY_PATH.)
+  
+- Use a weakref callback to ensure mpfr_clear gets called, instead of
+  relying on __del__.
+
+- Make bigfloat compatible with versions of MPFR as far back as MPFR 2.3.0
+
+- Relicense under LGPL, since this package might be considered a
+  derived work of MPFR.
+
+
+Tests
+-----
+
+- Skip the hashing consistency tests (those that test whether hash(n)
+  == hash(BigFloat(n) for integers n) on Python 2.5.  In rare cases,
+  this equality fails with Python 2.5, and this is awkward to fix.  If
+  this affects you, upgrade to Python 2.6 or avoid mixing BigFloat
+  instances with ints in sets or dictionary keys.
+
+
+What's new in bigfloat 0.1.2?
+=============================
+
+Library
+-------
+
+- Make Context objects hashable.
+
+Documentation
+-------------
+
+- Add 'where to get it' section to the documentation, pointing both
+  to the PyPI page and the bitbucket source.
+
+- Expand installation information in documentation.
+
+Packaging/distribution
+----------------------
+
+- Include html documentation in distribution, in docs directory.
+
+- Include INSTALL and CHANGELOG files in distribution.
+
+- Make sure the bigfloat_config.py file ends up in the top-level
+  package directory.
+
+- Add /usr/lib{32,64} and /usr/local/lib{32,64} to default search
+  paths in setup.py.
+

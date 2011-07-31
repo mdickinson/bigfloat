@@ -1,0 +1,4 @@
+include INSTALL
+include CHANGELOG
+include COPYING COPYING.LESSER
+recursive-include bigfloat/docs *
