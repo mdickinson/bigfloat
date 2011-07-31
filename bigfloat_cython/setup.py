@@ -17,8 +17,8 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with the bigfloat module.  If not, see <http://www.gnu.org/licenses/>.
 
-from setuptools import setup, Extension
-from Cython.Distutils import build_ext
+from distutils.core import setup
+from distutils.extension import Extension
 
 DESCRIPTION = """\
 Arbitrary precision correctly-rounded floating point arithmetic, via MPFR.\
@@ -167,14 +167,10 @@ setup(
         'OS X',
     ],
     license='GNU Library or Lesser General Public License (LGPL)',
-    cmdclass={'build_ext': build_ext},
     ext_modules=[
         Extension(
             "bigfloat.mpfr",
-            ["bigfloat/mpfr.pyx"],
-            include_dirs=[
-                'bigfloat',
-            ],
+            ["bigfloat/mpfr.c"],
             libraries=[
                 'mpfr', 'gmp',
             ],
