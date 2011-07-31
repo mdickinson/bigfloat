@@ -38,6 +38,7 @@ install: build_all
 pdf: docs/_build/latex/BigFloat.pdf
 
 test: develop
+	$(PYTHON) -m bigfloat.test.test___all__
 	$(PYTHON) -m bigfloat.test.test_bigfloat
 	$(PYTHON) -m bigfloat.test.test_context
 	$(PYTHON) -m bigfloat.test.test_mpfr
