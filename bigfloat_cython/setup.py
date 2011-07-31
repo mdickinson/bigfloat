@@ -170,7 +170,7 @@ setup(
     ext_modules=[
         Extension(
             "bigfloat.mpfr",
-            ["bigfloat/mpfr.c"],
+            ["src/mpfr.c"],
             libraries=[
                 'mpfr', 'gmp',
             ],
