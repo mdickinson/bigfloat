@@ -1500,6 +1500,7 @@ def mpfr_rint(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
 #  mpfr_zeta_ui
 #  mpfr_jn
 #  mpfr_yn
+#  mpfr_sum
 #
 #
 #  5.8 Input and Output Functions
