@@ -83,6 +83,22 @@ cdef int check_precision(cmpfr.mpfr_prec_t precision) except -1:
         )
 
 
+# Some functions that return a pair of results (mpfr_sin_cos, mpfr_sinh_cosh,
+# mpfr_modf) also return a pair of ternary values encoded in a single int.
+# Here we decode ternary pair.
+
+cdef decode_ternary_pair(int ternary_pair):
+    cdef int first_ternary, second_ternary
+
+    first_ternary = ternary_pair & 3
+    if first_ternary == 2:
+        first_ternary = -1
+    second_ternary = ternary_pair >> 2
+    if second_ternary == 2:
+        second_ternary = -1
+    return first_ternary, second_ternary
+
+
 cdef class Mpfr:
     """
     Class representing a mutable arbitrary-precision floating-point number.
@@ -861,15 +877,13 @@ def mpfr_sin_cos(Mpfr sop not None, Mpfr cop not None,
     from MPFR, which combines the ternary values into a single int return.
 
     """
-    cdef int combined_ternary, sin_ternary, cos_ternary
+    cdef int ternary_pair
 
     check_rounding_mode(rnd)
-    combined_ternary = cmpfr.mpfr_sin_cos(
+    ternary_pair = cmpfr.mpfr_sin_cos(
         &sop._value, &cop._value, &op._value, rnd
     )
-    sin_ternary = [0, 1, -1][combined_ternary & 3]
-    cos_ternary = [0, 1, -1][combined_ternary >> 2]
-    return sin_ternary, cos_ternary
+    return decode_ternary_pair(ternary_pair)
 
 def mpfr_sec(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
     """
@@ -1015,15 +1029,13 @@ def mpfr_sinh_cosh(Mpfr sop not None, Mpfr cop not None,
     from MPFR, which combines the ternary values into a single int return.
 
     """
-    cdef int combined_ternary, sinh_ternary, cosh_ternary
+    cdef int ternary_pair
 
     check_rounding_mode(rnd)
-    combined_ternary = cmpfr.mpfr_sinh_cosh(
+    ternary_pair = cmpfr.mpfr_sinh_cosh(
         &sop._value, &cop._value, &op._value, rnd
     )
-    sinh_ternary = [0, 1, -1][combined_ternary & 3]
-    cosh_ternary = [0, 1, -1][combined_ternary >> 2]
-    return sinh_ternary, cosh_ternary
+    return decode_ternary_pair(ternary_pair)
 
 def mpfr_sech(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
     """
@@ -1547,15 +1559,13 @@ def mpfr_modf(Mpfr iop not None, Mpfr fop not None,
     MPFR, which combines the ternary values into a single int return.
 
     """
-    cdef int combined_ternary, int_ternary, frac_ternary
+    cdef int ternary_pair
 
     check_rounding_mode(rnd)
-    combined_ternary = cmpfr.mpfr_modf(
+    ternary_pair = cmpfr.mpfr_modf(
         &iop._value, &fop._value, &op._value, rnd
     )
-    int_ternary = [0, 1, -1][combined_ternary & 3]
-    frac_ternary = [0, 1, -1][combined_ternary >> 2]
-    return int_ternary, frac_ternary
+    return decode_ternary_pair(ternary_pair)
 
 def mpfr_fmod(Mpfr r not None, Mpfr x not None,
               Mpfr y not None, cmpfr.mpfr_rnd_t rnd):
