@@ -125,14 +125,18 @@ from bigfloat.mpfr import (
     mpfr_j1,
     mpfr_y0,
     mpfr_y1,
+
+    mpfr_fma,
+    mpfr_fms,
+    mpfr_agm,
+    mpfr_hypot,
+
     mpfr_ai,
 
     mpfr_const_log2,
     mpfr_const_pi,
     mpfr_const_euler,
     mpfr_const_catalan,
-
-    mpfr_free_cache,
 
 
     mpfr_signbit,
@@ -732,6 +736,89 @@ class TestMpfr(unittest.TestCase):
         self.assertEqual(
             mpfr_get_d(y, MPFR_RNDN),
             1.0453705484668847151702051105754406143,
+        )
+
+    def test_miscellaneous_special_functions(self):
+        triples = [
+            (mpfr_log1p, 2.625, 1.2878542883066381),
+            (mpfr_expm1, 2.625, 12.804574186067095),
+            (mpfr_eint, 2.625, 7.7065767629369219),
+            (mpfr_li2, 2.625, 2.3990452789082216),
+            (mpfr_gamma, 2.625, 1.4569332050919717),
+            (mpfr_lngamma, 2.625, 0.37633368202490544),
+            (mpfr_digamma, 2.625, 0.76267585080804882),
+            (mpfr_zeta, 2.625, 1.2972601932163248),
+            (mpfr_erf, 2.625, 0.99979462426385878),
+            (mpfr_erfc, 2.625, 0.00020537573614121744),
+            (mpfr_j0, 2.625, -0.10848780856998129),
+            (mpfr_j1, 2.625, 0.46377974664560533),
+            (mpfr_y0, 2.625, 0.47649455655720157),
+            (mpfr_y1, 2.625, 0.19848583551020473),
+            (mpfr_ai, 2.625,  0.012735929874768289),
+            ]
+
+        rop = Mpfr(53)
+        op = Mpfr(53)
+        for fn, input, expected_output in triples:
+            mpfr_set_d(op, input, MPFR_RNDN)
+            fn(rop, op, MPFR_RNDN)
+            actual_output = mpfr_get_d(rop, MPFR_RNDN)
+            self.assertEqual(
+                actual_output,
+                expected_output,
+                msg='{}'.format(fn),
+            )
+
+    def test_fma(self):
+        op1 = Mpfr(53)
+        op2 = Mpfr(53)
+        op3 = Mpfr(53)
+        rop = Mpfr(53)
+        mpfr_set_d(op1, 5.0, MPFR_RNDN)
+        mpfr_set_d(op2, 7.0, MPFR_RNDN)
+        mpfr_set_d(op3, 11.0, MPFR_RNDN)
+        mpfr_fma(rop, op1, op2, op3, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(rop, MPFR_RNDN),
+            46.0,
+        )
+
+    def test_fms(self):
+        op1 = Mpfr(53)
+        op2 = Mpfr(53)
+        op3 = Mpfr(53)
+        rop = Mpfr(53)
+        mpfr_set_d(op1, 5.0, MPFR_RNDN)
+        mpfr_set_d(op2, 7.0, MPFR_RNDN)
+        mpfr_set_d(op3, 11.0, MPFR_RNDN)
+        mpfr_fms(rop, op1, op2, op3, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(rop, MPFR_RNDN),
+            24.0,
+        )
+
+    def test_agm(self):
+        x = Mpfr(53)
+        y = Mpfr(53)
+        rop = Mpfr(53)
+        mpfr_set_d(x, 1.0, MPFR_RNDN)
+        mpfr_set_d(y, 1.625, MPFR_RNDN)
+        mpfr_agm(rop, x, y, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(rop, MPFR_RNDN),
+            1.2935586022927736,
+        )
+
+    def test_hypot(self):
+        x = Mpfr(53)
+        y = Mpfr(53)
+        rop = Mpfr(53)
+        mpfr_set_d(x, 5.0, MPFR_RNDN)
+        mpfr_set_d(y, 12.0, MPFR_RNDN)
+        mpfr_hypot(rop, x, y, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(rop, MPFR_RNDN),
+            13.0,
         )
 
     def test_const_log2(self):

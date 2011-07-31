@@ -1224,6 +1224,64 @@ def mpfr_y1(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
     check_rounding_mode(rnd)
     return cmpfr.mpfr_y1(&rop._value, &op._value, rnd)
 
+def mpfr_fma(Mpfr rop not None,
+             Mpfr op1 not None,
+             Mpfr op2 not None,
+             Mpfr op3 not None,
+             cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to (op1 times op2) + op3 rounded in the direction rnd.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_fma(
+        &rop._value, &op1._value, &op2._value, &op3._value, rnd
+    )
+
+def mpfr_fms(Mpfr rop not None,
+             Mpfr op1 not None,
+             Mpfr op2 not None,
+             Mpfr op3 not None,
+             cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to (op1 times op2) - op3 rounded in the direction rnd.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_fms(
+        &rop._value, &op1._value, &op2._value, &op3._value, rnd
+    )
+
+def mpfr_agm(Mpfr rop not None,
+             Mpfr op1 not None,
+             Mpfr op2 not None,
+             cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the arithmetic-geometric mean of op1 and op2, rounded in the
+    direction rnd. The arithmetic-geometric mean is the common limit of the
+    sequences u_n and v_n, where u_0=op1, v_0=op2, u_(n+1) is the arithmetic
+    mean of u_n and v_n, and v_(n+1) is the geometric mean of u_n and v_n. If
+    any operand is negative, set rop to NaN.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_agm(&rop._value, &op1._value, &op2._value, rnd)
+
+def mpfr_hypot(Mpfr rop not None,
+             Mpfr x not None,
+             Mpfr y not None,
+             cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the Euclidean norm of x and y, i.e., the square root of the sum
+    of the squares of x and y, rounded in the direction rnd. Special values are
+    handled as described in Section F.9.4.3 of the ISO C99 and IEEE 754-2008
+    standards: If x or y is an infinity, then +Inf is returned in rop, even if
+    the other number is NaN.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_hypot(&rop._value, &x._value, &y._value, rnd)
+
 def mpfr_ai(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
     """
     Set rop to the value of the Airy function Ai on x, rounded in the direction
@@ -1301,6 +1359,34 @@ def mpfr_free_cache():
 
     """
     cmpfr.mpfr_free_cache()
+
+
+###############################################################################
+# 5.10 Integer and Remainder Related Functions
+###############################################################################
+
+def mpfr_rint(Mpfr rop not None, Mpfr op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to op rounded to an integer in the direction given by rnd.
+
+    The returned value is zero when the result is exact, positive when it is
+    greater than the original value of op, and negative when it is
+    smaller. More precisely, the returned value is 0 when op is an integer
+    representable in rop, 1 or −1 when op is an integer that is not
+    representable in rop, 2 or −2 when op is not an integer.
+
+    Note that mpfr_round is different from mpfr_rint called with the rounding
+    to nearest mode (where halfway cases are rounded to an even integer or
+    significand). Note also that no double rounding is performed; for instance,
+    10.5 (1010.1 in binary) is rounded by mpfr_rint with rounding to nearest to
+    12 (1100 in binary) in 2-bit precision, because the two enclosing numbers
+    representable on two bits are 8 and 12, and the closest is 12. (If one
+    first rounded to an integer, one would round 10.5 to 10 with even rounding,
+    and then 10 would be rounded to 8 again with even rounding.)
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_rint(&rop._value, &op._value, rnd)
 
 
 # Functions that are documented in the MPFR 3.0.1 documentation, but aren't
