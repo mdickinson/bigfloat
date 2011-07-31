@@ -1345,6 +1345,53 @@ def dim(x, y, context=None):
         return BigFloat._from_Mpfr(bf)
 
 
+###############################################################################
+# 5.6 Comparison Functions
+###############################################################################
+
+def cmp(op1, op2):
+    """
+    Perform a three-way comparison of op1 and op2.
+
+    Return a positive value if op1 > op2, zero if op1 = op2, and a negative
+    value if op1 < op2. Both op1 and op2 are considered to their full own
+    precision, which may differ. If one of the operands is NaN, set the erange
+    flag and return zero.
+
+    Note: This function may be useful to distinguish the three possible
+    cases. If you need to distinguish two cases only, it is recommended to use
+    the predicate functions like 'greaterequal'; they behave like the IEEE 754
+    comparisons, in particular when one or both arguments are NaN.
+
+    """
+    op1 = BigFloat._implicit_convert(op1)._value
+    op2 = BigFloat._implicit_convert(op2)._value
+    return mpfr.mpfr_cmp(op1, op2)
+
+
+def cmpabs(op1, op2):
+    """
+    Compare the absolute values of op1 and op2.
+
+    Return a positive value if op1 > op2, zero if op1 = op2, and a negative
+    value if op1 < op2. Both op1 and op2 are considered to their full own
+    precision, which may differ. If one of the operands is NaN, set the erange
+    flag and return zero.
+
+    Note: This function may be useful to distinguish the three possible
+    cases. If you need to distinguish two cases only, it is recommended to use
+    the predicate functions like 'greaterequal'; they behave like the IEEE 754
+    comparisons, in particular when one or both arguments are NaN.
+
+    """
+    op1 = BigFloat._implicit_convert(op1)._value
+    op2 = BigFloat._implicit_convert(op2)._value
+    return mpfr.mpfr_cmpabs(op1, op2)
+
+
+
+
+
 def mod(x, y, context=None):
     """
     Return x reduced modulo y, rounded according to the current context.
