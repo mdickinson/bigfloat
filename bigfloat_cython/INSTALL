@@ -44,6 +44,9 @@ installed in /opt/local (e.g., by MacPorts), one can do:
 
     LIBRARY_PATH=/opt/local/lib CPATH=/opt/local/include python setup.py build
 
+Alternatively, the include and library directories can be supplied to the build_ext command:
+
+    python setup.py build_ext -I /opt/local/include -L/opt/local/lib
 
 (3) (Optional).  Test the installation by doing:
 
