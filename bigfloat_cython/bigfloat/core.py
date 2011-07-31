@@ -45,7 +45,6 @@ from bigfloat.context import (
     RoundTowardZero,
     RoundAwayFromZero,
 
-    precision,
     extra_precision,
 
     getcontext,
@@ -1047,48 +1046,6 @@ def pos(x, context=None):
         return BigFloat._from_Mpfr(bf)
 
 
-def neg(x, context=None):
-    """
-    Return -x, rounded according to the current context.
-
-    """
-    with (context if context is not None else EmptyContext):
-        bf = _apply_function_in_context(
-            mpfr.mpfr_neg,
-            (BigFloat._implicit_convert(x)._value,),
-            getcontext(),
-        )
-        return BigFloat._from_Mpfr(bf)
-
-
-def abs(x, context=None):
-    """
-    Return abs(x), rounded according to the current context.
-
-    """
-    with (context if context is not None else EmptyContext):
-        bf = _apply_function_in_context(
-            mpfr.mpfr_abs,
-            (BigFloat._implicit_convert(x)._value,),
-            getcontext(),
-        )
-        return BigFloat._from_Mpfr(bf)
-
-
-def sqrt(x, context=None):
-    """
-    Return the square root of x, rounded according to the current context.
-
-    """
-    with (context if context is not None else EmptyContext):
-        bf = _apply_function_in_context(
-            mpfr.mpfr_sqrt,
-            (BigFloat._implicit_convert(x)._value,),
-            getcontext(),
-        )
-        return BigFloat._from_Mpfr(bf)
-
-
 def exp(x, context=None):
     """
     Return the exponential of x, rounded according to the current context.
@@ -1131,7 +1088,9 @@ def log2(x, context=None):
         return BigFloat._from_Mpfr(bf)
 
 
-# Binary functions.
+###############################################################################
+# 5.5 Basic Arithmetic Functions
+###############################################################################
 
 def add(x, y, context=None):
     """
@@ -1184,6 +1143,20 @@ def mul(x, y, context=None):
         return BigFloat._from_Mpfr(bf)
 
 
+def sqr(x, context=None):
+    """
+    Return the square of x, rounded according to the current context.
+
+    """
+    with (context if context is not None else EmptyContext):
+        bf = _apply_function_in_context(
+            mpfr.mpfr_sqr,
+            (BigFloat._implicit_convert(x)._value,),
+            getcontext(),
+        )
+        return BigFloat._from_Mpfr(bf)
+
+
 def div(x, y, context=None):
     """
     Return x divided by y, rounded according to the current context.
@@ -1201,26 +1174,71 @@ def div(x, y, context=None):
         return BigFloat._from_Mpfr(bf)
 
 
-def mod(x, y, context=None):
+def sqrt(x, context=None):
     """
-    Return x reduced modulo y, rounded according to the current context.
+    Return the square root of x, rounded according to the current context.
 
-    Returns the value of x - n * y, rounded according to the current context,
-    where n is the integer quotient of x divided by y, rounded toward zero.
-
-    Special values are handled as described in Section F.9.7.1 of the ISO C99
-    standard: If x is infinite or y is zero, the result is NaN. If y is
-    infinite and x is finite, the result is x rounded to the current context.
-    If the result is zero, it has the sign of x.
+    Return -0 if x is -0, to be consistent with the IEEE 754 standard.  Return
+    NaN if x is negative.
 
     """
     with (context if context is not None else EmptyContext):
         bf = _apply_function_in_context(
-            mpfr.mpfr_fmod,
-            (
-                BigFloat._implicit_convert(x)._value,
-                BigFloat._implicit_convert(y)._value,
-            ),
+            mpfr.mpfr_sqrt,
+            (BigFloat._implicit_convert(x)._value,),
+            getcontext(),
+        )
+        return BigFloat._from_Mpfr(bf)
+
+
+def rec_sqrt(x, context=None):
+    """
+    Return the reciprocal square root of x, rounded according to the current
+    context.
+
+    Return +Inf if x is ±0, +0 if x is +Inf, and NaN if x is negative.
+
+    """
+    with (context if context is not None else EmptyContext):
+        bf = _apply_function_in_context(
+            mpfr.mpfr_rec_sqrt,
+            (BigFloat._implicit_convert(x)._value,),
+            getcontext(),
+        )
+        return BigFloat._from_Mpfr(bf)
+
+
+def cbrt(x, context=None):
+    """
+    Return the cube root of x, rounded according to the current context.
+
+    For x negative, return a negative number.  The cube root of -0 is defined
+    to be -0.
+
+    """
+    with (context if context is not None else EmptyContext):
+        bf = _apply_function_in_context(
+            mpfr.mpfr_cbrt,
+            (BigFloat._implicit_convert(x)._value,),
+            getcontext(),
+        )
+        return BigFloat._from_Mpfr(bf)
+
+
+def root(x, k, context=None):
+    """
+    Return the kth root of x, rounded according to the current context.
+
+    For k odd and x negative (including -Inf), return a negative number.
+    For k even and x negative (including -Inf), return NaN.
+
+    The kth root of -0 is defined to be -0, whatever the parity of k.
+
+    """
+    with (context if context is not None else EmptyContext):
+        bf = _apply_function_in_context(
+            mpfr.mpfr_cbrt,
+            (BigFloat._implicit_convert(x)._value,),
             getcontext(),
         )
         return BigFloat._from_Mpfr(bf)
@@ -1271,6 +1289,78 @@ def pow(x, y, context=None):
     with (context if context is not None else EmptyContext):
         bf = _apply_function_in_context(
             mpfr.mpfr_pow,
+            (
+                BigFloat._implicit_convert(x)._value,
+                BigFloat._implicit_convert(y)._value,
+            ),
+            getcontext(),
+        )
+        return BigFloat._from_Mpfr(bf)
+
+
+def neg(x, context=None):
+    """
+    Return -x, rounded according to the current context.
+
+    """
+    with (context if context is not None else EmptyContext):
+        bf = _apply_function_in_context(
+            mpfr.mpfr_neg,
+            (BigFloat._implicit_convert(x)._value,),
+            getcontext(),
+        )
+        return BigFloat._from_Mpfr(bf)
+
+
+def abs(x, context=None):
+    """
+    Return abs(x), rounded according to the current context.
+
+    """
+    with (context if context is not None else EmptyContext):
+        bf = _apply_function_in_context(
+            mpfr.mpfr_abs,
+            (BigFloat._implicit_convert(x)._value,),
+            getcontext(),
+        )
+        return BigFloat._from_Mpfr(bf)
+
+
+def dim(x, y, context=None):
+    """
+    Return max(x - y, 0), rounded according to the current context.
+
+    Return x - y if x > y, +0 if x <= y, and NaN if either x or y is NaN.
+
+    """
+    with (context if context is not None else EmptyContext):
+        bf = _apply_function_in_context(
+            mpfr.mpfr_dim,
+            (
+                BigFloat._implicit_convert(x)._value,
+                BigFloat._implicit_convert(y)._value,
+            ),
+            getcontext(),
+        )
+        return BigFloat._from_Mpfr(bf)
+
+
+def mod(x, y, context=None):
+    """
+    Return x reduced modulo y, rounded according to the current context.
+
+    Returns the value of x - n * y, rounded according to the current context,
+    where n is the integer quotient of x divided by y, rounded toward zero.
+
+    Special values are handled as described in Section F.9.7.1 of the ISO C99
+    standard: If x is infinite or y is zero, the result is NaN. If y is
+    infinite and x is finite, the result is x rounded to the current context.
+    If the result is zero, it has the sign of x.
+
+    """
+    with (context if context is not None else EmptyContext):
+        bf = _apply_function_in_context(
+            mpfr.mpfr_fmod,
             (
                 BigFloat._implicit_convert(x)._value,
                 BigFloat._implicit_convert(y)._value,
