@@ -23,43 +23,45 @@ from bigfloat.mpfr import (
 
     Mpfr,
 
-    mpfr_get_prec,
-    mpfr_set_prec,
+    mpfr_fmod,
 
-    mpfr_get_str,
+    # 5.1 Initialization Functions
+    mpfr_set_prec,
+    mpfr_get_prec,
+
+    # 5.2 Assignment Functions
     mpfr_set,
-    mpfr_set_d,
-    mpfr_get_d,
-    mpfr_get_d_2exp,
     mpfr_set_si,
+    mpfr_set_d,
     mpfr_set_si_2exp,
-    mpfr_get_si,
     mpfr_set_str,
     mpfr_strtofr,
-
     mpfr_set_nan,
     mpfr_set_inf,
     mpfr_set_zero,
-
     mpfr_swap,
 
+    # 5.4 Conversion Functions
+    mpfr_get_d,
+    mpfr_get_si,
+    mpfr_get_d_2exp,
+    mpfr_get_str,
     mpfr_fits_slong_p,
 
-    mpfr_neg,
-
+    # 5.5 Basic Arithmetic Functions
     mpfr_add,
     mpfr_sub,
     mpfr_mul,
     mpfr_sqr,
+    mpfr_div,
     mpfr_sqrt,
     mpfr_rec_sqrt,
     mpfr_cbrt,
     mpfr_root,
-    mpfr_dim,
-
-    mpfr_div,
-    mpfr_fmod,
     mpfr_pow,
+    mpfr_neg,
+    mpfr_abs,
+    mpfr_dim,
 
     # 5.6 Comparison Functions
     mpfr_cmp,
@@ -137,7 +139,7 @@ from bigfloat.mpfr import (
     mpfr_const_pi,
     mpfr_const_euler,
     mpfr_const_catalan,
-
+    mpfr_free_cache,
 
     mpfr_signbit,
 
@@ -303,6 +305,22 @@ class TestMpfr(unittest.TestCase):
         self.assertEqual(
             mpfr_get_str(10, 0, y, MPFR_RNDN),
             ('-31415926553', 1),
+        )
+
+    def test_abs(self):
+        x = Mpfr(53)
+        y = Mpfr(53)
+        mpfr_set_d(x, -0.567, MPFR_RNDN)
+        mpfr_abs(y, x, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(y, MPFR_RNDN),
+            0.567,
+        )
+        mpfr_set_d(x, 0.123, MPFR_RNDN)
+        mpfr_abs(y, x, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(y, MPFR_RNDN),
+            0.123,
         )
 
     def test_add(self):
@@ -853,6 +871,10 @@ class TestMpfr(unittest.TestCase):
             0.91596559417721901505460351493238411077,
         )
 
+    def test_free_cache(self):
+        # It's awkward to test this; we settle for checking that the function
+        # has been exported and is callable.
+        mpfr_free_cache()
 
     def test_cmp(self):
         x = Mpfr(53)
