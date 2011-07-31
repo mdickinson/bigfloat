@@ -1,6 +1,6 @@
 PYTHON=python
 
-.PHONY: build clean develop dist install test upload
+.PHONY: build clean develop dist html install pdf test upload
 
 src/mpfr.c: src/mpfr.pyx src/cgmp.pxd src/cmpfr.pxd
 	cython -v $< -o $@
