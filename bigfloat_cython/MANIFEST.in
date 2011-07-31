@@ -1,0 +1,3 @@
+include INSTALL
+include CHANGELOG
+include COPYING COPYING.LESSER
