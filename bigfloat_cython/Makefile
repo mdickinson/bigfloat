@@ -9,8 +9,9 @@ build: src/mpfr.c
 	$(PYTHON) setup.py build
 
 clean:
-	-rm -fr build/
-	-rm -fr dist/
+	-rm -r build/
+	-rm -r dist/
+	-rm -r docs/_build
 	-rm MANIFEST
 	-rm src/mpfr.c
 	-rm bigfloat/mpfr.so
@@ -25,14 +26,22 @@ develop: src/mpfr.c
 dist: src/mpfr.c
 	$(PYTHON) setup.py sdist
 
+html:
+	cd docs && $(MAKE) html
+
+
 install: build
 	$(PYTHON) setup.py install
 
-upload: src/mpfr.c
-	$(PYTHON) setup.py sdist upload
+pdf:
+	cd docs && $(MAKE) latex
+	cd docs/_build/latex && $(MAKE)
 
 test: develop
 	$(PYTHON) -m bigfloat.test.test_bigfloat
 	$(PYTHON) -m bigfloat.test.test_context
 	$(PYTHON) -m bigfloat.test.test_mpfr
 	$(PYTHON) -m bigfloat.test.test_rounding_mode
+
+upload: src/mpfr.c
+	$(PYTHON) setup.py sdist upload
