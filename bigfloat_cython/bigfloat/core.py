@@ -464,13 +464,11 @@ class BigFloat(mpfr.Mpfr_t):
         the sign set to 0.
 
         """
-
-        m = mpfr.Mpfr(self.precision)
-        mpfr.mpfr_set(m, self, ROUND_TIES_TO_EVEN)
+        m = self.copy()
         if self and is_finite(self):
             mpfr.mpfr_set_exp(m, 0)
         mpfr.mpfr_setsign(m, m, False, ROUND_TIES_TO_EVEN)
-        return BigFloat._from_Mpfr(m)
+        return m
 
     def _exponent(self):
         """Return the exponent of self, as an integer.
@@ -502,9 +500,10 @@ class BigFloat(mpfr.Mpfr_t):
         same precision as the original.
 
         """
-        result = mpfr.Mpfr(self.precision)
+        result = mpfr.Mpfr_t.__new__(BigFloat)
+        mpfr.mpfr_init2(result, self.precision)
         mpfr.mpfr_set(result, self, ROUND_TIES_TO_EVEN)
-        return BigFloat._from_Mpfr(result)
+        return result
 
     def copy_neg(self):
         """ Return a copy of self with the opposite sign bit.
@@ -513,10 +512,11 @@ class BigFloat(mpfr.Mpfr_t):
         has the same precision as the original.
 
         """
-        result = mpfr.Mpfr(self.precision)
+        result = mpfr.Mpfr_t.__new__(BigFloat)
+        mpfr.mpfr_init2(result, self.precision)
         new_sign = not self._sign()
         mpfr.mpfr_setsign(result, self, new_sign, ROUND_TIES_TO_EVEN)
-        return BigFloat._from_Mpfr(result)
+        return result
 
     def copy_abs(self):
         """ Return a copy of self with the sign bit unset.
@@ -525,9 +525,10 @@ class BigFloat(mpfr.Mpfr_t):
         has the same precision as the original.
 
         """
-        result = mpfr.Mpfr(self.precision)
+        result = mpfr.Mpfr_t.__new__(BigFloat)
+        mpfr.mpfr_init2(result, self.precision)
         mpfr.mpfr_setsign(result, self, False, ROUND_TIES_TO_EVEN)
-        return BigFloat._from_Mpfr(result)
+        return result
 
     def hex(self):
         """Return a hexadecimal representation of a BigFloat."""
