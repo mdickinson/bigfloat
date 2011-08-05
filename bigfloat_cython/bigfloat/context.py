@@ -156,14 +156,6 @@ DefaultContext = Context(precision=53,
 # required, but no change to the current context is desirable
 EmptyContext = Context()
 
-# provided rounding modes are implemented as contexts, so that
-# they can be used directly in with statements
-RoundTiesToEven = Context(rounding=ROUND_TIES_TO_EVEN)
-RoundTowardPositive = Context(rounding=ROUND_TOWARD_POSITIVE)
-RoundTowardNegative = Context(rounding=ROUND_TOWARD_NEGATIVE)
-RoundTowardZero = Context(rounding=ROUND_TOWARD_ZERO)
-RoundAwayFromZero = Context(rounding=ROUND_AWAY_FROM_ZERO)
-
 # thread local variables:
 #   __bigfloat_context__: current context
 #   __context_stack__: context stack, used by with statement
@@ -205,6 +197,16 @@ def precision(prec):
 
     """
     return Context(precision=prec)
+
+
+def rounding(rnd):
+    """
+    Return a context giving the specified rounding mode.
+
+    rounding_mode(rnd) is exactly equivalent to Context(rounding=rnd).
+
+    """
+    return Context(rounding=rnd)
 
 
 def extra_precision(prec):
@@ -264,3 +266,12 @@ def _apply_function_in_context(cls, f, args, context):
 def _apply_function_in_current_context(cls, f, args, context):
     with (context if context is not None else EmptyContext):
         return _apply_function_in_context(cls, f, args, getcontext())
+
+
+# provided rounding modes are implemented as contexts, so that
+# they can be used directly in with statements
+RoundTiesToEven = rounding(ROUND_TIES_TO_EVEN)
+RoundTowardPositive = rounding(ROUND_TOWARD_POSITIVE)
+RoundTowardNegative = rounding(ROUND_TOWARD_NEGATIVE)
+RoundTowardZero = rounding(ROUND_TOWARD_ZERO)
+RoundAwayFromZero = rounding(ROUND_AWAY_FROM_ZERO)
