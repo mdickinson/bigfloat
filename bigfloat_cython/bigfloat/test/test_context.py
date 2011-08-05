@@ -98,6 +98,9 @@ class ContextTests(unittest.TestCase):
         c2 = (Context(emax=999, emin=-999, rounding=mpfr.MPFR_RNDU) + 
               Context(precision=100, subnormalize=True))
         self.assertEqual(hash(c1), hash(c2))
+        self.assertEqual(c1, c2)
+        self.assertIs(c1 == c2, True)
+        self.assertIs(c1 != c2, False)
 
     def test_with(self):
         # check use of contexts in with statements

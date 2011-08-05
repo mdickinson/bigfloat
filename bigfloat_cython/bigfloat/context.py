@@ -97,6 +97,9 @@ class Context(object):
             self.rounding == other.rounding
             )
 
+    def __ne__(self, other):
+        return not (self == other)
+
     def __hash__(self):
         return hash((self.precision, self.emin, self.emax,
                      self.subnormalize, self.rounding))
