@@ -842,6 +842,12 @@ class BigFloatTests(unittest.TestCase):
                 BigFloat.exact('0.91596559417721902', precision=53),
             )
 
+    def test_copy(self):
+        x = BigFloat.exact('1234091801830413840192384102394810329481324.3', precision=200)
+        y = x.copy()
+        self.assertEqual(x, y)
+        self.assertIsNot(x, y)
+
     def test_copy_abs(self):
         x = BigFloat.exact('1234091801830413840192384102394810329481324.3', precision=200)
         neg_x = BigFloat.exact('-1234091801830413840192384102394810329481324.3', precision=200)

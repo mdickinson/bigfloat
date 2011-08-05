@@ -238,14 +238,15 @@ def _temporary_exponent_bounds(emin, emax):
         mpfr.mpfr_set_emin(old_emin)
 
 
-def _apply_function_in_context(f, args, context):
+def _apply_function_in_context(cls, f, args, context):
     """ Apply an MPFR function 'f' to the given arguments 'args', rounding to
     the given context.  Returns a new Mpfr object with precision taken from
     the current context.
 
     """
     rounding = context.rounding
-    bf = mpfr.Mpfr(context.precision)
+    bf = mpfr.Mpfr_t.__new__(cls)
+    mpfr.mpfr_init2(bf, context.precision)
     args = (bf,) + args + (rounding,)
     ternary = f(*args)
     with _temporary_exponent_bounds(context.emin, context.emax):
@@ -267,3 +268,6 @@ def _apply_function_in_context(f, args, context):
             if ternary:
                 mpfr.mpfr_set_inexflag()
     return bf
+
+def _apply_function_in_current_context(cls, f, args):
+    return _apply_function_in_context(cls, f, args, getcontext())
