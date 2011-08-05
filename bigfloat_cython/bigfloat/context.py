@@ -268,3 +268,6 @@ def _apply_function_in_context(cls, f, args, context):
             if ternary:
                 mpfr.mpfr_set_inexflag()
     return bf
+
+def _apply_function_in_current_context(cls, f, args):
+    return _apply_function_in_context(cls, f, args, getcontext())

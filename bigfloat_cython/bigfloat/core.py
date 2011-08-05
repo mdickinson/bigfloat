@@ -42,9 +42,7 @@ from bigfloat.context import (
     RoundTowardPositive,
     RoundTowardNegative,
 
-    getcontext,
-
-    _apply_function_in_context,
+    _apply_function_in_current_context,
 )
 
 # Contexts corresponding to IEEE 754-2008 binary interchange formats
@@ -851,23 +849,21 @@ def _saved_flags():
 
 
 def _set_d(x, context=None):
-    current_context = getcontext()
-    if context is not None:
-        context = current_context + context
-    else:
-        context = current_context
-
-    return _apply_function_in_context(BigFloat, mpfr.mpfr_set_d, (x,), context)
+    with (context if context is not None else EmptyContext):
+        return _apply_function_in_current_context(
+            BigFloat,
+            mpfr.mpfr_set_d,
+            (x,),
+        )
 
 
 def set_str2(s, base, context=None):
-    current_context = getcontext()
-    if context is not None:
-        context = current_context + context
-    else:
-        context = current_context
-
-    return _apply_function_in_context(BigFloat, mpfr_set_str2, (s, base), context)
+    with (context if context is not None else EmptyContext):
+        return _apply_function_in_current_context(
+            BigFloat,
+            mpfr_set_str2,
+            (s, base),
+        )
 
 
 # Constants.
@@ -881,10 +877,10 @@ def const_log2(context=None):
 
     """
     with (context if context is not None else EmptyContext):
-        return _apply_function_in_context(BigFloat,
+        return _apply_function_in_current_context(
+            BigFloat,
             mpfr.mpfr_const_log2,
             (),
-            getcontext()
         )
 
 
@@ -897,10 +893,10 @@ def const_pi(context=None):
 
     """
     with (context if context is not None else EmptyContext):
-        return _apply_function_in_context(BigFloat,
+        return _apply_function_in_current_context(
+            BigFloat,
             mpfr.mpfr_const_pi,
             (),
-            getcontext()
         )
 
 
@@ -914,10 +910,10 @@ def const_euler(context=None):
 
     """
     with (context if context is not None else EmptyContext):
-        return _apply_function_in_context(BigFloat,
+        return _apply_function_in_current_context(
+            BigFloat,
             mpfr.mpfr_const_euler,
             (),
-            getcontext()
         )
 
 
@@ -930,10 +926,10 @@ def const_catalan(context=None):
 
     """
     with (context if context is not None else EmptyContext):
-        return _apply_function_in_context(BigFloat,
+        return _apply_function_in_current_context(
+            BigFloat,
             mpfr.mpfr_const_catalan,
             (),
-            getcontext()
         )
 
 
@@ -945,10 +941,10 @@ def pos(x, context=None):
 
     """
     with (context if context is not None else EmptyContext):
-        return _apply_function_in_context(BigFloat,
+        return _apply_function_in_current_context(
+            BigFloat,
             mpfr.mpfr_set,
             (BigFloat._implicit_convert(x),),
-            getcontext(),
         )
 
 
@@ -958,10 +954,10 @@ def exp(x, context=None):
 
     """
     with (context if context is not None else EmptyContext):
-        return _apply_function_in_context(BigFloat,
+        return _apply_function_in_current_context(
+            BigFloat,
             mpfr.mpfr_exp,
             (BigFloat._implicit_convert(x),),
-            getcontext(),
         )
 
 
@@ -971,10 +967,10 @@ def log(x, context=None):
 
     """
     with (context if context is not None else EmptyContext):
-        return _apply_function_in_context(BigFloat,
+        return _apply_function_in_current_context(
+            BigFloat,
             mpfr.mpfr_log,
             (BigFloat._implicit_convert(x),),
-            getcontext(),
         )
 
 
@@ -984,10 +980,10 @@ def log2(x, context=None):
 
     """
     with (context if context is not None else EmptyContext):
-        return _apply_function_in_context(BigFloat,
+        return _apply_function_in_current_context(
+            BigFloat,
             mpfr.mpfr_log2,
             (BigFloat._implicit_convert(x),),
-            getcontext(),
         )
 
 
@@ -1001,13 +997,13 @@ def add(x, y, context=None):
 
     """
     with (context if context is not None else EmptyContext):
-        return _apply_function_in_context(BigFloat,
+        return _apply_function_in_current_context(
+            BigFloat,
             mpfr.mpfr_add,
             (
                 BigFloat._implicit_convert(x),
                 BigFloat._implicit_convert(y),
             ),
-            getcontext(),
         )
 
 
@@ -1017,13 +1013,13 @@ def sub(x, y, context=None):
 
     """
     with (context if context is not None else EmptyContext):
-        return _apply_function_in_context(BigFloat,
+        return _apply_function_in_current_context(
+            BigFloat,
             mpfr.mpfr_sub,
             (
                 BigFloat._implicit_convert(x),
                 BigFloat._implicit_convert(y),
             ),
-            getcontext(),
         )
 
 
@@ -1033,13 +1029,13 @@ def mul(x, y, context=None):
 
     """
     with (context if context is not None else EmptyContext):
-        return _apply_function_in_context(BigFloat,
+        return _apply_function_in_current_context(
+            BigFloat,
             mpfr.mpfr_mul,
             (
                 BigFloat._implicit_convert(x),
                 BigFloat._implicit_convert(y),
             ),
-            getcontext(),
         )
 
 
@@ -1049,10 +1045,10 @@ def sqr(x, context=None):
 
     """
     with (context if context is not None else EmptyContext):
-        return _apply_function_in_context(BigFloat,
+        return _apply_function_in_current_context(
+            BigFloat,
             mpfr.mpfr_sqr,
             (BigFloat._implicit_convert(x),),
-            getcontext(),
         )
 
 
@@ -1062,13 +1058,13 @@ def div(x, y, context=None):
 
     """
     with (context if context is not None else EmptyContext):
-        return _apply_function_in_context(BigFloat,
+        return _apply_function_in_current_context(
+            BigFloat,
             mpfr.mpfr_div,
             (
                 BigFloat._implicit_convert(x),
                 BigFloat._implicit_convert(y),
             ),
-            getcontext(),
         )
 
 
@@ -1081,10 +1077,10 @@ def sqrt(x, context=None):
 
     """
     with (context if context is not None else EmptyContext):
-        return _apply_function_in_context(BigFloat,
+        return _apply_function_in_current_context(
+            BigFloat,
             mpfr.mpfr_sqrt,
             (BigFloat._implicit_convert(x),),
-            getcontext(),
         )
 
 
@@ -1097,10 +1093,10 @@ def rec_sqrt(x, context=None):
 
     """
     with (context if context is not None else EmptyContext):
-        return _apply_function_in_context(BigFloat,
+        return _apply_function_in_current_context(
+            BigFloat,
             mpfr.mpfr_rec_sqrt,
             (BigFloat._implicit_convert(x),),
-            getcontext(),
         )
 
 
@@ -1113,10 +1109,10 @@ def cbrt(x, context=None):
 
     """
     with (context if context is not None else EmptyContext):
-        return _apply_function_in_context(BigFloat,
+        return _apply_function_in_current_context(
+            BigFloat,
             mpfr.mpfr_cbrt,
             (BigFloat._implicit_convert(x),),
-            getcontext(),
         )
 
 
@@ -1131,10 +1127,10 @@ def root(x, k, context=None):
 
     """
     with (context if context is not None else EmptyContext):
-        return _apply_function_in_context(BigFloat,
+        return _apply_function_in_current_context(
+            BigFloat,
             mpfr.mpfr_cbrt,
             (BigFloat._implicit_convert(x),),
-            getcontext(),
         )
 
 
@@ -1181,13 +1177,13 @@ def pow(x, y, context=None):
 
     """
     with (context if context is not None else EmptyContext):
-        return _apply_function_in_context(BigFloat,
+        return _apply_function_in_current_context(
+            BigFloat,
             mpfr.mpfr_pow,
             (
                 BigFloat._implicit_convert(x),
                 BigFloat._implicit_convert(y),
             ),
-            getcontext(),
         )
 
 
@@ -1197,10 +1193,10 @@ def neg(x, context=None):
 
     """
     with (context if context is not None else EmptyContext):
-        return _apply_function_in_context(BigFloat,
+        return _apply_function_in_current_context(
+            BigFloat,
             mpfr.mpfr_neg,
             (BigFloat._implicit_convert(x),),
-            getcontext(),
         )
 
 
@@ -1210,10 +1206,10 @@ def abs(x, context=None):
 
     """
     with (context if context is not None else EmptyContext):
-        return _apply_function_in_context(BigFloat,
+        return _apply_function_in_current_context(
+            BigFloat,
             mpfr.mpfr_abs,
             (BigFloat._implicit_convert(x),),
-            getcontext(),
         )
 
 
@@ -1225,13 +1221,13 @@ def dim(x, y, context=None):
 
     """
     with (context if context is not None else EmptyContext):
-        return _apply_function_in_context(BigFloat,
+        return _apply_function_in_current_context(
+            BigFloat,
             mpfr.mpfr_dim,
             (
                 BigFloat._implicit_convert(x),
                 BigFloat._implicit_convert(y),
             ),
-            getcontext(),
         )
 
 
@@ -1296,13 +1292,13 @@ def mod(x, y, context=None):
 
     """
     with (context if context is not None else EmptyContext):
-        return _apply_function_in_context(BigFloat,
+        return _apply_function_in_current_context(
+            BigFloat,
             mpfr.mpfr_fmod,
             (
                 BigFloat._implicit_convert(x),
                 BigFloat._implicit_convert(y),
             ),
-            getcontext(),
         )
 
 
