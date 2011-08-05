@@ -19,7 +19,7 @@
 
 # Python wrapper for MPFR library
 
-from __future__ import with_statement  # for Python 2.5
+from __future__ import with_statement
 
 import __builtin__
 import sys as _sys
@@ -39,90 +39,13 @@ from bigfloat.context import (
     DefaultContext,
     EmptyContext,
 
-    RoundTiesToEven,
     RoundTowardPositive,
     RoundTowardNegative,
-    RoundTowardZero,
-    RoundAwayFromZero,
-
-    extra_precision,
 
     getcontext,
-    setcontext,
 
     _apply_function_in_context,
 )
-
-# Names to export when someone does 'from bigfloat import *'.  The
-# __all__ variable is extended to include standard functions later on.
-# Note that this module defines functions 'abs' and 'pow', 'max' and
-# 'min' which shadow the builtin functions of those names.  Don't do
-# 'from bigfloat import *' if you don't want to clobber these
-# functions.
-
-__all__ = [
-    # main class
-    'BigFloat',
-
-    # contexts
-    'Context',
-
-    # limits on emin, emax and precision
-    'EMIN_MIN', 'EMIN_MAX',
-    'EMAX_MIN', 'EMAX_MAX',
-    'PRECISION_MIN', 'PRECISION_MAX',
-
-    # context constants...
-    'DefaultContext', 'EmptyContext',
-    'half_precision', 'single_precision',
-    'double_precision', 'quadruple_precision',
-    'RoundTiesToEven', 'RoundTowardZero',
-    'RoundTowardPositive', 'RoundTowardNegative',
-    'RoundAwayFromZero',
-
-    # ... and functions
-    'IEEEContext', 'extra_precision',
-
-    # get and set current context
-    'getcontext', 'setcontext',
-
-    # flags
-    'Inexact', 'Overflow', 'Underflow', 'NanFlag',
-
-    # functions to test, set and clear individual flags
-    'test_flag', 'set_flag', 'clear_flag',
-
-    # and to get and set the entire flag state
-    'set_flagstate', 'get_flagstate',
-
-    # numeric functions
-    'next_up', 'next_down',
-
-    # constants
-    'const_log2',
-    'const_pi',
-    'const_euler',
-    'const_catalan',
-
-    # single argument standard functions
-    'pos',
-    'neg',
-    'abs',
-    'sqrt',
-    'exp',
-    'log',
-    'log2',
-
-    # predicates
-    'is_nan',
-    'is_inf',
-    'is_zero',
-    'is_finite',
-    'is_integer',
-    'is_regular',
-    'is_negative',
-]
-
 
 # Contexts corresponding to IEEE 754-2008 binary interchange formats
 # (see section 3.6 of the standard for details).
