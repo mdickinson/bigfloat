@@ -134,6 +134,13 @@ def Mpfr(cmpfr.mpfr_prec_t precision):
 # 5.1 Initialization Functions
 ###############################################################################
 
+def mpfr_init2(Mpfr_t x not None, cmpfr.mpfr_prec_t prec):
+    check_precision(prec)
+    cmpfr.mpfr_init2(&x._value, prec)
+
+def mpfr_clear(Mpfr_t x not None):
+    cmpfr.mpfr_clear(&x._value)
+
 def mpfr_set_prec(Mpfr_t x not None, cmpfr.mpfr_prec_t prec):
     """
     Reset precision of x.
