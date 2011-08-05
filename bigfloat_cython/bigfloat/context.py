@@ -38,15 +38,6 @@ EMAX_MIN = max(mpfr.MPFR_EMIN_DEFAULT, mpfr.mpfr_get_emax_min())
 EMIN_MAX = min(mpfr.MPFR_EMAX_DEFAULT, mpfr.mpfr_get_emin_max())
 
 
-_Context_attributes = [
-    'precision',
-    'emin',
-    'emax',
-    'subnormalize',
-    'rounding',
-]
-
-
 class Context(object):
     # Contexts are supposed to be immutable.  We make the attributes
     # of a Context private, and provide properties to access them in
