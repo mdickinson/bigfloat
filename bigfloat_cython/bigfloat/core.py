@@ -218,24 +218,22 @@ def next_up(x, context=None):
     x = BigFloat._implicit_convert(x)
     # make sure we don't alter any flags
     with _saved_flags():
-        if context is None:
-            context = EmptyContext
+        with (context if context is not None else EmptyContext):
+            with RoundTowardPositive:
+                # nan maps to itself
+                if is_nan(x):
+                    return +x
 
-        with context + RoundTowardPositive:
-            # nan maps to itself
-            if is_nan(x):
-                return +x
+                # round to current context; if value changes, we're done
+                y = +x
+                if y != x:
+                    return y
 
-            # round to current context; if value changes, we're done
-            y = +x
-            if y != x:
-                return y
-
-            # otherwise apply mpfr_nextabove
-            bf = y.copy()
-            mpfr.mpfr_nextabove(bf)
-            # apply + one more time to deal with subnormals
-            return +bf
+                # otherwise apply mpfr_nextabove
+                bf = y.copy()
+                mpfr.mpfr_nextabove(bf)
+                # apply + one more time to deal with subnormals
+                return +bf
 
 
 def next_down(x, context=None):
@@ -248,24 +246,22 @@ def next_down(x, context=None):
     x = BigFloat._implicit_convert(x)
     # make sure we don't alter any flags
     with _saved_flags():
-        if context is None:
-            context = EmptyContext
+        with (context if context is not None else EmptyContext):
+            with RoundTowardNegative:
+                # nan maps to itself
+                if is_nan(x):
+                    return +x
 
-        with context + RoundTowardNegative:
-            # nan maps to itself
-            if is_nan(x):
-                return +x
+                # round to current context; if value changes, we're done
+                y = +x
+                if y != x:
+                    return y
 
-            # round to current context; if value changes, we're done
-            y = +x
-            if y != x:
-                return y
-
-            # otherwise apply mpfr_nextabove
-            bf = y.copy()
-            mpfr.mpfr_nextbelow(bf)
-            # apply + one more time to deal with subnormals
-            return +bf
+                # otherwise apply mpfr_nextabove
+                bf = y.copy()
+                mpfr.mpfr_nextbelow(bf)
+                # apply + one more time to deal with subnormals
+                return +bf
 
 
 def _binop(op):
