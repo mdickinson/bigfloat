@@ -64,7 +64,6 @@ __all__ = [
 
 from bigfloat.core import (
     BigFloat,
-    IEEEContext,
 
     EMIN_MIN,
     EMIN_MAX,
@@ -73,11 +72,6 @@ from bigfloat.core import (
 
     PRECISION_MIN,
     PRECISION_MAX,
-
-    half_precision,
-    single_precision,
-    double_precision,
-    quadruple_precision,
 
     Inexact,
     Overflow,
@@ -155,6 +149,14 @@ from bigfloat.context import (
     RoundTowardPositive,
     RoundTowardNegative,
     RoundAwayFromZero,
+)
+
+from bigfloat.ieee import (
+    IEEEContext,
+    half_precision,
+    single_precision,
+    double_precision,
+    quadruple_precision,
 )
 
 from bigfloat.rounding_mode import (
