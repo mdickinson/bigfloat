@@ -291,25 +291,6 @@ def _rbinop(op):
 
 
 class BigFloat(mpfr.Mpfr_t):
-    @classmethod
-    def _from_Mpfr(cls, value):
-        # this is the true initialization function;  any creation
-        # of a BigFloat instance goes through this function.
-        #
-        # value should be an Mpfr_t instance; recall that Mpfr_t instances
-        # are mutable, but there should be no possibility of
-        # accidental future modifications to value.  It's up to the
-        # caller of _from_Mpfr to ensure this, by making a copy if
-        # necessary.
-        if not isinstance(value, mpfr.Mpfr_t):
-            raise TypeError("value should be a Mpfr_t instance")
-        self = mpfr.Mpfr_t.__new__(cls)
-
-        # Copy value into self.
-        mpfr.mpfr_init2(self, mpfr.mpfr_get_prec(value))
-        mpfr.mpfr_set(self, value, ROUND_TIES_TO_EVEN)
-        return self
-
     def __new__(cls, value, context=None):
         """Create BigFloat from integer, float, string or another BigFloat.
 
@@ -352,7 +333,9 @@ class BigFloat(mpfr.Mpfr_t):
         # wrapping), since its main use is in the testing of that machinery.
 
         # XXX Maybe we should move this function into test_bigfloat
-        bf = mpfr.Mpfr(len(value) * 4)
+        precision = len(value) * 4
+        bf = mpfr.Mpfr_t.__new__(BigFloat)
+        mpfr.mpfr_init2(bf, precision)
         ternary = mpfr_set_str2(bf, value, 16, ROUND_TIES_TO_EVEN)
         if ternary:
             # conversion should have been exact, except possibly if
@@ -360,7 +343,7 @@ class BigFloat(mpfr.Mpfr_t):
             raise ValueError("_fromhex_exact failed to do an exact "
                              "conversion.  This shouldn't happen. "
                              "Please report.")
-        return BigFloat._from_Mpfr(bf)
+        return bf
 
     # alternative constructor, that does exact conversions
     @classmethod
