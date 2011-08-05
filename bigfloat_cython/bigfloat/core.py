@@ -381,13 +381,13 @@ class BigFloat(object):
         # this is the true initialization function;  any creation
         # of a BigFloat instance goes through this function.
         #
-        # value should be an Mpfr instance; recall that Mpfr instances
+        # value should be an Mpfr_t instance; recall that Mpfr_t instances
         # are mutable, but there should be no possibility of
         # accidental future modifications to value.  It's up to the
         # caller of _from_Mpfr to ensure this, by making a copy if
         # necessary.
-        if not isinstance(value, mpfr.Mpfr):
-            raise TypeError("value should be a Mpfr instance")
+        if not isinstance(value, mpfr.Mpfr_t):
+            raise TypeError("value should be a Mpfr_t instance")
         self = object.__new__(cls)
         self._value = value
         return self

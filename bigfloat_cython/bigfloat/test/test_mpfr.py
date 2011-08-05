@@ -23,6 +23,8 @@ from bigfloat.mpfr import (
 
     Mpfr,
 
+    Mpfr_t,
+
     # 5.1 Initialization Functions
     mpfr_set_prec,
     mpfr_get_prec,
@@ -215,9 +217,9 @@ class TestMpfr(unittest.TestCase):
 
     def test_constructor(self):
         x = Mpfr(10)
-        self.assertIsInstance(x, Mpfr)
+        self.assertIsInstance(x, Mpfr_t)
         y = Mpfr(20L)
-        self.assertIsInstance(y, Mpfr)
+        self.assertIsInstance(y, Mpfr_t)
 
     def test_get_and_set_prec(self):
         x = Mpfr(10)
