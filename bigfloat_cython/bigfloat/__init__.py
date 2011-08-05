@@ -27,12 +27,21 @@ __all__ = [
     'EMAX_MIN', 'EMAX_MAX',
     'PRECISION_MIN', 'PRECISION_MAX',
 
+    # rounding mode constants
+    'ROUND_TIES_TO_EVEN',
+    'ROUND_TOWARD_ZERO',
+    'ROUND_TOWARD_POSITIVE',
+    'ROUND_TOWARD_NEGATIVE',
+    'ROUND_AWAY_FROM_ZERO',
+
     # context constants...
     'DefaultContext', 'EmptyContext',
     'half_precision', 'single_precision',
     'double_precision', 'quadruple_precision',
+
     'RoundTiesToEven', 'RoundTowardZero',
     'RoundTowardPositive', 'RoundTowardNegative',
+    'RoundAwayFromZero',
 
     # ... and functions
     'IEEEContext', 'precision', 'extra_precision',
@@ -69,12 +78,6 @@ from bigfloat.core import (
     single_precision,
     double_precision,
     quadruple_precision,
-
-    RoundTiesToEven,
-    RoundTowardZero,
-    RoundTowardPositive,
-    RoundTowardNegative,
-    RoundAwayFromZero,
 
     Inexact,
     Overflow,
@@ -146,6 +149,12 @@ from bigfloat.context import (
 
     precision,
     extra_precision,
+
+    RoundTiesToEven,
+    RoundTowardZero,
+    RoundTowardPositive,
+    RoundTowardNegative,
+    RoundAwayFromZero,
 )
 
 from bigfloat.rounding_mode import (
