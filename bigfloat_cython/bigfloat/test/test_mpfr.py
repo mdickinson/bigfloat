@@ -21,11 +21,12 @@ import unittest
 from bigfloat.mpfr import (
     MPFR_RNDN, MPFR_RNDZ, MPFR_RNDU, MPFR_RNDD, MPFR_RNDA,
 
-    Mpfr,
-
+    # Base extension type
     Mpfr_t,
 
     # 5.1 Initialization Functions
+    mpfr_init2,
+    mpfr_clear,
     mpfr_set_prec,
     mpfr_get_prec,
 
@@ -197,10 +198,21 @@ from bigfloat.mpfr import (
 )
 
 
+# Factory function for creating and initializing Mpfr_t instances.
+def Mpfr(precision):
+    self = Mpfr_t()
+    mpfr_init2(self, precision)
+    return self
+
+
 class TestMpfr(unittest.TestCase):
     def setUp(self):
         mpfr_clear_flags()
 
+    def test_init2_and_clear(self):
+        x = Mpfr_t()
+        mpfr_init2(x, 53)
+        mpfr_clear(x)
 
     def test_bad_constructor(self):
         with self.assertRaises(TypeError):

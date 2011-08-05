@@ -117,20 +117,7 @@ cdef class Mpfr_t:
             cmpfr.mpfr_clear(&self._value)
 
 
-def Mpfr(cmpfr.mpfr_prec_t precision):
-    """
-    Mpfr(prec) -> new Mpfr_t object initialized to precision 'prec'.
-
-    """    
-    x = Mpfr_t()
-    check_precision(precision)
-    cmpfr.mpfr_init2(&x._value, precision)
-    return x
-
-
-# Start wrapping MPFR functions here.
-
-###############################################################################
+##############################################################################
 # 5.1 Initialization Functions
 ###############################################################################
 
