@@ -235,7 +235,7 @@ def next_up(x, context=None):
 
             # otherwise apply mpfr_nextabove
             bf = mpfr.Mpfr(y.precision)
-            ternary = mpfr.mpfr_set(bf, y._value, ROUND_TIES_TO_EVEN)
+            ternary = mpfr.mpfr_set(bf, y, ROUND_TIES_TO_EVEN)
             assert ternary == 0
             mpfr.mpfr_nextabove(bf)
             y = BigFloat._from_Mpfr(bf)
@@ -269,7 +269,7 @@ def next_down(x, context=None):
 
             # otherwise apply mpfr_nextabove
             bf = mpfr.Mpfr(y.precision)
-            ternary = mpfr.mpfr_set(bf, y._value, ROUND_TIES_TO_EVEN)
+            ternary = mpfr.mpfr_set(bf, y, ROUND_TIES_TO_EVEN)
             assert ternary == 0
             mpfr.mpfr_nextbelow(bf)
             y = BigFloat._from_Mpfr(bf)
@@ -298,7 +298,7 @@ def _rbinop(op):
     return wrapped_op
 
 
-class BigFloat(object):
+class BigFloat(mpfr.Mpfr_t):
     @classmethod
     def _from_Mpfr(cls, value):
         # this is the true initialization function;  any creation
@@ -311,8 +311,11 @@ class BigFloat(object):
         # necessary.
         if not isinstance(value, mpfr.Mpfr_t):
             raise TypeError("value should be a Mpfr_t instance")
-        self = object.__new__(cls)
-        self._value = value
+        self = mpfr.Mpfr_t.__new__(cls)
+
+        # Copy value into self.
+        mpfr.mpfr_init2(self, mpfr.mpfr_get_prec(value))
+        mpfr.mpfr_set(self, value, ROUND_TIES_TO_EVEN)
         return self
 
     def __new__(cls, value, context=None):
@@ -427,7 +430,7 @@ class BigFloat(object):
 
         # Conversion to base 16 is exact, so any rounding mode will do.
         negative, digits, e = mpfr_get_str2(
-            self._value,
+            self,
             16,
             0,
             ROUND_TIES_TO_EVEN,
@@ -449,10 +452,10 @@ class BigFloat(object):
         Rounds using RoundTiesToEven, regardless of current rounding mode.
 
         """
-        return mpfr.mpfr_get_d(self._value, ROUND_TIES_TO_EVEN)
+        return mpfr.mpfr_get_d(self, ROUND_TIES_TO_EVEN)
 
     def _sign(self):
-        return mpfr.mpfr_signbit(self._value)
+        return mpfr.mpfr_signbit(self)
 
     def _significand(self):
         """Return the significand of self, as a BigFloat.
@@ -471,7 +474,7 @@ class BigFloat(object):
         """
 
         m = mpfr.Mpfr(self.precision)
-        mpfr.mpfr_set(m, self._value, ROUND_TIES_TO_EVEN)
+        mpfr.mpfr_set(m, self, ROUND_TIES_TO_EVEN)
         if self and is_finite(self):
             mpfr.mpfr_set_exp(m, 0)
         mpfr.mpfr_setsign(m, m, False, ROUND_TIES_TO_EVEN)
@@ -489,7 +492,7 @@ class BigFloat(object):
         """
 
         if self and is_finite(self):
-            return mpfr.mpfr_get_exp(self._value)
+            return mpfr.mpfr_get_exp(self)
 
         if not self:
             return '0'
@@ -509,7 +512,7 @@ class BigFloat(object):
         """
         result = mpfr.Mpfr(self.precision)
         new_sign = not self._sign()
-        mpfr.mpfr_setsign(result, self._value, new_sign, ROUND_TIES_TO_EVEN)
+        mpfr.mpfr_setsign(result, self, new_sign, ROUND_TIES_TO_EVEN)
         return BigFloat._from_Mpfr(result)
 
     def copy_abs(self):
@@ -520,7 +523,7 @@ class BigFloat(object):
 
         """
         result = mpfr.Mpfr(self.precision)
-        mpfr.mpfr_setsign(result, self._value, False, ROUND_TIES_TO_EVEN)
+        mpfr.mpfr_setsign(result, self, False, ROUND_TIES_TO_EVEN)
         return BigFloat._from_Mpfr(result)
 
     def hex(self):
@@ -532,7 +535,7 @@ class BigFloat(object):
             return sign + e
 
         m = self._significand()
-        _, digits, _ = mpfr_get_str2(m._value, 16, 0, ROUND_TIES_TO_EVEN)
+        _, digits, _ = mpfr_get_str2(m, 16, 0, ROUND_TIES_TO_EVEN)
         # only print the number of digits that are actually necessary
         n = 1 + (self.precision - 1) // 4
         assert all(c == '0' for c in digits[n:])
@@ -552,7 +555,7 @@ class BigFloat(object):
 
         # convert to a hex string, and from there to a fraction
         negative, digits, e = mpfr_get_str2(
-            self._value,
+            self,
             16,
             0,
             ROUND_TIES_TO_EVEN,
@@ -578,7 +581,7 @@ class BigFloat(object):
             return '-0' if is_negative(self) else '0'
         elif is_finite(self):
             negative, digits, e = mpfr_get_str2(
-                self._value,
+                self,
                 10,
                 0,
                 ROUND_TIES_TO_EVEN,
@@ -608,7 +611,7 @@ class BigFloat(object):
         # Start by formatting to 2 digits; we'll then truncate to one digit,
         # rounding appropriately.
         sign, digits, exp = mpfr_get_str2(
-            self._value, 10, 2, ROUND_TOWARD_NEGATIVE
+            self, 10, 2, ROUND_TOWARD_NEGATIVE
         )
 
         # If the last digit is 5, we can't tell which way to round; instead,
@@ -616,7 +619,7 @@ class BigFloat(object):
         # the result of that.
         if digits[-1] == '5':
             sign, digits, exp = mpfr_get_str2(
-                self._value, 10, 2, ROUND_TOWARD_POSITIVE
+                self, 10, 2, ROUND_TOWARD_POSITIVE
             )
 
         if digits[-1] in '01234':
@@ -658,7 +661,7 @@ class BigFloat(object):
             return self._format_to_precision_one()
 
         sign, digits, exp = mpfr_get_str2(
-            self._value, 10, precision, ROUND_TIES_TO_EVEN
+            self, 10, precision, ROUND_TIES_TO_EVEN
         )
 
         return sign, digits, exp - len(digits)
@@ -699,7 +702,7 @@ class BigFloat(object):
 
         # Figure out the exponent by making a call to get_str2.  exp satisfies
         # 10**(exp-1) <= self < 10**exp
-        _, _, exp = mpfr_get_str2(self._value, 10, 2, ROUND_TOWARD_ZERO)
+        _, _, exp = mpfr_get_str2(self, 10, 2, ROUND_TOWARD_ZERO)
 
         sig_figs = exp + precision
 
@@ -711,12 +714,12 @@ class BigFloat(object):
             # Ex: 0.1 <= x < 1.0, rounding x to nearest multiple of 1.0.
             # Or: 100.0 <= x < 1000.0, rounding x to nearest multiple of 1000.0
             sign, digits, new_exp = mpfr_get_str2(
-                self._value, 10, 2, ROUND_TOWARD_NEGATIVE
+                self, 10, 2, ROUND_TOWARD_NEGATIVE
             )
             if int(digits) == 50:
                 # Halfway case
                 sign, digits, new_exp = mpfr_get_str2(
-                    self._value, 10, 2, ROUND_TOWARD_POSITIVE
+                    self, 10, 2, ROUND_TOWARD_POSITIVE
                 )
 
             digits = '1' if int(digits) > 50 or new_exp == exp + 1 else '0'
@@ -750,7 +753,7 @@ class BigFloat(object):
         # alternative would be to convert an integral self to an
         # integer and take the hash of that, but that would be
         # painfully slow for something like BigFloat('1e1000000000').
-        negative, digits, e = mpfr_get_str2(self._value, 16, 0,
+        negative, digits, e = mpfr_get_str2(self, 16, 0,
                                             ROUND_TIES_TO_EVEN)
         e -= len(digits)
         # The value of self is (-1)**negative * int(digits, 16) *
@@ -773,7 +776,7 @@ class BigFloat(object):
 
     @property
     def precision(self):
-        return mpfr.mpfr_get_prec(self._value)
+        return mpfr.mpfr_get_prec(self)
 
     @classmethod
     def _implicit_convert(cls, arg):
@@ -963,7 +966,7 @@ def pos(x, context=None):
     with (context if context is not None else EmptyContext):
         bf = _apply_function_in_context(
             mpfr.mpfr_set,
-            (BigFloat._implicit_convert(x)._value,),
+            (BigFloat._implicit_convert(x),),
             getcontext(),
         )
         return BigFloat._from_Mpfr(bf)
@@ -977,7 +980,7 @@ def exp(x, context=None):
     with (context if context is not None else EmptyContext):
         bf = _apply_function_in_context(
             mpfr.mpfr_exp,
-            (BigFloat._implicit_convert(x)._value,),
+            (BigFloat._implicit_convert(x),),
             getcontext(),
         )
         return BigFloat._from_Mpfr(bf)
@@ -991,7 +994,7 @@ def log(x, context=None):
     with (context if context is not None else EmptyContext):
         bf = _apply_function_in_context(
             mpfr.mpfr_log,
-            (BigFloat._implicit_convert(x)._value,),
+            (BigFloat._implicit_convert(x),),
             getcontext(),
         )
         return BigFloat._from_Mpfr(bf)
@@ -1005,7 +1008,7 @@ def log2(x, context=None):
     with (context if context is not None else EmptyContext):
         bf = _apply_function_in_context(
             mpfr.mpfr_log2,
-            (BigFloat._implicit_convert(x)._value,),
+            (BigFloat._implicit_convert(x),),
             getcontext(),
         )
         return BigFloat._from_Mpfr(bf)
@@ -1024,8 +1027,8 @@ def add(x, y, context=None):
         bf = _apply_function_in_context(
             mpfr.mpfr_add,
             (
-                BigFloat._implicit_convert(x)._value,
-                BigFloat._implicit_convert(y)._value,
+                BigFloat._implicit_convert(x),
+                BigFloat._implicit_convert(y),
             ),
             getcontext(),
         )
@@ -1041,8 +1044,8 @@ def sub(x, y, context=None):
         bf = _apply_function_in_context(
             mpfr.mpfr_sub,
             (
-                BigFloat._implicit_convert(x)._value,
-                BigFloat._implicit_convert(y)._value,
+                BigFloat._implicit_convert(x),
+                BigFloat._implicit_convert(y),
             ),
             getcontext(),
         )
@@ -1058,8 +1061,8 @@ def mul(x, y, context=None):
         bf = _apply_function_in_context(
             mpfr.mpfr_mul,
             (
-                BigFloat._implicit_convert(x)._value,
-                BigFloat._implicit_convert(y)._value,
+                BigFloat._implicit_convert(x),
+                BigFloat._implicit_convert(y),
             ),
             getcontext(),
         )
@@ -1074,7 +1077,7 @@ def sqr(x, context=None):
     with (context if context is not None else EmptyContext):
         bf = _apply_function_in_context(
             mpfr.mpfr_sqr,
-            (BigFloat._implicit_convert(x)._value,),
+            (BigFloat._implicit_convert(x),),
             getcontext(),
         )
         return BigFloat._from_Mpfr(bf)
@@ -1089,8 +1092,8 @@ def div(x, y, context=None):
         bf = _apply_function_in_context(
             mpfr.mpfr_div,
             (
-                BigFloat._implicit_convert(x)._value,
-                BigFloat._implicit_convert(y)._value,
+                BigFloat._implicit_convert(x),
+                BigFloat._implicit_convert(y),
             ),
             getcontext(),
         )
@@ -1108,7 +1111,7 @@ def sqrt(x, context=None):
     with (context if context is not None else EmptyContext):
         bf = _apply_function_in_context(
             mpfr.mpfr_sqrt,
-            (BigFloat._implicit_convert(x)._value,),
+            (BigFloat._implicit_convert(x),),
             getcontext(),
         )
         return BigFloat._from_Mpfr(bf)
@@ -1125,7 +1128,7 @@ def rec_sqrt(x, context=None):
     with (context if context is not None else EmptyContext):
         bf = _apply_function_in_context(
             mpfr.mpfr_rec_sqrt,
-            (BigFloat._implicit_convert(x)._value,),
+            (BigFloat._implicit_convert(x),),
             getcontext(),
         )
         return BigFloat._from_Mpfr(bf)
@@ -1142,7 +1145,7 @@ def cbrt(x, context=None):
     with (context if context is not None else EmptyContext):
         bf = _apply_function_in_context(
             mpfr.mpfr_cbrt,
-            (BigFloat._implicit_convert(x)._value,),
+            (BigFloat._implicit_convert(x),),
             getcontext(),
         )
         return BigFloat._from_Mpfr(bf)
@@ -1161,7 +1164,7 @@ def root(x, k, context=None):
     with (context if context is not None else EmptyContext):
         bf = _apply_function_in_context(
             mpfr.mpfr_cbrt,
-            (BigFloat._implicit_convert(x)._value,),
+            (BigFloat._implicit_convert(x),),
             getcontext(),
         )
         return BigFloat._from_Mpfr(bf)
@@ -1213,8 +1216,8 @@ def pow(x, y, context=None):
         bf = _apply_function_in_context(
             mpfr.mpfr_pow,
             (
-                BigFloat._implicit_convert(x)._value,
-                BigFloat._implicit_convert(y)._value,
+                BigFloat._implicit_convert(x),
+                BigFloat._implicit_convert(y),
             ),
             getcontext(),
         )
@@ -1229,7 +1232,7 @@ def neg(x, context=None):
     with (context if context is not None else EmptyContext):
         bf = _apply_function_in_context(
             mpfr.mpfr_neg,
-            (BigFloat._implicit_convert(x)._value,),
+            (BigFloat._implicit_convert(x),),
             getcontext(),
         )
         return BigFloat._from_Mpfr(bf)
@@ -1243,7 +1246,7 @@ def abs(x, context=None):
     with (context if context is not None else EmptyContext):
         bf = _apply_function_in_context(
             mpfr.mpfr_abs,
-            (BigFloat._implicit_convert(x)._value,),
+            (BigFloat._implicit_convert(x),),
             getcontext(),
         )
         return BigFloat._from_Mpfr(bf)
@@ -1260,8 +1263,8 @@ def dim(x, y, context=None):
         bf = _apply_function_in_context(
             mpfr.mpfr_dim,
             (
-                BigFloat._implicit_convert(x)._value,
-                BigFloat._implicit_convert(y)._value,
+                BigFloat._implicit_convert(x),
+                BigFloat._implicit_convert(y),
             ),
             getcontext(),
         )
@@ -1287,8 +1290,8 @@ def cmp(op1, op2):
     comparisons, in particular when one or both arguments are NaN.
 
     """
-    op1 = BigFloat._implicit_convert(op1)._value
-    op2 = BigFloat._implicit_convert(op2)._value
+    op1 = BigFloat._implicit_convert(op1)
+    op2 = BigFloat._implicit_convert(op2)
     return mpfr.mpfr_cmp(op1, op2)
 
 
@@ -1307,8 +1310,8 @@ def cmpabs(op1, op2):
     comparisons, in particular when one or both arguments are NaN.
 
     """
-    op1 = BigFloat._implicit_convert(op1)._value
-    op2 = BigFloat._implicit_convert(op2)._value
+    op1 = BigFloat._implicit_convert(op1)
+    op2 = BigFloat._implicit_convert(op2)
     return mpfr.mpfr_cmpabs(op1, op2)
 
 
@@ -1332,8 +1335,8 @@ def mod(x, y, context=None):
         bf = _apply_function_in_context(
             mpfr.mpfr_fmod,
             (
-                BigFloat._implicit_convert(x)._value,
-                BigFloat._implicit_convert(y)._value,
+                BigFloat._implicit_convert(x),
+                BigFloat._implicit_convert(y),
             ),
             getcontext(),
         )
@@ -1344,21 +1347,21 @@ def mod(x, y, context=None):
 def is_nan(x):
     """ Return True if x is a NaN, else False. """
 
-    x = BigFloat._implicit_convert(x)._value
+    x = BigFloat._implicit_convert(x)
     return mpfr.mpfr_nan_p(x)
 
 
 def is_inf(x):
     """ Return True if x is an infinity, else False. """
 
-    x = BigFloat._implicit_convert(x)._value
+    x = BigFloat._implicit_convert(x)
     return mpfr.mpfr_inf_p(x)
 
 
 def is_zero(x):
     """ Return True if x is a zero, else False. """
 
-    x = BigFloat._implicit_convert(x)._value
+    x = BigFloat._implicit_convert(x)
     return mpfr.mpfr_zero_p(x)
 
 
@@ -1369,21 +1372,21 @@ def is_finite(x):
     infinity or a NaN.
 
     """
-    x = BigFloat._implicit_convert(x)._value
+    x = BigFloat._implicit_convert(x)
     return mpfr.mpfr_number_p(x)
 
 
 def is_integer(x):
     """ Return True if x is an exact integer, else False. """
 
-    x = BigFloat._implicit_convert(x)._value
+    x = BigFloat._implicit_convert(x)
     return mpfr.mpfr_integer_p(x)
 
 
 def is_regular(x):
     """ Return True if x is finite and nonzero, else False. """
 
-    x = BigFloat._implicit_convert(x)._value
+    x = BigFloat._implicit_convert(x)
     return mpfr.mpfr_regular_p(x)
 
 
@@ -1393,7 +1396,7 @@ def is_negative(x):
     Note that this function returns True for negative zeros.
 
     """
-    x = BigFloat._implicit_convert(x)._value
+    x = BigFloat._implicit_convert(x)
     return mpfr.mpfr_signbit(x)
 
 
@@ -1404,8 +1407,8 @@ def _is_equal(x, y):
     This function returns False whenever op1 and/or op2 is a NaN.
 
     """
-    x = BigFloat._implicit_convert(x)._value
-    y = BigFloat._implicit_convert(y)._value
+    x = BigFloat._implicit_convert(x)
+    y = BigFloat._implicit_convert(y)
     return mpfr.mpfr_equal_p(x, y)
 
 
@@ -1416,8 +1419,8 @@ def _is_greater(x, y):
     This function returns False whenever op1 and/or op2 is a NaN.
 
     """
-    x = BigFloat._implicit_convert(x)._value
-    y = BigFloat._implicit_convert(y)._value
+    x = BigFloat._implicit_convert(x)
+    y = BigFloat._implicit_convert(y)
     return mpfr.mpfr_greater_p(x, y)
 
 
@@ -1428,8 +1431,8 @@ def _is_greaterequal(x, y):
     This function returns False whenever op1 and/or op2 is a NaN.
 
     """
-    x = BigFloat._implicit_convert(x)._value
-    y = BigFloat._implicit_convert(y)._value
+    x = BigFloat._implicit_convert(x)
+    y = BigFloat._implicit_convert(y)
     return mpfr.mpfr_greaterequal_p(x, y)
 
 
@@ -1440,8 +1443,8 @@ def _is_less(x, y):
     This function returns False whenever op1 and/or op2 is a NaN.
 
     """
-    x = BigFloat._implicit_convert(x)._value
-    y = BigFloat._implicit_convert(y)._value
+    x = BigFloat._implicit_convert(x)
+    y = BigFloat._implicit_convert(y)
     return mpfr.mpfr_less_p(x, y)
 
 
@@ -1452,8 +1455,8 @@ def _is_lessequal(x, y):
     This function returns False whenever op1 and/or op2 is a NaN.
 
     """
-    x = BigFloat._implicit_convert(x)._value
-    y = BigFloat._implicit_convert(y)._value
+    x = BigFloat._implicit_convert(x)
+    y = BigFloat._implicit_convert(y)
     return mpfr.mpfr_lessequal_p(x, y)
 
 
@@ -1464,8 +1467,8 @@ def lessgreater(x, y):
     This function returns False whenever op1 and/or op2 is a NaN.
 
     """
-    x = BigFloat._implicit_convert(x)._value
-    y = BigFloat._implicit_convert(y)._value
+    x = BigFloat._implicit_convert(x)
+    y = BigFloat._implicit_convert(y)
     return mpfr.mpfr_lessgreater_p(x, y)
 
 
@@ -1474,8 +1477,8 @@ def unordered(x, y):
     Return True if op1 or op2 is a NaN and False otherwise.
 
     """
-    x = BigFloat._implicit_convert(x)._value
-    y = BigFloat._implicit_convert(y)._value
+    x = BigFloat._implicit_convert(x)
+    y = BigFloat._implicit_convert(y)
     return mpfr.mpfr_unordered_p(x, y)
 
 
