@@ -44,7 +44,7 @@ __all__ = [
     'RoundAwayFromZero',
 
     # ... and functions
-    'IEEEContext', 'precision', 'extra_precision',
+    'IEEEContext', 'precision', 'extra_precision', 'rounding',
 
     # get and set current context
     'getcontext', 'setcontext',
@@ -142,6 +142,7 @@ from bigfloat.context import (
     EmptyContext,
 
     precision,
+    rounding,
     extra_precision,
 
     RoundTiesToEven,
