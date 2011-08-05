@@ -102,6 +102,14 @@ class ContextTests(unittest.TestCase):
         self.assertIs(c1 == c2, True)
         self.assertIs(c1 != c2, False)
 
+        # distinct contexts
+        d1 = Context(emin=-999, emax=999, precision=100,
+                     subnormalize=True, rounding=mpfr.MPFR_RNDU)
+        d2 = Context(emin=-999, emax=999, precision=101,
+                     subnormalize=True, rounding=mpfr.MPFR_RNDU)
+        self.assertIs(d1 != d2, True)
+        self.assertIs(d1 == d2, False)
+
     def test_with(self):
         # check use of contexts in with statements
         c = Context(emin = -123, emax=456, precision=1729,
