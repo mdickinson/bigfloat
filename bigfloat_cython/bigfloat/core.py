@@ -215,13 +215,13 @@ def next_up(x, context=None):
     strictly greater than x.
 
     This operation is quiet:  flags are not affected.
-    """
 
+    """
+    x = BigFloat._implicit_convert(x)
     # make sure we don't alter any flags
     with _saved_flags():
         if context is None:
             context = EmptyContext
-        x = BigFloat._implicit_convert(x)
 
         with context + RoundTowardPositive:
             # nan maps to itself
@@ -234,14 +234,10 @@ def next_up(x, context=None):
                 return y
 
             # otherwise apply mpfr_nextabove
-            bf = mpfr.Mpfr(y.precision)
-            ternary = mpfr.mpfr_set(bf, y, ROUND_TIES_TO_EVEN)
-            assert ternary == 0
+            bf = y.copy()
             mpfr.mpfr_nextabove(bf)
-            y = BigFloat._from_Mpfr(bf)
-
             # apply + one more time to deal with subnormals
-            return +y
+            return +bf
 
 
 def next_down(x, context=None):
@@ -249,13 +245,13 @@ def next_down(x, context=None):
     strictly less than x.
 
     This operation is quiet:  flags are not affected.
-    """
 
+    """
+    x = BigFloat._implicit_convert(x)
     # make sure we don't alter any flags
     with _saved_flags():
         if context is None:
             context = EmptyContext
-        x = BigFloat._implicit_convert(x)
 
         with context + RoundTowardNegative:
             # nan maps to itself
@@ -268,14 +264,10 @@ def next_down(x, context=None):
                 return y
 
             # otherwise apply mpfr_nextabove
-            bf = mpfr.Mpfr(y.precision)
-            ternary = mpfr.mpfr_set(bf, y, ROUND_TIES_TO_EVEN)
-            assert ternary == 0
+            bf = y.copy()
             mpfr.mpfr_nextbelow(bf)
-            y = BigFloat._from_Mpfr(bf)
-
             # apply + one more time to deal with subnormals
-            return +y
+            return +bf
 
 
 def _binop(op):
