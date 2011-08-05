@@ -503,6 +503,17 @@ class BigFloat(mpfr.Mpfr_t):
         else:
             assert False, "shouldn't ever get here"
 
+    def copy(self):
+        """ Return a copy of self.
+
+        This function does not make use of the context.  The result has the
+        same precision as the original.
+
+        """
+        result = mpfr.Mpfr(self.precision)
+        mpfr.mpfr_set(result, self, ROUND_TIES_TO_EVEN)
+        return BigFloat._from_Mpfr(result)
+
     def copy_neg(self):
         """ Return a copy of self with the opposite sign bit.
 
