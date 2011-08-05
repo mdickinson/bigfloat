@@ -269,5 +269,7 @@ def _apply_function_in_context(cls, f, args, context):
                 mpfr.mpfr_set_inexflag()
     return bf
 
-def _apply_function_in_current_context(cls, f, args):
-    return _apply_function_in_context(cls, f, args, getcontext())
+
+def _apply_function_in_current_context(cls, f, args, context):
+    with (context if context is not None else EmptyContext):
+        return _apply_function_in_context(cls, f, args, getcontext())
