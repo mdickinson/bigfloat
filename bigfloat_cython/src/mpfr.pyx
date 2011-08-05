@@ -20,6 +20,11 @@
 
 cimport cmpfr
 
+
+###############################################################################
+# Various constants exported to Python
+###############################################################################
+
 # Version information
 MPFR_VERSION_MAJOR = cmpfr.MPFR_VERSION_MAJOR
 MPFR_VERSION_MINOR = cmpfr.MPFR_VERSION_MINOR
@@ -42,8 +47,16 @@ MPFR_EMAX_DEFAULT = cmpfr.MPFR_EMAX_DEFAULT
 MPFR_EMIN_DEFAULT = cmpfr.MPFR_EMIN_DEFAULT
 
 
+###############################################################################
+# Helper functions, not exposed to Python
+###############################################################################
+
 # Checks for valid parameter ranges
 cdef int check_rounding_mode(cmpfr.mpfr_rnd_t rnd) except -1:
+    """
+    Check that the given rounding mode is valid.  Raise ValueError if not.
+
+    """
     if MPFR_RNDN <= rnd <= MPFR_RNDA:
         return 0
     else:
@@ -51,6 +64,12 @@ cdef int check_rounding_mode(cmpfr.mpfr_rnd_t rnd) except -1:
 
 
 cdef int check_base(int b, int allow_zero) except -1:
+    """
+    Check that the given base (for string conversion) is valid.
+
+    Raise ValueError if not.
+
+    """
     if allow_zero:
         if 2 <= b <= 62 or b == 0:
             return 0
@@ -66,6 +85,12 @@ cdef int check_base(int b, int allow_zero) except -1:
 
 
 cdef int check_get_str_n(size_t n) except -1:
+    """
+    Check that the given number of requested digits is valid.
+
+    Raise ValueError if not.
+
+    """
     if n == 0 or 2 <= n:
         return 0
     else:
@@ -73,6 +98,10 @@ cdef int check_get_str_n(size_t n) except -1:
 
 
 cdef int check_precision(cmpfr.mpfr_prec_t precision) except -1:
+    """
+    Check that the given precision is valid.  Raise ValueError if not.
+
+    """
     if MPFR_PREC_MIN <= precision <= MPFR_PREC_MAX:
         return 0
     else:
@@ -83,11 +112,16 @@ cdef int check_precision(cmpfr.mpfr_prec_t precision) except -1:
         )
 
 
-# Some functions that return a pair of results (mpfr_sin_cos, mpfr_sinh_cosh,
-# mpfr_modf) also return a pair of ternary values encoded in a single int.
-# Here we decode ternary pair.
-
 cdef decode_ternary_pair(int ternary_pair):
+    """
+    Decode an encoded pair of ternary values.
+
+    Some MPFR functions with two outputs (mpfr_sin_cos, mpfr_sinh_cosh,
+    mpfr_modf) also return a pair of ternary values encoded into a single int.
+    This function decodes that ternary pair, returning a Python pair of
+    the corresponding ternary values.
+
+    """
     cdef int first_ternary, second_ternary
 
     first_ternary = ternary_pair & 3
@@ -99,15 +133,20 @@ cdef decode_ternary_pair(int ternary_pair):
     return first_ternary, second_ternary
 
 
+###############################################################################
+# The main Python extension type, based on mpfr_t.
+###############################################################################
+
 cdef class Mpfr_t:
     """
-    Class representing a mutable arbitrary-precision floating-point number.
+    Mutable arbitrary-precision binary floating-point numbers.
 
-    Mpfr(prec) -> new Mpfr object
+    Mpfr_t() -> new, uninitialized Mpfr object
 
-    Creates a new Mpfr_t object and sets its precision to be exactly 'prec' bits
-    and its value to NaN.  The precision must be an integer between
-    MPFR_PREC_MIN and MPFR_PREC_MAX; otherwise a ValueError is raised.
+    Mpfr_t() creates a new, uninitialized Mpfr_t object.  This object must be
+    initialized before use, for example by using the mpfr_init2 function.
+    However, unlike the underlying MPFR library, it's not necessary to clear
+    the object when it's no longer used.
 
     """
     cdef cmpfr.__mpfr_struct _value
