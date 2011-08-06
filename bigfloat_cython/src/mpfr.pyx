@@ -2263,10 +2263,16 @@ def mpfr_print_rnd_mode(cmpfr.mpfr_rnd_t rnd):
 #  --------------------------------------------
 #
 #  All functions in this section wrapped.
-
-
 #
-#  Sections 5.11 and later: details to come.
+#
+#  5.11 Rounding Related Functions
+#  --------------------------------------------
+#
+#  All functions in this section wrapped.
+#
+#
+#
+#  Sections 5.12 and later: details to come.
 
 
 
