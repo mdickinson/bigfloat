@@ -283,6 +283,7 @@ def mpfr_set_prec(Mpfr_t x not None, cmpfr.mpfr_prec_t prec):
     value stored in x, use mpfr_prec_round instead.
 
     """
+    check_initialized(x)
     check_precision(prec)
     cmpfr.mpfr_set_prec(&x._value, prec)
 
@@ -293,6 +294,7 @@ def mpfr_get_prec(Mpfr_t x not None):
     Returns the number of bits used to store the significand of x.
 
     """
+    check_initialized(x)
     return cmpfr.mpfr_get_prec(&x._value)
 
 
@@ -308,6 +310,8 @@ def mpfr_set(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     the given direction rnd.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_set(&rop._value, &op._value, rnd)
 
@@ -319,6 +323,7 @@ def mpfr_set_si(Mpfr_t rop not None, long int op, cmpfr.mpfr_rnd_t rnd):
     that the input 0 is converted to +0, regardless of the rounding mode.
 
     """
+    check_initialized(rop)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_set_si(&rop._value, op, rnd)
 
@@ -337,6 +342,7 @@ def mpfr_set_d(Mpfr_t rop not None, double op, cmpfr.mpfr_rnd_t rnd):
     binary number before MPFR can work with it.
 
     """
+    check_initialized(rop)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_set_d(&rop._value, op, rnd)
 
@@ -349,6 +355,7 @@ def mpfr_set_si_2exp(Mpfr_t rop not None, long int op,
     toward the given direction rnd. Note that the input 0 is converted to +0.
 
     """
+    check_initialized(rop)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_set_si_2exp(&rop._value, op, e, rnd)
 
@@ -367,6 +374,7 @@ def mpfr_set_str(Mpfr_t rop not None, bytes s, int base, cmpfr.mpfr_rnd_t rnd):
     an overflow.
 
     """
+    check_initialized(rop)
     check_base(base, False)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_set_str(&rop._value, s, base, rnd)
@@ -436,6 +444,7 @@ def mpfr_strtofr(Mpfr_t rop not None, bytes s, int base, cmpfr.mpfr_rnd_t rnd):
 
     startptr = s
 
+    check_initialized(rop)
     check_base(base, True)
     check_rounding_mode(rnd)
     ternary = cmpfr.mpfr_strtofr(
@@ -455,6 +464,7 @@ def mpfr_set_nan(Mpfr_t op not None):
     unspecified.
 
     """
+    check_initialized(op)
     cmpfr.mpfr_set_nan(&op._value)
 
 def mpfr_set_inf(Mpfr_t op not None, int sign):
@@ -464,6 +474,7 @@ def mpfr_set_inf(Mpfr_t op not None, int sign):
     is nonnegative, and negative infinity otherwise.
 
     """
+    check_initialized(op)
     cmpfr.mpfr_set_inf(&op._value, sign)
 
 def mpfr_set_zero(Mpfr_t op not None, int sign):
@@ -473,6 +484,7 @@ def mpfr_set_zero(Mpfr_t op not None, int sign):
     nonnegative, and negative zero otherwise.
 
     """
+    check_initialized(op)
     cmpfr.mpfr_set_zero(&op._value, sign)
 
 def mpfr_swap(Mpfr_t x not None, Mpfr_t y not None):
@@ -484,6 +496,8 @@ def mpfr_swap(Mpfr_t x not None, Mpfr_t y not None):
     third auxiliary variable.
 
     """
+    check_initialized(x)
+    check_initialized(y)
     cmpfr.mpfr_swap(&x._value, &y._value)
 
 
@@ -502,10 +516,11 @@ def mpfr_get_d(Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     to preserve its sign, if possible.
 
     """
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_get_d(&op._value, rnd)
 
-def mpfr_get_si(Mpfr_t rop not None, cmpfr.mpfr_rnd_t rnd):
+def mpfr_get_si(Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     """
     Convert op to a Python int.
 
@@ -516,8 +531,9 @@ def mpfr_get_si(Mpfr_t rop not None, cmpfr.mpfr_rnd_t rnd):
     too.
 
     """
+    check_initialized(op)
     check_rounding_mode(rnd)
-    return cmpfr.mpfr_get_si(&rop._value, rnd)
+    return cmpfr.mpfr_get_si(&op._value, rnd)
 
 def mpfr_get_d_2exp(Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     """
@@ -535,6 +551,7 @@ def mpfr_get_d_2exp(Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     cdef long int exp
     cdef double d
 
+    check_initialized(op)
     check_rounding_mode(rnd)
     d =  cmpfr.mpfr_get_d_2exp(&exp, &op._value, rnd)
     return d, exp
@@ -583,6 +600,7 @@ def mpfr_get_str(int b, size_t n, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
 
     check_base(b, False)
     check_get_str_n(n)
+    check_initialized(op)
     check_rounding_mode(rnd)
     c_digits = cmpfr.mpfr_get_str(NULL, &exp, b, n, &op._value, rnd)
     if c_digits == NULL:
@@ -605,6 +623,7 @@ def mpfr_fits_slong_p(Mpfr_t x not None, cmpfr.mpfr_rnd_t rnd):
     in the direction rnd.
 
     """
+    check_initialized(x)
     check_rounding_mode(rnd)
     return bool(cmpfr.mpfr_fits_slong_p(&x._value, rnd))
 
@@ -619,6 +638,9 @@ def mpfr_add(Mpfr_t rop not None, Mpfr_t op1 not None, Mpfr_t op2 not None,
     Set rop to op1 + op2 rounded in the direction rnd.
 
     """
+    check_initialized(rop)
+    check_initialized(op1)
+    check_initialized(op2)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_add(&rop._value, &op1._value, &op2._value, rnd)
 
@@ -628,6 +650,9 @@ def mpfr_sub(Mpfr_t rop not None, Mpfr_t op1 not None, Mpfr_t op2 not None,
     Set rop to op1 - op2, rounded in the direction rnd.
 
     """
+    check_initialized(rop)
+    check_initialized(op1)
+    check_initialized(op2)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_sub(&rop._value, &op1._value, &op2._value, rnd)
 
@@ -637,6 +662,9 @@ def mpfr_mul(Mpfr_t rop not None, Mpfr_t op1 not None, Mpfr_t op2 not None,
     Set rop to op1 times op2, rounded in the direction rnd.
 
     """
+    check_initialized(rop)
+    check_initialized(op1)
+    check_initialized(op2)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_mul(&rop._value, &op1._value, &op2._value, rnd)
 
@@ -645,6 +673,8 @@ def mpfr_sqr(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     Set rop to the square of op, rounded in the direction rnd.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_sqr(&rop._value, &op._value, rnd)
 
@@ -654,6 +684,9 @@ def mpfr_div(Mpfr_t rop not None, Mpfr_t op1 not None, Mpfr_t op2 not None,
     Set rop to op1 divided by op2, rounded in the direction rnd.
 
     """
+    check_initialized(rop)
+    check_initialized(op1)
+    check_initialized(op2)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_div(&rop._value, &op1._value, &op2._value, rnd)
 
@@ -665,6 +698,8 @@ def mpfr_sqrt(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     rop to NaN if op is negative.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_sqrt(&rop._value, &op._value, rnd)
 
@@ -675,6 +710,8 @@ def mpfr_rec_sqrt(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd)
     Set rop to +Inf if op is ±0, +0 if op is +Inf, and NaN if op is negative.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_rec_sqrt(&rop._value, &op._value, rnd)
 
@@ -686,6 +723,8 @@ def mpfr_cbrt(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     defined to be -0.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_cbrt(&rop._value, &op._value, rnd)
 
@@ -699,6 +738,8 @@ def mpfr_root(Mpfr_t rop not None, Mpfr_t op not None,
     whatever the parity of k.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_root(&rop._value, &op._value, k, rnd)
 
@@ -745,6 +786,9 @@ def mpfr_pow(Mpfr_t rop not None, Mpfr_t op1 not None, Mpfr_t op2 not None,
         positive.
 
     """
+    check_initialized(rop)
+    check_initialized(op1)
+    check_initialized(op2)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_pow(&rop._value, &op1._value, &op2._value, rnd)
 
@@ -757,6 +801,8 @@ def mpfr_neg(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     than that of op.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_neg(&rop._value, &op._value, rnd)
 
@@ -769,6 +815,8 @@ def mpfr_abs(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     than that of op.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_abs(&rop._value, &op._value, rnd)
 
@@ -781,6 +829,9 @@ def mpfr_dim(Mpfr_t rop not None, Mpfr_t op1 not None, Mpfr_t op2 not None,
     <= op2, and NaN if op1 or op2 is NaN.
 
     """
+    check_initialized(rop)
+    check_initialized(op1)
+    check_initialized(op2)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_dim(&rop._value, &op1._value, &op2._value, rnd)
 
@@ -805,6 +856,8 @@ def mpfr_cmp(Mpfr_t op1 not None, Mpfr_t op2 not None):
     both arguments are NaN.
 
     """
+    check_initialized(op1)
+    check_initialized(op2)
     return cmpfr.mpfr_cmp(&op1._value, &op2._value)
 
 def mpfr_cmpabs(Mpfr_t op1 not None, Mpfr_t op2 not None):
@@ -816,6 +869,8 @@ def mpfr_cmpabs(Mpfr_t op1 not None, Mpfr_t op2 not None):
     operands is NaN, set the erange flag and return zero.
 
     """
+    check_initialized(op1)
+    check_initialized(op2)
     return cmpfr.mpfr_cmpabs(&op1._value, &op2._value)
 
 def mpfr_nan_p(Mpfr_t op not None):
@@ -823,6 +878,7 @@ def mpfr_nan_p(Mpfr_t op not None):
     Return True if op is a NaN.  Return False otherwise.
 
     """
+    check_initialized(op)
     return bool(cmpfr.mpfr_nan_p(&op._value))
 
 def mpfr_inf_p(Mpfr_t op not None):
@@ -830,6 +886,7 @@ def mpfr_inf_p(Mpfr_t op not None):
     Return True if op is an infinity.  Return False otherwise.
 
     """
+    check_initialized(op)
     return bool(cmpfr.mpfr_inf_p(&op._value))
 
 def mpfr_number_p(Mpfr_t op not None):
@@ -839,6 +896,7 @@ def mpfr_number_p(Mpfr_t op not None):
     An ordinary number is a number which is neither a NaN nor an infinity.
 
     """
+    check_initialized(op)
     return bool(cmpfr.mpfr_number_p(&op._value))
 
 def mpfr_zero_p(Mpfr_t op not None):
@@ -846,6 +904,7 @@ def mpfr_zero_p(Mpfr_t op not None):
     Return True if op is zero.  Return False otherwise.
 
     """
+    check_initialized(op)
     return bool(cmpfr.mpfr_zero_p(&op._value))
 
 def mpfr_regular_p(Mpfr_t op not None):
@@ -856,6 +915,7 @@ def mpfr_regular_p(Mpfr_t op not None):
     zero.
 
     """
+    check_initialized(op)
     return bool(cmpfr.mpfr_regular_p(&op._value))
 
 def mpfr_sgn(Mpfr_t op not None):
@@ -867,6 +927,7 @@ def mpfr_sgn(Mpfr_t op not None):
     equivalent to mpfr_cmp_ui (op, 0), but more efficient.
 
     """
+    check_initialized(op)
     return cmpfr.mpfr_sgn(&op._value)
 
 def mpfr_greater_p(Mpfr_t op1 not None, Mpfr_t op2 not None):
@@ -876,6 +937,8 @@ def mpfr_greater_p(Mpfr_t op1 not None, Mpfr_t op2 not None):
     This function returns False whenever op1 and/or op2 is a NaN.
 
     """
+    check_initialized(op1)
+    check_initialized(op2)
     return bool(cmpfr.mpfr_greater_p(&op1._value, &op2._value))
 
 def mpfr_greaterequal_p(Mpfr_t op1 not None, Mpfr_t op2 not None):
@@ -885,6 +948,8 @@ def mpfr_greaterequal_p(Mpfr_t op1 not None, Mpfr_t op2 not None):
     This function returns False whenever op1 and/or op2 is a NaN.
 
     """
+    check_initialized(op1)
+    check_initialized(op2)
     return bool(cmpfr.mpfr_greaterequal_p(&op1._value, &op2._value))
 
 def mpfr_less_p(Mpfr_t op1 not None, Mpfr_t op2 not None):
@@ -894,6 +959,8 @@ def mpfr_less_p(Mpfr_t op1 not None, Mpfr_t op2 not None):
     This function returns False whenever op1 and/or op2 is a NaN.
 
     """
+    check_initialized(op1)
+    check_initialized(op2)
     return bool(cmpfr.mpfr_less_p(&op1._value, &op2._value))
 
 def mpfr_lessequal_p(Mpfr_t op1 not None, Mpfr_t op2 not None):
@@ -903,6 +970,8 @@ def mpfr_lessequal_p(Mpfr_t op1 not None, Mpfr_t op2 not None):
     This function returns False whenever op1 and/or op2 is a NaN.
 
     """
+    check_initialized(op1)
+    check_initialized(op2)
     return bool(cmpfr.mpfr_lessequal_p(&op1._value, &op2._value))
 
 def mpfr_equal_p(Mpfr_t op1 not None, Mpfr_t op2 not None):
@@ -912,6 +981,8 @@ def mpfr_equal_p(Mpfr_t op1 not None, Mpfr_t op2 not None):
     This function returns False whenever op1 and/or op2 is a NaN.
 
     """
+    check_initialized(op1)
+    check_initialized(op2)
     return bool(cmpfr.mpfr_equal_p(&op1._value, &op2._value))
 
 def mpfr_lessgreater_p(Mpfr_t op1 not None, Mpfr_t op2 not None):
@@ -921,6 +992,8 @@ def mpfr_lessgreater_p(Mpfr_t op1 not None, Mpfr_t op2 not None):
     This function returns False whenever op1 and/or op2 is a NaN.
 
     """
+    check_initialized(op1)
+    check_initialized(op2)
     return bool(cmpfr.mpfr_lessgreater_p(&op1._value, &op2._value))
 
 def mpfr_unordered_p(Mpfr_t op1 not None, Mpfr_t op2 not None):
@@ -928,6 +1001,8 @@ def mpfr_unordered_p(Mpfr_t op1 not None, Mpfr_t op2 not None):
     Return True if op1 or op2 is a NaN and False otherwise.
 
     """
+    check_initialized(op1)
+    check_initialized(op2)
     return bool(cmpfr.mpfr_unordered_p(&op1._value, &op2._value))
 
 
@@ -940,6 +1015,8 @@ def mpfr_log(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     Set rop to the natural logarithm of op, rounded in the direction rnd.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_log(&rop._value, &op._value, rnd)
 
@@ -948,6 +1025,8 @@ def mpfr_log2(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     Set rop to the base-two logarithm of op, rounded in the direction rnd.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_log2(&rop._value, &op._value, rnd)
 
@@ -956,6 +1035,8 @@ def mpfr_log10(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     Set rop to the base-ten logarithm of op, rounded in the direction rnd.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_log10(&rop._value, &op._value, rnd)
 
@@ -964,6 +1045,8 @@ def mpfr_exp(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     Set rop to the exponential of op, rounded in the direction rnd.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_exp(&rop._value, &op._value, rnd)
 
@@ -972,6 +1055,8 @@ def mpfr_exp2(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     Set rop to two raised to the power op, rounded in the direction rnd.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_exp2(&rop._value, &op._value, rnd)
 
@@ -980,6 +1065,8 @@ def mpfr_exp10(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     Set rop to ten raised to the power op, rounded in the direction rnd.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_exp10(&rop._value, &op._value, rnd)
 
@@ -988,6 +1075,8 @@ def mpfr_cos(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     Set rop to the cosine of op, rounded in the direction rnd.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_cos(&rop._value, &op._value, rnd)
 
@@ -996,6 +1085,8 @@ def mpfr_sin(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     Set rop to the sine of op, rounded in the direction rnd.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_sin(&rop._value, &op._value, rnd)
 
@@ -1004,6 +1095,8 @@ def mpfr_tan(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     Set rop to the tangent of op, rounded in the direction rnd.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_tan(&rop._value, &op._value, rnd)
 
@@ -1023,6 +1116,9 @@ def mpfr_sin_cos(Mpfr_t sop not None, Mpfr_t cop not None,
     """
     cdef int ternary_pair
 
+    check_initialized(sop)
+    check_initialized(cop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     ternary_pair = cmpfr.mpfr_sin_cos(
         &sop._value, &cop._value, &op._value, rnd
@@ -1034,6 +1130,8 @@ def mpfr_sec(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     Set rop to the secant of op, rounded in the direction rnd.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_sec(&rop._value, &op._value, rnd)
 
@@ -1042,6 +1140,8 @@ def mpfr_csc(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     Set rop to the cosecant of op, rounded in the direction rnd.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_csc(&rop._value, &op._value, rnd)
 
@@ -1050,6 +1150,8 @@ def mpfr_cot(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     Set rop to the cotangent of op, rounded in the direction rnd.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_cot(&rop._value, &op._value, rnd)
 
@@ -1064,6 +1166,8 @@ def mpfr_acos(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     function.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_acos(&rop._value, &op._value, rnd)
 
@@ -1078,6 +1182,8 @@ def mpfr_asin(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     lies in the image of this output range by the rounding function.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_asin(&rop._value, &op._value, rnd)
 
@@ -1092,6 +1198,8 @@ def mpfr_atan(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     lies in the image of this output range by the rounding function.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_atan(&rop._value, &op._value, rnd)
 
@@ -1132,6 +1240,9 @@ def mpfr_atan2(Mpfr_t rop not None, Mpfr_t y not None,
     atan2(y, +Inf) returns −0 for finite y < 0.
 
     """
+    check_initialized(rop)
+    check_initialized(y)
+    check_initialized(x)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_atan2(&rop._value, &y._value, &x._value, rnd)
 
@@ -1140,6 +1251,8 @@ def mpfr_cosh(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     Set rop to the hyperbolic cosine of op, rounded in the direction rnd.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_cosh(&rop._value, &op._value, rnd)
 
@@ -1148,6 +1261,8 @@ def mpfr_sinh(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     Set rop to the hyperbolic sine of op, rounded in the direction rnd.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_sinh(&rop._value, &op._value, rnd)
 
@@ -1156,6 +1271,8 @@ def mpfr_tanh(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     Set rop to the hyperbolic tangent of op, rounded in the direction rnd.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_tanh(&rop._value, &op._value, rnd)
 
@@ -1175,6 +1292,9 @@ def mpfr_sinh_cosh(Mpfr_t sop not None, Mpfr_t cop not None,
     """
     cdef int ternary_pair
 
+    check_initialized(sop)
+    check_initialized(cop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     ternary_pair = cmpfr.mpfr_sinh_cosh(
         &sop._value, &cop._value, &op._value, rnd
@@ -1186,6 +1306,8 @@ def mpfr_sech(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     Set rop to the hyperbolic secant of op, rounded in the direction rnd.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_sech(&rop._value, &op._value, rnd)
 
@@ -1194,6 +1316,8 @@ def mpfr_csch(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     Set rop to the hyperbolic cosecant of op, rounded in the direction rnd.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_csch(&rop._value, &op._value, rnd)
 
@@ -1202,6 +1326,8 @@ def mpfr_coth(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     Set rop to the hyperbolic cotangent of op, rounded in the direction rnd.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_coth(&rop._value, &op._value, rnd)
 
@@ -1210,6 +1336,8 @@ def mpfr_acosh(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     Set rop to the inverse hyperbolic cosine of op, rounded in the direction rnd.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_acosh(&rop._value, &op._value, rnd)
 
@@ -1218,6 +1346,8 @@ def mpfr_asinh(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     Set rop to the inverse hyperbolic sine of op, rounded in the direction rnd.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_asinh(&rop._value, &op._value, rnd)
 
@@ -1226,6 +1356,8 @@ def mpfr_atanh(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     Set rop to the inverse hyperbolic tangent of op, rounded in the direction rnd.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_atanh(&rop._value, &op._value, rnd)
 
@@ -1234,6 +1366,8 @@ def mpfr_log1p(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     Set rop to the logarithm of one plus op, rounded in the direction rnd.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_log1p(&rop._value, &op._value, rnd)
 
@@ -1243,6 +1377,8 @@ def mpfr_expm1(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     in the direction rnd.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_expm1(&rop._value, &op._value, rnd)
 
@@ -1257,6 +1393,8 @@ def mpfr_eint(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     NaN.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_eint(&rop._value, &op._value, rnd)
 
@@ -1269,6 +1407,8 @@ def mpfr_li2(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     to op.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_li2(&rop._value, &op._value, rnd)
 
@@ -1280,6 +1420,8 @@ def mpfr_gamma(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     When op is a negative integer, rop is set to NaN.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_gamma(&rop._value, &op._value, rnd)
 
@@ -1292,6 +1434,8 @@ def mpfr_lngamma(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     NaN. See also mpfr_lgamma.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_lngamma(&rop._value, &op._value, rnd)
 
@@ -1303,6 +1447,8 @@ def mpfr_digamma(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     When op is a negative integer, set rop to NaN.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_digamma(&rop._value, &op._value, rnd)
 
@@ -1312,6 +1458,8 @@ def mpfr_zeta(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     direction rnd.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_zeta(&rop._value, &op._value, rnd)
 
@@ -1321,6 +1469,8 @@ def mpfr_erf(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     rnd.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_erf(&rop._value, &op._value, rnd)
 
@@ -1330,6 +1480,8 @@ def mpfr_erfc(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     in the direction rnd.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_erfc(&rop._value, &op._value, rnd)
 
@@ -1340,6 +1492,8 @@ def mpfr_j0(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     NaN. When op is plus or minus infinity, rop is set to +0.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_j0(&rop._value, &op._value, rnd)
 
@@ -1351,6 +1505,8 @@ def mpfr_j1(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     rop is set to +0 or −0 depending on the sign of op.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_j1(&rop._value, &op._value, rnd)
 
@@ -1364,6 +1520,8 @@ def mpfr_y0(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     depending on the sign of op.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_y0(&rop._value, &op._value, rnd)
 
@@ -1377,6 +1535,8 @@ def mpfr_y1(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     depending on the sign of op.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_y1(&rop._value, &op._value, rnd)
 
@@ -1389,6 +1549,10 @@ def mpfr_fma(Mpfr_t rop not None,
     Set rop to (op1 times op2) + op3 rounded in the direction rnd.
 
     """
+    check_initialized(rop)
+    check_initialized(op1)
+    check_initialized(op2)
+    check_initialized(op3)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_fma(
         &rop._value, &op1._value, &op2._value, &op3._value, rnd
@@ -1403,6 +1567,10 @@ def mpfr_fms(Mpfr_t rop not None,
     Set rop to (op1 times op2) - op3 rounded in the direction rnd.
 
     """
+    check_initialized(rop)
+    check_initialized(op1)
+    check_initialized(op2)
+    check_initialized(op3)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_fms(
         &rop._value, &op1._value, &op2._value, &op3._value, rnd
@@ -1420,6 +1588,9 @@ def mpfr_agm(Mpfr_t rop not None,
     any operand is negative, set rop to NaN.
 
     """
+    check_initialized(rop)
+    check_initialized(op1)
+    check_initialized(op2)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_agm(&rop._value, &op1._value, &op2._value, rnd)
 
@@ -1435,6 +1606,9 @@ def mpfr_hypot(Mpfr_t rop not None,
     the other number is NaN.
 
     """
+    check_initialized(rop)
+    check_initialized(x)
+    check_initialized(y)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_hypot(&rop._value, &x._value, &y._value, rnd)
 
@@ -1450,6 +1624,8 @@ def mpfr_ai(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     version.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_ai(&rop._value, &op._value, rnd)
 
@@ -1462,6 +1638,7 @@ def mpfr_const_log2(Mpfr_t rop not None, cmpfr.mpfr_rnd_t rnd):
     or equal precision is requested.  To free this cache, use mpfr_free_cache.
 
     """
+    check_initialized(rop)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_const_log2(&rop._value, rnd)
 
@@ -1474,6 +1651,7 @@ def mpfr_const_pi(Mpfr_t rop not None, cmpfr.mpfr_rnd_t rnd):
     precision is requested.  To free this cache, use mpfr_free_cache.
 
     """
+    check_initialized(rop)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_const_pi(&rop._value, rnd)
 
@@ -1487,6 +1665,7 @@ def mpfr_const_euler(Mpfr_t rop not None, cmpfr.mpfr_rnd_t rnd):
     mpfr_free_cache.
 
     """
+    check_initialized(rop)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_const_euler(&rop._value, rnd)
 
@@ -1500,6 +1679,7 @@ def mpfr_const_catalan(Mpfr_t rop not None, cmpfr.mpfr_rnd_t rnd):
     cache, use mpfr_free_cache.
 
     """
+    check_initialized(rop)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_const_catalan(&rop._value, rnd)
 
@@ -1539,6 +1719,8 @@ def mpfr_rint(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     would be rounded to 8 again with even rounding.)
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_rint(&rop._value, &op._value, rnd)
 
@@ -1553,6 +1735,8 @@ def mpfr_ceil(Mpfr_t rop not None, Mpfr_t op not None):
     representable in rop, 2 or −2 when op is not an integer.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     return cmpfr.mpfr_ceil(&rop._value, &op._value)
 
 def mpfr_floor(Mpfr_t rop not None, Mpfr_t op not None):
@@ -1566,6 +1750,8 @@ def mpfr_floor(Mpfr_t rop not None, Mpfr_t op not None):
     representable in rop, 2 or −2 when op is not an integer.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     return cmpfr.mpfr_floor(&rop._value, &op._value)
 
 def mpfr_round(Mpfr_t rop not None, Mpfr_t op not None):
@@ -1589,6 +1775,8 @@ def mpfr_round(Mpfr_t rop not None, Mpfr_t op not None):
     first rounded to an integer, one would round 10.5 to 10 with even rounding,
     and then 10 would be rounded to 8 again with even rounding.)
     """
+    check_initialized(rop)
+    check_initialized(op)
     return cmpfr.mpfr_round(&rop._value, &op._value)
 
 def mpfr_trunc(Mpfr_t rop not None, Mpfr_t op not None):
@@ -1602,6 +1790,8 @@ def mpfr_trunc(Mpfr_t rop not None, Mpfr_t op not None):
     representable in rop, 2 or −2 when op is not an integer.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     return cmpfr.mpfr_trunc(&rop._value, &op._value)
 
 def mpfr_rint_ceil(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
@@ -1618,6 +1808,8 @@ def mpfr_rint_ceil(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd
     representable) is rounded in the given direction rnd.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_rint_ceil(&rop._value, &op._value, rnd)
 
@@ -1635,6 +1827,8 @@ def mpfr_rint_floor(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rn
     representable) is rounded in the given direction rnd.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_rint_floor(&rop._value, &op._value, rnd)
 
@@ -1658,6 +1852,8 @@ def mpfr_rint_round(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rn
     on two bits, and is closer to 6.5 than 8.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_rint_round(&rop._value, &op._value, rnd)
 
@@ -1675,6 +1871,8 @@ def mpfr_rint_trunc(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rn
     representable) is rounded in the given direction rnd.
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_rint_trunc(&rop._value, &op._value, rnd)
 
@@ -1685,6 +1883,8 @@ def mpfr_frac(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     fractional part is rounded, not how the fractional part is generated).
 
     """
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_frac(&rop._value, &op._value, rnd)
 
@@ -1705,6 +1905,9 @@ def mpfr_modf(Mpfr_t iop not None, Mpfr_t fop not None,
     """
     cdef int ternary_pair
 
+    check_initialized(iop)
+    check_initialized(fop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     ternary_pair = cmpfr.mpfr_modf(
         &iop._value, &fop._value, &op._value, rnd
@@ -1727,6 +1930,9 @@ def mpfr_fmod(Mpfr_t r not None, Mpfr_t x not None,
     corresponding to r.
 
     """
+    check_initialized(r)
+    check_initialized(x)
+    check_initialized(y)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_fmod(&r._value, &x._value, &y._value, rnd)
 
@@ -1746,6 +1952,9 @@ def mpfr_remainder(Mpfr_t r not None, Mpfr_t x not None,
     corresponding to r.
 
     """
+    check_initialized(r)
+    check_initialized(x)
+    check_initialized(y)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_remainder(&r._value, &x._value, &y._value, rnd)
 
@@ -1774,6 +1983,9 @@ def mpfr_remquo(Mpfr_t r not None, Mpfr_t x not None,
     """
     cdef long int quotient
 
+    check_initialized(r)
+    check_initialized(x)
+    check_initialized(y)
     check_rounding_mode(rnd)
     ternary = cmpfr.mpfr_remquo(
         &r._value, &quotient, &x._value, &y._value, rnd
@@ -1785,6 +1997,7 @@ def mpfr_integer_p(Mpfr_t op not None):
     Return True if op is an integer.  Return False otherwise.
 
     """
+    check_initialized(op)
     return bool(cmpfr.mpfr_integer_p(&op._value))
 
 
@@ -1936,6 +2149,7 @@ def mpfr_get_exp(Mpfr_t op not None):
     infinity or zero is undefined.
 
     """
+    check_initialized(op)
     return cmpfr.mpfr_get_exp(&op._value)
 
 def mpfr_set_exp(Mpfr_t op not None, cmpfr.mpfr_exp_t exp):
@@ -1948,6 +2162,7 @@ def mpfr_set_exp(Mpfr_t op not None, cmpfr.mpfr_exp_t exp):
     [1/2, 1).
 
     """
+    check_initialized(op)
     error_code = cmpfr.mpfr_set_exp(&op._value, exp)
     if error_code:
         raise ValueError("exponent not in current exponent range")
@@ -2062,6 +2277,8 @@ def mpfr_setsign(Mpfr_t rop not None, Mpfr_t op not None, s, cmpfr.mpfr_rnd_t rn
 
     """
     s = bool(s)
+    check_initialized(rop)
+    check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_setsign(&rop._value, &op._value, s, rnd)
 
@@ -2202,6 +2419,7 @@ def mpfr_check_range(Mpfr_t x not None, int t, cmpfr.mpfr_rnd_t rnd):
     internal computations.
 
     """
+    check_initialized(x)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_check_range(&x._value, t, rnd)
 
@@ -2232,6 +2450,7 @@ def mpfr_subnormalize(Mpfr_t x not None, int t, cmpfr.mpfr_rnd_t rnd):
     the subnormal range), the underflow flag is set.
 
     """
+    check_initialized(x)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_subnormalize(&x._value, t, rnd)
 
@@ -2243,6 +2462,7 @@ def mpfr_signbit(Mpfr_t op not None):
     or a NaN whose representation has its sign bit set.
 
     """
+    check_initialized(op)
     return bool(cmpfr.mpfr_signbit(&op._value))
 
 def mpfr_nexttoward(Mpfr_t x not None, Mpfr_t y not None):
@@ -2257,6 +2477,8 @@ def mpfr_nexttoward(Mpfr_t x not None, Mpfr_t y not None):
     same sign. No underflow or overflow is generated.
 
     """
+    check_initialized(x)
+    check_initialized(y)
     cmpfr.mpfr_nexttoward(&x._value, &y._value)
 
 def mpfr_nextabove(Mpfr_t op not None):
@@ -2264,6 +2486,7 @@ def mpfr_nextabove(Mpfr_t op not None):
     Equivalent to mpfr_nexttoward(op, y) where y is plus infinity.
 
     """
+    check_initialized(op)
     cmpfr.mpfr_nextabove(&op._value)
 
 def mpfr_nextbelow(Mpfr_t op not None):
@@ -2271,4 +2494,5 @@ def mpfr_nextbelow(Mpfr_t op not None):
     Equivalent to mpfr_nexttoward(op, y) where y is minus infinity.
 
     """
+    check_initialized(op)
     cmpfr.mpfr_nextbelow(&op._value)
