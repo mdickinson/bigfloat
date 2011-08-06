@@ -28,8 +28,11 @@ from bigfloat.mpfr import (
 
     # 5.1 Initialization Functions
     mpfr_init2,
+    mpfr_inits2,
     mpfr_clear,
+    mpfr_clears,
     mpfr_init,
+    mpfr_inits,
     mpfr_set_default_prec,
     mpfr_get_default_prec,
     mpfr_set_prec,
@@ -238,6 +241,11 @@ class TestMpfr(unittest.TestCase):
         with self.assertRaises(ValueError):
             mpfr_init2(x, 53)
 
+    def test_init2_bad_precision(self):
+        x = Mpfr_t()
+        with self.assertRaises(ValueError):
+            mpfr_init2(x, -2)
+
     def test_init(self):
         x = Mpfr_t()
         mpfr_init(x)
@@ -251,6 +259,37 @@ class TestMpfr(unittest.TestCase):
         mpfr_init(x)
         with self.assertRaises(ValueError):
             mpfr_init(x)
+
+    def test_inits2_and_clears(self):
+        args = [Mpfr_t() for _ in range(3)]
+        for arg in args:
+            self.assertIs(mpfr_initialized_p(arg), False)
+        mpfr_inits2(123, *args)
+        for arg in args:
+            self.assertIs(mpfr_initialized_p(arg), True)
+            self.assertEqual(mpfr_get_prec(arg), 123)
+        mpfr_clears(*args)
+        for arg in args:
+            self.assertIs(mpfr_initialized_p(arg), False)
+
+        # check bad precision
+        with self.assertRaises(ValueError):
+            mpfr_inits2(-2, *args)
+        with self.assertRaises(ValueError):
+            mpfr_inits2(-2)
+
+
+    def test_inits_and_clears(self):
+        args = [Mpfr_t() for _ in range(3)]
+        for arg in args:
+            self.assertIs(mpfr_initialized_p(arg), False)
+        mpfr_inits(*args)
+        for arg in args:
+            self.assertIs(mpfr_initialized_p(arg), True)
+            self.assertEqual(mpfr_get_prec(arg), mpfr_get_default_prec())
+        mpfr_clears(*args)
+        for arg in args:
+            self.assertIs(mpfr_initialized_p(arg), False)
 
     def get_and_set_default_prec(self):
         old_default_prec = mpfr_get_default_prec()

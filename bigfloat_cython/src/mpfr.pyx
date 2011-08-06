@@ -225,6 +225,16 @@ def mpfr_init2(Mpfr_t x not None, cmpfr.mpfr_prec_t prec):
     check_precision(prec)
     cmpfr.mpfr_init2(&x._value, prec)
 
+def mpfr_inits2(cmpfr.mpfr_prec_t prec, *args):
+    """
+    Initialize each of the variables in args: set its precision to prec bits
+    and its value to NaN.
+
+    """
+    check_precision(prec)
+    for arg in args:
+        mpfr_init2(arg, prec)
+
 def mpfr_clear(Mpfr_t x not None):
     """
     Free the space occupied by the significand of x.
@@ -235,6 +245,15 @@ def mpfr_clear(Mpfr_t x not None):
     """
     check_initialized(x)
     cmpfr.mpfr_clear(&x._value)
+
+def mpfr_clears(*args):
+    """
+    Free the space occupied by each of the variables in args.  See mpfr_clear
+    for more details.
+
+    """
+    for arg in args:
+        mpfr_clear(arg)
 
 def mpfr_init(Mpfr_t x not None):
     """
@@ -248,6 +267,19 @@ def mpfr_init(Mpfr_t x not None):
     """
     check_not_initialized(x)
     cmpfr.mpfr_init(&x._value)
+
+def mpfr_inits(*args):
+    """
+    Initialize each of the variables in args: set its precision to the default
+    precision, and set its value to NaN. The default precision can be changed
+    by a call to mpfr_set_default_prec.
+
+    Warning! In a given program, some other libraries might change the default
+    precision and not restore it. Thus it is safer to use mpfr_inits2.
+
+    """
+    for arg in args:
+        mpfr_init(arg)
 
 def mpfr_set_default_prec(cmpfr.mpfr_prec_t prec):
     """
@@ -2004,16 +2036,6 @@ def mpfr_integer_p(Mpfr_t op not None):
 
 # Functions that are documented in the MPFR 3.0.1 documentation, but aren't
 # (currently) wrapped:
-#
-#
-# 5.1 Initialization Functions
-# ----------------------------
-#
-# These functions aren't wrapped at all:
-#
-#   mpfr_inits2
-#   mpfr_clears
-#   mpfr_inits
 #
 #
 # 5.2 Assignment functions
