@@ -51,6 +51,9 @@ MPFR_EMIN_DEFAULT = cmpfr.MPFR_EMIN_DEFAULT
 # Helper functions, not exposed to Python
 ###############################################################################
 
+# Forward declaration
+cdef class Mpfr_t
+
 # Checks for valid parameter ranges
 cdef int check_rounding_mode(cmpfr.mpfr_rnd_t rnd) except -1:
     """
@@ -112,6 +115,33 @@ cdef int check_precision(cmpfr.mpfr_prec_t precision) except -1:
         )
 
 
+cdef int check_initialized(Mpfr_t x) except -1:
+    """
+    Check that the given Mpfr_t x instance has been initialized.
+
+    Raise ValueError if not.
+
+    """
+    if not cmpfr_initialized_p(&x._value):
+        raise ValueError(
+            "Mpfr_t instance {} should be initialized before use".format(x)
+        )
+
+
+cdef int check_not_initialized(Mpfr_t x) except -1:
+    """
+    Check that the given Mpfr_t x instance has *not* been initialized.
+
+    Raise ValueError if it has.  This function is used by the mpfr_init
+    and mpfr_init2 functions.
+
+    """
+    if cmpfr_initialized_p(&x._value):
+        raise ValueError(
+            "Mpfr_t instance {} is already initialized.".format(x)
+        )
+
+
 cdef decode_ternary_pair(int ternary_pair):
     """
     Decode an encoded pair of ternary values.
@@ -133,6 +163,14 @@ cdef decode_ternary_pair(int ternary_pair):
     return first_ternary, second_ternary
 
 
+cdef int cmpfr_initialized_p(cmpfr.mpfr_ptr op):
+    """
+    Return non-zero if op is initialized.  Return zero otherwise.
+
+    """
+    return op._mpfr_d != NULL
+
+
 ###############################################################################
 # The main Python extension type, based on mpfr_t.
 ###############################################################################
@@ -152,8 +190,20 @@ cdef class Mpfr_t:
     cdef cmpfr.__mpfr_struct _value
 
     def __dealloc__(self):
-        if self._value._mpfr_d != NULL:
+        if cmpfr_initialized_p(&self._value):
             cmpfr.mpfr_clear(&self._value)
+
+
+##############################################################################
+# Additional functions provided by this extension module
+###############################################################################
+
+def mpfr_initialized_p(Mpfr_t op not None):
+    """
+    Return True if op has been initialized.  Return False otherwise.
+
+    """
+    return bool(cmpfr_initialized_p(&op._value))
 
 
 ##############################################################################
@@ -171,6 +221,7 @@ def mpfr_init2(Mpfr_t x not None, cmpfr.mpfr_prec_t prec):
     (otherwise the behavior is undefined).
 
     """
+    check_not_initialized(x)
     check_precision(prec)
     cmpfr.mpfr_init2(&x._value, prec)
 
@@ -182,6 +233,7 @@ def mpfr_clear(Mpfr_t x not None):
     called automatically when x is garbage-collected.
 
     """
+    check_initialized(x)
     cmpfr.mpfr_clear(&x._value)
 
 def mpfr_set_prec(Mpfr_t x not None, cmpfr.mpfr_prec_t prec):

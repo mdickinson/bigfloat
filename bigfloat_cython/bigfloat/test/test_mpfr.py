@@ -24,6 +24,8 @@ from bigfloat.mpfr import (
     # Base extension type
     Mpfr_t,
 
+    mpfr_initialized_p,
+
     # 5.1 Initialization Functions
     mpfr_init2,
     mpfr_clear,
@@ -209,10 +211,29 @@ class TestMpfr(unittest.TestCase):
     def setUp(self):
         mpfr_clear_flags()
 
-    def test_init2_and_clear(self):
+    def test_initialized_p(self):
         x = Mpfr_t()
+        self.assertIs(mpfr_initialized_p(x), False)
+        mpfr_init2(x, 53)
+        self.assertIs(mpfr_initialized_p(x), True)
+        mpfr_clear(x)
+        self.assertIs(mpfr_initialized_p(x), False)
+
+    def test_clear_on_uninitialized_instance(self):
+        x = Mpfr_t()
+        with self.assertRaises(ValueError):
+            mpfr_clear(x)
+
         mpfr_init2(x, 53)
         mpfr_clear(x)
+        with self.assertRaises(ValueError):
+            mpfr_clear(x)
+
+    def test_init2_on_already_initialized_instance(self):
+        x = Mpfr_t()
+        mpfr_init2(x, 53)
+        with self.assertRaises(ValueError):
+            mpfr_init2(x, 53)
 
     def test_bad_constructor(self):
         with self.assertRaises(TypeError):
