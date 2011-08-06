@@ -161,10 +161,27 @@ cdef class Mpfr_t:
 ###############################################################################
 
 def mpfr_init2(Mpfr_t x not None, cmpfr.mpfr_prec_t prec):
+    """
+    Initialize x, set its precision to be prec bits and its value to NaN.
+
+    Normally, a variable should be initialized once only or at least be
+    cleared, using mpfr_clear, between initializations. To change the precision
+    of a variable which has already been initialized, use mpfr_set_prec. The
+    precision prec must be an integer between MPFR_PREC_MIN and MPFR_PREC_MAX
+    (otherwise the behavior is undefined).
+
+    """
     check_precision(prec)
     cmpfr.mpfr_init2(&x._value, prec)
 
 def mpfr_clear(Mpfr_t x not None):
+    """
+    Free the space occupied by the significand of x.
+
+    It's not usually necessary to call this function directly: it will be
+    called automatically when x is garbage-collected.
+
+    """
     cmpfr.mpfr_clear(&x._value)
 
 def mpfr_set_prec(Mpfr_t x not None, cmpfr.mpfr_prec_t prec):
@@ -1692,12 +1709,6 @@ def mpfr_integer_p(Mpfr_t op not None):
 #
 # 5.1 Initialization Functions
 # ----------------------------
-#
-# These functions are used by the Mpfr_t class, but not exported
-# independently by the mpfr module:
-#
-#   mpfr_init2
-#   mpfr_clear
 #
 # These functions aren't wrapped at all:
 #
