@@ -499,6 +499,10 @@ def mpfr_set_inf(Mpfr_t op not None, int sign):
     Set the variable x to infinity.  x is set to positive infinity if the sign
     is nonnegative, and negative infinity otherwise.
 
+    Note the unusual sign convention here: most MPFR function that deal with
+    signs use a nonzero value (or True) to indicate a negative number, and zero
+    to indiciate a positive number.
+
     """
     check_initialized(op)
     cmpfr.mpfr_set_inf(&op._value, sign)
@@ -508,6 +512,10 @@ def mpfr_set_zero(Mpfr_t op not None, int sign):
 
     Set the variable x to zero.  x is set to positive zero if the sign is
     nonnegative, and negative zero otherwise.
+
+    Note the unusual sign convention here: most MPFR function that deal with
+    signs use a nonzero value (or True) to indicate a negative number, and zero
+    to indiciate a positive number.
 
     """
     check_initialized(op)
