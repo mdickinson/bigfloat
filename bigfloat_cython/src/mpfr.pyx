@@ -25,12 +25,6 @@ cimport cmpfr
 # Various constants exported to Python
 ###############################################################################
 
-# Version information
-MPFR_VERSION_MAJOR = cmpfr.MPFR_VERSION_MAJOR
-MPFR_VERSION_MINOR = cmpfr.MPFR_VERSION_MINOR
-MPFR_VERSION_PATCHLEVEL = cmpfr.MPFR_VERSION_PATCHLEVEL
-MPFR_VERSION_STRING = cmpfr.MPFR_VERSION_STRING
-
 # Make precision limits available to Python
 MPFR_PREC_MIN = cmpfr.MPFR_PREC_MIN
 MPFR_PREC_MAX = cmpfr.MPFR_PREC_MAX
@@ -2144,6 +2138,198 @@ def mpfr_print_rnd_mode(cmpfr.mpfr_rnd_t rnd):
     return cmpfr.mpfr_print_rnd_mode(rnd)
 
 
+###############################################################################
+# 5.12 Miscellaneous Functions
+###############################################################################
+
+def mpfr_nexttoward(Mpfr_t x not None, Mpfr_t y not None):
+    """
+    Replace x by the next floating-point number in the direction of y.
+
+    If x or y is NaN, set x to NaN. If x and y are equal, x is
+    unchanged. Otherwise, if x is different from y, replace x by the next
+    floating-point number (with the precision of x and the current exponent
+    range) in the direction of y (the infinite values are seen as the smallest
+    and largest floating-point numbers). If the result is zero, it keeps the
+    same sign. No underflow or overflow is generated.
+
+    """
+    check_initialized(x)
+    check_initialized(y)
+    cmpfr.mpfr_nexttoward(&x._value, &y._value)
+
+def mpfr_nextabove(Mpfr_t op not None):
+    """
+    Equivalent to mpfr_nexttoward(op, y) where y is plus infinity.
+
+    """
+    check_initialized(op)
+    cmpfr.mpfr_nextabove(&op._value)
+
+def mpfr_nextbelow(Mpfr_t op not None):
+    """
+    Equivalent to mpfr_nexttoward(op, y) where y is minus infinity.
+
+    """
+    check_initialized(op)
+    cmpfr.mpfr_nextbelow(&op._value)
+
+def mpfr_min(Mpfr_t rop not None, Mpfr_t op1 not None, Mpfr_t op2 not None,
+             cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the minimum of op1 and op2.
+
+    If op1 and op2 are both NaN, then rop is set to NaN. If op1 or op2 is NaN,
+    then rop is set to the numeric value. If op1 and op2 are zeros of different
+    signs, then rop is set to −0.
+
+    """
+    check_initialized(rop)
+    check_initialized(op1)
+    check_initialized(op2)
+    check_rounding_mode(rnd)
+    cmpfr.mpfr_min(&rop._value, &op1._value, &op2._value, rnd)
+
+def mpfr_max(Mpfr_t rop not None, Mpfr_t op1 not None, Mpfr_t op2 not None,
+             cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the maximum of op1 and op2.
+
+    If op1 and op2 are both NaN, then rop is set to NaN. If op1 or op2 is NaN,
+    then rop is set to the numeric value. If op1 and op2 are zeros of different
+    signs, then rop is set to +0.
+
+    """
+    check_initialized(rop)
+    check_initialized(op1)
+    check_initialized(op2)
+    check_rounding_mode(rnd)
+    cmpfr.mpfr_max(&rop._value, &op1._value, &op2._value, rnd)
+
+def mpfr_get_exp(Mpfr_t op not None):
+    """
+    Return the exponent of op.
+
+    Return the exponent of op, assuming that op is a non-zero ordinary number
+    and the significand is considered in [1/2, 1). The behavior for NaN,
+    infinity or zero is undefined.
+
+    """
+    check_initialized(op)
+    return cmpfr.mpfr_get_exp(&op._value)
+
+def mpfr_set_exp(Mpfr_t op not None, cmpfr.mpfr_exp_t exp):
+    """
+    Set the exponent of op.
+
+    Set the exponent of op to exp if exp is in the current exponent range (even
+    if x is not a non-zero ordinary number).  If exp is not in the current
+    exponent range, raise ValueError.  The significand is assumed to be in
+    [1/2, 1).
+
+    """
+    check_initialized(op)
+    error_code = cmpfr.mpfr_set_exp(&op._value, exp)
+    if error_code:
+        raise ValueError("exponent not in current exponent range")
+
+def mpfr_signbit(Mpfr_t op not None):
+    """
+    Return True if op has its sign bit set.  Return False otherwise.
+
+    This function returns True for negative numbers, negative infinity, -0,
+    or a NaN whose representation has its sign bit set.
+
+    """
+    check_initialized(op)
+    return bool(cmpfr.mpfr_signbit(&op._value))
+
+def mpfr_setsign(Mpfr_t rop not None, Mpfr_t op not None, s, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set the value of rop from op and the sign of rop from s.
+
+    Set the value of rop from op, rounded toward the given direction rnd, then
+    set (resp. clear) its sign bit if s is non-zero (resp. zero), even when op
+    is a NaN.
+
+    """
+    check_initialized(rop)
+    check_initialized(op)
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_setsign(&rop._value, &op._value, s, rnd)
+
+def mpfr_copysign(Mpfr_t rop not None, Mpfr_t op1 not None,
+                  Mpfr_t op2 not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to op1 with the sign of op2.
+
+    Set the value of rop from op1, rounded toward the given direction rnd, then
+    set its sign bit to that of op2 (even when op1 or op2 is a NaN). This
+    function is equivalent to mpfr_setsign (rop, op1, mpfr_signbit (op2), rnd).
+
+    """
+    check_initialized(rop)
+    check_initialized(op1)
+    check_initialized(op2)
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_copysign(&rop._value, &op1._value, &op2._value, rnd)
+
+def mpfr_get_version():
+    """
+    Return the MPFR version, as a string.
+
+    """
+    return cmpfr.mpfr_get_version()
+
+MPFR_VERSION = cmpfr.MPFR_VERSION
+MPFR_VERSION_MAJOR = cmpfr.MPFR_VERSION_MAJOR
+MPFR_VERSION_MINOR = cmpfr.MPFR_VERSION_MINOR
+MPFR_VERSION_PATCHLEVEL = cmpfr.MPFR_VERSION_PATCHLEVEL
+MPFR_VERSION_STRING = cmpfr.MPFR_VERSION_STRING
+
+def MPFR_VERSION_NUM(int major, int minor, int patchlevel):
+    """
+    Create an integer in the same format as used by MPFR_VERSION from the given
+    major, minor and patchlevel.
+
+    """
+    return cmpfr.MPFR_VERSION_NUM(major, minor, patchlevel)
+
+def mpfr_get_patches():
+    """
+    Return information about patches applied to the MPFR library.
+
+    Return a list containing the ids of patches applied to the MPFR
+    library (contents of the PATCHES file), separated by spaces.
+
+    Note: If the program has been compiled with an older MPFR version and is
+    dynamically linked with a new MPFR library version, the identifiers of the
+    patches applied to the old (compile-time) MPFR version are not available
+    (however this information should not have much interest in general).
+
+    """
+    return cmpfr.mpfr_get_patches().split()
+
+def mpfr_buildopt_tls_p():
+    """
+    Return True if MPFR was compiled as thread safe using compiler-level Thread
+    Local Storage (that is, MPFR was built with the --enable-thread-safe
+    configure option, see INSTALL file), return False otherwise.
+
+    """
+    return bool(cmpfr.mpfr_buildopt_tls_p())
+
+def mpfr_buildopt_decimal_p():
+    """
+    Return True if MPFR was compiled with decimal float support (that is, MPFR
+    was built with the --enable-decimal-float configure option), return False
+    otherwise.
+
+    """
+    return bool(cmpfr.mpfr_buildopt_decimal_p())
+
+
+
 # Functions that are documented in the MPFR 3.0.1 documentation, but aren't
 # (currently) wrapped:
 #
@@ -2272,38 +2458,17 @@ def mpfr_print_rnd_mode(cmpfr.mpfr_rnd_t rnd):
 #  All functions in this section wrapped.
 #
 #
+#  5.12 Miscellaneous Functions
+#  ----------------------------
 #
-#  Sections 5.12 and later: details to come.
+#  mpfr_urandomb
+#  mpfr_urandom
+#
+#
+#  Sections 5.13 and later: details to come.
 
 
 
-
-def mpfr_get_exp(Mpfr_t op not None):
-    """
-    Return the exponent of op.
-
-    Return the exponent of op, assuming that op is a non-zero ordinary number
-    and the significand is considered in [1/2, 1). The behavior for NaN,
-    infinity or zero is undefined.
-
-    """
-    check_initialized(op)
-    return cmpfr.mpfr_get_exp(&op._value)
-
-def mpfr_set_exp(Mpfr_t op not None, cmpfr.mpfr_exp_t exp):
-    """
-    Set the exponent of op.
-
-    Set the exponent of op to exp if exp is in the current exponent range (even
-    if x is not a non-zero ordinary number).  If exp is not in the current
-    exponent range, raise ValueError.  The significand is assumed to be in
-    [1/2, 1).
-
-    """
-    check_initialized(op)
-    error_code = cmpfr.mpfr_set_exp(&op._value, exp)
-    if error_code:
-        raise ValueError("exponent not in current exponent range")
 
 
 
@@ -2404,21 +2569,6 @@ def mpfr_set_emax(cmpfr.mpfr_exp_t exp):
     error_code = cmpfr.mpfr_set_emax(exp)
     if error_code:
         raise ValueError("new exponent for emin is outside allowable range")
-
-def mpfr_setsign(Mpfr_t rop not None, Mpfr_t op not None, s, cmpfr.mpfr_rnd_t rnd):
-    """
-    Set the value of rop from op and the sign of rop from s.
-
-    Set the value of rop from op, rounded toward the given direction rnd, then
-    set (resp. clear) its sign bit if s is non-zero (resp. zero), even when op
-    is a NaN.
-
-    """
-    s = bool(s)
-    check_initialized(rop)
-    check_initialized(op)
-    check_rounding_mode(rnd)
-    return cmpfr.mpfr_setsign(&rop._value, &op._value, s, rnd)
 
 def mpfr_clear_underflow():
     """
@@ -2592,45 +2742,3 @@ def mpfr_subnormalize(Mpfr_t x not None, int t, cmpfr.mpfr_rnd_t rnd):
     check_rounding_mode(rnd)
     return cmpfr.mpfr_subnormalize(&x._value, t, rnd)
 
-def mpfr_signbit(Mpfr_t op not None):
-    """
-    Return True if op has its sign bit set.  Return False otherwise.
-
-    This function returns True for negative numbers, negative infinity, -0,
-    or a NaN whose representation has its sign bit set.
-
-    """
-    check_initialized(op)
-    return bool(cmpfr.mpfr_signbit(&op._value))
-
-def mpfr_nexttoward(Mpfr_t x not None, Mpfr_t y not None):
-    """
-    Replace x by the next floating-point number in the direction of y.
-
-    If x or y is NaN, set x to NaN. If x and y are equal, x is
-    unchanged. Otherwise, if x is different from y, replace x by the next
-    floating-point number (with the precision of x and the current exponent
-    range) in the direction of y (the infinite values are seen as the smallest
-    and largest floating-point numbers). If the result is zero, it keeps the
-    same sign. No underflow or overflow is generated.
-
-    """
-    check_initialized(x)
-    check_initialized(y)
-    cmpfr.mpfr_nexttoward(&x._value, &y._value)
-
-def mpfr_nextabove(Mpfr_t op not None):
-    """
-    Equivalent to mpfr_nexttoward(op, y) where y is plus infinity.
-
-    """
-    check_initialized(op)
-    cmpfr.mpfr_nextabove(&op._value)
-
-def mpfr_nextbelow(Mpfr_t op not None):
-    """
-    Equivalent to mpfr_nexttoward(op, y) where y is minus infinity.
-
-    """
-    check_initialized(op)
-    cmpfr.mpfr_nextbelow(&op._value)

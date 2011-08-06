@@ -178,7 +178,29 @@ from bigfloat.mpfr import (
     mpfr_min_prec,
     mpfr_print_rnd_mode,
 
+
+    # 5.12 Miscellaneous Functions
+    mpfr_nexttoward,
+    mpfr_nextabove,
+    mpfr_nextbelow,
+    mpfr_min,
+    mpfr_max,
+    mpfr_get_exp,
+    mpfr_set_exp,
     mpfr_signbit,
+    mpfr_setsign,
+    mpfr_copysign,
+    mpfr_get_version,
+    MPFR_VERSION,
+    MPFR_VERSION_MAJOR,
+    MPFR_VERSION_MINOR,
+    MPFR_VERSION_PATCHLEVEL,
+    MPFR_VERSION_STRING,
+    MPFR_VERSION_NUM,
+    mpfr_get_patches,
+    mpfr_buildopt_tls_p,
+    mpfr_buildopt_decimal_p,
+
 
     mpfr_get_emin,
     mpfr_get_emin_min,
@@ -1388,6 +1410,167 @@ class TestMpfr(unittest.TestCase):
         self.assertEqual(mpfr_print_rnd_mode(MPFR_RNDA), 'MPFR_RNDA')
         with self.assertRaises(ValueError):
             mpfr_print_rnd_mode(-1)
+
+
+    # 5.12 Miscellaneous Functions
+
+    def test_nexttoward(self):
+        x = Mpfr(4)
+        y = Mpfr(53)
+
+        mpfr_set_d(x, 2.0, MPFR_RNDN)
+        mpfr_set_d(y, 2.001, MPFR_RNDN)
+        mpfr_nexttoward(x, y)
+        self.assertEqual(
+            mpfr_get_d(x, MPFR_RNDN),
+            2.25,
+        )
+
+        mpfr_set_d(x, 2.0, MPFR_RNDN)
+        mpfr_set_d(y, -1.3, MPFR_RNDN)
+        mpfr_nexttoward(x, y)
+        self.assertEqual(
+            mpfr_get_d(x, MPFR_RNDN),
+            1.875,
+        )
+
+    def test_nextabove(self):
+        x = Mpfr(4)
+        mpfr_set_d(x, 1.0, MPFR_RNDN)
+        mpfr_nextabove(x)
+        self.assertEqual(
+            mpfr_get_d(x, MPFR_RNDN),
+            1.125,
+        )
+
+    def test_nextbelow(self):
+        x = Mpfr(4)
+        mpfr_set_d(x, 1.0, MPFR_RNDN)
+        mpfr_nextbelow(x)
+        self.assertEqual(
+            mpfr_get_d(x, MPFR_RNDN),
+            0.9375,
+        )
+
+    def test_get_exp(self):
+        x = Mpfr(34)
+        mpfr_set_d(x, 0.516, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_exp(x),
+            0,
+        )
+        mpfr_set_d(x, 8.0, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_exp(x),
+            4,
+        )
+        mpfr_set_d(x, 1e-9, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_exp(x),
+            -29,
+        )
+
+    def test_set_exp(self):
+        x = Mpfr(53)
+        mpfr_set_d(x, 48.0, MPFR_RNDN)
+        old_exp = mpfr_get_exp(x)
+        mpfr_set_exp(x, -1)
+        self.assertEqual(
+            mpfr_get_exp(x),
+            -1,
+        )
+        self.assertEqual(
+            mpfr_get_d(x, MPFR_RNDN),
+            0.375,
+        )
+        mpfr_set_exp(x, old_exp)
+        self.assertEqual(
+            mpfr_get_exp(x),
+            old_exp,
+        )
+        self.assertEqual(
+            mpfr_get_d(x, MPFR_RNDN),
+            48.0,
+        )
+
+    def test_min_and_max(self):
+        x = Mpfr(53)
+        y = Mpfr(53)
+        z = Mpfr(53)
+        mpfr_set_d(x, 1.2, MPFR_RNDN)
+        mpfr_set_d(y, 1.3, MPFR_RNDN)
+        mpfr_min(z, x, y, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(z, MPFR_RNDN),
+            1.2,
+        )
+        mpfr_max(z, x, y, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(z, MPFR_RNDN),
+            1.3,
+        )
+
+    def test_signbit(self):
+        x = Mpfr(53)
+        mpfr_set_d(x, 24.5, MPFR_RNDN)
+        self.assertIs(mpfr_signbit(x), False)
+        mpfr_set_d(x, -12.3, MPFR_RNDN)
+        self.assertIs(mpfr_signbit(x), True)
+
+    def test_setsign(self):
+        x = Mpfr(53)
+        y = Mpfr(53)
+        mpfr_set_d(y, 24.5, MPFR_RNDN)
+
+        mpfr_setsign(x, y, False, MPFR_RNDN)
+        self.assertIs(mpfr_signbit(x), False)
+        self.assertEqual(
+            mpfr_get_d(x, MPFR_RNDN),
+            24.5,
+        )
+        mpfr_setsign(x, y, True, MPFR_RNDN)
+        self.assertIs(mpfr_signbit(x), True)
+        self.assertEqual(
+            mpfr_get_d(x, MPFR_RNDN),
+            -24.5,
+        )
+
+    def test_copysign(self):
+        x = Mpfr(53)
+        y = Mpfr(53)
+        z = Mpfr(53)
+        mpfr_set_d(y, 24.5, MPFR_RNDN)
+        mpfr_set_d(z, -12.3, MPFR_RNDN)
+        mpfr_copysign(x, y, z, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(x, MPFR_RNDN),
+            -24.5,
+        )
+        mpfr_copysign(x, z, y, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(x, MPFR_RNDN),
+            12.3,
+        )
+
+    def test_MPFR_VERSION(self):
+        major = MPFR_VERSION_MAJOR
+        minor = MPFR_VERSION_MINOR
+        patchlevel = MPFR_VERSION_PATCHLEVEL
+        num = MPFR_VERSION_NUM(major, minor, patchlevel)
+        self.assertEqual(num, MPFR_VERSION)
+        self.assertIsInstance(MPFR_VERSION_STRING, str)
+
+    def test_get_version(self):
+        self.assertIsInstance(mpfr_get_version(), str)
+
+    def test_get_patches(self):
+        self.assertIsInstance(mpfr_get_patches(), list)
+
+    def test_buildopt_tls_p(self):
+        self.assertIsInstance(mpfr_buildopt_tls_p(), bool)
+
+    def test_buildopt_decimal_p(self):
+        self.assertIsInstance(mpfr_buildopt_decimal_p(), bool)
 
 
     def test_set_d(self):

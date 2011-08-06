@@ -18,12 +18,6 @@
 cimport cgmp
 
 cdef extern from "mpfr.h":
-    # Define MPFR version number
-    int MPFR_VERSION_MAJOR
-    int MPFR_VERSION_MINOR
-    int MPFR_VERSION_PATCHLEVEL
-    char *MPFR_VERSION_STRING
-
     # MPFR type declarations
     ctypedef int mpfr_prec_t
     ctypedef int mpfr_sign_t
@@ -272,6 +266,33 @@ cdef extern from "mpfr.h":
     char *mpfr_print_rnd_mode(mpfr_rnd_t rnd)
 
 
+    ###########################################################################
+    # 5.12 Miscellaneous Functions
+    ###########################################################################
+
+    void mpfr_nexttoward(mpfr_ptr rop, mpfr_ptr op)
+    void mpfr_nextabove(mpfr_ptr op)
+    void mpfr_nextbelow(mpfr_ptr op)
+    int mpfr_min(mpfr_ptr rop, mpfr_ptr op1, mpfr_ptr op2, mpfr_rnd_t rnd)
+    int mpfr_max(mpfr_ptr rop, mpfr_ptr op1, mpfr_ptr op2, mpfr_rnd_t rnd)
+    mpfr_exp_t mpfr_get_exp(mpfr_ptr x)
+    int mpfr_set_exp(mpfr_ptr x, mpfr_exp_t exp)
+    int mpfr_signbit(mpfr_ptr op)
+    int mpfr_setsign(mpfr_ptr rop, mpfr_ptr op, int s, mpfr_rnd_t rnd)
+    int mpfr_copysign(mpfr_ptr rop, mpfr_ptr op1, mpfr_ptr op2, mpfr_rnd_t rnd)
+    char *mpfr_get_version()
+    int MPFR_VERSION
+    int MPFR_VERSION_MAJOR
+    int MPFR_VERSION_MINOR
+    int MPFR_VERSION_PATCHLEVEL
+    char *MPFR_VERSION_STRING
+    int MPFR_VERSION_NUM(int major, int minor, int patchlevel)
+    char *mpfr_get_patches()
+    int mpfr_buildopt_tls_p()
+    int mpfr_buildopt_decimal_p()
+
+
+
     void mpfr_clear_flags()
     void mpfr_clear_underflow()
     void mpfr_clear_overflow()
@@ -298,14 +319,6 @@ cdef extern from "mpfr.h":
 
 
 
-
-
-
-    void mpfr_nexttoward(mpfr_ptr rop, mpfr_ptr op)
-    void mpfr_nextabove(mpfr_ptr op)
-    void mpfr_nextbelow(mpfr_ptr op)
-    int mpfr_signbit(mpfr_ptr op)
-
     # Functions to get and set exponent min and max values.
     mpfr_exp_t mpfr_get_emin()
     mpfr_exp_t mpfr_get_emin_min()
@@ -316,8 +329,5 @@ cdef extern from "mpfr.h":
     int mpfr_set_emin(mpfr_exp_t exp)
     int mpfr_set_emax(mpfr_exp_t exp)
 
-    int mpfr_setsign(mpfr_ptr rop, mpfr_ptr op, int s, mpfr_rnd_t rnd)
 
     long int mpfr_get_si(mpfr_ptr op, mpfr_rnd_t rnd)
-    mpfr_exp_t mpfr_get_exp(mpfr_ptr x)
-    int mpfr_set_exp(mpfr_ptr x, mpfr_exp_t exp)
