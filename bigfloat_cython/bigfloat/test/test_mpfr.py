@@ -29,6 +29,9 @@ from bigfloat.mpfr import (
     # 5.1 Initialization Functions
     mpfr_init2,
     mpfr_clear,
+    mpfr_init,
+    mpfr_set_default_prec,
+    mpfr_get_default_prec,
     mpfr_set_prec,
     mpfr_get_prec,
 
@@ -234,6 +237,29 @@ class TestMpfr(unittest.TestCase):
         mpfr_init2(x, 53)
         with self.assertRaises(ValueError):
             mpfr_init2(x, 53)
+
+    def test_init(self):
+        x = Mpfr_t()
+        mpfr_init(x)
+        self.assertEqual(
+            mpfr_get_prec(x),
+            mpfr_get_default_prec(),
+        )
+
+    def test_init_on_already_initialized_instance(self):
+        x = Mpfr_t()
+        mpfr_init(x)
+        with self.assertRaises(ValueError):
+            mpfr_init(x)
+
+    def get_and_set_default_prec(self):
+        old_default_prec = mpfr_get_default_prec()
+        mpfr_set_default_prec(200)
+        try:
+            self.assertEqual(mpfr_get_default_prec(), 200)
+        finally:
+            mpfr_set_default_prec(old_default_prec)
+        self.assertEqual(mpfr_get_default_prec(), old_default_prec)
 
     def test_bad_constructor(self):
         with self.assertRaises(TypeError):

@@ -236,6 +236,40 @@ def mpfr_clear(Mpfr_t x not None):
     check_initialized(x)
     cmpfr.mpfr_clear(&x._value)
 
+def mpfr_init(Mpfr_t x not None):
+    """
+    Initialize x, set its precision to the default precision, and set its value
+    to NaN. The default precision can be changed by a call to
+    mpfr_set_default_prec.
+
+    Warning! In a given program, some other libraries might change the default
+    precision and not restore it. Thus it is safer to use mpfr_init2.
+
+    """
+    check_not_initialized(x)
+    cmpfr.mpfr_init(&x._value)
+
+def mpfr_set_default_prec(cmpfr.mpfr_prec_t prec):
+    """
+    Set the default precision to be exactly prec bits.
+
+    prec can be any integer between MPFR_PREC_MIN and MPFR_PREC_MAX. The
+    precision of a variable means the number of bits used to store its
+    significand. All subsequent calls to mpfr_init or mpfr_inits will use this
+    precision, but previously initialized variables are unaffected. The default
+    precision is set to 53 bits initially.
+
+    """
+    check_precision(prec)
+    cmpfr.mpfr_set_default_prec(prec)
+
+def mpfr_get_default_prec():
+    """
+    Return the current default MPFR precision in bits.
+
+    """
+    return cmpfr.mpfr_get_default_prec()
+
 def mpfr_set_prec(Mpfr_t x not None, cmpfr.mpfr_prec_t prec):
     """
     Reset precision of x.
@@ -1766,15 +1800,7 @@ def mpfr_integer_p(Mpfr_t op not None):
 #
 #   mpfr_inits2
 #   mpfr_clears
-#   mpfr_init
 #   mpfr_inits
-#     -- there's no direct use for these 4 functions, since initialization and
-#        finalization are already handled by the Mpfr_t class.
-#
-#   mpfr_set_default_prec
-#   mpfr_get_default_prec
-#     -- we don't wrap any functions that make use of the default precision,
-#        so these aren't useful
 #
 #
 # 5.2 Assignment functions
