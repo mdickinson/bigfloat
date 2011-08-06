@@ -2033,6 +2033,115 @@ def mpfr_integer_p(Mpfr_t op not None):
     return bool(cmpfr.mpfr_integer_p(&op._value))
 
 
+###############################################################################
+# 5.11 Rounding Related Functions
+###############################################################################
+
+def mpfr_set_default_rounding_mode(cmpfr.mpfr_rnd_t rnd):
+    """
+    Set the default rounding mode to rnd.
+
+    The default rounding mode is to nearest initially.
+
+    """
+    check_rounding_mode(rnd)
+    cmpfr.mpfr_set_default_rounding_mode(rnd)
+
+def mpfr_get_default_rounding_mode():
+    """
+    Get the default rounding mode.
+
+    """
+    return cmpfr.mpfr_get_default_rounding_mode()
+
+def mpfr_prec_round(
+    Mpfr_t x not None, cmpfr.mpfr_prec_t prec, cmpfr.mpfr_rnd_t rnd
+    ):
+    """
+    Round x according to the given rounding mode and precision.
+
+    Round x according to rnd with precision prec, which must be an integer
+    between MPFR_PREC_MIN and MPFR_PREC_MAX (otherwise the behavior is
+    undefined). If prec is greater or equal to the precision of x, then new
+    space is allocated for the significand, and it is filled with
+    zeros. Otherwise, the significand is rounded to precision prec with the
+    given direction. In both cases, the precision of x is changed to prec.
+
+    Here is an example of how to use mpfr_prec_round to implement Newton's
+    algorithm to compute the inverse of a, assuming x is already an
+    approximation to n bits:
+
+            mpfr_set_prec (t, 2 * n);
+            mpfr_set (t, a, MPFR_RNDN);         /* round a to 2n bits */
+            mpfr_mul (t, t, x, MPFR_RNDN);      /* t is correct to 2n bits */
+            mpfr_ui_sub (t, 1, t, MPFR_RNDN);   /* high n bits cancel with 1 */
+            mpfr_prec_round (t, n, MPFR_RNDN);  /* t is correct to n bits */
+            mpfr_mul (t, t, x, MPFR_RNDN);      /* t is correct to n bits */
+            mpfr_prec_round (x, 2 * n, MPFR_RNDN); /* exact */
+            mpfr_add (x, x, t, MPFR_RNDN);      /* x is correct to 2n bits */
+
+    """
+    check_initialized(x)
+    check_precision(prec)
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_prec_round(&x._value, prec, rnd)
+
+def mpfr_can_round(Mpfr_t b not None, cmpfr.mpfr_exp_t err,
+                   cmpfr.mpfr_rnd_t rnd1, cmpfr.mpfr_rnd_t rnd2,
+                   cmpfr.mpfr_prec_t prec):
+    """
+    Assuming b is an approximation of an unknown number x in the direction rnd1
+    with error at most two to the power E(b)-err where E(b) is the exponent of
+    b, return a non-zero value if one is able to round correctly x to precision
+    prec with the direction rnd2, and 0 otherwise (including for NaN and
+    Inf). This function does not modify its arguments.
+
+    If rnd1 is MPFR_RNDN, then the sign of the error is unknown, but its
+    absolute value is the same, so that the possible range is twice as large as
+    with a directed rounding for rnd1.
+
+    Note: if one wants to also determine the correct ternary value when
+    rounding b to precision prec with rounding mode rnd, a useful trick is the
+    following:
+
+     if mpfr_can_round(b, err, MPFR_RNDN, MPFR_RNDZ, prec + (rnd == MPFR_RNDN)):
+         ...
+
+    Indeed, if rnd is MPFR_RNDN, this will check if one can round to prec+1
+    bits with a directed rounding: if so, one can surely round to nearest to
+    prec bits, and in addition one can determine the correct ternary value,
+    which would not be the case when b is near from a value exactly
+    representable on prec bits.
+
+    """
+    check_initialized(b)
+    check_rounding_mode(rnd1)
+    check_rounding_mode(rnd2)
+    check_precision(prec)
+    return bool(cmpfr.mpfr_can_round(&b._value, err, rnd1, rnd2, prec))
+
+def mpfr_min_prec(Mpfr_t x not None):
+    """
+    Return the minimal number of bits required to store the significand of x,
+    and 0 for special values, including 0. (Warning: the returned value can be
+    less than MPFR_PREC_MIN.)
+
+    The function name is subject to change.
+
+    """
+    check_initialized(x)
+    return cmpfr.mpfr_min_prec(&x._value)
+
+def mpfr_print_rnd_mode(cmpfr.mpfr_rnd_t rnd):
+    """
+    Return a string ("MPFR_RNDD", "MPFR_RNDU", "MPFR_RNDN", "MPFR_RNDZ",
+    "MPFR_RNDA") corresponding to the rounding mode rnd, or a null pointer if
+    rnd is an invalid rounding mode.
+
+    """
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_print_rnd_mode(rnd)
+
 
 # Functions that are documented in the MPFR 3.0.1 documentation, but aren't
 # (currently) wrapped:

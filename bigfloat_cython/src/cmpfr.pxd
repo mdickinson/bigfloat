@@ -256,7 +256,20 @@ cdef extern from "mpfr.h":
     int mpfr_integer_p(mpfr_ptr op)
 
 
+    ###########################################################################
+    # 5.11 Rounding Related Functions
+    ###########################################################################
 
+    void mpfr_set_default_rounding_mode(mpfr_rnd_t rnd)
+    mpfr_rnd_t mpfr_get_default_rounding_mode()
+    int mpfr_prec_round(mpfr_ptr x, mpfr_prec_t prec, mpfr_rnd_t rnd)
+    int mpfr_can_round(
+        mpfr_ptr b, mpfr_exp_t err,
+        mpfr_rnd_t rnd1, mpfr_rnd_t rnd2,
+        mpfr_prec_t prec
+    )
+    mpfr_prec_t mpfr_min_prec(mpfr_ptr x)
+    char *mpfr_print_rnd_mode(mpfr_rnd_t rnd)
 
 
     void mpfr_clear_flags()

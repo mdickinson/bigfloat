@@ -170,7 +170,13 @@ from bigfloat.mpfr import (
     mpfr_remquo,
     mpfr_integer_p,
 
-
+    # 5.11 Rounding Related Functions
+    mpfr_set_default_rounding_mode,
+    mpfr_get_default_rounding_mode,
+    mpfr_prec_round,
+    mpfr_can_round,
+    mpfr_min_prec,
+    mpfr_print_rnd_mode,
 
     mpfr_signbit,
 
@@ -291,7 +297,7 @@ class TestMpfr(unittest.TestCase):
         for arg in args:
             self.assertIs(mpfr_initialized_p(arg), False)
 
-    def get_and_set_default_prec(self):
+    def test_get_and_set_default_prec(self):
         old_default_prec = mpfr_get_default_prec()
         mpfr_set_default_prec(200)
         try:
@@ -1309,6 +1315,79 @@ class TestMpfr(unittest.TestCase):
                 True,
             )
 
+    # 5.11 Rounding Related Functions
+    def test_get_and_set_default_rounding_mode(self):
+        old_default_rounding_mode = mpfr_get_default_rounding_mode()
+        mpfr_set_default_rounding_mode(MPFR_RNDZ)
+        try:
+            self.assertEqual(mpfr_get_default_rounding_mode(), MPFR_RNDZ)
+        finally:
+            mpfr_set_default_rounding_mode(old_default_rounding_mode)
+        self.assertEqual(
+            mpfr_get_default_rounding_mode(),
+            old_default_rounding_mode,
+        )
+
+    def test_prec_round(self):
+        x = Mpfr_t()
+        mpfr_init2(x, 100)
+        mpfr_set_d(x, 5.123, MPFR_RNDN)
+        mpfr_prec_round(x, 200, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(x, MPFR_RNDN),
+            5.123,
+        )
+        self.assertEqual(mpfr_get_prec(x), 200)
+        mpfr_prec_round(x, 3, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(x, MPFR_RNDN),
+            5.0,
+        )
+        self.assertEqual(mpfr_get_prec(x), 3)
+
+    def test_min_prec(self):
+        x = Mpfr_t()
+        mpfr_init2(x, 53)
+        mpfr_set_d(x, 5.0, MPFR_RNDN)
+        self.assertEqual(mpfr_min_prec(x), 3)
+
+    def test_can_round(self):
+        # Example: we have an (very good) approximation b = 24.5 of some value
+        # x, and we need to know x to 5 bits.
+        b = Mpfr_t()
+        mpfr_init2(b, 53)
+        mpfr_set_d(b, 24.5, MPFR_RNDN)
+        # Here we can't round to nearest, since we don't know whether to round
+        # to 24 or 25.
+        self.assertIs(
+            mpfr_can_round(b, 1000, MPFR_RNDN, MPFR_RNDN, 5),
+            False,
+        )
+        # But we can round down safely.
+        self.assertIs(
+            mpfr_can_round(b, 1000, MPFR_RNDN, MPFR_RNDZ, 5),
+            True,
+        )
+        # We can also round to nearest safely if the original value 24.5 was
+        # the result of a rounding up ...
+        self.assertIs(
+            mpfr_can_round(b, 1000, MPFR_RNDU, MPFR_RNDN, 5),
+            True,
+        )
+        # ... but not if it was the result of a rounding down ...
+        self.assertIs(
+            mpfr_can_round(b, 1000, MPFR_RNDD, MPFR_RNDN, 5),
+            False,
+        )
+
+    def test_print_rnd_mode(self):
+        self.assertEqual(mpfr_print_rnd_mode(MPFR_RNDN), 'MPFR_RNDN')
+        self.assertEqual(mpfr_print_rnd_mode(MPFR_RNDD), 'MPFR_RNDD')
+        self.assertEqual(mpfr_print_rnd_mode(MPFR_RNDU), 'MPFR_RNDU')
+        self.assertEqual(mpfr_print_rnd_mode(MPFR_RNDZ), 'MPFR_RNDZ')
+        self.assertEqual(mpfr_print_rnd_mode(MPFR_RNDA), 'MPFR_RNDA')
+
+
 
     def test_set_d(self):
         x = Mpfr(30)
@@ -1444,7 +1523,7 @@ class TestMpfr(unittest.TestCase):
         self.assertIsInstance(mpfr_get_emax_min(), (int, long))
         self.assertIsInstance(mpfr_get_emax_max(), (int, long))
 
-    def test_set_emin(self):
+    def test_get_and_set_emin(self):
         # Setting exponent bounds
         old_emin = mpfr_get_emin()
         mpfr_set_emin(-56)
@@ -1454,7 +1533,7 @@ class TestMpfr(unittest.TestCase):
             mpfr_set_emin(old_emin)
         self.assertEqual(mpfr_get_emin(), old_emin)
 
-    def test_set_emax(self):
+    def test_get_and_set_emax(self):
         old_emax = mpfr_get_emax()
         mpfr_set_emax(777)
         try:
