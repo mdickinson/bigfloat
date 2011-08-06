@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with the bigfloat module.  If not, see <http://www.gnu.org/licenses/>.
 
+import contextlib
 import sys
 import unittest
 
@@ -236,6 +237,25 @@ from bigfloat.mpfr import (
     mpfr_erangeflag_p,
 )
 
+# Context manager for making a temporary change to emin.
+@contextlib.contextmanager
+def temporary_emin(emin):
+    old_emin = mpfr_get_emin()
+    mpfr_set_emin(emin)
+    try:
+        yield
+    finally:
+        mpfr_set_emin(old_emin)
+
+# Context manager for making a temporary change to emax.
+@contextlib.contextmanager
+def temporary_emax(emax):
+    old_emax = mpfr_get_emax()
+    mpfr_set_emax(emax)
+    try:
+        yield
+    finally:
+        mpfr_set_emax(old_emax)
 
 # Factory function for creating and initializing Mpfr_t instances.
 def Mpfr(precision):
@@ -1574,6 +1594,49 @@ class TestMpfr(unittest.TestCase):
 
     def test_buildopt_decimal_p(self):
         self.assertIsInstance(mpfr_buildopt_decimal_p(), bool)
+
+
+    # 5.13 Exception Related Functions
+    def test_check_range(self):
+        # Example:  with emax = 4, and precision 3, the maximum representable
+        # finite value is 14.0.
+
+        inf = float('inf')
+        test_data = [
+            ((14.0, 1, MPFR_RNDN), (14.0, 1)),    # exact value in (13, 14)
+            ((14.0, 0, MPFR_RNDN), (14.0, 0)),    # exact value 14
+            ((14.0, -1, MPFR_RNDN), (14.0, -1)),  # exact value in (14, 15)
+            ((16.0, 1, MPFR_RNDN), (inf, 1)),     # exact value in [15, 16)
+            ((16.0, 0, MPFR_RNDN), (inf, 1)),     # exact value 16
+            ((16.0, -1, MPFR_RNDN), (inf, 1)),    # exact value in [16, 18]
+            ((20.0, 1, MPFR_RNDN), (inf, 1)),     # exact value in (18, 20)
+
+            ((14.0, 1, MPFR_RNDU), (14.0, 1)),    # exact value in (12, 14)
+            ((14.0, 0, MPFR_RNDU), (14.0, 0)),    # exact value 14
+            ((16.0, 1, MPFR_RNDU), (inf, 1)),     # exact value in (14, 16)
+            ((16.0, 0, MPFR_RNDU), (inf, 1)),     # exact value 16
+            ((20.0, 1, MPFR_RNDU), (inf, 1)),     # exact value in (16, 20)
+
+            ((12.0, -1, MPFR_RNDD), (12.0, -1)),  # exact value in (12, 14)
+            ((14.0, 0, MPFR_RNDD), (14.0, 0)),    # exact value 14
+            ((14.0, -1, MPFR_RNDD), (14.0, -1)),  # exact value in (14, 16)
+            ((16.0, 0, MPFR_RNDD), (14.0, -1)),   # exact value 16
+            ((16.0, -1, MPFR_RNDD), (14.0, -1)),  # exact value in (16, 20)
+        ]
+
+        x = Mpfr(3)
+        for (val_in, ternary_in, rnd), (val_out, ternary_out) in test_data:
+            # All test values should be exactly representable in 4 bits.
+            print val_in, ternary_in, rnd
+            t = mpfr_set_d(x, val_in, MPFR_RNDN)
+            assert t == 0
+            with temporary_emax(4):
+                actual_ternary_out = mpfr_check_range(x, ternary_in, rnd)
+            self.assertEqual(
+                mpfr_get_d(x, MPFR_RNDN),
+                val_out,
+            )
+            self.assertEqual(actual_ternary_out, ternary_out)
 
 
     def test_set_d(self):
