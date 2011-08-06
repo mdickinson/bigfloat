@@ -292,8 +292,21 @@ cdef extern from "mpfr.h":
     int mpfr_buildopt_decimal_p()
 
 
+    ###########################################################################
+    # 5.13 Exception Related Functions
+    ###########################################################################
 
-    void mpfr_clear_flags()
+    mpfr_exp_t mpfr_get_emin()
+    mpfr_exp_t mpfr_get_emax()
+    int mpfr_set_emin(mpfr_exp_t exp)
+    int mpfr_set_emax(mpfr_exp_t exp)
+    mpfr_exp_t mpfr_get_emin_min()
+    mpfr_exp_t mpfr_get_emin_max()
+    mpfr_exp_t mpfr_get_emax_min()
+    mpfr_exp_t mpfr_get_emax_max()
+    int mpfr_check_range(mpfr_ptr x, int t, mpfr_rnd_t rnd)
+    int mpfr_subnormalize(mpfr_ptr x, int t, mpfr_rnd_t rnd)
+
     void mpfr_clear_underflow()
     void mpfr_clear_overflow()
     void mpfr_clear_nanflag()
@@ -306,28 +319,10 @@ cdef extern from "mpfr.h":
     void mpfr_set_inexflag()
     void mpfr_set_erangeflag()
 
+    void mpfr_clear_flags()
+
     int mpfr_underflow_p()
     int mpfr_overflow_p()
     int mpfr_nanflag_p()
     int mpfr_inexflag_p()
     int mpfr_erangeflag_p()
-
-    int mpfr_check_range(mpfr_ptr x, int t, mpfr_rnd_t rnd)
-    int mpfr_subnormalize(mpfr_ptr x, int t, mpfr_rnd_t rnd)
-
-
-
-
-
-    # Functions to get and set exponent min and max values.
-    mpfr_exp_t mpfr_get_emin()
-    mpfr_exp_t mpfr_get_emin_min()
-    mpfr_exp_t mpfr_get_emin_max()
-    mpfr_exp_t mpfr_get_emax()
-    mpfr_exp_t mpfr_get_emax_min()
-    mpfr_exp_t mpfr_get_emax_max()
-    int mpfr_set_emin(mpfr_exp_t exp)
-    int mpfr_set_emax(mpfr_exp_t exp)
-
-
-    long int mpfr_get_si(mpfr_ptr op, mpfr_rnd_t rnd)

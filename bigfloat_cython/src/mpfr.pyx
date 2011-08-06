@@ -2329,6 +2329,281 @@ def mpfr_buildopt_decimal_p():
     return bool(cmpfr.mpfr_buildopt_decimal_p())
 
 
+###############################################################################
+# 5.13 Exception Related Functions
+###############################################################################
+
+
+def mpfr_get_emin():
+    """
+    Return smallest exponent allowed.
+
+    Return the (current) smallest and exponent allowed for a floating-point
+    variable. The smallest positive value of a floating-point variable is one
+    half times 2 raised to the smallest exponent.
+
+    """
+    return cmpfr.mpfr_get_emin()
+
+def mpfr_get_emax():
+    """
+    Return largest exponent allowed.
+
+    Return the (current) largest exponent allowed for a floating-point
+    variable. The largest positive value of a floating-point variable has the
+    form (1 - epsilon) times 2 raised to the largest exponent, where epsilon
+    depends on the precision of the considered variable.
+
+    """
+    return cmpfr.mpfr_get_emax()
+
+def mpfr_set_emin(cmpfr.mpfr_exp_t exp):
+    """
+    Set the smallest exponent allowed for a floating-point variable.
+
+    Raises ValueError when exp is not in the range accepted by the
+    implementation (in that case the smallest exponent is not changed).
+
+    If the user changes the exponent range, it is her/his responsibility to
+    check that all current floating-point variables are in the new allowed
+    range (for example using mpfr_check_range), otherwise the subsequent
+    behavior will be undefined, in the sense of the ISO C standard.
+
+    """
+    error_code = cmpfr.mpfr_set_emin(exp)
+    if error_code:
+        raise ValueError("new exponent for emin is outside allowable range")
+
+def mpfr_set_emax(cmpfr.mpfr_exp_t exp):
+    """
+    Set the largest exponent allowed for a floating-point variable.
+
+    Raises ValueError when exp is not in the range accepted by the
+    implementation (in that case the largest exponent is not changed).
+
+    If the user changes the exponent range, it is her/his responsibility to
+    check that all current floating-point variables are in the new allowed
+    range (for example using mpfr_check_range), otherwise the subsequent
+    behavior will be undefined, in the sense of the ISO C standard.
+
+    """
+    error_code = cmpfr.mpfr_set_emax(exp)
+    if error_code:
+        raise ValueError("new exponent for emin is outside allowable range")
+
+def mpfr_get_emin_min():
+    """
+    Return the minimum exponent allowed for mpfr_set_emin.
+
+    This value is implementation dependent, thus a program using
+    mpfr_set_emin(mpfr_get_emin_min()) may not be portable.
+
+    """
+    return cmpfr.mpfr_get_emin_min()
+
+def mpfr_get_emin_max():
+    """
+    Return the maximum exponent allowed for mpfr_set_emin.
+
+    This value is implementation dependent, thus a program using
+    mpfr_set_emin(mpfr_get_emin_max()) may not be portable.
+
+    """
+    return cmpfr.mpfr_get_emin_max()
+
+def mpfr_get_emax_min():
+    """
+    Return the minimum exponent allowed for mpfr_set_emax.
+
+    This value is implementation dependent, thus a program using
+    mpfr_set_emax(mpfr_get_emax_min()) may not be portable.
+
+    """
+    return cmpfr.mpfr_get_emax_min()
+
+def mpfr_get_emax_max():
+    """
+    Return the maximum exponent allowed for mpfr_set_emax.
+
+    This value is implementation dependent, thus a program using
+    mpfr_set_emax(mpfr_get_emax_max()) may not be portable.
+
+    """
+    return cmpfr.mpfr_get_emax_max()
+
+def mpfr_check_range(Mpfr_t x not None, int t, cmpfr.mpfr_rnd_t rnd):
+    """
+    Modify x if necessary to fit into the current exponent range.
+
+    This function assumes that x is the correctly-rounded value of some real
+    value y in the direction rnd and some extended exponent range, and that t
+    is the corresponding ternary value. For example, one performed t = mpfr_log
+    (x, u, rnd), and y is the exact logarithm of u. Thus t is negative if x is
+    smaller than y, positive if x is larger than y, and zero if x equals
+    y. This function modifies x if needed to be in the current range of
+    acceptable values: It generates an underflow or an overflow if the exponent
+    of x is outside the current allowed range; the value of t may be used to
+    avoid a double rounding. This function returns zero if the new value of x
+    equals the exact one y, a positive value if that new value is larger than
+    y, and a negative value if it is smaller than y. Note that unlike most
+    functions, the new result x is compared to the (unknown) exact one y, not
+    the input value x, i.e., the ternary value is propagated.
+
+    Note: If x is an infinity and t is different from zero (i.e., if the
+    rounded result is an inexact infinity), then the overflow flag is set. This
+    is useful because mpfr_check_range is typically called (at least in MPFR
+    functions) after restoring the flags that could have been set due to
+    internal computations.
+
+    """
+    check_initialized(x)
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_check_range(&x._value, t, rnd)
+
+def mpfr_subnormalize(Mpfr_t x not None, int t, cmpfr.mpfr_rnd_t rnd):
+    """
+    Modify x if necessary to account for subnormalization.
+
+    This function rounds x emulating subnormal number arithmetic: if x is
+    outside the subnormal exponent range, it just propagates the ternary value
+    t; otherwise, it rounds x to precision EXP(x)-emin+1 according to rounding
+    mode rnd and previous ternary value t, avoiding double rounding
+    problems. More precisely in the subnormal domain, denoting by e the value
+    of emin, x is rounded in fixed-point arithmetic to an integer multiple of
+    two to the power e−1; as a consequence, 1.5 multiplied by two to the power
+    e−1 when t is zero is rounded to two to the power e with rounding to
+    nearest.
+
+    PREC(x) is not modified by this function. rnd and t must be the rounding
+    mode and the returned ternary value used when computing x (as in
+    mpfr_check_range). The subnormal exponent range is from emin to
+    emin+PREC(x)-1. If the result cannot be represented in the current exponent
+    range (due to a too small emax), the behavior is undefined. Note that
+    unlike most functions, the result is compared to the exact one, not the
+    input value x, i.e., the ternary value is propagated.
+
+    As usual, if the returned ternary value is non zero, the inexact flag is
+    set. Moreover, if a second rounding occurred (because the input x was in
+    the subnormal range), the underflow flag is set.
+
+    """
+    check_initialized(x)
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_subnormalize(&x._value, t, rnd)
+
+def mpfr_clear_underflow():
+    """
+    Clear the underflow flag.
+
+    """
+    cmpfr.mpfr_clear_underflow()
+
+def mpfr_clear_overflow():
+    """
+    Clear the overflow flag.
+
+    """
+    cmpfr.mpfr_clear_overflow()
+
+def mpfr_clear_nanflag():
+    """
+    Clear the invalid flag.
+
+    """
+    cmpfr.mpfr_clear_nanflag()
+
+def mpfr_clear_inexflag():
+    """
+    Clear the inexact flag.
+
+    """
+    cmpfr.mpfr_clear_inexflag()
+
+def mpfr_clear_erangeflag():
+    """
+    Clear the erange flag.
+
+    """
+    cmpfr.mpfr_clear_erangeflag()
+
+def mpfr_set_underflow():
+    """
+    Set the underflow flag.
+
+    """
+    cmpfr.mpfr_set_underflow()
+
+def mpfr_set_overflow():
+    """
+    Set the overflow flag.
+
+    """
+    cmpfr.mpfr_set_overflow()
+
+def mpfr_set_nanflag():
+    """
+    Set the invalid flag.
+
+    """
+    cmpfr.mpfr_set_nanflag()
+
+def mpfr_set_inexflag():
+    """
+    Set the inexact flag.
+
+    """
+    cmpfr.mpfr_set_inexflag()
+
+def mpfr_set_erangeflag():
+    """
+    Set the erange flag.
+
+    """
+    cmpfr.mpfr_set_erangeflag()
+
+def mpfr_clear_flags():
+    """
+    Clear all global flags.
+
+    """
+    cmpfr.mpfr_clear_flags()
+
+def mpfr_underflow_p():
+    """
+    Return True if the underflow flag is set, else False.
+
+    """
+    return bool(cmpfr.mpfr_underflow_p())
+
+def mpfr_overflow_p():
+    """
+    Return True if the overflow flag is set, else False.
+
+    """
+    return bool(cmpfr.mpfr_overflow_p())
+
+def mpfr_nanflag_p():
+    """
+    Return True if the invalid flag is set, else False.
+
+    """
+    return bool(cmpfr.mpfr_nanflag_p())
+
+def mpfr_inexflag_p():
+    """
+    Return True if the inexact flag is set, else False.
+
+    """
+    return bool(cmpfr.mpfr_inexflag_p())
+
+def mpfr_erangeflag_p():
+    """
+    Return True if the erange flag is set, else False.
+
+    """
+    return bool(cmpfr.mpfr_erangeflag_p())
+
+
 
 # Functions that are documented in the MPFR 3.0.1 documentation, but aren't
 # (currently) wrapped:
@@ -2465,280 +2740,21 @@ def mpfr_buildopt_decimal_p():
 #  mpfr_urandom
 #
 #
-#  Sections 5.13 and later: details to come.
-
-
-
-
-
-
-# Functions for getting exponent bounds.
-def mpfr_get_emin():
-    """
-    Return smallest exponent allowed.
-
-    Return the (current) smallest and exponent allowed for a floating-point
-    variable. The smallest positive value of a floating-point variable is one
-    half times 2 raised to the smallest exponent.
-
-    """
-    return cmpfr.mpfr_get_emin()
-
-def mpfr_get_emax():
-    """
-    Return largest exponent allowed.
-
-    Return the (current) largest exponent allowed for a floating-point
-    variable. The largest positive value of a floating-point variable has the
-    form (1 - epsilon) times 2 raised to the largest exponent, where epsilon
-    depends on the precision of the considered variable.
-
-    """
-    return cmpfr.mpfr_get_emax()
-
-def mpfr_get_emin_min():
-    """
-    Return the minimum exponent allowed for mpfr_set_emin.
-
-    This value is implementation dependent, thus a program using
-    mpfr_set_emin(mpfr_get_emin_min()) may not be portable.
-
-    """
-    return cmpfr.mpfr_get_emin_min()
-
-def mpfr_get_emin_max():
-    """
-    Return the maximum exponent allowed for mpfr_set_emin.
-
-    This value is implementation dependent, thus a program using
-    mpfr_set_emin(mpfr_get_emin_max()) may not be portable.
-
-    """
-    return cmpfr.mpfr_get_emin_max()
-
-def mpfr_get_emax_min():
-    """
-    Return the minimum exponent allowed for mpfr_set_emax.
-
-    This value is implementation dependent, thus a program using
-    mpfr_set_emax(mpfr_get_emax_min()) may not be portable.
-
-    """
-    return cmpfr.mpfr_get_emax_min()
-
-def mpfr_get_emax_max():
-    """
-    Return the maximum exponent allowed for mpfr_set_emax.
-
-    This value is implementation dependent, thus a program using
-    mpfr_set_emax(mpfr_get_emax_max()) may not be portable.
-
-    """
-    return cmpfr.mpfr_get_emax_max()
-
-def mpfr_set_emin(cmpfr.mpfr_exp_t exp):
-    """
-    Set the smallest exponent allowed for a floating-point variable.
-
-    Raises ValueError when exp is not in the range accepted by the
-    implementation (in that case the smallest exponent is not changed).
-
-    If the user changes the exponent range, it is her/his responsibility to
-    check that all current floating-point variables are in the new allowed
-    range (for example using mpfr_check_range), otherwise the subsequent
-    behavior will be undefined, in the sense of the ISO C standard.
-
-    """
-    error_code = cmpfr.mpfr_set_emin(exp)
-    if error_code:
-        raise ValueError("new exponent for emin is outside allowable range")
-
-def mpfr_set_emax(cmpfr.mpfr_exp_t exp):
-    """
-    Set the largest exponent allowed for a floating-point variable.
-
-    Raises ValueError when exp is not in the range accepted by the
-    implementation (in that case the largest exponent is not changed).
-
-    If the user changes the exponent range, it is her/his responsibility to
-    check that all current floating-point variables are in the new allowed
-    range (for example using mpfr_check_range), otherwise the subsequent
-    behavior will be undefined, in the sense of the ISO C standard.
-
-    """
-    error_code = cmpfr.mpfr_set_emax(exp)
-    if error_code:
-        raise ValueError("new exponent for emin is outside allowable range")
-
-def mpfr_clear_underflow():
-    """
-    Clear the underflow flag.
-
-    """
-    cmpfr.mpfr_clear_underflow()
-
-def mpfr_clear_overflow():
-    """
-    Clear the overflow flag.
-
-    """
-    cmpfr.mpfr_clear_overflow()
-
-def mpfr_clear_nanflag():
-    """
-    Clear the invalid flag.
-
-    """
-    cmpfr.mpfr_clear_nanflag()
-
-def mpfr_clear_inexflag():
-    """
-    Clear the inexact flag.
-
-    """
-    cmpfr.mpfr_clear_inexflag()
-
-def mpfr_clear_erangeflag():
-    """
-    Clear the erange flag.
-
-    """
-    cmpfr.mpfr_clear_erangeflag()
-
-def mpfr_clear_flags():
-    """
-    Clear all global flags.
-
-    """
-    cmpfr.mpfr_clear_flags()
-
-def mpfr_set_underflow():
-    """
-    Set the underflow flag.
-
-    """
-    cmpfr.mpfr_set_underflow()
-
-def mpfr_set_overflow():
-    """
-    Set the overflow flag.
-
-    """
-    cmpfr.mpfr_set_overflow()
-
-def mpfr_set_nanflag():
-    """
-    Set the invalid flag.
-
-    """
-    cmpfr.mpfr_set_nanflag()
-
-def mpfr_set_inexflag():
-    """
-    Set the inexact flag.
-
-    """
-    cmpfr.mpfr_set_inexflag()
-
-def mpfr_set_erangeflag():
-    """
-    Set the erange flag.
-
-    """
-    cmpfr.mpfr_set_erangeflag()
-
-def mpfr_underflow_p():
-    """
-    Return True if the underflow flag is set, else False.
-
-    """
-    return bool(cmpfr.mpfr_underflow_p())
-
-def mpfr_overflow_p():
-    """
-    Return True if the overflow flag is set, else False.
-
-    """
-    return bool(cmpfr.mpfr_overflow_p())
-
-def mpfr_nanflag_p():
-    """
-    Return True if the invalid flag is set, else False.
-
-    """
-    return bool(cmpfr.mpfr_nanflag_p())
-
-def mpfr_inexflag_p():
-    """
-    Return True if the inexact flag is set, else False.
-
-    """
-    return bool(cmpfr.mpfr_inexflag_p())
-
-def mpfr_erangeflag_p():
-    """
-    Return True if the erange flag is set, else False.
-
-    """
-    return bool(cmpfr.mpfr_erangeflag_p())
-
-def mpfr_check_range(Mpfr_t x not None, int t, cmpfr.mpfr_rnd_t rnd):
-    """
-    Modify x if necessary to fit into the current exponent range.
-
-    This function assumes that x is the correctly-rounded value of some real
-    value y in the direction rnd and some extended exponent range, and that t
-    is the corresponding ternary value. For example, one performed t = mpfr_log
-    (x, u, rnd), and y is the exact logarithm of u. Thus t is negative if x is
-    smaller than y, positive if x is larger than y, and zero if x equals
-    y. This function modifies x if needed to be in the current range of
-    acceptable values: It generates an underflow or an overflow if the exponent
-    of x is outside the current allowed range; the value of t may be used to
-    avoid a double rounding. This function returns zero if the new value of x
-    equals the exact one y, a positive value if that new value is larger than
-    y, and a negative value if it is smaller than y. Note that unlike most
-    functions, the new result x is compared to the (unknown) exact one y, not
-    the input value x, i.e., the ternary value is propagated.
-
-    Note: If x is an infinity and t is different from zero (i.e., if the
-    rounded result is an inexact infinity), then the overflow flag is set. This
-    is useful because mpfr_check_range is typically called (at least in MPFR
-    functions) after restoring the flags that could have been set due to
-    internal computations.
-
-    """
-    check_initialized(x)
-    check_rounding_mode(rnd)
-    return cmpfr.mpfr_check_range(&x._value, t, rnd)
-
-def mpfr_subnormalize(Mpfr_t x not None, int t, cmpfr.mpfr_rnd_t rnd):
-    """
-    Modify x if necessary to account for subnormalization.
-
-    This function rounds x emulating subnormal number arithmetic: if x is
-    outside the subnormal exponent range, it just propagates the ternary value
-    t; otherwise, it rounds x to precision EXP(x)-emin+1 according to rounding
-    mode rnd and previous ternary value t, avoiding double rounding
-    problems. More precisely in the subnormal domain, denoting by e the value
-    of emin, x is rounded in fixed-point arithmetic to an integer multiple of
-    two to the power e−1; as a consequence, 1.5 multiplied by two to the power
-    e−1 when t is zero is rounded to two to the power e with rounding to
-    nearest.
-
-    PREC(x) is not modified by this function. rnd and t must be the rounding
-    mode and the returned ternary value used when computing x (as in
-    mpfr_check_range). The subnormal exponent range is from emin to
-    emin+PREC(x)-1. If the result cannot be represented in the current exponent
-    range (due to a too small emax), the behavior is undefined. Note that
-    unlike most functions, the result is compared to the exact one, not the
-    input value x, i.e., the ternary value is propagated.
-
-    As usual, if the returned ternary value is non zero, the inexact flag is
-    set. Moreover, if a second rounding occurred (because the input x was in
-    the subnormal range), the underflow flag is set.
-
-    """
-    check_initialized(x)
-    check_rounding_mode(rnd)
-    return cmpfr.mpfr_subnormalize(&x._value, t, rnd)
-
+#  5.13 Exception Related Functions
+#  --------------------------------
+#
+#  All functions in this section wrapped.
+#
+#
+#  5.14 Compatibility with MPFR
+#  ----------------------------
+#
+#  No functions in this section wrapped.
+#
+#
+#  5.15 Custom Interface
+#  ---------------------
+#
+#  No functions in this section wrapped.
+
+#  Sections 5.14 and later: details to come.

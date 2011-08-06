@@ -178,7 +178,6 @@ from bigfloat.mpfr import (
     mpfr_min_prec,
     mpfr_print_rnd_mode,
 
-
     # 5.12 Miscellaneous Functions
     mpfr_nexttoward,
     mpfr_nextabove,
@@ -201,16 +200,20 @@ from bigfloat.mpfr import (
     mpfr_buildopt_tls_p,
     mpfr_buildopt_decimal_p,
 
-
+    # 5.13 Exception Related Functions
     mpfr_get_emin,
-    mpfr_get_emin_min,
-    mpfr_get_emin_max,
     mpfr_get_emax,
-    mpfr_get_emax_min,
-    mpfr_get_emax_max,
 
     mpfr_set_emin,
     mpfr_set_emax,
+
+    mpfr_get_emin_min,
+    mpfr_get_emin_max,
+    mpfr_get_emax_min,
+    mpfr_get_emax_max,
+
+    mpfr_check_range,
+    mpfr_subnormalize,
 
     mpfr_clear_underflow,
     mpfr_clear_overflow,
@@ -218,13 +221,13 @@ from bigfloat.mpfr import (
     mpfr_clear_inexflag,
     mpfr_clear_erangeflag,
 
-    mpfr_clear_flags,
-
     mpfr_set_underflow,
     mpfr_set_overflow,
     mpfr_set_nanflag,
     mpfr_set_inexflag,
     mpfr_set_erangeflag,
+
+    mpfr_clear_flags,
 
     mpfr_underflow_p,
     mpfr_overflow_p,
