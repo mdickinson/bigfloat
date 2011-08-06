@@ -2135,8 +2135,9 @@ def mpfr_min_prec(Mpfr_t x not None):
 def mpfr_print_rnd_mode(cmpfr.mpfr_rnd_t rnd):
     """
     Return a string ("MPFR_RNDD", "MPFR_RNDU", "MPFR_RNDN", "MPFR_RNDZ",
-    "MPFR_RNDA") corresponding to the rounding mode rnd, or a null pointer if
-    rnd is an invalid rounding mode.
+    "MPFR_RNDA") corresponding to the rounding mode rnd.
+
+    Raise a ValueError if rnd is an invalid rounding mode.
 
     """
     check_rounding_mode(rnd)

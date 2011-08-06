@@ -1386,7 +1386,8 @@ class TestMpfr(unittest.TestCase):
         self.assertEqual(mpfr_print_rnd_mode(MPFR_RNDU), 'MPFR_RNDU')
         self.assertEqual(mpfr_print_rnd_mode(MPFR_RNDZ), 'MPFR_RNDZ')
         self.assertEqual(mpfr_print_rnd_mode(MPFR_RNDA), 'MPFR_RNDA')
-
+        with self.assertRaises(ValueError):
+            mpfr_print_rnd_mode(-1)
 
 
     def test_set_d(self):
