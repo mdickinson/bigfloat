@@ -1598,46 +1598,81 @@ class TestMpfr(unittest.TestCase):
 
     # 5.13 Exception Related Functions
     def test_check_range(self):
-        # Example:  with emax = 4, and precision 3, the maximum representable
-        # finite value is 14.0.
-
+        # Make some tests with precision 3 and exponent range (0, 4).  With
+        # this format, the largest representable finite number is 14, and the
+        # smallest is 0.5.
         inf = float('inf')
         test_data = [
-            ((14.0, 1, MPFR_RNDN), (14.0, 1)),    # exact value in (13, 14)
-            ((14.0, 0, MPFR_RNDN), (14.0, 0)),    # exact value 14
-            ((14.0, -1, MPFR_RNDN), (14.0, -1)),  # exact value in (14, 15)
-            ((16.0, 1, MPFR_RNDN), (inf, 1)),     # exact value in [15, 16)
-            ((16.0, 0, MPFR_RNDN), (inf, 1)),     # exact value 16
-            ((16.0, -1, MPFR_RNDN), (inf, 1)),    # exact value in [16, 18]
-            ((20.0, 1, MPFR_RNDN), (inf, 1)),     # exact value in (18, 20)
+            ((14.0, 1, MPFR_RNDN), (14.0, 1, 'inexflag')),
+            ((14.0, 0, MPFR_RNDN), (14.0, 0, '')),
+            ((14.0, -1, MPFR_RNDN), (14.0, -1, 'inexflag')),
+            ((16.0, 1, MPFR_RNDN), (inf, 1, 'inexflag overflow')),
+            ((16.0, 0, MPFR_RNDN), (inf, 1, 'inexflag overflow')),
+            ((16.0, -1, MPFR_RNDN), (inf, 1, 'inexflag overflow')),
+            ((20.0, 1, MPFR_RNDN), (inf, 1, 'inexflag overflow')),
 
-            ((14.0, 1, MPFR_RNDU), (14.0, 1)),    # exact value in (12, 14)
-            ((14.0, 0, MPFR_RNDU), (14.0, 0)),    # exact value 14
-            ((16.0, 1, MPFR_RNDU), (inf, 1)),     # exact value in (14, 16)
-            ((16.0, 0, MPFR_RNDU), (inf, 1)),     # exact value 16
-            ((20.0, 1, MPFR_RNDU), (inf, 1)),     # exact value in (16, 20)
+            ((14.0, 1, MPFR_RNDU), (14.0, 1, 'inexflag')),
+            ((14.0, 0, MPFR_RNDU), (14.0, 0, '')),
+            ((16.0, 1, MPFR_RNDU), (inf, 1, 'inexflag overflow')),
+            ((16.0, 0, MPFR_RNDU), (inf, 1, 'inexflag overflow')),
+            ((20.0, 1, MPFR_RNDU), (inf, 1, 'inexflag overflow')),
 
-            ((12.0, -1, MPFR_RNDD), (12.0, -1)),  # exact value in (12, 14)
-            ((14.0, 0, MPFR_RNDD), (14.0, 0)),    # exact value 14
-            ((14.0, -1, MPFR_RNDD), (14.0, -1)),  # exact value in (14, 16)
-            ((16.0, 0, MPFR_RNDD), (14.0, -1)),   # exact value 16
-            ((16.0, -1, MPFR_RNDD), (14.0, -1)),  # exact value in (16, 20)
+            ((12.0, -1, MPFR_RNDD), (12.0, -1, 'inexflag')),
+            ((14.0, 0, MPFR_RNDD), (14.0, 0, '')),
+            ((14.0, -1, MPFR_RNDD), (14.0, -1, 'inexflag')),
+            ((16.0, 0, MPFR_RNDD), (14.0, -1, 'inexflag overflow')),
+            ((16.0, -1, MPFR_RNDD), (14.0, -1, 'inexflag overflow')),
+
+            ((0.25, 1, MPFR_RNDN), (0, -1, 'underflow inexflag')),
+            ((0.25, 0, MPFR_RNDN), (0, -1, 'underflow inexflag')),
+            ((0.25, -1, MPFR_RNDN), (0.5, 1, 'underflow inexflag')),
+            ((0.4375, 1, MPFR_RNDN), (0.5, 1, 'underflow inexflag')),
+            ((0.4375, 0, MPFR_RNDN), (0.5, 1, 'underflow inexflag')),
+            ((0.4375, -1, MPFR_RNDN), (0.5, 1, 'underflow inexflag')),
+            ((0.5, 1, MPFR_RNDN), (0.5, 1, 'inexflag')),
+            ((0.5, 0, MPFR_RNDN), (0.5, 0, '')),
+            ((0.5, -1, MPFR_RNDN), (0.5, -1, 'inexflag')),
+
+            ((0.4375, 1, MPFR_RNDU), (0.5, 1, 'underflow inexflag')),
+            ((0.4375, 0, MPFR_RNDU), (0.5, 1, 'underflow inexflag')),
+            ((0.5, 1, MPFR_RNDU), (0.5, 1, 'inexflag')),
+            ((0.5, 0, MPFR_RNDU), (0.5, 0, '')),
+
+            ((0.4375, 0, MPFR_RNDD), (0, -1, 'underflow inexflag')),
+            ((0.4375, -1, MPFR_RNDD), (0, -1, 'underflow inexflag')),
+            ((0.5, 0, MPFR_RNDD), (0.5, 0, '')),
+            ((0.5, -1, MPFR_RNDD), (0.5, -1, 'inexflag')),
         ]
 
+        flags_testers = {
+            'underflow': mpfr_underflow_p,
+            'inexflag': mpfr_inexflag_p,
+            'overflow': mpfr_overflow_p,
+            'nanflag': mpfr_nanflag_p,
+            'erangeflag': mpfr_erangeflag_p,
+        }
+
+        def get_current_flags():
+            flags = set()
+            for flag, tester in flags_testers.items():
+                if tester():
+                    flags.add(flag)
+            return flags
+
         x = Mpfr(3)
-        for (val_in, ternary_in, rnd), (val_out, ternary_out) in test_data:
+        for (val_in, ternary_in, rnd), (val_out, ternary_out, flags) in test_data:
             # All test values should be exactly representable in 4 bits.
-            print val_in, ternary_in, rnd
             t = mpfr_set_d(x, val_in, MPFR_RNDN)
             assert t == 0
             with temporary_emax(4):
-                actual_ternary_out = mpfr_check_range(x, ternary_in, rnd)
-            self.assertEqual(
-                mpfr_get_d(x, MPFR_RNDN),
-                val_out,
-            )
+                with temporary_emin(0):
+                    mpfr_clear_flags()
+                    actual_ternary_out = mpfr_check_range(x, ternary_in, rnd)
+                    actual_flags = get_current_flags()
+                    actual_val_out = mpfr_get_d(x, MPFR_RNDN)
+            self.assertEqual(actual_val_out, val_out)
             self.assertEqual(actual_ternary_out, ternary_out)
-
+            self.assertEqual(actual_flags, set(flags.split()))
 
     def test_set_d(self):
         x = Mpfr(30)
