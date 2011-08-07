@@ -1644,7 +1644,7 @@ class TestMpfr(unittest.TestCase):
             ((0.5, -1, MPFR_RNDD), (0.5, -1, 'inexflag')),
         ]
 
-        flags_testers = {
+        flag_testers = {
             'underflow': mpfr_underflow_p,
             'inexflag': mpfr_inexflag_p,
             'overflow': mpfr_overflow_p,
@@ -1654,7 +1654,7 @@ class TestMpfr(unittest.TestCase):
 
         def get_current_flags():
             flags = set()
-            for flag, tester in flags_testers.items():
+            for flag, tester in flag_testers.items():
                 if tester():
                     flags.add(flag)
             return flags
@@ -1670,6 +1670,108 @@ class TestMpfr(unittest.TestCase):
                     actual_ternary_out = mpfr_check_range(x, ternary_in, rnd)
                     actual_flags = get_current_flags()
                     actual_val_out = mpfr_get_d(x, MPFR_RNDN)
+            self.assertEqual(actual_val_out, val_out)
+            self.assertEqual(actual_ternary_out, ternary_out)
+            self.assertEqual(actual_flags, set(flags.split()))
+
+    def test_subnormalize(self):
+        # Tests with precision 3 and emin 0.
+
+        # With this precision and exponent range, and gradual underflow, the
+        # representable finite positive numbers are, in order:
+        #
+        #   0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 5.0, 6.0, 7.0,
+        #   8.0, 10.0, 12.0, 14.0, ...
+        #
+        # Here only 0.5, 1.0 and 1.5 are subnormal.
+
+        # Note that mpfr_subnormalize expects that the exponent of the
+        # given number is already in the range [emin, emax].
+
+        # Underflow flag should be set for all values that would round to
+        # something less than 2 with unbounded exponent range; that's
+        # everything that's strictly less than 1.875.
+
+        test_data = [
+            # Exact result in the range [0, 0.25]
+            ((0.0, 0, MPFR_RNDN), (0.0, 0, '')),
+            # Hmm.  Apparently MPFR doesn't set the underflow flag for the case
+            # below.  Bug?  Probably not a problem in practice, since a normal
+            # function producing the result 0.0 with ternary value -1 will
+            # already have set the underflow flag.
+            ((0.0, -1, MPFR_RNDN), (0.0, -1, 'inexflag')),
+
+            # Exact result in the range (0.25, 0.5625]
+            ((0.5, 1, MPFR_RNDN), (0.5, 1, 'inexflag underflow')),
+            ((0.5, 0, MPFR_RNDN), (0.5, 0, 'underflow')),
+            ((0.5, -1, MPFR_RNDN), (0.5, -1, 'inexflag underflow')),
+
+            # Exact result in the range (0.5625, 0.6875)
+            ((0.625, 1, MPFR_RNDN), (0.5, -1, 'inexflag underflow')),
+            ((0.625, 0, MPFR_RNDN), (0.5, -1, 'inexflag underflow')),
+            ((0.625, -1, MPFR_RNDN), (0.5, -1, 'inexflag underflow')),
+
+            # Exact result in the range [0.6875, 0.8125]
+            ((0.75, 1, MPFR_RNDN), (0.5, -1, 'inexflag underflow')),
+            ((0.75, 0, MPFR_RNDN), (1.0, 1, 'inexflag underflow')),
+            ((0.75, -1, MPFR_RNDN), (1.0, 1, 'inexflag underflow')),
+
+            # Exact result in the range (0.8125, 0.9375)
+            ((0.875, 1, MPFR_RNDN), (1.0, 1, 'inexflag underflow')),
+            ((0.875, 0, MPFR_RNDN), (1.0, 1, 'inexflag underflow')),
+            ((0.875, -1, MPFR_RNDN), (1.0, 1, 'inexflag underflow')),
+
+            # Exact result in the range [0.9375, 1.125]
+            ((1.0, 1, MPFR_RNDN), (1.0, 1, 'inexflag underflow')),
+            ((1.0, 0, MPFR_RNDN), (1.0, 0, 'underflow')),
+            ((1.0, -1, MPFR_RNDN), (1.0, -1, 'inexflag underflow')),
+
+            # Exact result in the range (1.125, 1.375)
+            ((1.25, 1, MPFR_RNDN), (1.0, -1, 'inexflag underflow')),
+            ((1.25, 0, MPFR_RNDN), (1.0, -1, 'inexflag underflow')),
+            ((1.25, -1, MPFR_RNDN), (1.5, 1, 'inexflag underflow')),
+
+            # Exact result in the range [1.375, 1.625]
+            ((1.25, 1, MPFR_RNDN), (1.0, -1, 'inexflag underflow')),
+            ((1.25, 0, MPFR_RNDN), (1.0, -1, 'inexflag underflow')),
+            ((1.25, -1, MPFR_RNDN), (1.5, 1, 'inexflag underflow')),
+
+            # Exact result in the range (1.625, 1.875)
+            ((1.75, 1, MPFR_RNDN), (1.5, -1, 'inexflag underflow')),
+            ((1.75, 0, MPFR_RNDN), (2.0, 1, 'inexflag underflow')),
+            ((1.75, -1, MPFR_RNDN), (2.0, 1, 'inexflag underflow')),
+
+            # Exact result in the range [1.875, 2.25]
+            ((2.0, 1, MPFR_RNDN), (2.0, 1, 'inexflag')),
+            ((2.0, 0, MPFR_RNDN), (2.0, 0, '')),
+            ((2.0, -1, MPFR_RNDN), (2.0, -1, 'inexflag')),
+        ]
+
+        flag_testers = {
+            'underflow': mpfr_underflow_p,
+            'inexflag': mpfr_inexflag_p,
+            'overflow': mpfr_overflow_p,
+            'nanflag': mpfr_nanflag_p,
+            'erangeflag': mpfr_erangeflag_p,
+        }
+
+        def get_current_flags():
+            flags = set()
+            for flag, tester in flag_testers.items():
+                if tester():
+                    flags.add(flag)
+            return flags
+
+        x = Mpfr(3)
+        for (val_in, ternary_in, rnd), (val_out, ternary_out, flags) in test_data:
+            # All test values should be exactly representable in 4 bits.
+            t = mpfr_set_d(x, val_in, MPFR_RNDN)
+            assert t == 0
+            with temporary_emin(0):
+                mpfr_clear_flags()
+                actual_ternary_out = cmp(mpfr_subnormalize(x, ternary_in, rnd), 0)
+                actual_flags = get_current_flags()
+                actual_val_out = mpfr_get_d(x, MPFR_RNDN)
             self.assertEqual(actual_val_out, val_out)
             self.assertEqual(actual_ternary_out, ternary_out)
             self.assertEqual(actual_flags, set(flags.split()))
