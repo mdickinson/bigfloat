@@ -62,19 +62,19 @@ class ContextTests(unittest.TestCase):
 
         # Even erroneous calls should restore originals.
         with self.assertRaises(OverflowError):
-            with _temporary_exponent_bounds(-10, 10**100):
+            with _temporary_exponent_bounds(-10, 10 ** 100):
                 pass
         self.assertEqual(mpfr.mpfr_get_emin(), original_emin)
         self.assertEqual(mpfr.mpfr_get_emax(), original_emax)
 
         with self.assertRaises(OverflowError):
-            with _temporary_exponent_bounds(-10**100, 10):
+            with _temporary_exponent_bounds(-10 ** 100, 10):
                 pass
         self.assertEqual(mpfr.mpfr_get_emin(), original_emin)
         self.assertEqual(mpfr.mpfr_get_emax(), original_emax)
 
         with self.assertRaises(OverflowError):
-            with _temporary_exponent_bounds(-10**100, 10**100):
+            with _temporary_exponent_bounds(-10 ** 100, 10 ** 100):
                 pass
         self.assertEqual(mpfr.mpfr_get_emin(), original_emin)
         self.assertEqual(mpfr.mpfr_get_emax(), original_emax)
@@ -95,7 +95,7 @@ class ContextTests(unittest.TestCase):
         # create equal but non-identical contexts
         c1 = Context(emin=-999, emax=999, precision=100,
                      subnormalize=True, rounding=mpfr.MPFR_RNDU)
-        c2 = (Context(emax=999, emin=-999, rounding=mpfr.MPFR_RNDU) + 
+        c2 = (Context(emax=999, emin=-999, rounding=mpfr.MPFR_RNDU) +
               Context(precision=100, subnormalize=True))
         self.assertEqual(hash(c1), hash(c2))
         self.assertEqual(c1, c2)
@@ -112,9 +112,9 @@ class ContextTests(unittest.TestCase):
 
     def test_with(self):
         # check use of contexts in with statements
-        c = Context(emin = -123, emax=456, precision=1729,
+        c = Context(emin=-123, emax=456, precision=1729,
                     subnormalize=True, rounding=mpfr.MPFR_RNDU)
-        d = Context(emin = 0, emax=10585, precision=20,
+        d = Context(emin=0, emax=10585, precision=20,
                     subnormalize=False, rounding=mpfr.MPFR_RNDD)
 
         with c:

@@ -237,6 +237,7 @@ from bigfloat.mpfr import (
     mpfr_erangeflag_p,
 )
 
+
 # Context manager for making a temporary change to emin.
 @contextlib.contextmanager
 def temporary_emin(emin):
@@ -247,6 +248,7 @@ def temporary_emin(emin):
     finally:
         mpfr_set_emin(old_emin)
 
+
 # Context manager for making a temporary change to emax.
 @contextlib.contextmanager
 def temporary_emax(emax):
@@ -256,6 +258,7 @@ def temporary_emax(emax):
         yield
     finally:
         mpfr_set_emax(old_emax)
+
 
 # Factory function for creating and initializing Mpfr_t instances.
 def Mpfr(precision):
@@ -328,7 +331,6 @@ class TestMpfr(unittest.TestCase):
             mpfr_inits2(-2, *args)
         with self.assertRaises(ValueError):
             mpfr_inits2(-2)
-
 
     def test_inits_and_clears(self):
         args = [Mpfr_t() for _ in range(3)]
@@ -403,7 +405,7 @@ class TestMpfr(unittest.TestCase):
         self.assertIs(mpfr_fits_slong_p(x, MPFR_RNDN), True)
 
         x = Mpfr(64)
-        mpfr_set_si(x, -sys.maxint-1, MPFR_RNDN)
+        mpfr_set_si(x, -sys.maxint - 1, MPFR_RNDN)
         self.assertIs(mpfr_fits_slong_p(x, MPFR_RNDN), True)
 
         x = Mpfr(28)
@@ -422,10 +424,10 @@ class TestMpfr(unittest.TestCase):
 
         # Check set_si from out-of-range arguments.
         with self.assertRaises(OverflowError):
-            mpfr_set_si(x, sys.maxint+1, MPFR_RNDN)
+            mpfr_set_si(x, sys.maxint + 1, MPFR_RNDN)
 
         with self.assertRaises(OverflowError):
-            mpfr_set_si(x, -sys.maxint-2, MPFR_RNDN)
+            mpfr_set_si(x, -sys.maxint - 2, MPFR_RNDN)
 
         # None of the above should have set the erange flag.
         self.assertIs(mpfr_erangeflag_p(), False)
@@ -437,7 +439,7 @@ class TestMpfr(unittest.TestCase):
         mpfr_clear_erangeflag()
 
         mpfr_set_inf(x, -1)
-        self.assertEqual(mpfr_get_si(x, MPFR_RNDN), -sys.maxint-1)
+        self.assertEqual(mpfr_get_si(x, MPFR_RNDN), -sys.maxint - 1)
         self.assertIs(mpfr_erangeflag_p(), True)
         mpfr_clear_erangeflag()
 
@@ -447,7 +449,7 @@ class TestMpfr(unittest.TestCase):
         mpfr_clear_erangeflag()
 
         mpfr_set_d(x, -1e100, MPFR_RNDN)
-        self.assertEqual(mpfr_get_si(x, MPFR_RNDN), -sys.maxint-1)
+        self.assertEqual(mpfr_get_si(x, MPFR_RNDN), -sys.maxint - 1)
         self.assertIs(mpfr_erangeflag_p(), True)
         mpfr_clear_erangeflag()
 
@@ -552,7 +554,7 @@ class TestMpfr(unittest.TestCase):
         y = Mpfr(53)
         mpfr_set_si(x, 23, MPFR_RNDN)
         mpfr_sqr(y, x, MPFR_RNDN)
-        self.assertEqual(mpfr_get_si(y, MPFR_RNDN), 23**2)
+        self.assertEqual(mpfr_get_si(y, MPFR_RNDN), 23 ** 2)
 
     def test_div(self):
         x = Mpfr(30)
@@ -569,28 +571,28 @@ class TestMpfr(unittest.TestCase):
     def test_sqrt(self):
         x = Mpfr(53)
         y = Mpfr(53)
-        mpfr_set_si(x, 23**2, MPFR_RNDN)
+        mpfr_set_si(x, 23 ** 2, MPFR_RNDN)
         mpfr_sqrt(y, x, MPFR_RNDN)
         self.assertEqual(mpfr_get_si(y, MPFR_RNDN), 23)
 
     def test_rec_sqrt(self):
         x = Mpfr(53)
         y = Mpfr(53)
-        mpfr_set_si(x, 23**2, MPFR_RNDN)
+        mpfr_set_si(x, 23 ** 2, MPFR_RNDN)
         mpfr_rec_sqrt(y, x, MPFR_RNDN)
         self.assertEqual(mpfr_get_d(y, MPFR_RNDN), 0.043478260869565216)
 
     def test_cbrt(self):
         x = Mpfr(53)
         y = Mpfr(53)
-        mpfr_set_si(x, 23**3, MPFR_RNDN)
+        mpfr_set_si(x, 23 ** 3, MPFR_RNDN)
         mpfr_cbrt(y, x, MPFR_RNDN)
         self.assertEqual(mpfr_get_si(y, MPFR_RNDN), 23)
 
     def test_root(self):
         x = Mpfr(53)
         y = Mpfr(53)
-        mpfr_set_si(x, -(23**5), MPFR_RNDN)
+        mpfr_set_si(x, -(23 ** 5), MPFR_RNDN)
         mpfr_root(y, x, 5, MPFR_RNDN)
         self.assertEqual(mpfr_get_d(y, MPFR_RNDN), -23.0)
 
@@ -760,7 +762,6 @@ class TestMpfr(unittest.TestCase):
             mpfr_unordered_p(z, z),
             False,
         )
-
 
     # 5.7 Special Functions
     def test_log(self):
@@ -1191,7 +1192,6 @@ class TestMpfr(unittest.TestCase):
         # has been exported and is callable.
         mpfr_free_cache()
 
-
     # 5.10 Integer and Remainder Related Functions
     def test_rint(self):
         x = Mpfr(2)
@@ -1434,9 +1434,7 @@ class TestMpfr(unittest.TestCase):
         with self.assertRaises(ValueError):
             mpfr_print_rnd_mode(-1)
 
-
     # 5.12 Miscellaneous Functions
-
     def test_nexttoward(self):
         x = Mpfr(4)
         y = Mpfr(53)
@@ -1595,7 +1593,6 @@ class TestMpfr(unittest.TestCase):
     def test_buildopt_decimal_p(self):
         self.assertIsInstance(mpfr_buildopt_decimal_p(), bool)
 
-
     # 5.13 Exception Related Functions
     def test_check_range(self):
         # Make some tests with precision 3 and exponent range (0, 4).  With
@@ -1660,7 +1657,9 @@ class TestMpfr(unittest.TestCase):
             return flags
 
         x = Mpfr(3)
-        for (val_in, ternary_in, rnd), (val_out, ternary_out, flags) in test_data:
+        for inputs, outputs in test_data:
+            val_in, ternary_in, rnd = inputs
+            val_out, ternary_out, flags = outputs
             # All test values should be exactly representable in 4 bits.
             t = mpfr_set_d(x, val_in, MPFR_RNDN)
             assert t == 0
@@ -1763,13 +1762,18 @@ class TestMpfr(unittest.TestCase):
             return flags
 
         x = Mpfr(3)
-        for (val_in, ternary_in, rnd), (val_out, ternary_out, flags) in test_data:
+        for inputs, outputs in test_data:
+            val_in, ternary_in, rnd = inputs
+            val_out, ternary_out, flags = outputs
             # All test values should be exactly representable in 4 bits.
             t = mpfr_set_d(x, val_in, MPFR_RNDN)
             assert t == 0
             with temporary_emin(0):
                 mpfr_clear_flags()
-                actual_ternary_out = cmp(mpfr_subnormalize(x, ternary_in, rnd), 0)
+                actual_ternary_out = cmp(
+                    mpfr_subnormalize(x, ternary_in, rnd),
+                    0
+                )
                 actual_flags = get_current_flags()
                 actual_val_out = mpfr_get_d(x, MPFR_RNDN)
             self.assertEqual(actual_val_out, val_out)
@@ -1955,8 +1959,6 @@ class TestMpfr(unittest.TestCase):
         self.assertIs(mpfr_erangeflag_p(), True)
         mpfr_clear_erangeflag()
         self.assertIs(mpfr_erangeflag_p(), False)
-
-
 
 
 if __name__ == '__main__':
