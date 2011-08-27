@@ -2013,12 +2013,34 @@ def const_catalan(context=None):
 # 5.10 Integer and Remainder Related Functions
 ###############################################################################
 
-def rint_ceil(x, context=None):
+def ceil(x, context=None):
     """
     Return the next higher or equal integer to x.
 
     If the result is not exactly representable, it will be rounded according to
-    the current context.
+    the current context.  Note that the rounding step means that it's possible
+    for the result to be smaller than ``x``.  For example::
+
+        >>> x = 2**100 + 1
+        >>> ceil(2**100 + 1) >= x
+        False
+
+    One way to be sure of getting a result that's greater than or equal to
+    ``x`` is to use the ``RoundTowardPositive`` rounding mode::
+
+        >>> with RoundTowardPositive:
+        ...     x = 2**100 + 1
+        ...     ceil(x) >= x
+        ... 
+        True
+
+    Similar comments apply to the :func:`floor`, :func:`round` and
+    :func:`trunc` functions.
+
+    .. note::
+
+       This function corresponds to the MPFR function ``mpfr_rint_ceil``,
+       not to ``mpfr_ceil``.
 
     """
     return _apply_function_in_current_context(
@@ -2029,12 +2051,20 @@ def rint_ceil(x, context=None):
     )
 
 
-def rint_floor(x, context=None):
+def floor(x, context=None):
     """
     Return the next lower or equal integer to x.
 
     If the result is not exactly representable, it will be rounded according to
     the current context.
+
+    Note that it's possible for the result to be larger than ``x``.  See the
+    documentation of the :func:`ceil` function for more information.
+
+    .. note::
+
+       This function corresponds to the MPFR function ``mpfr_rint_floor``,
+       not to ``mpfr_floor``.
 
     """
     return _apply_function_in_current_context(
@@ -2045,12 +2075,17 @@ def rint_floor(x, context=None):
     )
 
 
-def rint_round(x, context=None):
+def round(x, context=None):
     """
     Return the nearest integer to x, rounding halfway cases *away from zero*.
 
     If the result is not exactly representable, it will be rounded according to
     the current context.
+
+    .. note::
+
+       This function corresponds to the MPFR function ``mpfr_rint_round``, not
+       to ``mpfr_round``.
 
     """
     return _apply_function_in_current_context(
@@ -2061,12 +2096,17 @@ def rint_round(x, context=None):
     )
 
 
-def rint_trunc(x, context=None):
+def trunc(x, context=None):
     """
     Return the next integer towards zero.
 
     If the result is not exactly representable, it will be rounded according to
     the current context.
+
+    .. note::
+
+       This function corresponds to the MPFR function ``mpfr_rint_trunc``,
+       not to ``mpfr_trunc``.
 
     """
     return _apply_function_in_current_context(

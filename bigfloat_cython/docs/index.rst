@@ -1062,36 +1062,11 @@ Miscellaneous functions
 
 .. autofunction:: frac
 
-.. function:: floor(x)
+.. autofunction:: ceil
+.. autofunction:: floor
+.. autofunction:: round
+.. autofunction:: trunc
 
-   Return the floor of x.  Note that since the result is rounded to
-   the current context, it's quite possible for the result to be
-   larger than x:
-
-   >>> with DefaultContext:
-   ...     floor(2**100-1) <= 2**100-1
-   ... 
-   False
-
-   If you want to be sure of getting a result that's no larger than
-   *x*, use the ``RoundTowardNegative`` rounding mode.  Alternatively,
-   if you want the exact floor you may want to clear the ``Inexact``
-   flag before the call and test it afterwards.  Similar comments
-   apply to the :func:`ceil`, :func:`round` and :func:`trunc`
-   functions.
-
-.. function:: ceil(x)
-
-   Return the ceiling of x.
-
-.. function:: round(x)
-
-   Return x, rounded to the nearest integer.  Ties are rounded
-   away from zero. ('Biased rounding')
-
-.. function:: trunc(x)
-
-   Return the integer part of x.
 
 Other Functions
 ^^^^^^^^^^^^^^^
