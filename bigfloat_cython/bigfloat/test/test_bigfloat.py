@@ -73,6 +73,7 @@ from bigfloat import (
     MPFR_VERSION_MAJOR, MPFR_VERSION_MINOR,
 
     # 5.6 Comparison Functions
+    cmp, cmpabs,
     sgn,
 
 )
@@ -1133,6 +1134,24 @@ class BigFloatTests(unittest.TestCase):
         )
 
     # 5.6 Comparison Functions
+    def test_cmp(self):
+        # Comparisons involving NaNs should raise an exception
+        with self.assertRaises(ValueError):
+            cmp(BigFloat('nan'), 0)
+        with self.assertRaises(ValueError):
+            cmp(0, BigFloat('nan'))
+        with self.assertRaises(ValueError):
+            cmp(BigFloat('-nan'), BigFloat('nan'))
+
+    def test_cmpabs(self):
+        # Comparisons involving NaNs should raise an exception
+        with self.assertRaises(ValueError):
+            cmpabs(BigFloat('nan'), 0)
+        with self.assertRaises(ValueError):
+            cmpabs(0, BigFloat('nan'))
+        with self.assertRaises(ValueError):
+            cmpabs(BigFloat('-nan'), BigFloat('nan'))
+
     def test_sgn(self):
         self.assertEqual(sgn(BigFloat(2.6)), 1)
         self.assertEqual(sgn(BigFloat(-3.5)), -1)

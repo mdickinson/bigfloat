@@ -1098,8 +1098,8 @@ def cmp(op1, op2):
 
     Return a positive value if op1 > op2, zero if op1 = op2, and a negative
     value if op1 < op2. Both op1 and op2 are considered to their full own
-    precision, which may differ. If one of the operands is NaN, set the erange
-    flag and return zero.
+    precision, which may differ. If one of the operands is NaN, raise
+    ValueError.
 
     Note: This function may be useful to distinguish the three possible
     cases. If you need to distinguish two cases only, it is recommended to use
@@ -1109,6 +1109,8 @@ def cmp(op1, op2):
     """
     op1 = BigFloat._implicit_convert(op1)
     op2 = BigFloat._implicit_convert(op2)
+    if is_nan(op1) or is_nan(op2):
+        raise ValueError("Cannot perform comparison with NaN.")
     return mpfr.mpfr_cmp(op1, op2)
 
 
@@ -1118,8 +1120,8 @@ def cmpabs(op1, op2):
 
     Return a positive value if op1 > op2, zero if op1 = op2, and a negative
     value if op1 < op2. Both op1 and op2 are considered to their full own
-    precision, which may differ. If one of the operands is NaN, set the erange
-    flag and return zero.
+    precision, which may differ. If one of the operands is NaN, raise
+    ValueError.
 
     Note: This function may be useful to distinguish the three possible
     cases. If you need to distinguish two cases only, it is recommended to use
@@ -1129,6 +1131,8 @@ def cmpabs(op1, op2):
     """
     op1 = BigFloat._implicit_convert(op1)
     op2 = BigFloat._implicit_convert(op2)
+    if is_nan(op1) or is_nan(op2):
+        raise ValueError("Cannot perform comparison with NaN.")
     return mpfr.mpfr_cmpabs(op1, op2)
 
 
@@ -1172,15 +1176,18 @@ def is_regular(x):
 
 
 def sgn(x):
-    """ Return 1 if x > 0, 0 if x == 0, and -1 if x < 0.
+    """
+    Return the sign of x.
 
-    Raise ValueError if x is a NaN.
+    Return a positive integer if x > 0, 0 if x == 0, and a negative integer if
+    x < 0.  Raise ValueError if x is a NaN.
+
+    This function is equivalent to cmp(x, 0), but more efficient.
 
     """
     x = BigFloat._implicit_convert(x)
     if is_nan(x):
         raise ValueError("Cannot take sign of a NaN.")
-
     return mpfr.mpfr_sgn(x)
 
 
