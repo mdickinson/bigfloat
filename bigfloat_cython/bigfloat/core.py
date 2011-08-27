@@ -827,72 +827,9 @@ def set_str2(s, base, context=None):
 
 # Constants.
 
-def const_log2(context=None):
-    """
-    Return log(2), rounded according to the current context.
-
-    Returns the natural logarithm of 2 = 0.693..., with precision and rounding
-    mode taken from the current context.
-
-    """
-    return _apply_function_in_current_context(
-        BigFloat,
-        mpfr.mpfr_const_log2,
-        (),
-        context,
-    )
-
-
-def const_pi(context=None):
-    """
-    Return Pi, rounded according to the current context.
-
-    Returns Pi = 3.141..., with precision and rounding mode taken from the
-    current context.
-
-    """
-    return _apply_function_in_current_context(
-        BigFloat,
-        mpfr.mpfr_const_pi,
-        (),
-        context,
-    )
-
-
-def const_euler(context=None):
-    """
-    Return Euler's constant, rounded according to the current context.
-
-    Returns the value of Euler's constant 0.577..., (also called the
-    Euler-Mascheroni constant) with precision and rounding mode taken from the
-    current context.
-
-    """
-    return _apply_function_in_current_context(
-        BigFloat,
-        mpfr.mpfr_const_euler,
-        (),
-        context,
-    )
-
-
-def const_catalan(context=None):
-    """
-    Return Catalan's constant, rounded according to the current context.
-
-    Returns the value of Catalan's constant 0.915..., with precision and
-    rounding mode taken from the current context.
-
-    """
-    return _apply_function_in_current_context(
-        BigFloat,
-        mpfr.mpfr_const_catalan,
-        (),
-        context,
-    )
-
-
-# Unary functions.
+###############################################################################
+# 5.2 Assignment Functions
+###############################################################################
 
 def pos(x, context=None):
     """
@@ -1944,6 +1881,71 @@ def ai(x, context=None):
         BigFloat,
         mpfr.mpfr_ai,
         (BigFloat._implicit_convert(x),),
+        context,
+    )
+
+
+def const_log2(context=None):
+    """
+    Return log(2), rounded according to the current context.
+
+    Returns the natural logarithm of 2 = 0.693..., with precision and rounding
+    mode taken from the current context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_const_log2,
+        (),
+        context,
+    )
+
+
+def const_pi(context=None):
+    """
+    Return Pi, rounded according to the current context.
+
+    Returns Pi = 3.141..., with precision and rounding mode taken from the
+    current context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_const_pi,
+        (),
+        context,
+    )
+
+
+def const_euler(context=None):
+    """
+    Return Euler's constant, rounded according to the current context.
+
+    Returns the value of Euler's constant 0.577..., (also called the
+    Euler-Mascheroni constant) with precision and rounding mode taken from the
+    current context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_const_euler,
+        (),
+        context,
+    )
+
+
+def const_catalan(context=None):
+    """
+    Return Catalan's constant, rounded according to the current context.
+
+    Returns the value of Catalan's constant 0.915..., with precision and
+    rounding mode taken from the current context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_const_catalan,
+        (),
         context,
     )
 

@@ -61,6 +61,9 @@ __all__ = [
     # numeric functions
     'next_up', 'next_down',
 
+    # 5.2 Assignment Functions
+    'pos',
+
     # 5.5 Basic arithmetic functions
     'add', 'sub', 'mul', 'sqr', 'div', 'sqrt', 'rec_sqrt', 'cbrt', 'root',
     'pow', 'neg', 'abs', 'dim',
@@ -111,15 +114,15 @@ from bigfloat.core import (
     is_negative,
     is_integer,
 
-    # Standard functions: 1-ary
-    pos,
-
     # Standard functions: 2-ary
     mod,
 
     # Miscellaneous functions
     next_down,
     next_up,
+
+    # 5.2 Assignment Functions
+    pos,
 
     # 5.5 Basic Arithmetic Functions
     add, sub, mul, sqr, div, sqrt, rec_sqrt, cbrt, root, pow, neg, abs, dim,
