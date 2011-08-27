@@ -2242,7 +2242,7 @@ def mpfr_min(Mpfr_t rop not None, Mpfr_t op1 not None, Mpfr_t op2 not None,
     check_initialized(op1)
     check_initialized(op2)
     check_rounding_mode(rnd)
-    cmpfr.mpfr_min(&rop._value, &op1._value, &op2._value, rnd)
+    return cmpfr.mpfr_min(&rop._value, &op1._value, &op2._value, rnd)
 
 def mpfr_max(Mpfr_t rop not None, Mpfr_t op1 not None, Mpfr_t op2 not None,
              cmpfr.mpfr_rnd_t rnd):
@@ -2258,7 +2258,7 @@ def mpfr_max(Mpfr_t rop not None, Mpfr_t op1 not None, Mpfr_t op2 not None,
     check_initialized(op1)
     check_initialized(op2)
     check_rounding_mode(rnd)
-    cmpfr.mpfr_max(&rop._value, &op1._value, &op2._value, rnd)
+    return cmpfr.mpfr_max(&rop._value, &op1._value, &op2._value, rnd)
 
 def mpfr_get_exp(Mpfr_t op not None):
     """
