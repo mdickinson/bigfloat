@@ -45,6 +45,7 @@ from bigfloat.context import (
     _apply_function_in_current_context,
 )
 
+
 def mpfr_set_str2(rop, s, base, rnd):
     """Set value of rop from the string s, using given base and rounding mode.
 
@@ -1347,7 +1348,7 @@ def log(x, context=None):
 
 def log2(x, context=None):
     """
-    Return the base-2 logarithm of x, rounded according to the current context.
+    Return the base-two logarithm of x, rounded according to the current context.
 
     """
     return _apply_function_in_current_context(
@@ -1360,7 +1361,7 @@ def log2(x, context=None):
 
 def log10(x, context=None):
     """
-    Return the base-10 logarithm of x, rounded according to the current context.
+    Return the base-ten logarithm of x, rounded according to the current context.
 
     """
     return _apply_function_in_current_context(
@@ -1490,7 +1491,7 @@ def cot(x, context=None):
 
 def acos(x, context=None):
     """
-    Return the arc-cosine of x, rounded according to the current context.
+    Return the inverse cosine of x, rounded according to the current context.
 
     """
     return _apply_function_in_current_context(
@@ -1503,7 +1504,7 @@ def acos(x, context=None):
 
 def asin(x, context=None):
     """
-    Return the arc-sine of x, rounded according to the current context.
+    Return the inverse sine of x, rounded according to the current context.
 
     """
     return _apply_function_in_current_context(
@@ -1516,7 +1517,7 @@ def asin(x, context=None):
 
 def atan(x, context=None):
     """
-    Return the arc-tangent of x, rounded according to the current context.
+    Return the inverse tangent of x, rounded according to the current context.
 
     """
     return _apply_function_in_current_context(
@@ -1681,9 +1682,6 @@ def mod(x, y, context=None):
     )
 
 
-
-
-
 def is_integer(x):
     """ Return True if x is an exact integer, else False. """
 
@@ -1699,8 +1697,6 @@ def is_negative(x):
     """
     x = BigFloat._implicit_convert(x)
     return mpfr.mpfr_signbit(x)
-
-
 
 
 # unary arithmetic operations
