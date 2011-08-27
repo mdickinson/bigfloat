@@ -18,12 +18,14 @@
 # For Python 2.5
 from __future__ import with_statement
 
-import sys
+# Standard library imports
 import __builtin__
-import unittest
+import doctest
 import operator
+import sys
+import unittest
 
-import bigfloat
+import bigfloat.core
 
 from bigfloat import (
     # main class
@@ -1360,6 +1362,12 @@ pos 1p-1022 -> 1p-1022
 pos 1p+1024 -> Infinity Inexact Overflow
 
 """.split('\n'))
+
+
+def load_tests(loader, tests, ignore):
+    """ Add bigfloat.core doctests to test suite. """
+    tests.addTests(doctest.DocTestSuite(bigfloat.core))
+    return tests
 
 if __name__ == '__main__':
     unittest.main()
