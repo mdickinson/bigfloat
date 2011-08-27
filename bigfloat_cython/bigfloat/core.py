@@ -1335,7 +1335,8 @@ def unordered(x, y):
 
 def log(x, context=None):
     """
-    Return the natural logarithm of x, rounded according to the current context.
+    Return the natural logarithm of x, rounded according to the current
+    context.
 
     """
     return _apply_function_in_current_context(
@@ -1348,7 +1349,8 @@ def log(x, context=None):
 
 def log2(x, context=None):
     """
-    Return the base-two logarithm of x, rounded according to the current context.
+    Return the base-two logarithm of x, rounded according to the current
+    context.
 
     """
     return _apply_function_in_current_context(
@@ -1361,7 +1363,8 @@ def log2(x, context=None):
 
 def log10(x, context=None):
     """
-    Return the base-ten logarithm of x, rounded according to the current context.
+    Return the base-ten logarithm of x, rounded according to the current
+    context.
 
     """
     return _apply_function_in_current_context(
@@ -1543,7 +1546,8 @@ def atan2(x, y, context=None):
 
 def cosh(x, context=None):
     """
-    Return the hyperbolic cosine of x, rounded according to the current context.
+    Return the hyperbolic cosine of x, rounded according to the current
+    context.
 
     """
     return _apply_function_in_current_context(
@@ -1569,7 +1573,8 @@ def sinh(x, context=None):
 
 def tanh(x, context=None):
     """
-    Return the hyperbolic tangent of x, rounded according to the current context.
+    Return the hyperbolic tangent of x, rounded according to the current
+    context.
 
     """
     return _apply_function_in_current_context(
@@ -1582,7 +1587,8 @@ def tanh(x, context=None):
 
 def sech(x, context=None):
     """
-    Return the hyperbolic secant of x, rounded according to the current context.
+    Return the hyperbolic secant of x, rounded according to the current
+    context.
 
     """
     return _apply_function_in_current_context(
@@ -1595,7 +1601,8 @@ def sech(x, context=None):
 
 def csch(x, context=None):
     """
-    Return the hyperbolic cosecant of x, rounded according to the current context.
+    Return the hyperbolic cosecant of x, rounded according to the current
+    context.
 
     """
     return _apply_function_in_current_context(
@@ -1608,7 +1615,8 @@ def csch(x, context=None):
 
 def coth(x, context=None):
     """
-    Return the hyperbolic cotangent of x, rounded according to the current context.
+    Return the hyperbolic cotangent of x, rounded according to the current
+    context.
 
     """
     return _apply_function_in_current_context(
@@ -1621,7 +1629,8 @@ def coth(x, context=None):
 
 def acosh(x, context=None):
     """
-    Return the inverse hyperbolic cosine of x, rounded according to the current context.
+    Return the inverse hyperbolic cosine of x, rounded according to the current
+    context.
 
     """
     return _apply_function_in_current_context(
@@ -1634,7 +1643,8 @@ def acosh(x, context=None):
 
 def asinh(x, context=None):
     """
-    Return the inverse hyperbolic sine of x, rounded according to the current context.
+    Return the inverse hyperbolic sine of x, rounded according to the current
+    context.
 
     """
     return _apply_function_in_current_context(
@@ -1647,7 +1657,8 @@ def asinh(x, context=None):
 
 def atanh(x, context=None):
     """
-    Return the inverse hyperbolic tangent of x, rounded according to the current context.
+    Return the inverse hyperbolic tangent of x, rounded according to the
+    current context.
 
     """
     return _apply_function_in_current_context(
@@ -1660,7 +1671,8 @@ def atanh(x, context=None):
 
 def log1p(x, context=None):
     """
-    Return the logarithm of one plus x, rounded according to the current context.
+    Return the logarithm of one plus x, rounded according to the current
+    context.
 
     """
     return _apply_function_in_current_context(
@@ -1673,7 +1685,8 @@ def log1p(x, context=None):
 
 def expm1(x, context=None):
     """
-    Return one less than the exponential of x, rounded according to the current context.
+    Return one less than the exponential of x, rounded according to the current
+    context.
 
     """
     return _apply_function_in_current_context(
@@ -1686,7 +1699,8 @@ def expm1(x, context=None):
 
 def eint(x, context=None):
     """
-    Return the exponential integral of x, rounded according to the current context.
+    Return the exponential integral of x, rounded according to the current
+    context.
 
     """
     return _apply_function_in_current_context(
@@ -1699,7 +1713,8 @@ def eint(x, context=None):
 
 def li2(x, context=None):
     """
-    Return the real part of the dilogarithm of x, rounded according to the current context.
+    Return the real part of the dilogarithm of x, rounded according to the
+    current context.
 
     """
     return _apply_function_in_current_context(
@@ -1712,7 +1727,8 @@ def li2(x, context=None):
 
 def gamma(x, context=None):
     """
-    Return the value of the Gamma function of x, rounded according to the current context.
+    Return the value of the Gamma function of x, rounded according to the
+    current context.
 
     """
     return _apply_function_in_current_context(
@@ -1725,7 +1741,8 @@ def gamma(x, context=None):
 
 def lngamma(x, context=None):
     """
-    Return the value of the logarithm of the Gamma function of x, rounded according to the current context.
+    Return the value of the logarithm of the Gamma function of x, rounded
+    according to the current context.
 
     """
     return _apply_function_in_current_context(
@@ -1738,7 +1755,8 @@ def lngamma(x, context=None):
 
 def digamma(x, context=None):
     """
-    Return the value of the digamma (sometimes also called Psi) function on op, rounded according to the current context.
+    Return the value of the digamma (sometimes also called Psi) function on op,
+    rounded according to the current context.
 
     """
     return _apply_function_in_current_context(
