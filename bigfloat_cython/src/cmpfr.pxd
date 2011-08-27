@@ -206,8 +206,10 @@ cdef extern from "mpfr.h":
     int mpfr_erfc(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_j0(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_j1(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_jn(mpfr_ptr rop, long int n, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_y0(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_y1(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_yn(mpfr_ptr rop, long int n, mpfr_ptr op, mpfr_rnd_t rnd)
 
     int mpfr_fma(
         mpfr_ptr rop, mpfr_ptr op1, mpfr_ptr op2, mpfr_ptr op3, mpfr_rnd_t rnd

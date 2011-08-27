@@ -78,6 +78,8 @@ from bigfloat import (
     # 5.7 Special Functions
     factorial,
     zeta_ui,
+    j0, j1, jn,
+    y0, y1, yn,
 
 )
 
@@ -1188,6 +1190,14 @@ class BigFloatTests(unittest.TestCase):
         self.assertEqual(zeta_ui(0), -0.5)
         self.assertEqual(zeta_ui(1), float('inf'))
         self.assertEqual(zeta_ui(2), 1.6449340668482264)
+
+    def test_jn(self):
+        self.assertEqual(j0(1.2345), jn(0, 1.2345))
+        self.assertEqual(j1(1.2345), jn(1, 1.2345))
+
+    def test_yn(self):
+        self.assertEqual(y0(1.2345), yn(0, 1.2345))
+        self.assertEqual(y1(1.2345), yn(1, 1.2345))
 
 
 class IEEEContextTests(unittest.TestCase):

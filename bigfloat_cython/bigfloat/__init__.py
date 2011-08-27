@@ -146,7 +146,7 @@ from bigfloat.core import (
     log1p, expm1,
     eint, li2, gamma, lngamma, digamma, zeta, zeta_ui,
     erf, erfc,
-    j0, j1, y0, y1,
+    j0, j1, jn, y0, y1, yn,
     fma, fms, agm,
     hypot,
     ai,

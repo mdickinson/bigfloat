@@ -1009,8 +1009,10 @@ Special functions
 .. autofunction:: erfc
 .. autofunction:: j0
 .. autofunction:: j1
+.. autofunction:: jn
 .. autofunction:: y0
 .. autofunction:: y1
+.. autofunction:: yn
 .. autofunction:: agm
 
 .. autofunction:: factorial
@@ -1020,15 +1022,6 @@ Special functions
    Return the natural log of the absolute value of gamma(x).
 
 
-.. function:: jn(n, x)
-
-   Return Bessel function of the first kind of order 0, 1 and n,
-   evaluated at x.  For ``jn``, *n* should be an integer.
-
-.. function:: yn(n, x)
-
-   Return Bessel function of the second kind of order 0, 1 and n,
-   evaluated at x.  For ``yn``, *n* should be an integer.
 
 
 Constants

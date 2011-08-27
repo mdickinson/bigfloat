@@ -1859,6 +1859,21 @@ def j1(x, context=None):
     )
 
 
+def jn(n, x, context=None):
+    """
+    Return the value of the first kind Bessel function of order ``n`` at ``x``.
+
+    ``n`` should be a Python integer.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_jn,
+        (n, BigFloat._implicit_convert(x)),
+        context,
+    )
+
+
 def y0(x, context=None):
     """
     Return the value of the second kind Bessel function of order 0 at x.
@@ -1881,6 +1896,21 @@ def y1(x, context=None):
         BigFloat,
         mpfr.mpfr_y1,
         (BigFloat._implicit_convert(x),),
+        context,
+    )
+
+
+def yn(n, x, context=None):
+    """
+    Return the value of the second kind Bessel function of order ``n`` at ``x``.
+
+    ``n`` should be a Python integer.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_yn,
+        (n, BigFloat._implicit_convert(x)),
         context,
     )
 

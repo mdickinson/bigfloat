@@ -138,8 +138,10 @@ from bigfloat.mpfr import (
     mpfr_erfc,
     mpfr_j0,
     mpfr_j1,
+    mpfr_jn,
     mpfr_y0,
     mpfr_y1,
+    mpfr_yn,
 
     mpfr_fma,
     mpfr_fms,
@@ -1140,6 +1142,46 @@ class TestMpfr(unittest.TestCase):
         self.assertEqual(
             mpfr_get_d(x, MPFR_RNDN),
             1.6449340668482264,
+        )
+
+    def test_jn(self):
+        # Just check that n = 0 and n = 1 cases correspond to what we already have.
+        x = Mpfr(53)
+        y = Mpfr(53)
+        z = Mpfr(53)
+        mpfr_set_d(z, 2.3456, MPFR_RNDN)
+
+        mpfr_j0(x, z, MPFR_RNDN)
+        mpfr_jn(y, 0, z, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(x, MPFR_RNDN),
+            mpfr_get_d(y, MPFR_RNDN),
+        )
+        mpfr_j1(x, z, MPFR_RNDN)
+        mpfr_jn(y, 1, z, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(x, MPFR_RNDN),
+            mpfr_get_d(y, MPFR_RNDN),
+        )
+
+    def test_yn(self):
+        # Just check that n = 0 and n = 1 cases correspond to what we already have.
+        x = Mpfr(53)
+        y = Mpfr(53)
+        z = Mpfr(53)
+        mpfr_set_d(z, 2.3456, MPFR_RNDN)
+
+        mpfr_y0(x, z, MPFR_RNDN)
+        mpfr_yn(y, 0, z, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(x, MPFR_RNDN),
+            mpfr_get_d(y, MPFR_RNDN),
+        )
+        mpfr_y1(x, z, MPFR_RNDN)
+        mpfr_yn(y, 1, z, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(x, MPFR_RNDN),
+            mpfr_get_d(y, MPFR_RNDN),
         )
 
     def test_fma(self):

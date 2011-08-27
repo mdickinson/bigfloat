@@ -1563,6 +1563,20 @@ def mpfr_j1(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     check_rounding_mode(rnd)
     return cmpfr.mpfr_j1(&rop._value, &op._value, rnd)
 
+def mpfr_jn(Mpfr_t rop not None, long int n, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the value of the first kind Bessel function of order n on op,
+    rounded in the direction rnd. When op is NaN, rop is always set to
+    NaN. When op is plus or minus Infinity, rop is set to +0. When op is zero,
+    and n is not zero, rop is set to +0 or −0 depending on the parity and sign
+    of n, and the sign of op.
+
+    """
+    check_initialized(rop)
+    check_initialized(op)
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_jn(&rop._value, n, &op._value, rnd)
+
 def mpfr_y0(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     """
     Set rop to the value of the second kind Bessel function of order 0 on op,
@@ -1592,6 +1606,19 @@ def mpfr_y1(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_y1(&rop._value, &op._value, rnd)
+
+def mpfr_yn(Mpfr_t rop not None, long int n, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the value of the second kind Bessel function of order n on op,
+    rounded in the direction rnd. When op is NaN or negative, rop is always set
+    to NaN. When op is +Inf, rop is set to +0. When op is zero, rop is set to
+    +Inf or −Inf depending on the parity and sign of n.
+
+    """
+    check_initialized(rop)
+    check_initialized(op)
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_yn(&rop._value, n, &op._value, rnd)
 
 def mpfr_fma(Mpfr_t rop not None,
              Mpfr_t op1 not None,
@@ -2715,8 +2742,6 @@ def mpfr_erangeflag_p():
 # The following are not yet implemented.
 #
 #  mpfr_lgamma
-#  mpfr_jn
-#  mpfr_yn
 #  mpfr_sum
 #
 #
