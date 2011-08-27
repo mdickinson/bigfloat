@@ -1506,6 +1506,16 @@ def mpfr_zeta(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     check_rounding_mode(rnd)
     return cmpfr.mpfr_zeta(&rop._value, &op._value, rnd)
 
+def mpfr_zeta_ui(Mpfr_t rop not None, unsigned long int op, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the value of the Riemann Zeta function on op, rounded in the
+    direction rnd.
+
+    """
+    check_initialized(rop)
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_zeta_ui(&rop._value, op, rnd)
+
 def mpfr_erf(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     """
     Set rop to the value of the error function on op, rounded in the direction
@@ -2705,7 +2715,6 @@ def mpfr_erangeflag_p():
 # The following are not yet implemented.
 #
 #  mpfr_lgamma
-#  mpfr_zeta_ui
 #  mpfr_jn
 #  mpfr_yn
 #  mpfr_sum

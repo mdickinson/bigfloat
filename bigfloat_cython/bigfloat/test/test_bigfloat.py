@@ -77,6 +77,7 @@ from bigfloat import (
 
     # 5.7 Special Functions
     factorial,
+    zeta_ui,
 
 )
 
@@ -1182,6 +1183,11 @@ class BigFloatTests(unittest.TestCase):
 
         with self.assertRaises((OverflowError, ValueError)):
             factorial(-1)
+
+    def test_zeta_ui(self):
+        self.assertEqual(zeta_ui(0), -0.5)
+        self.assertEqual(zeta_ui(1), float('inf'))
+        self.assertEqual(zeta_ui(2), 1.6449340668482264)
 
 
 class IEEEContextTests(unittest.TestCase):

@@ -133,6 +133,7 @@ from bigfloat.mpfr import (
     mpfr_lngamma,
     mpfr_digamma,
     mpfr_zeta,
+    mpfr_zeta_ui,
     mpfr_erf,
     mpfr_erfc,
     mpfr_j0,
@@ -1122,6 +1123,24 @@ class TestMpfr(unittest.TestCase):
                 expected_output,
                 msg='{}'.format(fn),
             )
+
+    def test_zeta_ui(self):
+        x = Mpfr(53)
+        mpfr_zeta_ui(x, 0, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(x, MPFR_RNDN),
+            -0.5,
+        )
+        mpfr_zeta_ui(x, 1, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(x, MPFR_RNDN),
+            float('inf'),
+        )
+        mpfr_zeta_ui(x, 2, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(x, MPFR_RNDN),
+            1.6449340668482264,
+        )
 
     def test_fma(self):
         op1 = Mpfr(53)

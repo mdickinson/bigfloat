@@ -1004,6 +1004,7 @@ Special functions
 .. autofunction:: gamma
 .. autofunction:: lngamma
 .. autofunction:: zeta
+.. autofunction:: zeta_ui
 .. autofunction:: erf
 .. autofunction:: erfc
 .. autofunction:: j0

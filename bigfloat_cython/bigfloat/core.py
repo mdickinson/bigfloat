@@ -1794,6 +1794,19 @@ def zeta(x, context=None):
     )
 
 
+def zeta_ui(x, context=None):
+    """
+    Return the value of the Riemann zeta function at the nonnegative integer x.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_zeta_ui,
+        (x,),
+        context,
+    )
+
+
 def erf(x, context=None):
     """
     Return the value of the error function at x.
