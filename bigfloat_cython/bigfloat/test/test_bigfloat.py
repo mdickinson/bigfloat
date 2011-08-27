@@ -75,6 +75,9 @@ from bigfloat import (
     cmp, cmpabs,
     sgn,
 
+    # 5.7 Special Functions
+    factorial,
+
 )
 
 from bigfloat.core import _all_flags
@@ -1166,6 +1169,19 @@ class BigFloatTests(unittest.TestCase):
         # NaNs should raise an exception
         with self.assertRaises(ValueError):
             sgn(BigFloat('nan'))
+
+    # 5.7 Special Functions
+    def test_factorial(self):
+        self.assertEqual(factorial(0), 1)
+        self.assertEqual(factorial(1), 1)
+        self.assertEqual(factorial(2), 2)
+        self.assertEqual(factorial(3), 6)
+        self.assertEqual(factorial(4), 24)
+        self.assertEqual(factorial(5), 120)
+        self.assertEqual(factorial(6), 720)
+
+        with self.assertRaises((OverflowError, ValueError)):
+            factorial(-1)
 
 
 class IEEEContextTests(unittest.TestCase):

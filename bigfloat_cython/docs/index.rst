@@ -1012,10 +1012,7 @@ Special functions
 .. autofunction:: y1
 .. autofunction:: agm
 
-
-.. function:: factorial(n)
-
-   Return the factorial of n.  *n* should be a nonnegative integer.
+.. autofunction:: factorial
 
 .. function:: lgamma(x)
 

@@ -191,6 +191,8 @@ cdef extern from "mpfr.h":
     int mpfr_asinh(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_atanh(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
 
+    int mpfr_fac_ui(mpfr_ptr rop, unsigned long int op, mpfr_rnd_t rnd)
+
     int mpfr_log1p(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_expm1(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_eint(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)

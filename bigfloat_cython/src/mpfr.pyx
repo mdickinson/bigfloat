@@ -1395,6 +1395,15 @@ def mpfr_atanh(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     check_rounding_mode(rnd)
     return cmpfr.mpfr_atanh(&rop._value, &op._value, rnd)
 
+def mpfr_fac_ui(Mpfr_t rop not None, unsigned long int op, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the factorial of op, rounded in the direction rnd.
+
+    """
+    check_initialized(rop)
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_fac_ui(&rop._value, op, rnd)
+
 def mpfr_log1p(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     """
     Set rop to the logarithm of one plus op, rounded in the direction rnd.
@@ -2695,7 +2704,6 @@ def mpfr_erangeflag_p():
 #
 # The following are not yet implemented.
 #
-#  mpfr_fac_ui
 #  mpfr_lgamma
 #  mpfr_zeta_ui
 #  mpfr_jn

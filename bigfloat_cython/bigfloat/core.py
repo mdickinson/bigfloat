@@ -1677,6 +1677,19 @@ def atanh(x, context=None):
     )
 
 
+def factorial(x, context=None):
+    """
+    Return the factorial of the nonnegative integer x.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_fac_ui,
+        (x,),
+        context,
+    )
+
+
 def log1p(x, context=None):
     """
     Return the logarithm of one plus x.

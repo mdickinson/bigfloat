@@ -123,6 +123,8 @@ from bigfloat.mpfr import (
     mpfr_asinh,
     mpfr_atanh,
 
+    mpfr_fac_ui,
+
     mpfr_log1p,
     mpfr_expm1,
     mpfr_eint,
@@ -1070,6 +1072,24 @@ class TestMpfr(unittest.TestCase):
         self.assertEqual(
             mpfr_get_d(y, MPFR_RNDN),
             1.0453705484668847151702051105754406143,
+        )
+
+    def test_fac_ui(self):
+        x = Mpfr(53)
+        mpfr_fac_ui(x, 4, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(x, MPFR_RNDN),
+            24.0,
+        )
+        mpfr_fac_ui(x, 5, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(x, MPFR_RNDN),
+            120.0,
+        )
+        mpfr_fac_ui(x, 6, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(x, MPFR_RNDN),
+            720.0,
         )
 
     def test_miscellaneous_special_functions(self):
