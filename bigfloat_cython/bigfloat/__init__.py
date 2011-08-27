@@ -75,6 +75,13 @@ __all__ = [
     'cos', 'sin', 'tan', 'sec', 'csc', 'cot', 'acos', 'asin', 'atan',
     'atan2',
     'cosh', 'sinh', 'tanh', 'sech', 'csch', 'coth', 'acosh', 'asinh', 'atanh',
+    'log1p', 'expm1',
+    'eint', 'li2', 'gamma', 'lngamma', 'digamma', 'zeta', 'erf', 'erfc',
+    'j0', 'j1', 'y0', 'y1',
+    'fma', 'fms', 'agm',
+    'hypot',
+    'ai',
+    'const_log2', 'const_pi', 'const_euler', 'const_catalan',
 ]
 
 from bigfloat.core import (
@@ -104,18 +111,8 @@ from bigfloat.core import (
     is_negative,
     is_integer,
 
-    # Standard functions: 0-ary
-    const_log2,
-    const_catalan,
-    const_pi,
-    const_euler,
-
     # Standard functions: 1-ary
     pos,
-
-    log2,
-    log,
-    exp,
 
     # Standard functions: 2-ary
     mod,
@@ -136,6 +133,14 @@ from bigfloat.core import (
     cos, sin, tan, sec, csc, cot, acos, asin, atan,
     atan2,
     cosh, sinh, tanh, sech, csch, coth, acosh, asinh, atanh,
+    log1p, expm1,
+    eint, li2, gamma, lngamma, digamma, zeta, erf, erfc,
+    j0, j1, y0, y1,
+    fma, fms, agm,
+    hypot,
+    ai,
+    const_log2, const_pi, const_euler, const_catalan,
+
 )
 
 from bigfloat.mpfr import (

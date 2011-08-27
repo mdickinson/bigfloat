@@ -1658,6 +1658,278 @@ def atanh(x, context=None):
     )
 
 
+def log1p(x, context=None):
+    """
+    Return the logarithm of one plus x, rounded according to the current context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_log1p,
+        (BigFloat._implicit_convert(x),),
+        context,
+    )
+
+
+def expm1(x, context=None):
+    """
+    Return one less than the exponential of x, rounded according to the current context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_expm1,
+        (BigFloat._implicit_convert(x),),
+        context,
+    )
+
+
+def eint(x, context=None):
+    """
+    Return the exponential integral of x, rounded according to the current context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_eint,
+        (BigFloat._implicit_convert(x),),
+        context,
+    )
+
+
+def li2(x, context=None):
+    """
+    Return the real part of the dilogarithm of x, rounded according to the current context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_li2,
+        (BigFloat._implicit_convert(x),),
+        context,
+    )
+
+
+def gamma(x, context=None):
+    """
+    Return the value of the Gamma function of x, rounded according to the current context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_gamma,
+        (BigFloat._implicit_convert(x),),
+        context,
+    )
+
+
+def lngamma(x, context=None):
+    """
+    Return the value of the logarithm of the Gamma function of x, rounded according to the current context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_lngamma,
+        (BigFloat._implicit_convert(x),),
+        context,
+    )
+
+
+def digamma(x, context=None):
+    """
+    Return the value of the digamma (sometimes also called Psi) function on op, rounded according to the current context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_digamma,
+        (BigFloat._implicit_convert(x),),
+        context,
+    )
+
+
+def zeta(x, context=None):
+    """
+    Return the value of the Riemann zeta function on x, rounded according to
+    the current context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_zeta,
+        (BigFloat._implicit_convert(x),),
+        context,
+    )
+
+
+def erf(x, context=None):
+    """
+    Return the value of the error function at x, rounded according to the
+    current context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_erf,
+        (BigFloat._implicit_convert(x),),
+        context,
+    )
+
+
+def erfc(x, context=None):
+    """
+    Return the value of the complementary error function at x, rounded
+    according to the current context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_erfc,
+        (BigFloat._implicit_convert(x),),
+        context,
+    )
+
+
+def j0(x, context=None):
+    """
+    Return the value of the first kind Bessel function of order 0 at x, rounded
+    according to the current context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_j0,
+        (BigFloat._implicit_convert(x),),
+        context,
+    )
+
+
+def j1(x, context=None):
+    """
+    Return the value of the first kind Bessel function of order 1 at x, rounded
+    according to the current context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_j1,
+        (BigFloat._implicit_convert(x),),
+        context,
+    )
+
+
+def y0(x, context=None):
+    """
+    Return the value of the second kind Bessel function of order 0 at x,
+    rounded according to the current context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_y0,
+        (BigFloat._implicit_convert(x),),
+        context,
+    )
+
+
+def y1(x, context=None):
+    """
+    Return the value of the second kind Bessel function of order 1 at x,
+    rounded according to the current context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_y1,
+        (BigFloat._implicit_convert(x),),
+        context,
+    )
+
+
+def fma(x, y, z, context=None):
+    """
+    Return (x * y) + z, with a single rounding according to the current
+    context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_fma,
+        (
+            BigFloat._implicit_convert(x),
+            BigFloat._implicit_convert(y),
+            BigFloat._implicit_convert(z),
+        ),
+        context,
+    )
+
+
+def fms(x, y, z, context=None):
+    """
+    Return (x * y) - z, with a single rounding according to the current
+    context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_fms,
+        (
+            BigFloat._implicit_convert(x),
+            BigFloat._implicit_convert(y),
+            BigFloat._implicit_convert(z),
+        ),
+        context,
+    )
+
+
+def agm(x, y, context=None):
+    """
+    Return the arithmetic geometric mean of x and y, rounded according to the
+    current context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_agm,
+        (
+            BigFloat._implicit_convert(x),
+            BigFloat._implicit_convert(y),
+        ),
+        context,
+    )
+
+
+def hypot(x, y, context=None):
+    """
+    Return the Euclidean norm of x and y, i.e., the square root of the sum of
+    the squares of x and y, rounded according to the current context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_hypot,
+        (
+            BigFloat._implicit_convert(x),
+            BigFloat._implicit_convert(y),
+        ),
+        context,
+    )
+
+
+def ai(x, context=None):
+    """
+    Return the Airy function of x, rounded according to the current context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_ai,
+        (BigFloat._implicit_convert(x),),
+        context,
+    )
+
+
 def mod(x, y, context=None):
     """
     Return x reduced modulo y, rounded according to the current context.
