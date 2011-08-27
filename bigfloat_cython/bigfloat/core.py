@@ -1206,9 +1206,9 @@ def sgn(x):
 
 def greater(x, y):
     """
-    Return True if op1 > op2 and False otherwise.
+    Return True if x > y and False otherwise.
 
-    This function returns False whenever op1 and/or op2 is a NaN.
+    This function returns False whenever x and/or y is a NaN.
 
     """
     x = BigFloat._implicit_convert(x)
@@ -1218,9 +1218,9 @@ def greater(x, y):
 
 def greaterequal(x, y):
     """
-    Return True if op1 >= op2 and False otherwise.
+    Return True if x >= y and False otherwise.
 
-    This function returns False whenever op1 and/or op2 is a NaN.
+    This function returns False whenever x and/or y is a NaN.
 
     """
     x = BigFloat._implicit_convert(x)
@@ -1230,9 +1230,9 @@ def greaterequal(x, y):
 
 def less(x, y):
     """
-    Return True if op1 < op2 and False otherwise.
+    Return True if x < y and False otherwise.
 
-    This function returns False whenever op1 and/or op2 is a NaN.
+    This function returns False whenever x and/or y is a NaN.
 
     """
     x = BigFloat._implicit_convert(x)
@@ -1242,9 +1242,9 @@ def less(x, y):
 
 def lessequal(x, y):
     """
-    Return True if op1 <= op2 and False otherwise.
+    Return True if x <= y and False otherwise.
 
-    This function returns False whenever op1 and/or op2 is a NaN.
+    This function returns False whenever x and/or y is a NaN.
 
     """
     x = BigFloat._implicit_convert(x)
@@ -1254,9 +1254,9 @@ def lessequal(x, y):
 
 def equal(x, y):
     """
-    Return True if op1 == op2 and False otherwise.
+    Return True if x == y and False otherwise.
 
-    This function returns False whenever op1 and/or op2 is a NaN.
+    This function returns False whenever x and/or y is a NaN.
 
     """
     x = BigFloat._implicit_convert(x)
@@ -1266,9 +1266,9 @@ def equal(x, y):
 
 def lessgreater(x, y):
     """
-    Return True if op1 < op2 or op1 > op2 and False otherwise.
+    Return True if x < y or x > y and False otherwise.
 
-    This function returns False whenever op1 and/or op2 is a NaN.
+    This function returns False whenever x and/or y is a NaN.
 
     """
     x = BigFloat._implicit_convert(x)
@@ -1278,7 +1278,7 @@ def lessgreater(x, y):
 
 def unordered(x, y):
     """
-    Return True if op1 or op2 is a NaN and False otherwise.
+    Return True if x or y is a NaN and False otherwise.
 
     """
     x = BigFloat._implicit_convert(x)

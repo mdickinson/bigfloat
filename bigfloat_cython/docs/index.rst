@@ -1065,22 +1065,30 @@ Other Functions
 These are the functions exported by the :mod:`bigfloat` module that
 don't fit into the above section, for one reason or another.
 
-Additional Comparisons
-""""""""""""""""""""""
+Comparisons
+"""""""""""
+
+These functions provide three-way comparisons.
+
+.. autofunction:: sgn
+.. autofunction:: cmp
+.. autofunction:: cmpabs
+
+The following functions match the functionality of the builtin Python
+comparison operators.
+
+.. autofunction:: greater
+.. autofunction:: greaterequal
+.. autofunction:: less
+.. autofunction:: lessequal
+.. autofunction:: equal 
 
 There are two additional comparison functions that don't
 correspond to any of the Python comparison operators.
 
-.. function:: lessgreater(x, y)
+.. autofunction:: lessgreater
+.. autofunction:: unordered
 
-   Return True if either x < y or x > y, and False otherwise.
-   lessgreater(x, y) differs from x != y in the case where either x or
-   y is a NaN: in that case, lessgreater(x, y) will return False,
-   while x != y will return True.
-
-.. function:: unordered(x, y)
-
-   Return True if either x or y is a NaN, and False otherwise.
 
 Number classification functions
 """"""""""""""""""""""""""""""""
@@ -1089,40 +1097,12 @@ The following functions all accept a single :class:`BigFloat` instance (or a
 float, or an integer) and return a boolean value.  They make no
 use of the current context, and do not affect the state of the flags.
 
-.. function:: is_nan(x)
-
-   Return True if x is a NaN and False otherwise.
-
-.. function:: is_inf(x)
-
-   Return True if x is an infinity (either positive or negative), and False
-   otherwise.
-
-.. function:: is_zero(x)
-
-   Return True if x is a zero (either positive zero or negative zero),
-   and False otherwise.
-
-.. function:: is_finite(x)
-
-   Return True if x is not an infinity or NaN, and False otherwise.
-
-.. function:: is_negative(x)
-
-   Return True if the sign bit of x is set, and False otherwise.  Note
-   that the name of this function is slightly misleading for zeros:
-   is_negative(-0.0) returns True, even though -0.0 is not, strictly
-   speaking, negative.
-
-.. function:: is_integer(x)
-
-   Return True if x is finite and an exact integer, and False
-   otherwise.
-
-.. function:: sgn(x)
-
-   Return 1 if x > 0, 0 if x == 0, and -1 if x < 0.  Raise ValueError if x is a
-   NaN.
+.. autofunction:: is_nan(x)
+.. autofunction:: is_inf(x)
+.. autofunction:: is_zero(x)
+.. autofunction:: is_finite(x)
+.. autofunction:: is_negative(x)
+.. autofunction:: is_integer(x)
 
 
 Miscellaneous functions
