@@ -825,8 +825,6 @@ def set_str2(s, base, context=None):
     )
 
 
-# Constants.
-
 ###############################################################################
 # 5.2 Assignment Functions
 ###############################################################################
@@ -2093,6 +2091,10 @@ def is_integer(x):
     x = BigFloat._implicit_convert(x)
     return mpfr.mpfr_integer_p(x)
 
+
+###############################################################################
+# 5.12 Miscellaneous Functions
+###############################################################################
 
 def is_negative(x):
     """ Return True if x has its sign bit set, else False.

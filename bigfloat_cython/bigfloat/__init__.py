@@ -89,6 +89,9 @@ __all__ = [
     # 5.10 Integer and Remainder Related Functions
     'rint_ceil', 'rint_floor', 'rint_round', 'rint_trunc',
     'frac', 'mod', 'remainder', 'is_integer',
+
+    # 5.12 Miscellaneous Functions
+    'is_negative',
 ]
 
 from bigfloat.core import (
@@ -113,9 +116,6 @@ from bigfloat.core import (
     test_flag,
     set_flag,
     clear_flag,
-
-    # Predicates: 1-ary
-    is_negative,
 
     # Miscellaneous functions
     next_down,
@@ -147,6 +147,9 @@ from bigfloat.core import (
     # 5.10 Integer and Remainder Related Functions
     rint_ceil, rint_floor, rint_round, rint_trunc,
     frac, mod, remainder, is_integer,
+
+    # 5.12 Miscellaneous Functions
+    is_negative,
 
 )
 
