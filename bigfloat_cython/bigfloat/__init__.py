@@ -69,6 +69,12 @@ __all__ = [
     'cmp', 'cmpabs', 'is_nan', 'is_inf', 'is_finite', 'is_zero', 'is_regular',
     'sgn', 'greater', 'greaterequal', 'less', 'lessequal', 'equal',
     'lessgreater', 'unordered',
+
+    # 5.7 Special Functions
+    'log', 'log2', 'log10', 'exp', 'exp2', 'exp10',
+    'cos', 'sin', 'tan', 'sec', 'csc', 'cot', 'acos', 'asin', 'atan',
+    'atan2',
+    'cosh', 'sinh', 'tanh', 'sech', 'csch', 'coth', 'acosh', 'asinh', 'atanh',
 ]
 
 from bigfloat.core import (
@@ -124,6 +130,12 @@ from bigfloat.core import (
     # 5.6 Comparison Functions
     cmp, cmpabs, is_nan, is_inf, is_finite, is_zero, is_regular, sgn,
     greater, greaterequal, less, lessequal, equal, lessgreater, unordered,
+
+    # 5.7 Special Functions
+    log, log2, log10, exp, exp2, exp10,
+    cos, sin, tan, sec, csc, cot, acos, asin, atan,
+    atan2,
+    cosh, sinh, tanh, sech, csch, coth, acosh, asinh, atanh,
 )
 
 from bigfloat.mpfr import (

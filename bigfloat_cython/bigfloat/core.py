@@ -906,45 +906,6 @@ def pos(x, context=None):
     )
 
 
-def exp(x, context=None):
-    """
-    Return the exponential of x, rounded according to the current context.
-
-    """
-    return _apply_function_in_current_context(
-        BigFloat,
-        mpfr.mpfr_exp,
-        (BigFloat._implicit_convert(x),),
-        context,
-    )
-
-
-def log(x, context=None):
-    """
-    Return the natural logarithm of x, rounded according to the current context.
-
-    """
-    return _apply_function_in_current_context(
-        BigFloat,
-        mpfr.mpfr_log,
-        (BigFloat._implicit_convert(x),),
-        context,
-    )
-
-
-def log2(x, context=None):
-    """
-    Return the base-2 logarithm of x, rounded according to the current context.
-
-    """
-    return _apply_function_in_current_context(
-        BigFloat,
-        mpfr.mpfr_log2,
-        (BigFloat._implicit_convert(x),),
-        context,
-    )
-
-
 ###############################################################################
 # 5.5 Basic Arithmetic Functions
 ###############################################################################
@@ -1233,34 +1194,6 @@ def cmpabs(op1, op2):
     return mpfr.mpfr_cmpabs(op1, op2)
 
 
-
-
-
-def mod(x, y, context=None):
-    """
-    Return x reduced modulo y, rounded according to the current context.
-
-    Returns the value of x - n * y, rounded according to the current context,
-    where n is the integer quotient of x divided by y, rounded toward zero.
-
-    Special values are handled as described in Section F.9.7.1 of the ISO C99
-    standard: If x is infinite or y is zero, the result is NaN. If y is
-    infinite and x is finite, the result is x rounded to the current context.
-    If the result is zero, it has the sign of x.
-
-    """
-    return _apply_function_in_current_context(
-        BigFloat,
-        mpfr.mpfr_fmod,
-        (
-            BigFloat._implicit_convert(x),
-            BigFloat._implicit_convert(y),
-        ),
-        context,
-    )
-
-
-# Predicates
 def is_nan(x):
     """ Return True if x is a NaN, else False. """
 
@@ -1393,6 +1326,362 @@ def unordered(x, y):
     x = BigFloat._implicit_convert(x)
     y = BigFloat._implicit_convert(y)
     return mpfr.mpfr_unordered_p(x, y)
+
+
+###############################################################################
+# 5.7 Special Functions
+###############################################################################
+
+def log(x, context=None):
+    """
+    Return the natural logarithm of x, rounded according to the current context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_log,
+        (BigFloat._implicit_convert(x),),
+        context,
+    )
+
+
+def log2(x, context=None):
+    """
+    Return the base-2 logarithm of x, rounded according to the current context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_log2,
+        (BigFloat._implicit_convert(x),),
+        context,
+    )
+
+
+def log10(x, context=None):
+    """
+    Return the base-10 logarithm of x, rounded according to the current context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_log10,
+        (BigFloat._implicit_convert(x),),
+        context,
+    )
+
+
+def exp(x, context=None):
+    """
+    Return the exponential of x, rounded according to the current context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_exp,
+        (BigFloat._implicit_convert(x),),
+        context,
+    )
+
+
+def exp2(x, context=None):
+    """
+    Return two raised to the power x, rounded according to the current context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_exp2,
+        (BigFloat._implicit_convert(x),),
+        context,
+    )
+
+
+def exp10(x, context=None):
+    """
+    Return ten raised to the power x, rounded according to the current context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_exp10,
+        (BigFloat._implicit_convert(x),),
+        context,
+    )
+
+
+def cos(x, context=None):
+    """
+    Return the cosine of x, rounded according to the current context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_cos,
+        (BigFloat._implicit_convert(x),),
+        context,
+    )
+
+
+def sin(x, context=None):
+    """
+    Return the sine of x, rounded according to the current context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_sin,
+        (BigFloat._implicit_convert(x),),
+        context,
+    )
+
+
+def tan(x, context=None):
+    """
+    Return the tangent of x, rounded according to the current context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_tan,
+        (BigFloat._implicit_convert(x),),
+        context,
+    )
+
+
+def sec(x, context=None):
+    """
+    Return the secant of x, rounded according to the current context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_sec,
+        (BigFloat._implicit_convert(x),),
+        context,
+    )
+
+
+def csc(x, context=None):
+    """
+    Return the cosecant of x, rounded according to the current context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_csc,
+        (BigFloat._implicit_convert(x),),
+        context,
+    )
+
+
+def cot(x, context=None):
+    """
+    Return the cotangent of x, rounded according to the current context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_cot,
+        (BigFloat._implicit_convert(x),),
+        context,
+    )
+
+
+def acos(x, context=None):
+    """
+    Return the arc-cosine of x, rounded according to the current context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_acos,
+        (BigFloat._implicit_convert(x),),
+        context,
+    )
+
+
+def asin(x, context=None):
+    """
+    Return the arc-sine of x, rounded according to the current context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_asin,
+        (BigFloat._implicit_convert(x),),
+        context,
+    )
+
+
+def atan(x, context=None):
+    """
+    Return the arc-tangent of x, rounded according to the current context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_atan,
+        (BigFloat._implicit_convert(x),),
+        context,
+    )
+
+
+def atan2(x, y, context=None):
+    """
+    Return atan(y / x) with the appropriate choice of function branch.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_atan2,
+        (BigFloat._implicit_convert(x), BigFloat._implicit_convert(y)),
+        context,
+    )
+
+
+def cosh(x, context=None):
+    """
+    Return the hyperbolic cosine of x, rounded according to the current context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_cosh,
+        (BigFloat._implicit_convert(x),),
+        context,
+    )
+
+
+def sinh(x, context=None):
+    """
+    Return the hyperbolic sine of x, rounded according to the current context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_sinh,
+        (BigFloat._implicit_convert(x),),
+        context,
+    )
+
+
+def tanh(x, context=None):
+    """
+    Return the hyperbolic tangent of x, rounded according to the current context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_tanh,
+        (BigFloat._implicit_convert(x),),
+        context,
+    )
+
+
+def sech(x, context=None):
+    """
+    Return the hyperbolic secant of x, rounded according to the current context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_sech,
+        (BigFloat._implicit_convert(x),),
+        context,
+    )
+
+
+def csch(x, context=None):
+    """
+    Return the hyperbolic cosecant of x, rounded according to the current context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_csch,
+        (BigFloat._implicit_convert(x),),
+        context,
+    )
+
+
+def coth(x, context=None):
+    """
+    Return the hyperbolic cotangent of x, rounded according to the current context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_coth,
+        (BigFloat._implicit_convert(x),),
+        context,
+    )
+
+
+def acosh(x, context=None):
+    """
+    Return the inverse hyperbolic cosine of x, rounded according to the current context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_acosh,
+        (BigFloat._implicit_convert(x),),
+        context,
+    )
+
+
+def asinh(x, context=None):
+    """
+    Return the inverse hyperbolic sine of x, rounded according to the current context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_asinh,
+        (BigFloat._implicit_convert(x),),
+        context,
+    )
+
+
+def atanh(x, context=None):
+    """
+    Return the inverse hyperbolic tangent of x, rounded according to the current context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_atanh,
+        (BigFloat._implicit_convert(x),),
+        context,
+    )
+
+
+def mod(x, y, context=None):
+    """
+    Return x reduced modulo y, rounded according to the current context.
+
+    Returns the value of x - n * y, rounded according to the current context,
+    where n is the integer quotient of x divided by y, rounded toward zero.
+
+    Special values are handled as described in Section F.9.7.1 of the ISO C99
+    standard: If x is infinite or y is zero, the result is NaN. If y is
+    infinite and x is finite, the result is x rounded to the current context.
+    If the result is zero, it has the sign of x.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_fmod,
+        (
+            BigFloat._implicit_convert(x),
+            BigFloat._implicit_convert(y),
+        ),
+        context,
+    )
+
+
+
 
 
 def is_integer(x):
