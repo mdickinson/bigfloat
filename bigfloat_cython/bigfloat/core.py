@@ -1275,13 +1275,6 @@ def is_inf(x):
     return mpfr.mpfr_inf_p(x)
 
 
-def is_zero(x):
-    """ Return True if x is a zero, else False. """
-
-    x = BigFloat._implicit_convert(x)
-    return mpfr.mpfr_zero_p(x)
-
-
 def is_finite(x):
     """ Return True if x is finite, else False.
 
@@ -1293,11 +1286,11 @@ def is_finite(x):
     return mpfr.mpfr_number_p(x)
 
 
-def is_integer(x):
-    """ Return True if x is an exact integer, else False. """
+def is_zero(x):
+    """ Return True if x is a zero, else False. """
 
     x = BigFloat._implicit_convert(x)
-    return mpfr.mpfr_integer_p(x)
+    return mpfr.mpfr_zero_p(x)
 
 
 def is_regular(x):
@@ -1307,29 +1300,20 @@ def is_regular(x):
     return mpfr.mpfr_regular_p(x)
 
 
-def is_negative(x):
-    """ Return True if x has its sign bit set, else False.
+def sgn(x):
+    """ Return 1 if x > 0, 0 if x == 0, and -1 if x < 0.
 
-    Note that this function returns True for negative zeros.
-
-    """
-    x = BigFloat._implicit_convert(x)
-    return mpfr.mpfr_signbit(x)
-
-
-def _is_equal(x, y):
-    """
-    Return True if op1 == op2 and False otherwise.
-
-    This function returns False whenever op1 and/or op2 is a NaN.
+    Raise ValueError if x is a NaN.
 
     """
     x = BigFloat._implicit_convert(x)
-    y = BigFloat._implicit_convert(y)
-    return mpfr.mpfr_equal_p(x, y)
+    if is_nan(x):
+        raise ValueError("Cannot take sign of a NaN.")
+
+    return mpfr.mpfr_sgn(x)
 
 
-def _is_greater(x, y):
+def greater(x, y):
     """
     Return True if op1 > op2 and False otherwise.
 
@@ -1341,7 +1325,7 @@ def _is_greater(x, y):
     return mpfr.mpfr_greater_p(x, y)
 
 
-def _is_greaterequal(x, y):
+def greaterequal(x, y):
     """
     Return True if op1 >= op2 and False otherwise.
 
@@ -1353,7 +1337,7 @@ def _is_greaterequal(x, y):
     return mpfr.mpfr_greaterequal_p(x, y)
 
 
-def _is_less(x, y):
+def less(x, y):
     """
     Return True if op1 < op2 and False otherwise.
 
@@ -1365,7 +1349,7 @@ def _is_less(x, y):
     return mpfr.mpfr_less_p(x, y)
 
 
-def _is_lessequal(x, y):
+def lessequal(x, y):
     """
     Return True if op1 <= op2 and False otherwise.
 
@@ -1375,6 +1359,18 @@ def _is_lessequal(x, y):
     x = BigFloat._implicit_convert(x)
     y = BigFloat._implicit_convert(y)
     return mpfr.mpfr_lessequal_p(x, y)
+
+
+def equal(x, y):
+    """
+    Return True if op1 == op2 and False otherwise.
+
+    This function returns False whenever op1 and/or op2 is a NaN.
+
+    """
+    x = BigFloat._implicit_convert(x)
+    y = BigFloat._implicit_convert(y)
+    return mpfr.mpfr_equal_p(x, y)
 
 
 def lessgreater(x, y):
@@ -1397,6 +1393,25 @@ def unordered(x, y):
     x = BigFloat._implicit_convert(x)
     y = BigFloat._implicit_convert(y)
     return mpfr.mpfr_unordered_p(x, y)
+
+
+def is_integer(x):
+    """ Return True if x is an exact integer, else False. """
+
+    x = BigFloat._implicit_convert(x)
+    return mpfr.mpfr_integer_p(x)
+
+
+def is_negative(x):
+    """ Return True if x has its sign bit set, else False.
+
+    Note that this function returns True for negative zeros.
+
+    """
+    x = BigFloat._implicit_convert(x)
+    return mpfr.mpfr_signbit(x)
+
+
 
 
 # unary arithmetic operations
@@ -1423,11 +1438,11 @@ if (mpfr.MPFR_VERSION_MAJOR, mpfr.MPFR_VERSION_MINOR) >= (2, 4):
     BigFloat.__rmod__ = _rbinop(mod)
 
 # comparisons
-BigFloat.__eq__ = _binop(_is_equal)
-BigFloat.__le__ = _binop(_is_lessequal)
-BigFloat.__lt__ = _binop(_is_less)
-BigFloat.__ge__ = _binop(_is_greaterequal)
-BigFloat.__gt__ = _binop(_is_greater)
+BigFloat.__eq__ = _binop(equal)
+BigFloat.__le__ = _binop(lessequal)
+BigFloat.__lt__ = _binop(less)
+BigFloat.__ge__ = _binop(greaterequal)
+BigFloat.__gt__ = _binop(greater)
 
 MPFR_VERSION_MAJOR = mpfr.MPFR_VERSION_MAJOR
 MPFR_VERSION_MINOR = mpfr.MPFR_VERSION_MINOR

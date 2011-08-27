@@ -60,6 +60,15 @@ __all__ = [
 
     # numeric functions
     'next_up', 'next_down',
+
+    # 5.5 Basic arithmetic functions
+    'add', 'sub', 'mul', 'sqr', 'div', 'sqrt', 'rec_sqrt', 'cbrt', 'root',
+    'pow', 'neg', 'abs', 'dim',
+
+    # 5.6 Comparison functions
+    'cmp', 'cmpabs', 'is_nan', 'is_inf', 'is_finite', 'is_zero', 'is_regular',
+    'sgn', 'greater', 'greaterequal', 'less', 'lessequal', 'equal',
+    'lessgreater', 'unordered',
 ]
 
 from bigfloat.core import (
@@ -86,17 +95,8 @@ from bigfloat.core import (
     clear_flag,
 
     # Predicates: 1-ary
-    is_nan,
-    is_zero,
-    is_inf,
     is_negative,
-    is_finite,
-    is_regular,
     is_integer,
-
-    # Predicates: 2-ary
-    lessgreater,
-    unordered,
 
     # Standard functions: 0-ary
     const_log2,
@@ -105,26 +105,25 @@ from bigfloat.core import (
     const_euler,
 
     # Standard functions: 1-ary
-    abs,
-    neg,
     pos,
 
-    sqrt,
     log2,
     log,
     exp,
 
     # Standard functions: 2-ary
-    add,
-    mul,
-    sub,
-    div,
-    pow,
     mod,
 
     # Miscellaneous functions
     next_down,
     next_up,
+
+    # 5.5 Basic Arithmetic Functions
+    add, sub, mul, sqr, div, sqrt, rec_sqrt, cbrt, root, pow, neg, abs, dim,
+
+    # 5.6 Comparison Functions
+    cmp, cmpabs, is_nan, is_inf, is_finite, is_zero, is_regular, sgn,
+    greater, greaterequal, less, lessequal, equal, lessgreater, unordered,
 )
 
 from bigfloat.mpfr import (

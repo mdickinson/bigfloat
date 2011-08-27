@@ -1277,6 +1277,12 @@ use of the current context, and do not affect the state of the flags.
    Return True if x is finite and an exact integer, and False
    otherwise.
 
+.. function:: sgn(x)
+
+   Return 1 if x > 0, 0 if x == 0, and -1 if x < 0.  Raise ValueError if x is a
+   NaN.
+
+
 Miscellaneous functions
 """""""""""""""""""""""
 

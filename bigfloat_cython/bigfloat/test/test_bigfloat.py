@@ -70,6 +70,10 @@ from bigfloat import (
 
     # Version information
     MPFR_VERSION_MAJOR, MPFR_VERSION_MINOR,
+
+    # 5.6 Comparison Functions
+    sgn,
+
 )
 
 all_rounding_modes = [RoundTowardZero, RoundTowardNegative,
@@ -1081,6 +1085,21 @@ class BigFloatTests(unittest.TestCase):
             x._format_to_fixed_precision(3),
             (False, '1000', -3),
         )
+
+    # 5.6 Comparison Functions
+    def test_sgn(self):
+        self.assertEqual(sgn(BigFloat(2.6)), 1)
+        self.assertEqual(sgn(BigFloat(-3.5)), -1)
+
+        # Special values
+        self.assertEqual(sgn(BigFloat('-inf')), -1)
+        self.assertEqual(sgn(BigFloat('inf')), 1)
+        self.assertEqual(sgn(BigFloat('0')), 0)
+        self.assertEqual(sgn(BigFloat('-0')), 0)
+
+        # NaNs should raise an exception
+        with self.assertRaises(ValueError):
+            sgn(BigFloat('nan'))
 
 
 class IEEEContextTests(unittest.TestCase):
