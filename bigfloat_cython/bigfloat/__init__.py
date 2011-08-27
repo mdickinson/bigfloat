@@ -92,6 +92,11 @@ __all__ = [
 
     # 5.12 Miscellaneous Functions
     'is_negative',
+    'MPFR_VERSION',
+    'MPFR_VERSION_MAJOR',
+    'MPFR_VERSION_MINOR',
+    'MPFR_VERSION_PATCHLEVEL',
+    'MPFR_VERSION_STRING',
 ]
 
 from bigfloat.core import (
@@ -111,7 +116,6 @@ from bigfloat.core import (
     Underflow,
     set_flagstate,
     get_flagstate,
-    _all_flags,
 
     test_flag,
     set_flag,
@@ -155,8 +159,11 @@ from bigfloat.core import (
 
 from bigfloat.mpfr import (
     # MPFR Version information
+    MPFR_VERSION,
     MPFR_VERSION_MAJOR,
     MPFR_VERSION_MINOR,
+    MPFR_VERSION_PATCHLEVEL,
+    MPFR_VERSION_STRING,
 )
 
 from bigfloat.context import (
