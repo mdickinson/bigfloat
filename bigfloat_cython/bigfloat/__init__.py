@@ -85,6 +85,10 @@ __all__ = [
     'hypot',
     'ai',
     'const_log2', 'const_pi', 'const_euler', 'const_catalan',
+
+    # 5.10 Integer and Remainder Related Functions
+    'rint_ceil', 'rint_floor', 'rint_round', 'rint_trunc',
+    'frac', 'mod', 'remainder', 'is_integer',
 ]
 
 from bigfloat.core import (
@@ -112,10 +116,6 @@ from bigfloat.core import (
 
     # Predicates: 1-ary
     is_negative,
-    is_integer,
-
-    # Standard functions: 2-ary
-    mod,
 
     # Miscellaneous functions
     next_down,
@@ -143,6 +143,10 @@ from bigfloat.core import (
     hypot,
     ai,
     const_log2, const_pi, const_euler, const_catalan,
+
+    # 5.10 Integer and Remainder Related Functions
+    rint_ceil, rint_floor, rint_round, rint_trunc,
+    frac, mod, remainder, is_integer,
 
 )
 

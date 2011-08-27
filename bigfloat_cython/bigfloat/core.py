@@ -1957,6 +1957,87 @@ def const_catalan(context=None):
     )
 
 
+###############################################################################
+# 5.10 Integer and Remainder Related Functions
+###############################################################################
+
+def rint_ceil(x, context=None):
+    """
+    Return the next higher or equal integer to x.
+
+    If the result is not exactly representable, it will be rounded according to
+    the current context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_rint_ceil,
+        (BigFloat._implicit_convert(x),),
+        context,
+    )
+
+
+def rint_floor(x, context=None):
+    """
+    Return the next lower or equal integer to x.
+
+    If the result is not exactly representable, it will be rounded according to
+    the current context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_rint_floor,
+        (BigFloat._implicit_convert(x),),
+        context,
+    )
+
+
+def rint_round(x, context=None):
+    """
+    Return the nearest integer to x, rounding halfway cases *away from zero*.
+
+    If the result is not exactly representable, it will be rounded according to
+    the current context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_rint_round,
+        (BigFloat._implicit_convert(x),),
+        context,
+    )
+
+
+def rint_trunc(x, context=None):
+    """
+    Return the next integer towards zero.
+
+    If the result is not exactly representable, it will be rounded according to
+    the current context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_rint_trunc,
+        (BigFloat._implicit_convert(x),),
+        context,
+    )
+
+
+def frac(x, context=None):
+    """
+    Return the fractional part of x, rounded according to the current context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_frac,
+        (BigFloat._implicit_convert(x),),
+        context,
+    )
+
+
 def mod(x, y, context=None):
     """
     Return x reduced modulo y, rounded according to the current context.
@@ -1973,6 +2054,31 @@ def mod(x, y, context=None):
     return _apply_function_in_current_context(
         BigFloat,
         mpfr.mpfr_fmod,
+        (
+            BigFloat._implicit_convert(x),
+            BigFloat._implicit_convert(y),
+        ),
+        context,
+    )
+
+
+def remainder(x, y, context=None):
+    """
+    Return x reduced modulo y, rounded according to the current context.
+
+    Returns the value of x - n * y, rounded according to the current context,
+    where n is the integer quotient of x divided by y, rounded to the nearest
+    integer (ties rounded to even).
+
+    Special values are handled as described in Section F.9.7.1 of the ISO C99
+    standard: If x is infinite or y is zero, the result is NaN. If y is
+    infinite and x is finite, the result is x (rounded to the current
+    context). If the result is zero, it has the sign of x.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_remainder,
         (
             BigFloat._implicit_convert(x),
             BigFloat._implicit_convert(y),
