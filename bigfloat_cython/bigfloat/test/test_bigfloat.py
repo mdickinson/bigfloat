@@ -66,9 +66,6 @@ from bigfloat import (
     # comparisons
     lessgreater, unordered,
 
-    # List of all flags
-    _all_flags,
-
     # Version information
     MPFR_VERSION_MAJOR, MPFR_VERSION_MINOR,
 
@@ -77,6 +74,8 @@ from bigfloat import (
     sgn,
 
 )
+
+from bigfloat.core import _all_flags
 
 all_rounding_modes = [RoundTowardZero, RoundTowardNegative,
                       RoundTowardPositive, RoundTiesToEven, RoundAwayFromZero]
