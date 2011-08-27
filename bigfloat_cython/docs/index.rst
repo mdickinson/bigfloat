@@ -1036,31 +1036,26 @@ Exponential and logarithmic functions
 Trigonometric functions
 """"""""""""""""""""""""
 
-.. function:: cos(x)
-.. function:: sin(x)
-.. function:: tan(x)
-.. function:: sec(x)
-.. function:: csc(x)
-.. function:: cot(x)
+.. autofunction:: cos
+.. autofunction:: sin
+.. autofunction:: tan
+.. autofunction:: sec
+.. autofunction:: csc
+.. autofunction:: cot
 
-   Cosine, sine, tangent, secant, cosecant and cotangent of x,
-   respectively.  Note that these functions are (necessarily) very
-   slow for large arguments (for example, ``x`` larger than
-   ``BigFloat('1e1000000')``), since reducing ``x`` correctly modulo
-   ``pi`` requires computing ``pi`` to high precision.  Input
-   arguments are in radians, not degrees.
+The above six trigonometric functions are inefficient for large arguments (for
+example, ``x`` larger than ``BigFloat('1e1000000')``), since reducing ``x``
+correctly modulo π requires computing π to high precision.  Input
+arguments are in radians, not degrees.
 
-.. function:: acos(x)
-.. function:: asin(x)
-.. function:: atan(x)
+.. autofunction:: acos
+.. autofunction:: asin
+.. autofunction:: atan
 
-   Inverse cosine, sine and tangent functions, giving a result in
-   radians.
+These functions return a result in radians.
 
-.. function:: atan2(y, x)
+.. autofunction:: atan2
 
-   Return the arctangent2 of y and x.  This is the angle that the ray
-   joining (0, 0) to (x, y) makes with the positive x-axis.
 
 Hyperbolic trig functions
 """"""""""""""""""""""""""

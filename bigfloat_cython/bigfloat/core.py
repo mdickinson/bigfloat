@@ -43,6 +43,7 @@ from bigfloat.context import (
     RoundTowardNegative,
 
     _apply_function_in_current_context,
+    precision,
 )
 
 
@@ -1358,7 +1359,7 @@ def exp10(x, context=None):
 
 def cos(x, context=None):
     """
-    Return the cosine of x, rounded according to the current context.
+    Return the cosine of ``x``.
 
     """
     return _apply_function_in_current_context(
@@ -1371,7 +1372,7 @@ def cos(x, context=None):
 
 def sin(x, context=None):
     """
-    Return the sine of x, rounded according to the current context.
+    Return the sine of ``x``.
 
     """
     return _apply_function_in_current_context(
@@ -1384,7 +1385,7 @@ def sin(x, context=None):
 
 def tan(x, context=None):
     """
-    Return the tangent of x, rounded according to the current context.
+    Return the tangent of ``x``.
 
     """
     return _apply_function_in_current_context(
@@ -1397,7 +1398,7 @@ def tan(x, context=None):
 
 def sec(x, context=None):
     """
-    Return the secant of x, rounded according to the current context.
+    Return the secant of ``x``.
 
     """
     return _apply_function_in_current_context(
@@ -1410,7 +1411,7 @@ def sec(x, context=None):
 
 def csc(x, context=None):
     """
-    Return the cosecant of x, rounded according to the current context.
+    Return the cosecant of ``x``.
 
     """
     return _apply_function_in_current_context(
@@ -1423,7 +1424,7 @@ def csc(x, context=None):
 
 def cot(x, context=None):
     """
-    Return the cotangent of x, rounded according to the current context.
+    Return the cotangent of ``x``.
 
     """
     return _apply_function_in_current_context(
@@ -1436,7 +1437,19 @@ def cot(x, context=None):
 
 def acos(x, context=None):
     """
-    Return the inverse cosine of x, rounded according to the current context.
+    Return the inverse cosine of ``x``.
+
+    The mathematically exact result lies in the range [0, π].  However, note
+    that as a result of rounding to the current context, it's possible for the
+    actual value returned to be fractionally larger than π::
+
+        >>> with precision(12):
+        ...     x = acos(-1)
+        ... 
+        >>> print x
+        3.1416
+        >>> x > const_pi()
+        True
 
     """
     return _apply_function_in_current_context(
@@ -1449,7 +1462,11 @@ def acos(x, context=None):
 
 def asin(x, context=None):
     """
-    Return the inverse sine of x, rounded according to the current context.
+    Return the inverse sine of ``x``.
+
+    The mathematically exact result lies in the range [-π/2, π/2].  However,
+    note that as a result of rounding to the current context, it's possible
+    for the actual value to lie just outside this range.
 
     """
     return _apply_function_in_current_context(
@@ -1462,7 +1479,11 @@ def asin(x, context=None):
 
 def atan(x, context=None):
     """
-    Return the inverse tangent of x, rounded according to the current context.
+    Return the inverse tangent of ``x``.
+
+    The mathematically exact result lies in the range [-π/2, π/2].  However,
+    note that as a result of rounding to the current context, it's possible
+    for the actual value to lie just outside this range.
 
     """
     return _apply_function_in_current_context(
@@ -1473,15 +1494,57 @@ def atan(x, context=None):
     )
 
 
-def atan2(x, y, context=None):
+def atan2(y, x, context=None):
     """
-    Return atan(y / x) with the appropriate choice of function branch.
+    Return ``atan(y / x)`` with the appropriate choice of function branch.
+
+    If ``x > 0``, then ``atan2(y, x)`` is mathematically equivalent to ``atan(y
+    / x)``.  If ``x < 0`` and ``y > 0``, ``atan(y, x)`` is equivalent to ``π +
+    atan(y, x)``.  If ``x < 0`` and ``y < 0``, the result is ``-π + atan(y,
+    x)``.
+
+    Geometrically, ``atan2(y, x)`` is the angle (measured counterclockwise, in
+    radians) from the positive x-axis to the line segment joining (0, 0) to (x,
+    y), in the usual representation of the x-y plane.
+
+    Special values are handled as described in the ISO C99 and IEEE 754-2008
+    standards for the atan2 function.  The following examples illustrate the
+    rules for positive y; for negative y, apply the symmetry ``atan(-y, x) ==
+    -atan(y, x)``.
+
+        >>> finite = positive = 2.3
+        >>> negative = -2.3
+        >>> inf = BigFloat('inf')
+
+        >>> print atan2(+0.0, -0.0)      # pi
+        3.1415926535897931
+        >>> print atan2(+0.0, +0.0)      # 0
+        0
+        >>> print atan2(+0.0, negative)  # pi
+        3.1415926535897931
+        >>> print atan2(+0.0, positive)  # 0
+        0
+        >>> print atan2(positive, 0.0)   # pi / 2
+        1.5707963267948966
+        >>> print atan2(inf, -inf)       # 3*pi / 4
+        2.3561944901923448
+        >>> print atan2(inf, inf)        # pi / 4
+        0.78539816339744828
+        >>> print atan2(inf, finite)     # pi / 2
+        1.5707963267948966
+        >>> print atan2(positive, -inf)  # pi
+        3.1415926535897931
+        >>> print atan2(positive, +inf)  # 0
+        0
 
     """
     return _apply_function_in_current_context(
         BigFloat,
         mpfr.mpfr_atan2,
-        (BigFloat._implicit_convert(x), BigFloat._implicit_convert(y)),
+        (
+            BigFloat._implicit_convert(y),
+            BigFloat._implicit_convert(x),
+        ),
         context,
     )
 
@@ -1908,9 +1971,9 @@ def const_log2(context=None):
 
 def const_pi(context=None):
     """
-    Return Pi, rounded according to the current context.
+    Return π, rounded according to the current context.
 
-    Returns Pi = 3.141..., with precision and rounding mode taken from the
+    Returns π = 3.141..., with precision and rounding mode taken from the
     current context.
 
     """
