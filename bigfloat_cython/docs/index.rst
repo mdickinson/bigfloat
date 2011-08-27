@@ -918,120 +918,45 @@ Conversion from string
 Arithmetic functions
 """"""""""""""""""""
 
-.. function:: add(x, y)
-.. function:: sub(x, y)
-.. function:: mul(x, y)
-.. function:: div(x, y)
-.. function:: pow(x, y)
+.. autofunction:: add
+.. autofunction:: sub
+.. autofunction:: mul
+.. autofunction:: div
+.. autofunction:: pow
+.. autofunction:: mod
 
-   Return x+y, x-y, x*y, x/y and x**y respectively.
+.. autofunction:: remainder
 
-.. function:: mod(x, y)
+.. autofunction:: dim
 
-   Return the reduction of x modulo y.  The result has the same sign as x.
-   In other words, return x-q*y, where q is the integer part of x/y.
+.. autofunction:: pos
+.. autofunction:: neg
+.. autofunction:: abs
 
-.. function:: remainder(x, y)
+.. autofunction:: fma
+.. autofunction:: fms
+.. autofunction:: sqr
+.. autofunction:: sqrt
+.. autofunction:: rec_sqrt
+.. autofunction:: cbrt
+.. autofunction:: root
+.. autofunction:: hypot
 
-   Return x-q*y, where q is the closest integer to x/y, with ties rounded
-   to the nearest even integer.
-
-.. function:: dim(x, y)
-
-   Return max(x-y, 0).
-
-.. function:: pos(x)
-.. function:: neg(x)
-.. function:: abs(x)
-
-   Return +x, -x and the absolute value of x respectively.  Note that
-   these functions will round if x is not exactly representable in the
-   current context.
-
-.. function:: fma(x, y, z)
-
-   Return x*y+z, but with no loss of intermediate accuracy.
-
-.. function:: fms(x, y, z)
-
-   Return x*y-z, with no loss of intermediate accuracy.
-
-.. function:: sqr(x)
-
-   Return x*x.
-
-.. function:: sqrt(x)
-
-   Return the square root of x, or a NaN if x is negative.  The square
-   root of negative zero returns negative zero.
-
-.. function:: rec_sqrt(x)
-
-   Return the reciprocal of the square root of x.  rec_sqrt of zero
-   returns positive infinity, regardless of the sign of the zero.
-   Note that this means that 1/sqrt(x) differs from rec_sqrt(x) when
-   x is negative zero.
-
-   .. note::
-
-      Available for MPFR version >= 2.4.0
-
-.. function:: cbrt(x)
-
-   Return the cube root of x.
-
-.. function:: root(x, n)
-
-   Return the nth root of x; n should be a nonnegative integer.  For
-   even n, return NaN if x is negative.  For n = 0, always return NaN.
-
-.. function:: hypot(x, y)
-
-   Return the square root of x*x+y*y.
 
 Exponential and logarithmic functions
 """"""""""""""""""""""""""""""""""""""
 
-.. function:: exp(x)
+.. autofunction:: exp
+.. autofunction:: exp2
+.. autofunction:: exp10
 
-   Return ``e**x``, where ``e`` is Euler's constant. (2.71828...)
+.. autofunction:: log
+.. autofunction:: log2
+.. autofunction:: log10
 
-.. function:: expm1(x)
+.. autofunction:: expm1
+.. autofunction:: log1p
 
-   Return ``e**x - 1``.  Useful for values of ``x`` close to 0, when
-   the expression ``exp(x)-1`` would lose significant accuracy.
-
-   >>> exp(1e-10)-1
-   BigFloat.exact('1.0000000827403710e-10', precision=53)
-   >>> exp(1e-10, precision(100))-1
-   BigFloat.exact('1.0000000000500000e-10', precision=53)
-   >>> expm1(1e-10)
-   BigFloat.exact('1.0000000000500000e-10', precision=53)
-
-.. function:: exp2(x)
-
-   Return ``2**x``.
-
-.. function:: exp10(x)
-
-   Return ``10**x``.
-
-.. function:: log(x)
-
-   Return the natural (base ``e``) logarithm of *x*.
-
-.. function:: log1p(x)
-
-   Return ``log(1+x)``.  Useful for small values of x, where
-   computing ``log(1+x)`` directly loses significant accuracy.
-
-.. function:: log2(x)
-
-   Return the log base 2 of *x*.
-
-.. function:: log10(x)
-
-   Return the log base 10 of *x*.
 
 Trigonometric functions
 """"""""""""""""""""""""
@@ -1060,102 +985,61 @@ These functions return a result in radians.
 Hyperbolic trig functions
 """"""""""""""""""""""""""
 
-.. function:: cosh(x)
-.. function:: sinh(x)
-.. function:: tanh(x)
-.. function:: sech(x)
-.. function:: csch(x)
-.. function:: coth(x)
+.. autofunction:: cosh
+.. autofunction:: sinh
+.. autofunction:: tanh
+.. autofunction:: sech
+.. autofunction:: csch
+.. autofunction:: coth
 
-   Hyperbolic cosine, sine, tangent, secant, cosecant and cotangent of x,
-   respectively.
-
-.. function:: acosh(x)
-.. function:: asinh(x)
-.. function:: atanh(x)
-
-   Inverse hyperbolic cosine, sine and tangent functions.
+.. autofunction:: acosh
+.. autofunction:: asinh
+.. autofunction:: atanh
 
 Special functions
 """"""""""""""""""
 
-.. function:: eint(x)
+.. autofunction:: eint
+.. autofunction:: li2
+.. autofunction:: gamma
+.. autofunction:: lngamma
+.. autofunction:: zeta
+.. autofunction:: erf
+.. autofunction:: erfc
+.. autofunction:: j0
+.. autofunction:: j1
+.. autofunction:: y0
+.. autofunction:: y1
+.. autofunction:: agm
 
-   Return the exponential integral of x.
-
-.. function:: li2(x)
-
-   .. note::
-
-      Available for MPFR version >= 2.4.0
-
-   Return the real part of the dilogarithm of x.
 
 .. function:: factorial(n)
 
    Return the factorial of n.  *n* should be a nonnegative integer.
 
-.. function:: gamma(x)
-
-   Return the gamma function applied to x.
-
 .. function:: lgamma(x)
 
    Return the natural log of the absolute value of gamma(x).
 
-.. function:: lngamma(x)
 
-   Return log(gamma(x)).
-
-.. function:: zeta(x)
-
-   Return the Riemann zeta function of x.
-
-.. function:: erf(x)
-
-   Return the error function of x.
-
-.. function:: erfc(x)
-
-   Return the complementary error function of x.
-
-.. function:: j0(x)
-.. function:: j1(x)
 .. function:: jn(n, x)
 
    Return Bessel function of the first kind of order 0, 1 and n,
    evaluated at x.  For ``jn``, *n* should be an integer.
 
-.. function:: y0(x)
-.. function:: y1(x)
 .. function:: yn(n, x)
 
    Return Bessel function of the second kind of order 0, 1 and n,
    evaluated at x.  For ``yn``, *n* should be an integer.
 
-.. function:: agm(x, y)
-
-   Return the arithmetic-geometric mean of x and y.
 
 Constants
 """"""""""
 
-.. function:: const_catalan()
-
-   The Catalan constant 1 - 1/3**2 + 1/5**2 - 1/7**2 + 1/9**2 - ... = 0.9159655941...
-
-.. function:: const_euler()
-
-   The Euler-Mascheroni constant 0.5772156649..., equal to the limit
-   of (1 + 1/2 + 1/3 + ... + 1/n) - log(n) as n approaches infinity.
-
-.. function:: const_log2()
-
-   The natural log of 2, 0.6931471805...
-
-.. function:: const_pi()
-
-   The constant pi = 3.1415926535...
+.. autofunction:: const_catalan
+.. autofunction:: const_euler
+.. autofunction:: const_log2
+.. autofunction:: const_pi
 
 
 Miscellaneous functions
@@ -1176,10 +1060,7 @@ Miscellaneous functions
    Return a :class:`BigFloat` with absolute value taken from x and sign taken
    from y.
 
-.. function:: frac(x)
-
-   Return the fractional part of x.  The result has the same sign
-   as x.
+.. autofunction:: frac
 
 .. function:: floor(x)
 

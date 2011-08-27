@@ -832,7 +832,22 @@ def set_str2(s, base, context=None):
 
 def pos(x, context=None):
     """
-    Return x, rounded according to the current context.
+    Return ``x``.
+
+    As usual, the result is rounded to the current context.  The ``pos``
+    function can be useful for rounding an intermediate result, computed with a
+    temporary increase in precision, back to the current context.  For
+    example::
+
+        >>> pow(3, 20) + 1.234 - pow(3, 20)  # inaccurate due to precision loss
+        BigFloat.exact('1.2340002059936523', precision=53)
+        >>> with precision(100):  # compute result with extra precision
+        ...     x = pow(3, 20) + 1.234 - pow(3, 20)
+        ... 
+        >>> x
+        BigFloat.exact('1.2339999999999999857891452847980', precision=100)
+        >>> pos(x)  # round back to original precision
+        BigFloat.exact('1.2340000000000000', precision=53)
 
     """
     return _apply_function_in_current_context(
@@ -849,7 +864,7 @@ def pos(x, context=None):
 
 def add(x, y, context=None):
     """
-    Return x + y, rounded according to the current context.
+    Return ``x`` + ``y``.
 
     """
     return _apply_function_in_current_context(
@@ -865,7 +880,7 @@ def add(x, y, context=None):
 
 def sub(x, y, context=None):
     """
-    Return x - y, rounded according to the current context.
+    Return ``x`` - ``y``.
 
     """
     return _apply_function_in_current_context(
@@ -881,7 +896,7 @@ def sub(x, y, context=None):
 
 def mul(x, y, context=None):
     """
-    Return x times y, rounded according to the current context.
+    Return ``x`` times ``y``.
 
     """
     return _apply_function_in_current_context(
@@ -897,7 +912,7 @@ def mul(x, y, context=None):
 
 def sqr(x, context=None):
     """
-    Return the square of x, rounded according to the current context.
+    Return the square of ``x``.
 
     """
     return _apply_function_in_current_context(
@@ -910,7 +925,7 @@ def sqr(x, context=None):
 
 def div(x, y, context=None):
     """
-    Return x divided by y, rounded according to the current context.
+    Return ``x`` divided by ``y``.
 
     """
     return _apply_function_in_current_context(
@@ -926,7 +941,7 @@ def div(x, y, context=None):
 
 def sqrt(x, context=None):
     """
-    Return the square root of x, rounded according to the current context.
+    Return the square root of ``x``.
 
     Return -0 if x is -0, to be consistent with the IEEE 754 standard.  Return
     NaN if x is negative.
@@ -942,8 +957,7 @@ def sqrt(x, context=None):
 
 def rec_sqrt(x, context=None):
     """
-    Return the reciprocal square root of x, rounded according to the current
-    context.
+    Return the reciprocal square root of x.
 
     Return +Inf if x is ±0, +0 if x is +Inf, and NaN if x is negative.
 
@@ -958,7 +972,7 @@ def rec_sqrt(x, context=None):
 
 def cbrt(x, context=None):
     """
-    Return the cube root of x, rounded according to the current context.
+    Return the cube root of x.
 
     For x negative, return a negative number.  The cube root of -0 is defined
     to be -0.
@@ -974,7 +988,7 @@ def cbrt(x, context=None):
 
 def root(x, k, context=None):
     """
-    Return the kth root of x, rounded according to the current context.
+    Return the kth root of x.
 
     For k odd and x negative (including -Inf), return a negative number.
     For k even and x negative (including -Inf), return NaN.
@@ -992,7 +1006,7 @@ def root(x, k, context=None):
 
 def pow(x, y, context=None):
     """
-    Return x raised to the power y, rounded according to the current context.
+    Return ``x`` raised to the power ``y``.
 
     Special values are handled as described in the ISO C99 and IEEE 754-2008
     standards for the pow function.
@@ -1045,7 +1059,7 @@ def pow(x, y, context=None):
 
 def neg(x, context=None):
     """
-    Return -x, rounded according to the current context.
+    Return -x.
 
     """
     return _apply_function_in_current_context(
@@ -1058,7 +1072,7 @@ def neg(x, context=None):
 
 def abs(x, context=None):
     """
-    Return abs(x), rounded according to the current context.
+    Return abs(x).
 
     """
     return _apply_function_in_current_context(
@@ -1071,7 +1085,7 @@ def abs(x, context=None):
 
 def dim(x, y, context=None):
     """
-    Return max(x - y, 0), rounded according to the current context.
+    Return max(x - y, 0).
 
     Return x - y if x > y, +0 if x <= y, and NaN if either x or y is NaN.
 
@@ -1278,8 +1292,7 @@ def unordered(x, y):
 
 def log(x, context=None):
     """
-    Return the natural logarithm of x, rounded according to the current
-    context.
+    Return the natural logarithm of x.
 
     """
     return _apply_function_in_current_context(
@@ -1292,8 +1305,7 @@ def log(x, context=None):
 
 def log2(x, context=None):
     """
-    Return the base-two logarithm of x, rounded according to the current
-    context.
+    Return the base-two logarithm of x.
 
     """
     return _apply_function_in_current_context(
@@ -1306,8 +1318,7 @@ def log2(x, context=None):
 
 def log10(x, context=None):
     """
-    Return the base-ten logarithm of x, rounded according to the current
-    context.
+    Return the base-ten logarithm of x.
 
     """
     return _apply_function_in_current_context(
@@ -1320,7 +1331,7 @@ def log10(x, context=None):
 
 def exp(x, context=None):
     """
-    Return the exponential of x, rounded according to the current context.
+    Return the exponential of x.
 
     """
     return _apply_function_in_current_context(
@@ -1333,7 +1344,7 @@ def exp(x, context=None):
 
 def exp2(x, context=None):
     """
-    Return two raised to the power x, rounded according to the current context.
+    Return two raised to the power x.
 
     """
     return _apply_function_in_current_context(
@@ -1346,7 +1357,7 @@ def exp2(x, context=None):
 
 def exp10(x, context=None):
     """
-    Return ten raised to the power x, rounded according to the current context.
+    Return ten raised to the power x.
 
     """
     return _apply_function_in_current_context(
@@ -1551,8 +1562,7 @@ def atan2(y, x, context=None):
 
 def cosh(x, context=None):
     """
-    Return the hyperbolic cosine of x, rounded according to the current
-    context.
+    Return the hyperbolic cosine of x.
 
     """
     return _apply_function_in_current_context(
@@ -1565,7 +1575,7 @@ def cosh(x, context=None):
 
 def sinh(x, context=None):
     """
-    Return the hyperbolic sine of x, rounded according to the current context.
+    Return the hyperbolic sine of x.
 
     """
     return _apply_function_in_current_context(
@@ -1578,8 +1588,7 @@ def sinh(x, context=None):
 
 def tanh(x, context=None):
     """
-    Return the hyperbolic tangent of x, rounded according to the current
-    context.
+    Return the hyperbolic tangent of x.
 
     """
     return _apply_function_in_current_context(
@@ -1592,8 +1601,7 @@ def tanh(x, context=None):
 
 def sech(x, context=None):
     """
-    Return the hyperbolic secant of x, rounded according to the current
-    context.
+    Return the hyperbolic secant of x.
 
     """
     return _apply_function_in_current_context(
@@ -1606,8 +1614,7 @@ def sech(x, context=None):
 
 def csch(x, context=None):
     """
-    Return the hyperbolic cosecant of x, rounded according to the current
-    context.
+    Return the hyperbolic cosecant of x.
 
     """
     return _apply_function_in_current_context(
@@ -1620,8 +1627,7 @@ def csch(x, context=None):
 
 def coth(x, context=None):
     """
-    Return the hyperbolic cotangent of x, rounded according to the current
-    context.
+    Return the hyperbolic cotangent of x.
 
     """
     return _apply_function_in_current_context(
@@ -1634,8 +1640,7 @@ def coth(x, context=None):
 
 def acosh(x, context=None):
     """
-    Return the inverse hyperbolic cosine of x, rounded according to the current
-    context.
+    Return the inverse hyperbolic cosine of x.
 
     """
     return _apply_function_in_current_context(
@@ -1648,8 +1653,7 @@ def acosh(x, context=None):
 
 def asinh(x, context=None):
     """
-    Return the inverse hyperbolic sine of x, rounded according to the current
-    context.
+    Return the inverse hyperbolic sine of x.
 
     """
     return _apply_function_in_current_context(
@@ -1662,8 +1666,7 @@ def asinh(x, context=None):
 
 def atanh(x, context=None):
     """
-    Return the inverse hyperbolic tangent of x, rounded according to the
-    current context.
+    Return the inverse hyperbolic tangent of x.
 
     """
     return _apply_function_in_current_context(
@@ -1676,8 +1679,7 @@ def atanh(x, context=None):
 
 def log1p(x, context=None):
     """
-    Return the logarithm of one plus x, rounded according to the current
-    context.
+    Return the logarithm of one plus x.
 
     """
     return _apply_function_in_current_context(
@@ -1690,8 +1692,7 @@ def log1p(x, context=None):
 
 def expm1(x, context=None):
     """
-    Return one less than the exponential of x, rounded according to the current
-    context.
+    Return one less than the exponential of x.
 
     """
     return _apply_function_in_current_context(
@@ -1704,8 +1705,7 @@ def expm1(x, context=None):
 
 def eint(x, context=None):
     """
-    Return the exponential integral of x, rounded according to the current
-    context.
+    Return the exponential integral of x.
 
     """
     return _apply_function_in_current_context(
@@ -1718,8 +1718,7 @@ def eint(x, context=None):
 
 def li2(x, context=None):
     """
-    Return the real part of the dilogarithm of x, rounded according to the
-    current context.
+    Return the real part of the dilogarithm of x.
 
     """
     return _apply_function_in_current_context(
@@ -1732,8 +1731,7 @@ def li2(x, context=None):
 
 def gamma(x, context=None):
     """
-    Return the value of the Gamma function of x, rounded according to the
-    current context.
+    Return the value of the Gamma function of x.
 
     """
     return _apply_function_in_current_context(
@@ -1746,8 +1744,7 @@ def gamma(x, context=None):
 
 def lngamma(x, context=None):
     """
-    Return the value of the logarithm of the Gamma function of x, rounded
-    according to the current context.
+    Return the value of the logarithm of the Gamma function of x.
 
     """
     return _apply_function_in_current_context(
@@ -1760,8 +1757,7 @@ def lngamma(x, context=None):
 
 def digamma(x, context=None):
     """
-    Return the value of the digamma (sometimes also called Psi) function on op,
-    rounded according to the current context.
+    Return the value of the digamma (sometimes also called Psi) function on op.
 
     """
     return _apply_function_in_current_context(
@@ -1774,8 +1770,7 @@ def digamma(x, context=None):
 
 def zeta(x, context=None):
     """
-    Return the value of the Riemann zeta function on x, rounded according to
-    the current context.
+    Return the value of the Riemann zeta function on x.
 
     """
     return _apply_function_in_current_context(
@@ -1788,8 +1783,7 @@ def zeta(x, context=None):
 
 def erf(x, context=None):
     """
-    Return the value of the error function at x, rounded according to the
-    current context.
+    Return the value of the error function at x.
 
     """
     return _apply_function_in_current_context(
@@ -1802,8 +1796,7 @@ def erf(x, context=None):
 
 def erfc(x, context=None):
     """
-    Return the value of the complementary error function at x, rounded
-    according to the current context.
+    Return the value of the complementary error function at x.
 
     """
     return _apply_function_in_current_context(
@@ -1816,8 +1809,7 @@ def erfc(x, context=None):
 
 def j0(x, context=None):
     """
-    Return the value of the first kind Bessel function of order 0 at x, rounded
-    according to the current context.
+    Return the value of the first kind Bessel function of order 0 at x.
 
     """
     return _apply_function_in_current_context(
@@ -1830,8 +1822,7 @@ def j0(x, context=None):
 
 def j1(x, context=None):
     """
-    Return the value of the first kind Bessel function of order 1 at x, rounded
-    according to the current context.
+    Return the value of the first kind Bessel function of order 1 at x.
 
     """
     return _apply_function_in_current_context(
@@ -1844,8 +1835,7 @@ def j1(x, context=None):
 
 def y0(x, context=None):
     """
-    Return the value of the second kind Bessel function of order 0 at x,
-    rounded according to the current context.
+    Return the value of the second kind Bessel function of order 0 at x.
 
     """
     return _apply_function_in_current_context(
@@ -1858,8 +1848,7 @@ def y0(x, context=None):
 
 def y1(x, context=None):
     """
-    Return the value of the second kind Bessel function of order 1 at x,
-    rounded according to the current context.
+    Return the value of the second kind Bessel function of order 1 at x.
 
     """
     return _apply_function_in_current_context(
@@ -1908,8 +1897,7 @@ def fms(x, y, z, context=None):
 
 def agm(x, y, context=None):
     """
-    Return the arithmetic geometric mean of x and y, rounded according to the
-    current context.
+    Return the arithmetic geometric mean of x and y.
 
     """
     return _apply_function_in_current_context(
@@ -1926,7 +1914,7 @@ def agm(x, y, context=None):
 def hypot(x, y, context=None):
     """
     Return the Euclidean norm of x and y, i.e., the square root of the sum of
-    the squares of x and y, rounded according to the current context.
+    the squares of x and y.
 
     """
     return _apply_function_in_current_context(
@@ -1942,7 +1930,7 @@ def hypot(x, y, context=None):
 
 def ai(x, context=None):
     """
-    Return the Airy function of x, rounded according to the current context.
+    Return the Airy function of x.
 
     """
     return _apply_function_in_current_context(
@@ -1955,10 +1943,10 @@ def ai(x, context=None):
 
 def const_log2(context=None):
     """
-    Return log(2), rounded according to the current context.
+    Return log(2).
 
-    Returns the natural logarithm of 2 = 0.693..., with precision and rounding
-    mode taken from the current context.
+    Returns the natural logarithm of 2, 0.6931471805..., with precision and
+    rounding mode taken from the current context.
 
     """
     return _apply_function_in_current_context(
@@ -1971,10 +1959,10 @@ def const_log2(context=None):
 
 def const_pi(context=None):
     """
-    Return π, rounded according to the current context.
+    Return π.
 
-    Returns π = 3.141..., with precision and rounding mode taken from the
-    current context.
+    Returns π = 3.1415926535..., with precision and rounding mode taken from
+    the current context.
 
     """
     return _apply_function_in_current_context(
@@ -1987,11 +1975,12 @@ def const_pi(context=None):
 
 def const_euler(context=None):
     """
-    Return Euler's constant, rounded according to the current context.
+    Return Euler's constant.
 
-    Returns the value of Euler's constant 0.577..., (also called the
-    Euler-Mascheroni constant) with precision and rounding mode taken from the
-    current context.
+    Returns the value of the Euler-Mascheroni constant, 0.5772156649..., with
+    precision and rounding mode taken from the current context.  The constant
+    is equal to the limit of (1 + 1/2 + 1/3 + ... + 1/n) - log(n) as n
+    approaches infinity.
 
     """
     return _apply_function_in_current_context(
@@ -2004,10 +1993,12 @@ def const_euler(context=None):
 
 def const_catalan(context=None):
     """
-    Return Catalan's constant, rounded according to the current context.
+    Return Catalan's constant.
 
-    Returns the value of Catalan's constant 0.915..., with precision and
-    rounding mode taken from the current context.
+    Returns the value of Catalan's constant 0.9159655941..., with precision and
+    rounding mode taken from the current context.  The Catalan constant is
+    defined as the limit of the series 1 - 1/3**2 + 1/5**2 - 1/7**2 + 1/9**2 -
+    ...
 
     """
     return _apply_function_in_current_context(
@@ -2088,7 +2079,9 @@ def rint_trunc(x, context=None):
 
 def frac(x, context=None):
     """
-    Return the fractional part of x, rounded according to the current context.
+    Return the fractional part of ``x``.
+
+    The result has the same sign as ``x``.
 
     """
     return _apply_function_in_current_context(
@@ -2101,10 +2094,10 @@ def frac(x, context=None):
 
 def mod(x, y, context=None):
     """
-    Return x reduced modulo y, rounded according to the current context.
+    Return ``x`` reduced modulo ``y``.
 
-    Returns the value of x - n * y, rounded according to the current context,
-    where n is the integer quotient of x divided by y, rounded toward zero.
+    Returns the value of x - n * y, where n is the integer quotient of x
+    divided by y, rounded toward zero.
 
     Special values are handled as described in Section F.9.7.1 of the ISO C99
     standard: If x is infinite or y is zero, the result is NaN. If y is
@@ -2125,11 +2118,10 @@ def mod(x, y, context=None):
 
 def remainder(x, y, context=None):
     """
-    Return x reduced modulo y, rounded according to the current context.
+    Return x reduced modulo y.
 
-    Returns the value of x - n * y, rounded according to the current context,
-    where n is the integer quotient of x divided by y, rounded to the nearest
-    integer (ties rounded to even).
+    Returns the value of x - n * y, where n is the integer quotient of x
+    divided by y, rounded to the nearest integer (ties rounded to even).
 
     Special values are handled as described in Section F.9.7.1 of the ISO C99
     standard: If x is infinite or y is zero, the result is NaN. If y is
