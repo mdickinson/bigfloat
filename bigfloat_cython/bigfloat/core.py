@@ -2247,6 +2247,46 @@ def is_integer(x):
 # 5.12 Miscellaneous Functions
 ###############################################################################
 
+def min(x, y, context=None):
+    """
+    Return the minimum of x and y.
+
+    If x and y are both NaN, return NaN. If exactly one of x and y is NaN,
+    return the non-NaN value. If x and y are zeros of different signs, return
+    −0.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_min,
+        (
+            BigFloat._implicit_convert(x),
+            BigFloat._implicit_convert(y),
+        ),
+        context,
+    )
+
+
+def max(x, y, context=None):
+    """
+    Return the maximum of x and y.
+
+    If x and y are both NaN, return NaN. If exactly one of x and y is NaN,
+    return the non-NaN value. If x and y are zeros of different signs, return
+    +0.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_max,
+        (
+            BigFloat._implicit_convert(x),
+            BigFloat._implicit_convert(y),
+        ),
+        context,
+    )
+
+
 def is_negative(x):
     """ Return True if x has its sign bit set, else False.
 

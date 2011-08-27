@@ -93,6 +93,7 @@ __all__ = [
     'frac', 'mod', 'remainder', 'is_integer',
 
     # 5.12 Miscellaneous Functions
+    'min', 'max',
     'is_negative',
     'MPFR_VERSION',
     'MPFR_VERSION_MAJOR',
@@ -157,6 +158,7 @@ from bigfloat.core import (
     frac, mod, remainder, is_integer,
 
     # 5.12 Miscellaneous Functions
+    min, max,
     is_negative,
 
 )

@@ -1036,15 +1036,8 @@ Constants
 Miscellaneous functions
 """"""""""""""""""""""""
 
-.. function:: max(x, y)
-
-   Return the maximum of *x* and *y*.  If *x* and *y* are zeros with
-   different signs, return positive zero.
-
-.. function:: min(x, y)
-
-   Return the minimum of *x* and *y*.  If *x* and *y* are zeros with
-   different signs, return negative zero.
+.. autofunction:: max(x, y)
+.. autofunction:: min(x, y)
 
 .. function:: copysign(x, y)
 

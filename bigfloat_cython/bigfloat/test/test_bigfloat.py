@@ -81,6 +81,8 @@ from bigfloat import (
     j0, j1, jn,
     y0, y1, yn,
 
+    # 5.12 Miscellaneous Functions
+    min, max,
 )
 
 from bigfloat.core import _all_flags
@@ -1198,6 +1200,14 @@ class BigFloatTests(unittest.TestCase):
     def test_yn(self):
         self.assertEqual(y0(1.2345), yn(0, 1.2345))
         self.assertEqual(y1(1.2345), yn(1, 1.2345))
+
+
+    # 5.12 Miscellaneous Functions
+    def test_min(self):
+        self.assertEqual(min(2, 3), 2)
+
+    def test_max(self):
+        self.assertEqual(max(2, 3), 3)
 
 
 class IEEEContextTests(unittest.TestCase):
