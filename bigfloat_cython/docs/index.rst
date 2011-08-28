@@ -1003,6 +1003,7 @@ Special functions
 .. autofunction:: li2
 .. autofunction:: gamma
 .. autofunction:: lngamma
+.. autofunction:: lgamma
 .. autofunction:: zeta
 .. autofunction:: zeta_ui
 .. autofunction:: erf
@@ -1014,14 +1015,7 @@ Special functions
 .. autofunction:: y1
 .. autofunction:: yn
 .. autofunction:: agm
-
 .. autofunction:: factorial
-
-.. function:: lgamma(x)
-
-   Return the natural log of the absolute value of gamma(x).
-
-
 
 
 Constants

@@ -71,6 +71,7 @@ from bigfloat import (
     exp,
     factorial,
     zeta_ui,
+    lgamma,
     j0, j1, jn,
     y0, y1, yn,
     const_log2, const_pi, const_euler, const_catalan,
@@ -1191,6 +1192,10 @@ class BigFloatTests(unittest.TestCase):
         self.assertEqual(zeta_ui(0), -0.5)
         self.assertEqual(zeta_ui(1), float('inf'))
         self.assertEqual(zeta_ui(2), 1.6449340668482264)
+
+    def test_lgamma(self):
+        self.assertEqual(lgamma(0.5), 0.57236494292470008)
+        self.assertEqual(lgamma(-0.5), 1.2655121234846454)
 
     def test_jn(self):
         self.assertEqual(j0(1.2345), jn(0, 1.2345))

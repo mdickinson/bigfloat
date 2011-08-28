@@ -1768,6 +1768,19 @@ def lngamma(x, context=None):
     )
 
 
+def lgamma(x, context=None):
+    """
+    Return the logarithm of the absolute value of the Gamma function at x.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        lambda rop, op, rnd: mpfr.mpfr_lgamma(rop, op, rnd)[0],
+        (BigFloat._implicit_convert(x),),
+        context,
+    )
+
+
 def digamma(x, context=None):
     """
     Return the value of the digamma (sometimes also called Psi) function on op.
