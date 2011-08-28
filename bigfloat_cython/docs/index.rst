@@ -1036,13 +1036,9 @@ Constants
 Miscellaneous functions
 """"""""""""""""""""""""
 
-.. autofunction:: max(x, y)
-.. autofunction:: min(x, y)
-
-.. function:: copysign(x, y)
-
-   Return a :class:`BigFloat` with absolute value taken from x and sign taken
-   from y.
+.. autofunction:: max
+.. autofunction:: min
+.. autofunction:: copysign
 
 .. autofunction:: frac
 

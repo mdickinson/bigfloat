@@ -95,6 +95,8 @@ __all__ = [
     # 5.12 Miscellaneous Functions
     'min', 'max',
     'is_negative',
+    'copysign',
+
     'MPFR_VERSION',
     'MPFR_VERSION_MAJOR',
     'MPFR_VERSION_MINOR',
@@ -160,6 +162,7 @@ from bigfloat.core import (
     # 5.12 Miscellaneous Functions
     min, max,
     is_negative,
+    copysign,
 
 )
 

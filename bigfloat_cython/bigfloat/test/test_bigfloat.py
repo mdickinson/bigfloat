@@ -63,7 +63,7 @@ from bigfloat import (
     const_log2, const_pi, const_euler, const_catalan,
 
     # tests
-    is_nan, is_inf, is_zero, is_negative, is_finite, is_integer, is_regular,
+    is_nan, is_inf, is_zero, is_finite, is_integer, is_regular,
 
     # comparisons
     lessgreater, unordered,
@@ -83,6 +83,8 @@ from bigfloat import (
 
     # 5.12 Miscellaneous Functions
     min, max,
+    is_negative,
+    copysign,
 )
 
 from bigfloat.core import _all_flags
@@ -1201,13 +1203,18 @@ class BigFloatTests(unittest.TestCase):
         self.assertEqual(y0(1.2345), yn(0, 1.2345))
         self.assertEqual(y1(1.2345), yn(1, 1.2345))
 
-
     # 5.12 Miscellaneous Functions
     def test_min(self):
         self.assertEqual(min(2, 3), 2)
 
     def test_max(self):
         self.assertEqual(max(2, 3), 3)
+
+    def test_copysign(self):
+        self.assertEqual(copysign(5, -7), -5)
+        self.assertEqual(copysign(5, 7), 5)
+        self.assertEqual(copysign(-5, 7), 5)
+        self.assertEqual(copysign(-5, -7), -5)
 
 
 class IEEEContextTests(unittest.TestCase):

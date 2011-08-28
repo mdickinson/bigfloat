@@ -2297,6 +2297,22 @@ def is_negative(x):
     return mpfr.mpfr_signbit(x)
 
 
+def copysign(x, y, context=None):
+    """
+    Return a new BigFloat object with the magnitude of x but the sign of y.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_copysign,
+        (
+            BigFloat._implicit_convert(x),
+            BigFloat._implicit_convert(y),
+        ),
+        context,
+    )
+
+
 # unary arithmetic operations
 BigFloat.__pos__ = pos
 BigFloat.__neg__ = neg
