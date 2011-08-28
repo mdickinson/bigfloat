@@ -1,10 +1,20 @@
-What's new in bigfloat 0.3.0?
-=============================
+What's new in bigfloat 0.3.0a1?
+===============================
+
+
+Prerequisites
+-------------
+
+- For now, Python 2.7 and MPFR version >= 3.0 are required.  Support for earlier
+  versions of Python is planned.  Support for MPFR 2.x will probably not be
+  added.
+
 
 Library
 -------
 
-- Rewrote core to use Cython rather than ctypes.
+- Major rewrite and restructuring of the core code.  The core now uses Cython
+  rather than ctypes.
 
 - mpfr module now separately available as an extension type, with semantics very close
   to the Mpfr library.
@@ -25,6 +35,12 @@ Library
   are defined in bigfloat.rounding_modes, and the main BigFloat type is defined
   in bigfloat.core.  Everything is importable directory from bigfloat, as
   before.
+
+
+Documentation
+-------------
+
+- Most of the documentation is now generated automatically using Sphinx's autodoc extension.
 
 
 What's new in bigfloat 0.2.1?

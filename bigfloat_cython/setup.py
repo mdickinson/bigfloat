@@ -149,7 +149,7 @@ Links
 
 setup(
     name='BigFloat',
-    version='0.3.0',
+    version='0.3.0a1',
     description=DESCRIPTION,
     long_description=LONG_DESCRIPTION,
     author='Mark Dickinson',
