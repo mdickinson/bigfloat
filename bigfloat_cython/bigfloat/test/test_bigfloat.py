@@ -57,29 +57,26 @@ from bigfloat import (
 
     # standard arithmetic functions
     add, sub, mul, div, mod, pow,
+    sqrt,
 
-    sqrt, exp,
-
-    const_log2, const_pi, const_euler, const_catalan,
-
-    # tests
-    is_nan, is_inf, is_zero, is_finite, is_integer, is_regular,
-
-    # comparisons
-    lessgreater, unordered,
 
     # Version information
     MPFR_VERSION_MAJOR, MPFR_VERSION_MINOR,
 
     # 5.6 Comparison Functions
-    cmp, cmpabs,
-    sgn,
+    cmp, cmpabs, is_nan, is_inf, is_finite, is_zero, is_regular, sgn,
+    lessgreater, unordered,
 
     # 5.7 Special Functions
+    exp,
     factorial,
     zeta_ui,
     j0, j1, jn,
     y0, y1, yn,
+    const_log2, const_pi, const_euler, const_catalan,
+
+    # 5.10 Integer and Remainder Related Functions
+    is_integer,
 
     # 5.12 Miscellaneous Functions
     min, max,
