@@ -606,7 +606,7 @@ zero, and NaNs.
 
 
 Special methods
-""""""""""""""""
+"""""""""""""""
 
 The :class:`BigFloat` type has a full complement of special methods.
 Here are some brief notes on those methods, indicating some possible
@@ -803,7 +803,7 @@ instances.
    rounds results towards negative infinity.
 
 Constants
-""""""""""
+"""""""""
 
 .. data:: PRECISION_MIN
 .. data:: PRECISION_MAX
@@ -826,7 +826,7 @@ Constants
 
 
 The current context
-""""""""""""""""""""
+"""""""""""""""""""
 
 There can be many Context objects in existence at one time, but
 there's only ever one *current context*.  The current context is given
@@ -919,7 +919,7 @@ Arithmetic functions
 
 
 Exponential and logarithmic functions
-""""""""""""""""""""""""""""""""""""""
+"""""""""""""""""""""""""""""""""""""
 
 .. autofunction:: exp
 .. autofunction:: exp2
@@ -934,7 +934,7 @@ Exponential and logarithmic functions
 
 
 Trigonometric functions
-""""""""""""""""""""""""
+"""""""""""""""""""""""
 
 .. autofunction:: cos
 .. autofunction:: sin
@@ -958,7 +958,7 @@ These functions return a result in radians.
 
 
 Hyperbolic trig functions
-""""""""""""""""""""""""""
+"""""""""""""""""""""""""
 
 .. autofunction:: cosh
 .. autofunction:: sinh
@@ -972,7 +972,7 @@ Hyperbolic trig functions
 .. autofunction:: atanh
 
 Special functions
-""""""""""""""""""
+"""""""""""""""""
 
 .. autofunction:: eint
 .. autofunction:: li2
@@ -994,7 +994,7 @@ Special functions
 
 
 Constants
-""""""""""
+"""""""""
 
 .. autofunction:: const_catalan
 .. autofunction:: const_euler
@@ -1003,7 +1003,7 @@ Constants
 
 
 Miscellaneous functions
-""""""""""""""""""""""""
+"""""""""""""""""""""""
 
 .. autofunction:: max
 .. autofunction:: min
@@ -1049,7 +1049,7 @@ correspond to any of the Python comparison operators.
 
 
 Number classification functions
-""""""""""""""""""""""""""""""""
+"""""""""""""""""""""""""""""""
 
 The following functions all accept a single :class:`BigFloat` instance (or a
 float, or an integer) and return a boolean value.  They make no
