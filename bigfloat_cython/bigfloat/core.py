@@ -47,23 +47,6 @@ from bigfloat.context import (
 )
 
 
-def mpfr_set_str2(rop, s, base, rnd):
-    """Set value of rop from the string s, using given base and rounding mode.
-
-    If s is a valid string for the given base, set the Mpfr variable
-    rop from s, rounding in the direction given by 'rnd', and return
-    the usual ternary value.
-
-    If s is not a valid string for the given base, raise ValueError.
-
-    """
-    if s == s.strip():
-        ternary, endindex = mpfr.mpfr_strtofr(rop, s, base, rnd)
-        if not s[endindex:]:
-            return ternary
-    raise ValueError("not a valid numeric string")
-
-
 def mpfr_get_str2(rop, base, ndigits, rounding_mode):
     digits, exp = mpfr.mpfr_get_str(base, ndigits, rop, rounding_mode)
     negative = digits.startswith('-')
@@ -815,10 +798,32 @@ def _set_d(x, context=None):
     )
 
 
+def _set_from_whole_string(rop, s, base, rnd):
+    """
+    Helper function for set_str2: accept a string, set rop, and return the
+    appropriate ternary value.  Raise ValueError if ``s`` doesn't represent
+    a valid string in the given base.
+
+    """
+    s = s.strip()
+    ternary, endindex = mpfr.mpfr_strtofr(rop, s, base, rnd)
+    if len(s) != endindex:
+        raise ValueError("not a valid numeric string")
+    return ternary
+
+
 def set_str2(s, base, context=None):
+    """
+    Convert the string ``s`` in base ``base`` to a BigFloat instance, rounding
+    according to the current context.
+
+    Raise ValueError if ``s`` doesn't represent a valid string in the given
+    base.
+
+    """
     return _apply_function_in_current_context(
         BigFloat,
-        mpfr_set_str2,
+        _set_from_whole_string,
         (s, base),
         context,
     )

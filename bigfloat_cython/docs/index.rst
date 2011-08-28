@@ -885,10 +885,9 @@ All functions in this section follow the same rules:
 Conversion from string
 """"""""""""""""""""""
 
-.. function:: set_str2(s, base)
+.. autofunction:: set_str2
 
-   Convert a string s, representing a number in base b, to a :class:`BigFloat`.
-   The base should satisfy 2 <= base <= 36.
+
 
 Arithmetic functions
 """"""""""""""""""""

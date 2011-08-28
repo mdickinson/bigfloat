@@ -1245,13 +1245,32 @@ class ABCTests(unittest.TestCase):
         setcontext(DefaultContext)
 
 
+def mpfr_set_str2(rop, s, base, rnd):
+    """Set value of rop from the string s, using given base and rounding mode.
+
+    If s is a valid string for the given base, set the Mpfr variable
+    rop from s, rounding in the direction given by 'rnd', and return
+    the usual ternary value.
+
+    If s is not a valid string for the given base, raise ValueError.
+
+    """
+    import bigfloat.mpfr as mpfr
+
+    if s == s.strip():
+        ternary, endindex = mpfr.mpfr_strtofr(rop, s, base, rnd)
+        if not s[endindex:]:
+            return ternary
+    raise ValueError("not a valid numeric string")
+
+
 def _fromhex_exact(value):
     """Private function used in testing"""
     # private low-level version of fromhex that always does an exact
     # conversion.  Avoids using any heavy machinery (contexts, function
     # wrapping), since its main use is in the testing of that machinery.
     import bigfloat.mpfr as mpfr
-    from bigfloat.core import mpfr_set_str2, ROUND_TIES_TO_EVEN
+    from bigfloat.core import ROUND_TIES_TO_EVEN
 
     precision = len(value) * 4
     bf = mpfr.Mpfr_t.__new__(BigFloat)
