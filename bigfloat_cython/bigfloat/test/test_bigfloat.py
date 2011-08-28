@@ -59,7 +59,6 @@ from bigfloat import (
     add, sub, mul, div, mod, pow,
     sqrt,
 
-
     # Version information
     MPFR_VERSION_MAJOR, MPFR_VERSION_MINOR,
 
@@ -1246,6 +1245,27 @@ class ABCTests(unittest.TestCase):
         setcontext(DefaultContext)
 
 
+def _fromhex_exact(value):
+    """Private function used in testing"""
+    # private low-level version of fromhex that always does an exact
+    # conversion.  Avoids using any heavy machinery (contexts, function
+    # wrapping), since its main use is in the testing of that machinery.
+    import bigfloat.mpfr as mpfr
+    from bigfloat.core import mpfr_set_str2, ROUND_TIES_TO_EVEN
+
+    precision = len(value) * 4
+    bf = mpfr.Mpfr_t.__new__(BigFloat)
+    mpfr.mpfr_init2(bf, precision)
+    ternary = mpfr_set_str2(bf, value, 16, ROUND_TIES_TO_EVEN)
+    if ternary:
+        # conversion should have been exact, except possibly if
+        # value overflows or underflows
+        raise ValueError("_fromhex_exact failed to do an exact "
+                         "conversion.  This shouldn't happen. "
+                         "Please report.")
+    return bf
+
+
 def process_lines(lines):
     def test_fn(self):
 
@@ -1271,8 +1291,8 @@ def process_lines(lines):
             # the rhs is an expected result followed by expected flags
             lhs_pieces, rhs_pieces = map(str.split, l.split('->'))
             fn = getattr(bigfloat, lhs_pieces[0])
-            args = [BigFloat._fromhex_exact(arg) for arg in lhs_pieces[1:]]
-            expected_result = BigFloat._fromhex_exact(rhs_pieces[0])
+            args = [_fromhex_exact(arg) for arg in lhs_pieces[1:]]
+            expected_result = _fromhex_exact(rhs_pieces[0])
             expected_flags = set(
                 getattr(bigfloat, flag) for flag in rhs_pieces[1:]
             )

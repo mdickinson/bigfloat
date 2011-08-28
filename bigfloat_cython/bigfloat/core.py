@@ -283,26 +283,6 @@ class BigFloat(mpfr.Mpfr_t):
         with (context if context is not None else EmptyContext):
             return set_str2(value, 16)
 
-    @staticmethod
-    def _fromhex_exact(value):
-        """Private function used in testing"""
-        # private low-level version of fromhex that always does an exact
-        # conversion.  Avoids using any heavy machinery (contexts, function
-        # wrapping), since its main use is in the testing of that machinery.
-
-        # XXX Maybe we should move this function into test_bigfloat
-        precision = len(value) * 4
-        bf = mpfr.Mpfr_t.__new__(BigFloat)
-        mpfr.mpfr_init2(bf, precision)
-        ternary = mpfr_set_str2(bf, value, 16, ROUND_TIES_TO_EVEN)
-        if ternary:
-            # conversion should have been exact, except possibly if
-            # value overflows or underflows
-            raise ValueError("_fromhex_exact failed to do an exact "
-                             "conversion.  This shouldn't happen. "
-                             "Please report.")
-        return bf
-
     # alternative constructor, that does exact conversions
     @classmethod
     def exact(cls, value, precision=None):
