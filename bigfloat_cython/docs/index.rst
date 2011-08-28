@@ -1086,26 +1086,19 @@ The following functions all accept a single :class:`BigFloat` instance (or a
 float, or an integer) and return a boolean value.  They make no
 use of the current context, and do not affect the state of the flags.
 
-.. autofunction:: is_nan(x)
-.. autofunction:: is_inf(x)
-.. autofunction:: is_zero(x)
-.. autofunction:: is_finite(x)
-.. autofunction:: is_negative(x)
-.. autofunction:: is_integer(x)
+.. autofunction:: is_nan
+.. autofunction:: is_inf
+.. autofunction:: is_zero
+.. autofunction:: is_finite
+.. autofunction:: is_negative
+.. autofunction:: is_integer
 
 
 Miscellaneous functions
 """""""""""""""""""""""
 
-.. function:: next_up(x)
-
-   Return the least representable BigFloat that's strictly greater than x.
-   This operation is quiet:  it doesn't affect any of the flags.
-
-.. function:: next_down(x)
-
-   Return the greatest representable BigFloat that's strictly less than x.
-   This operation is quiet:  it doesn't affect any of the flags.
+.. autofunction:: next_up
+.. autofunction:: next_down
 
 
 Flags
