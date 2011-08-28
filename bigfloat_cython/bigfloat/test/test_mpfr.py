@@ -1168,7 +1168,8 @@ class TestMpfr(unittest.TestCase):
         )
 
     def test_jn(self):
-        # Just check that n = 0 and n = 1 cases correspond to what we already have.
+        # Just check that n = 0 and n = 1 cases correspond to what we already
+        # have.
         x = Mpfr(53)
         y = Mpfr(53)
         z = Mpfr(53)
@@ -1188,7 +1189,8 @@ class TestMpfr(unittest.TestCase):
         )
 
     def test_yn(self):
-        # Just check that n = 0 and n = 1 cases correspond to what we already have.
+        # Just check that n = 0 and n = 1 cases correspond to what we already
+        # have.
         x = Mpfr(53)
         y = Mpfr(53)
         z = Mpfr(53)

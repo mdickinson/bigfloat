@@ -882,7 +882,7 @@ def pos(x, context=None):
         BigFloat.exact('1.2340002059936523', precision=53)
         >>> with precision(100):  # compute result with extra precision
         ...     x = pow(3, 20) + 1.234 - pow(3, 20)
-        ... 
+        ...
         >>> x
         BigFloat.exact('1.2339999999999999857891452847980', precision=100)
         >>> pos(x)  # round back to original precision
@@ -1495,7 +1495,7 @@ def acos(x, context=None):
 
         >>> with precision(12):
         ...     x = acos(-1)
-        ... 
+        ...
         >>> print x
         3.1416
         >>> x > const_pi()
@@ -1954,7 +1954,8 @@ def y1(x, context=None):
 
 def yn(n, x, context=None):
     """
-    Return the value of the second kind Bessel function of order ``n`` at ``x``.
+    Return the value of the second kind Bessel function of order ``n`` at
+    ``x``.
 
     ``n`` should be a Python integer.
 
@@ -2139,7 +2140,7 @@ def ceil(x, context=None):
         >>> with RoundTowardPositive:
         ...     x = 2**100 + 1
         ...     ceil(x) >= x
-        ... 
+        ...
         True
 
     Similar comments apply to the :func:`floor`, :func:`round` and

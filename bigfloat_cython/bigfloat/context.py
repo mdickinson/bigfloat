@@ -233,7 +233,7 @@ def extra_precision(prec):
     63
     >>> with extra_precision(20):
     ...     gamma(1.5)
-    ... 
+    ...
     BigFloat.exact('0.88622692545275801364912', precision=73)
 
     """
