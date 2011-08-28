@@ -769,24 +769,42 @@ _test_flag_fns = dict((v, getattr(mpfr, 'mpfr_' + k + '_p'))
 
 
 def test_flag(f):
+    """
+    Return True if the given flag is set, and False otherwise.
+
+    """
     return _test_flag_fns[f]()
 
 
 def set_flag(f):
+    """
+    Set the given flag.
+
+    """
     return _set_flag_fns[f]()
 
 
 def clear_flag(f):
+    """
+    Clear the given flag.
+
+    """
     return _clear_flag_fns[f]()
 
 
 def get_flagstate():
+    """
+    Return a set containing the flags that are currently set.
+
+    """
     return set(f for f in _all_flags if test_flag(f))
 
 
 def set_flagstate(flagset):
-    # set all flags in the given flag set;  clear all flags not
-    # in the given flag set.
+    """
+    Set all flags in ``flagset``, and clear all other flags.
+
+    """
     if not flagset <= _all_flags:
         raise ValueError("unrecognized flags in flagset")
 

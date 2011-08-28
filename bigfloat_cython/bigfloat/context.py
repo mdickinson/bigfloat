@@ -171,13 +171,22 @@ local.__context_stack__ = []
 
 
 def getcontext(_local=local):
+    """
+    Return the current context.
+
+    """
     return _local.__bigfloat_context__
 
 
 def setcontext(context, _local=local):
-    # attributes provided by 'context' override those in the current
-    # context; if 'context' doesn't specify a particular attribute,
-    # the attribute from the current context shows through
+    """
+    Set the current context to that given.
+
+    Attributes provided by ``context`` override those in the current
+    context.  If ``context`` doesn't specify a particular attribute,
+    the attribute from the current context shows through.
+
+    """
     oldcontext = getcontext()
     _local.__bigfloat_context__ = oldcontext + context
 
@@ -194,9 +203,10 @@ del threading, local
 
 
 def precision(prec):
-    """Return context specifying the given precision.
+    """
+    Return context specifying the given precision.
 
-    precision(prec) is exactly equivalent to Context(precision=prec).
+    ``precision(prec)`` is exactly equivalent to ``Context(precision=prec)``.
 
     """
     return Context(precision=prec)
@@ -206,15 +216,28 @@ def rounding(rnd):
     """
     Return a context giving the specified rounding mode.
 
-    rounding_mode(rnd) is exactly equivalent to Context(rounding=rnd).
+    ``rounding(rnd)`` is exactly equivalent to ``Context(rounding=rnd)``.
 
     """
     return Context(rounding=rnd)
 
 
 def extra_precision(prec):
-    """Return new context equal to the current context, but with
-    precision increased by prec."""
+    """
+    Return copy of the current context with the precision increased by
+    ``prec``.  Equivalent to ``Context(precision=getcontext().precision + p)``.
+
+    >>> getcontext().precision
+    53
+    >>> extra_precision(10).precision
+    63
+    >>> with extra_precision(20):
+    ...     gamma(1.5)
+    ... 
+    BigFloat.exact('0.88622692545275801364912', precision=73)
+
+    """
+
     c = getcontext()
     return Context(precision=c.precision + prec)
 

@@ -784,17 +784,10 @@ instances.
    IEEE 754-2008 (section 3.6).  They're all special cases of the
    :func:`IEEEContext` function.
 
-.. function:: IEEEContext(bitwidth)
+.. autofunction:: IEEEContext
 
-   If bitwidth is one of widths permitted by IEEE 754 (that is, either
-   16, 32, 64, or a multiple of 32 not less than 128), return the IEEE
-   754 binary interchange format with the given bit width.  See
-   section 3.6 of IEEE 754-2008 or the bigfloat source for details.
-
-.. function:: precision(p)
-
-   A convenience function.  ``precision(p)`` is exactly equivalent to
-   ``Context(precision=p)``.
+.. autofunction:: precision
+.. autofunction:: rounding
 
 .. data:: RoundTiesToEven
 .. data:: RoundTowardZero
@@ -864,32 +857,14 @@ is equivalent to ::
 The current context can be read and written directly using the
 :func:`getcontext` and :func:`setcontext` functions.
 
-.. function:: getcontext()
-
-   Return a copy of the current context.
-
-.. function:: setcontext(context)
-
-   Set the current context to the given context.
+.. autofunction:: getcontext()
+.. autofunction:: setcontext(context)
 
 It's usually neater to make a temporary change to the context using a
 with statement, as described above.  There's also one convenience
 function that's often useful in calculations:
 
-.. function:: extra_precision(p)
-
-   Return a copy of the current context with the precision increased
-   by p.  Equivalent to
-   ``Context(precision=getcontext().precision+p)``.
-
-      >>> getcontext().precision
-      53
-      >>> extra_precision(10).precision
-      63
-      >>> with extra_precision(20):
-      ...     gamma(1.5)
-      ... 
-      BigFloat.exact('0.88622692545275801364912', precision=73)
+.. autofunction:: extra_precision
 
 
 Standard functions
@@ -1136,25 +1111,11 @@ Flags
    NaN flag.  Set whever the result of an operation gives a NaN
    result.
 
-.. function:: clear_flag(flag)
-
-   Clear the given flag.
-
-.. function:: set_flag(flag)
-
-   Set the given flag.
-
-.. function:: test_flag(flag)
-
-   Return True if the given flag is set and False otherwise.
-
-.. function:: get_flagstate()
-
-   Return a set containing the flags that are currently set.
-
-.. function:: set_flagstate(flag_set)
-
-   Set all flags that are in *flag_set*, and clear all other flags.
+.. autofunction:: clear_flag
+.. autofunction:: set_flag
+.. autofunction:: test_flag
+.. autofunction:: get_flagstate
+.. autofunction:: set_flagstate
 
 .. rubric:: Footnotes
 

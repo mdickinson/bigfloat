@@ -19,16 +19,16 @@ from bigfloat.core import log2
 from bigfloat.context import Context, DefaultContext
 
 
-# Contexts corresponding to IEEE 754-2008 binary interchange formats
-# (see section 3.6 of the standard for details).
-
 def IEEEContext(bitwidth):
-    """ Return IEEE 754-2008 context for a given bit width.
+    """
+    Return IEEE 754-2008 context for a given bit width.
 
-    IEEE 754 specifies standard binary interchange formats with bitwidths
+    The IEEE 754 standard specifies binary interchange formats with bitwidths
     16, 32, 64, 128, and all multiples of 32 greater than 128.  This function
     returns the context corresponding to the interchange format for the given
     bitwidth.
+
+    See section 3.6 of IEEE 754-2008 or the bigfloat source for more details.
 
     """
     try:
