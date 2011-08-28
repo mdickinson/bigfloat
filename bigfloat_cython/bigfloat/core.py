@@ -47,8 +47,15 @@ from bigfloat.context import (
 )
 
 
-def mpfr_get_str2(rop, base, ndigits, rounding_mode):
-    digits, exp = mpfr.mpfr_get_str(base, ndigits, rop, rounding_mode)
+def _mpfr_get_str2(base, ndigits, op, rounding_mode):
+    """
+    Variant of mpfr_get_str, for internal use:  simply splits off the '-'
+    sign from the digit string, and returns a triple
+
+        (sign, digits, exp)
+
+    """
+    digits, exp = mpfr.mpfr_get_str(base, ndigits, op, rounding_mode)
     negative = digits.startswith('-')
     if negative:
         digits = digits[1:]
@@ -325,10 +332,10 @@ class BigFloat(mpfr.Mpfr_t):
             raise ValueError("Can't convert infinity or nan to integer")
 
         # Conversion to base 16 is exact, so any rounding mode will do.
-        negative, digits, e = mpfr_get_str2(
-            self,
+        negative, digits, e = _mpfr_get_str2(
             16,
             0,
+            self,
             ROUND_TIES_TO_EVEN,
         )
         n = int(digits, 16)
@@ -443,7 +450,12 @@ class BigFloat(mpfr.Mpfr_t):
             return sign + e
 
         m = self._significand()
-        _, digits, _ = mpfr_get_str2(m, 16, 0, ROUND_TIES_TO_EVEN)
+        _, digits, _ = _mpfr_get_str2(
+            16,
+            0,
+            m,
+            ROUND_TIES_TO_EVEN,
+        )
         # only print the number of digits that are actually necessary
         n = 1 + (self.precision - 1) // 4
         assert all(c == '0' for c in digits[n:])
@@ -462,10 +474,10 @@ class BigFloat(mpfr.Mpfr_t):
             return 0, 1
 
         # convert to a hex string, and from there to a fraction
-        negative, digits, e = mpfr_get_str2(
-            self,
+        negative, digits, e = _mpfr_get_str2(
             16,
             0,
+            self,
             ROUND_TIES_TO_EVEN,
         )
         digits = digits.rstrip('0')
@@ -488,10 +500,10 @@ class BigFloat(mpfr.Mpfr_t):
         if is_zero(self):
             return '-0' if is_negative(self) else '0'
         elif is_finite(self):
-            negative, digits, e = mpfr_get_str2(
-                self,
+            negative, digits, e = _mpfr_get_str2(
                 10,
                 0,
+                self,
                 ROUND_TIES_TO_EVEN,
             )
             return _format_finite(negative, digits, e)
@@ -518,16 +530,22 @@ class BigFloat(mpfr.Mpfr_t):
 
         # Start by formatting to 2 digits; we'll then truncate to one digit,
         # rounding appropriately.
-        sign, digits, exp = mpfr_get_str2(
-            self, 10, 2, ROUND_TOWARD_NEGATIVE
+        sign, digits, exp = _mpfr_get_str2(
+            10,
+            2,
+            self,
+            ROUND_TOWARD_NEGATIVE,
         )
 
         # If the last digit is 5, we can't tell which way to round; instead,
         # recompute with the opposite rounding direction, and round based on
         # the result of that.
         if digits[-1] == '5':
-            sign, digits, exp = mpfr_get_str2(
-                self, 10, 2, ROUND_TOWARD_POSITIVE
+            sign, digits, exp = _mpfr_get_str2(
+                10,
+                2,
+                self,
+                ROUND_TOWARD_POSITIVE,
             )
 
         if digits[-1] in '01234':
@@ -568,8 +586,11 @@ class BigFloat(mpfr.Mpfr_t):
         if precision == 1:
             return self._format_to_precision_one()
 
-        sign, digits, exp = mpfr_get_str2(
-            self, 10, precision, ROUND_TIES_TO_EVEN
+        sign, digits, exp = _mpfr_get_str2(
+            10,
+            precision,
+            self,
+            ROUND_TIES_TO_EVEN,
         )
 
         return sign, digits, exp - len(digits)
@@ -610,7 +631,12 @@ class BigFloat(mpfr.Mpfr_t):
 
         # Figure out the exponent by making a call to get_str2.  exp satisfies
         # 10**(exp-1) <= self < 10**exp
-        _, _, exp = mpfr_get_str2(self, 10, 2, ROUND_TOWARD_ZERO)
+        _, _, exp = _mpfr_get_str2(
+            10,
+            2,
+            self,
+            ROUND_TOWARD_ZERO,
+        )
 
         sig_figs = exp + precision
 
@@ -621,13 +647,19 @@ class BigFloat(mpfr.Mpfr_t):
         elif sig_figs == 0:
             # Ex: 0.1 <= x < 1.0, rounding x to nearest multiple of 1.0.
             # Or: 100.0 <= x < 1000.0, rounding x to nearest multiple of 1000.0
-            sign, digits, new_exp = mpfr_get_str2(
-                self, 10, 2, ROUND_TOWARD_NEGATIVE
+            sign, digits, new_exp = _mpfr_get_str2(
+                10,
+                2,
+                self,
+                ROUND_TOWARD_NEGATIVE,
             )
             if int(digits) == 50:
                 # Halfway case
-                sign, digits, new_exp = mpfr_get_str2(
-                    self, 10, 2, ROUND_TOWARD_POSITIVE
+                sign, digits, new_exp = _mpfr_get_str2(
+                    10,
+                    2,
+                    self,
+                    ROUND_TOWARD_POSITIVE,
                 )
 
             digits = '1' if int(digits) > 50 or new_exp == exp + 1 else '0'
@@ -661,8 +693,12 @@ class BigFloat(mpfr.Mpfr_t):
         # alternative would be to convert an integral self to an
         # integer and take the hash of that, but that would be
         # painfully slow for something like BigFloat('1e1000000000').
-        negative, digits, e = mpfr_get_str2(self, 16, 0,
-                                            ROUND_TIES_TO_EVEN)
+        negative, digits, e = _mpfr_get_str2(
+            16,
+            0,
+            self,
+            ROUND_TIES_TO_EVEN,
+        )
         e -= len(digits)
         # The value of self is (-1)**negative * int(digits, 16) *
         # 16**e.  Compute a strictly positive integer n such that n is
