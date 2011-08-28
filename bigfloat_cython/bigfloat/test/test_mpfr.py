@@ -131,6 +131,7 @@ from bigfloat.mpfr import (
     mpfr_li2,
     mpfr_gamma,
     mpfr_lngamma,
+    mpfr_lgamma,
     mpfr_digamma,
     mpfr_zeta,
     mpfr_zeta_ui,
@@ -1125,6 +1126,28 @@ class TestMpfr(unittest.TestCase):
                 expected_output,
                 msg='{}'.format(fn),
             )
+
+    def test_lgamma(self):
+        x = Mpfr(53)
+        y = Mpfr(53)
+        z = Mpfr(53)
+        mpfr_set_d(x, 2.625, MPFR_RNDN)
+        ternary, sign = mpfr_lgamma(y, x, MPFR_RNDN)
+        mpfr_lngamma(z, x, MPFR_RNDN)
+        self.assertEqual(sign, 1)
+        self.assertEqual(
+            mpfr_get_d(y, MPFR_RNDN),
+            mpfr_get_d(z, MPFR_RNDN),
+        )
+
+        # Negative value
+        mpfr_set_d(x, -0.5, MPFR_RNDN)
+        ternary, sign = mpfr_lgamma(y, x, MPFR_RNDN)
+        self.assertEqual(sign, -1)
+        self.assertEqual(
+            mpfr_get_d(y, MPFR_RNDN),
+            1.2655121234846454,  # log(2 * sqrt(pi))
+        )
 
     def test_zeta_ui(self):
         x = Mpfr(53)

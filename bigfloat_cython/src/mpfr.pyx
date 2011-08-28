@@ -1482,6 +1482,29 @@ def mpfr_lngamma(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     check_rounding_mode(rnd)
     return cmpfr.mpfr_lngamma(&rop._value, &op._value, rnd)
 
+def mpfr_lgamma(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the value of the logarithm of the absolute value of the Gamma
+    function on op, rounded in the direction rnd.
+
+    Return a pair (ternary, sign) where ternary is the usual ternary value and
+    sign is the sign (1 or -1) of Gamma(rop).
+
+    When op is an infinity or a non-positive integer, set rop to +Inf. When op
+    is NaN, −Inf or a negative integer, signp is undefined, and when op is ±0,
+    signp is the sign of the zero.
+
+    """
+    cdef int signp
+
+    check_initialized(rop)
+    check_initialized(op)
+    check_rounding_mode(rnd)
+    ternary = cmpfr.mpfr_lgamma(
+        &rop._value, &signp, &op._value, rnd
+    )
+    return ternary, signp
+
 def mpfr_digamma(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     """
     Set rop to the value of the Digamma (sometimes also called Psi) function on
@@ -2741,7 +2764,6 @@ def mpfr_erangeflag_p():
 #
 # The following are not yet implemented.
 #
-#  mpfr_lgamma
 #  mpfr_sum
 #
 #

@@ -199,6 +199,7 @@ cdef extern from "mpfr.h":
     int mpfr_li2(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_gamma(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_lngamma(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_lgamma(mpfr_ptr rop, int *signp, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_digamma(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_zeta(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_zeta_ui(mpfr_ptr rop, unsigned long int op, mpfr_rnd_t rnd)
