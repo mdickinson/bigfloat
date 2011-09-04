@@ -9,7 +9,7 @@ The bigfloat package --- high precision floating-point arithmetic
 Introduction
 ------------
 
-The :mod:`bigfloat` module is a Python wrapper for the MPFR library
+The :mod:`bigfloat` package is a Python wrapper for the MPFR library
 for arbitrary precision floating-point reliable arithmetic.
 
 The `MPFR library <http://www.mpfr.org>`_ is a well-known portable C
@@ -17,7 +17,7 @@ library for arbitrary-precision arithmetic on floating-point numbers.
 It provides precise control over precisions and rounding modes and
 gives correctly-rounded reproducible platform-independent results.
 
-The :mod:`bigfloat` module aims to provide a convenient and friendly
+The :mod:`bigfloat` package aims to provide a convenient and friendly
 Python interface to the operations and functions provided by the MPFR
 library.  The main class, :class:`BigFloat`, gives an immutable
 multiple-precision floating-point type that can be freely mixed with
@@ -64,7 +64,7 @@ Installation
 Where to get it
 ^^^^^^^^^^^^^^^
 
-The latest released version of the :mod:`bigfloat` module can be
+The latest released version of the :mod:`bigfloat` package can be
 downloaded from its place at the `Python Package Index
 <http://pypi.python.org/pypi/bigfloat/>`_.  Development sources can be
 checked out from the project's `bitbucket page
@@ -73,20 +73,20 @@ checked out from the project's `bitbucket page
 Prerequisites
 ^^^^^^^^^^^^^
 
-In order to use the :mod:`bigfloat` module you will need to have both
+In order to use the :mod:`bigfloat` package you will need to have both
 the GMP and MPFR libraries already installed on your system.  See the
 `MPFR homepage <http://www.mpfr.org>`_ and the `GMP homepage
 <http://gmplib.org>`_ for more information about these libraries.
 Currently, MPFR version 2.3.0 or later is required.
 
-This module requires Python version 2.5 or later.  For Python 2.5,
+This package requires Python version 2.5 or later.  For Python 2.5,
 you'll need to do a ``from __future__ import with_statement`` if you
-want to take advantage of all of the features of this module.
+want to take advantage of all of the features of this package.
 
 Installation
 ^^^^^^^^^^^^
 
-Like most third party Python libraries, the :mod:`bigfloat` module is
+Like most third party Python libraries, the :mod:`bigfloat` package is
 installed by means of the ``setup.py`` script included in the
 distribution.  On most systems, installation should be as simple as
 doing::
@@ -102,15 +102,15 @@ superuser privileges to install the library, for example with::
 Locating the MPFR library
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-On import, the :mod:`bigfloat` module attempts to locate an MPFR library on
+On import, the :mod:`bigfloat` package attempts to locate an MPFR library on
 your system; if the library is in the usual library search path (as controlled
 by the LD_LIBRARY_PATH environment variable on Linux, for example) then it
-should be found as normal.  If the module fails to find the MPFR library, or if
+should be found as normal.  If the package fails to find the MPFR library, or if
 you have multiple MPFR libraries installed on your system and want to specify
 which one to use, you can edit the ``mpfr_library_location`` setting in the
 ``bigfloat_config.py`` configuration file to specify the library location.
 This file should be found in the same location as the other installed source
-files for the bigfloat module.
+files for the bigfloat package.
 
 Other configuration
 ^^^^^^^^^^^^^^^^^^^
@@ -128,7 +128,7 @@ Linux systems, these files may be in a different package from the library files
 Tutorial
 --------
 
-Start by importing the contents of the module (assuming that you've
+Start by importing the contents of the package (assuming that you've
 already installed it and its prerequisites) with:
 
    >>> from bigfloat import *
@@ -216,7 +216,7 @@ attribute, the value for the right-hand addend takes precedence::
    Context(precision=53, emax=1024, emin=-1073, subnormalize=True,
    rounding='RoundTowardPositive')
 
-The `bigfloat` module also defines various constant Context instances.
+The :mod:`bigfloat` package also defines various constant Context instances.
 For example, ``quadruple_precision`` is a Context that corresponds to
 the IEEE 754 binary128 interchange format::
 
@@ -311,7 +311,7 @@ representable as a :class:`BigFloat`.
    This makes the unary plus operator useful as a way to round a
    result produced in a different context to the current context.
 
-For each arithmetic operation the :mod:`bigfloat` module exports a
+For each arithmetic operation the :mod:`bigfloat` package exports a
 corresponding function.  For example, the :func:`div` function
 corresponds to usual (true) division:
 
@@ -359,7 +359,7 @@ corresponding function.
 Mathematical functions
 ^^^^^^^^^^^^^^^^^^^^^^
 
-The :mod:`bigfloat` module provides a number of standard mathematical
+The :mod:`bigfloat` package provides a number of standard mathematical
 functions.  These functions follow the same rules as the arithmetic
 operations above:
 
@@ -475,7 +475,7 @@ you can always restore the original default context as follows:
 Flags
 ^^^^^
 
-The :mod:`bigfloat` module also provides four global flags: 'Inexact',
+The :mod:`bigfloat` package also provides four global flags: 'Inexact',
 'Overflow', 'Underflow', 'NanFlag', along with methods to set and test
 these flags:
 
@@ -706,7 +706,7 @@ a rounding mode.
       Valid values are 'RoundTiesToEven', 'RoundTowardZero',
       'RoundTowardPositive' and 'RoundTowardNegative'.  Note that the
       rounding modes ``RoundTiesToEven``, etc. exported by the
-      :mod:`bigfloat` module are Context instances, not strings, so
+      :mod:`bigfloat` package are Context instances, not strings, so
       cannot be used directly here.
 
 
@@ -751,12 +751,12 @@ is exactly equivalent to ::
        with y:
            <block>
 
-The bigfloat module defines a number of predefined :class:`Context`
+The bigfloat package defines a number of predefined :class:`Context`
 instances.
 
 .. data:: DefaultContext
 
-   The context that's in use when the bigfloat module is first
+   The context that's in use when the bigfloat package is first
    imported.  It has precision of 53, large exponent bounds, no
    subnormalization, and the RoundTiesToEven rounding mode.
 
@@ -1019,7 +1019,7 @@ Miscellaneous functions
 Other Functions
 ^^^^^^^^^^^^^^^
 
-These are the functions exported by the :mod:`bigfloat` module that
+These are the functions exported by the :mod:`bigfloat` package that
 don't fit into the above section, for one reason or another.
 
 Comparisons

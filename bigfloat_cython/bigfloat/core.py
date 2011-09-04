@@ -2,20 +2,20 @@
 
 # Copyright 2009--2011 Mark Dickinson.
 #
-# This file is part of the bigfloat module.
+# This file is part of the bigfloat package.
 #
-# The bigfloat module is free software: you can redistribute it and/or modify
+# The bigfloat package is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or (at your
 # option) any later version.
 #
-# The bigfloat module is distributed in the hope that it will be useful, but
+# The bigfloat package is distributed in the hope that it will be useful, but
 # WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 # FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License
 # for more details.
 #
 # You should have received a copy of the GNU Lesser General Public License
-# along with the bigfloat module.  If not, see <http://www.gnu.org/licenses/>.
+# along with the bigfloat package.  If not, see <http://www.gnu.org/licenses/>.
 
 # Python wrapper for MPFR library
 
@@ -87,7 +87,7 @@ except AttributeError:
 # exponents within the current [emin, emax] range.
 #
 # This assumption is inconsistent with the way that we'd like the
-# bigfloat module to operate: a standard operation on BigFloats
+# bigfloat package to operate: a standard operation on BigFloats
 # shouldn't care if the inputs to the operation are outside the
 # current context; it should only worry about forcing the output into
 # the format specified by the current context.  So we adopt the
