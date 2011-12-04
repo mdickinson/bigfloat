@@ -27,7 +27,8 @@ Arbitrary precision correctly-rounded floating point arithmetic, via MPFR.\
 LONG_DESCRIPTION = """\
 The ``bigfloat`` package is a Python package providing arbitrary-precision
 correctly-rounded binary floating-point arithmetic.  It is currently
-implemented as a ctypes wrapper around the MPFR library (http://www.mpfr.org).
+implemented as a Python extension module (generated using Cython) around the
+MPFR library (http://www.mpfr.org).
 
 Features
 --------
