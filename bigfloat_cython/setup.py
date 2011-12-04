@@ -148,7 +148,10 @@ Links
 """
 
 setup(
-    name='BigFloat',
+    # Name should really be capitalized as 'BigFloat'.  We keep 'bigfloat' to avoid
+    # upload problems on PyPI.  (Previous versions of the package were also
+    # called bigfloat.)
+    name='bigfloat',
     version='0.3.0a1',
     description=DESCRIPTION,
     long_description=LONG_DESCRIPTION,
