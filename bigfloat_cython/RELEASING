@@ -19,7 +19,11 @@ output of 'hg summary').
       INSTALL
       RELEASING
 
-2. In the bigfloat_cython directory:
+2. Tag:
+
+   hg tag v0.3.0a2
+
+3. In the bigfloat_cython directory:
 
       iwasawa:bigfloat_cython mdickinson$ LIBRARY_PATH=/opt/local/lib CPATH=/opt/local/include make upload
 
@@ -40,7 +44,7 @@ output of 'hg summary').
    Cython to be able to install the library.  (Though the .pyx file should probably
    be included, for reference purposes only...)
 
-3. Building docs
+4. Building docs
 
 Again in the bigfloat_cython directory, do:
 
