@@ -30,12 +30,12 @@ develop: src/mpfr.c
 dist: build_all
 	$(PYTHON) setup.py sdist
 
-html: docs/_build/html/index.html
+html: develop docs/_build/html/index.html
 
 install: build_all
 	$(PYTHON) setup.py install
 
-pdf: docs/_build/latex/BigFloat.pdf
+pdf: develop docs/_build/latex/BigFloat.pdf
 
 test: develop
 	$(PYTHON) -m bigfloat.test.test___all__
