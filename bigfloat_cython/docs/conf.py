@@ -197,3 +197,9 @@ latex_documents = [
 
 # If false, no module index is generated.
 #latex_use_modindex = True
+
+def setup(app):
+    from sphinx.util.texescape import tex_replacements
+    tex_replacements.append(
+        (u'\u2212', u'-'),
+    )
