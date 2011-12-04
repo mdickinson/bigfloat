@@ -57,7 +57,7 @@ For demonstration purposes, start with::
 
     >>> from bigfloat import *
 
-Note that this import clobbers some builtin Python functions, namely
+Note that this import shadows some builtin Python functions, namely
 ``abs``, ``max``, ``min`` and ``pow``.  In normal usage you'll
 probably only want to import the classes and functions that you
 actually need.
@@ -80,7 +80,7 @@ by calling ``getcontext``::
 
     >>> getcontext()
     Context(precision=53, emax=1073741823, emin=-1073741823,
-            subnormalize=False, rounding='RoundTiesToEven')
+            subnormalize=False, rounding=ROUND_TIES_TO_EVEN)
 
 The ``precision(200)`` argument passed to the ``BigFloat`` constructor
 above is also an example of a ``Context``::
