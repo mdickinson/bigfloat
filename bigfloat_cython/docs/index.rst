@@ -882,12 +882,6 @@ All functions in this section follow the same rules:
   explicit ``context`` keyword argument.
 * Results are correctly rounded.
 
-Conversion from string
-""""""""""""""""""""""
-
-.. autofunction:: set_str2
-
-
 
 Arithmetic functions
 """"""""""""""""""""
