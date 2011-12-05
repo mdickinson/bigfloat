@@ -475,9 +475,9 @@ you can always restore the original default context as follows:
 Flags
 ^^^^^
 
-The :mod:`bigfloat` package also provides four global flags: 'Inexact',
-'Overflow', 'Underflow', 'NanFlag', along with methods to set and test
-these flags:
+The :mod:`bigfloat` package also provides five global flags: 'Inexact',
+'Overflow', 'ZeroDivision', 'Underflow', and 'NanFlag', along with methods to
+set and test these flags:
 
    >>> set_flagstate(set())  # clear all flags
    >>> get_flagstate()
@@ -1093,6 +1093,12 @@ Flags
    performed in a context ``c`` overflows if the result computed as if
    with unbounded exponent range is finite and greater than or equal
    to ``2**c.emax`` in absolute value.
+
+.. data:: ZeroDivision
+
+   Set whenever an exact infinite result is obtained from finite inputs.
+   Despite the name, this flag is not just set for divisions by zero.  For
+   example, ``log(0)`` will set the ZeroDivision flag.
 
 .. data:: Inexact
 

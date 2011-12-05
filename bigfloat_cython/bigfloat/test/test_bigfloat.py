@@ -52,7 +52,7 @@ from bigfloat import (
     setcontext,
 
     # flags
-    Inexact, Overflow,
+    Inexact, Overflow, ZeroDivision,
     set_flagstate, get_flagstate,
 
     # standard arithmetic functions
@@ -1238,6 +1238,17 @@ class FlagTests(unittest.TestCase):
         set_flagstate(set())  # clear flags
         exp(BigFloat(1e308))
         self.assertEqual(get_flagstate(), set([Inexact, Overflow]))
+
+    def test_divide_by_zero(self):
+        # Clear all flags.
+        set_flagstate(set())
+        self.assertEqual(get_flagstate(), set())
+        x = BigFloat(2) / BigFloat(0)
+        self.assertEqual(get_flagstate(), set([ZeroDivision]))
+        # Flag should be sticky, so after a simple exact operation, it
+        # should still be set.
+        y = BigFloat(1) * BigFloat(3)
+        self.assertEqual(get_flagstate(), set([ZeroDivision]))
 
 
 class ABCTests(unittest.TestCase):

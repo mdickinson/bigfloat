@@ -749,14 +749,16 @@ Inexact = 'Inexact'
 Overflow = 'Overflow'
 Underflow = 'Underflow'
 NanFlag = 'NanFlag'
+ZeroDivision = 'ZeroDivision'
 
-_all_flags = set([Inexact, Overflow, Underflow, NanFlag])
+_all_flags = set([Inexact, Overflow, Underflow, NanFlag, ZeroDivision])
 
 _flag_translate = {
     'underflow': Underflow,
     'overflow': Overflow,
     'nanflag': NanFlag,
     'inexflag': Inexact,
+    'divby0': ZeroDivision,
 }
 
 _clear_flag_fns = dict((v, getattr(mpfr, 'mpfr_clear_' + k))

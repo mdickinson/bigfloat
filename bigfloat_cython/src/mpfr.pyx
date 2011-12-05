@@ -2582,6 +2582,13 @@ def mpfr_clear_overflow():
     """
     cmpfr.mpfr_clear_overflow()
 
+def mpfr_clear_divby0():
+    """
+    Clear the divide-by-zero flag.
+
+    """
+    cmpfr.mpfr_clear_divby0()
+
 def mpfr_clear_nanflag():
     """
     Clear the invalid flag.
@@ -2616,6 +2623,13 @@ def mpfr_set_overflow():
 
     """
     cmpfr.mpfr_set_overflow()
+
+def mpfr_set_divby0():
+    """
+    Set the divide-by-zero flag.
+
+    """
+    cmpfr.mpfr_set_divby0()
 
 def mpfr_set_nanflag():
     """
@@ -2658,6 +2672,13 @@ def mpfr_overflow_p():
 
     """
     return bool(cmpfr.mpfr_overflow_p())
+
+def mpfr_divby0_p():
+    """
+    Return True if the divide-by-zero flag is set, else False.
+
+    """
+    return bool(cmpfr.mpfr_divby0_p())
 
 def mpfr_nanflag_p():
     """

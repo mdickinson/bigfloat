@@ -1,5 +1,17 @@
+What's new in bigfloat 0.3.0a3?
+===============================
+
+Library
+-------
+
+- Added support for the new 'divide-by-zero' flag (exposed as 'ZeroDivision' to
+  bigfloat).
+
+
 What's new in bigfloat 0.3.0a2?
 ===============================
+
+- Minor documentation fixes.
 
 
 What's new in bigfloat 0.3.0a1?

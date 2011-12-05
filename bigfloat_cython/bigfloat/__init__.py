@@ -50,7 +50,7 @@ __all__ = [
     'getcontext', 'setcontext',
 
     # flags
-    'Inexact', 'Overflow', 'Underflow', 'NanFlag',
+    'Inexact', 'Overflow', 'Underflow', 'NanFlag', 'ZeroDivision',
 
     # functions to test, set and clear individual flags
     'test_flag', 'set_flag', 'clear_flag',
@@ -117,6 +117,7 @@ from bigfloat.core import (
 
     Inexact,
     Overflow,
+    ZeroDivision,
     NanFlag,
     Underflow,
     set_flagstate,
