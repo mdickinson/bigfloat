@@ -19,13 +19,14 @@
 from __future__ import with_statement
 
 # Standard library imports
-import __builtin__
 import doctest
 import operator
 import sys
 import unittest
 
 import bigfloat.core
+
+_builtin_abs = abs
 
 from bigfloat import (
     # main class
@@ -956,7 +957,7 @@ class BigFloatTests(unittest.TestCase):
                 else:
                     self.assertEqual(x, -negx)
 
-                absx = __builtin__.abs(x)
+                absx = _builtin_abs(x)
                 self.assertEqual(absx.precision, p)
                 if p < 150:
                     self.assertNotEqual(x, absx)

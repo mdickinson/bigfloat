@@ -21,7 +21,6 @@
 
 from __future__ import with_statement
 
-import __builtin__
 import sys as _sys
 import contextlib as _contextlib
 
@@ -45,6 +44,14 @@ from bigfloat.context import (
     _apply_function_in_current_context,
     precision,
 )
+
+
+# Alternative names for some builtins that get overwritten by functions created
+# in this module.
+_builtin_max = max
+_builtin_min = min
+_builtin_abs = abs
+_builtin_pow = pow
 
 
 def _mpfr_get_str2(base, ndigits, op, rounding_mode):
@@ -112,8 +119,8 @@ except AttributeError:
 EMAX_MAX = mpfr.MPFR_EMAX_DEFAULT
 EMIN_MIN = mpfr.MPFR_EMIN_DEFAULT
 
-EMAX_MIN = __builtin__.max(mpfr.MPFR_EMIN_DEFAULT, mpfr.mpfr_get_emax_min())
-EMIN_MAX = __builtin__.min(mpfr.MPFR_EMAX_DEFAULT, mpfr.mpfr_get_emin_max())
+EMAX_MIN = _builtin_max(mpfr.MPFR_EMIN_DEFAULT, mpfr.mpfr_get_emax_min())
+EMIN_MAX = _builtin_min(mpfr.MPFR_EMAX_DEFAULT, mpfr.mpfr_get_emin_max())
 
 mpfr.mpfr_set_emin(EMIN_MIN)
 mpfr.mpfr_set_emax(EMAX_MAX)
@@ -129,7 +136,7 @@ _bit_length_correction = {
 
 def _bit_length(n):
     """Bit length of an integer"""
-    hex_n = '%x' % __builtin__.abs(n)
+    hex_n = '%x' % _builtin_abs(n)
     return 4 * len(hex_n) - _bit_length_correction[hex_n[0]]
 
 
@@ -293,9 +300,9 @@ class BigFloat(mpfr.Mpfr_t):
                                 "specified except when converting "
                                 "from a string")
             if isinstance(value, float):
-                precision = __builtin__.max(DBL_PRECISION, PRECISION_MIN)
+                precision = _builtin_max(DBL_PRECISION, PRECISION_MIN)
             elif isinstance(value, (int, long)):
-                precision = __builtin__.max(_bit_length(value), PRECISION_MIN)
+                precision = _builtin_max(_bit_length(value), PRECISION_MIN)
             elif isinstance(value, BigFloat):
                 precision = value.precision
             else:
@@ -707,9 +714,9 @@ class BigFloat(mpfr.Mpfr_t):
         # 2**64-1).
 
         if e >= 0:
-            n = int(digits, 16) * __builtin__.pow(16, e, 2 ** 64 - 1)
+            n = int(digits, 16) * _builtin_pow(16, e, 2 ** 64 - 1)
         else:
-            n = int(digits, 16) * __builtin__.pow(2 ** 60, -e, 2 ** 64 - 1)
+            n = int(digits, 16) * _builtin_pow(2 ** 60, -e, 2 ** 64 - 1)
         return hash(-n if negative else n)
 
     def __ne__(self, other):
