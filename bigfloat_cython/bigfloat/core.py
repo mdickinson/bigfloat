@@ -263,9 +263,6 @@ class BigFloat(mpfr.Mpfr_t):
             return _set_d(value)
         elif isinstance(value, str):
             return set_str2(value.strip(), 10)
-        elif isinstance(value, str):
-            value = value.strip().encode('ascii')
-            return set_str2(value, 10)
         elif isinstance(value, int):
             return set_str2('%x' % value, 16)
         elif isinstance(value, BigFloat):
