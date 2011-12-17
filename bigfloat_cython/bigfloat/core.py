@@ -846,7 +846,7 @@ def _set_from_whole_string(rop, s, base, rnd):
     a valid string in the given base.
 
     """
-    s = s.strip()
+    s = s.strip().encode('ascii')
     ternary, endindex = mpfr.mpfr_strtofr(rop, s, base, rnd)
     if len(s) != endindex:
         raise ValueError("not a valid numeric string")
