@@ -19,7 +19,6 @@
 
 # Python wrapper for MPFR library
 
-from __future__ import with_statement
 
 import sys as _sys
 import contextlib as _contextlib
@@ -264,10 +263,10 @@ class BigFloat(mpfr.Mpfr_t):
             return _set_d(value)
         elif isinstance(value, str):
             return set_str2(value.strip(), 10)
-        elif isinstance(value, unicode):
+        elif isinstance(value, str):
             value = value.strip().encode('ascii')
             return set_str2(value, 10)
-        elif isinstance(value, (int, long)):
+        elif isinstance(value, int):
             return set_str2('%x' % value, 16)
         elif isinstance(value, BigFloat):
             return pos(value)
@@ -290,7 +289,7 @@ class BigFloat(mpfr.Mpfr_t):
         """
 
         # figure out precision to use
-        if isinstance(value, basestring):
+        if isinstance(value, str):
             if precision is None:
                 raise TypeError("precision must be supplied when "
                                 "converting from a string")
@@ -301,7 +300,7 @@ class BigFloat(mpfr.Mpfr_t):
                                 "from a string")
             if isinstance(value, float):
                 precision = _builtin_max(DBL_PRECISION, PRECISION_MIN)
-            elif isinstance(value, (int, long)):
+            elif isinstance(value, int):
                 precision = _builtin_max(_bit_length(value), PRECISION_MIN)
             elif isinstance(value, BigFloat):
                 precision = value.precision
@@ -318,7 +317,7 @@ class BigFloat(mpfr.Mpfr_t):
                 raise ValueError("value too large to represent as a BigFloat")
             if test_flag(Underflow):
                 raise ValueError("value too small to represent as a BigFloat")
-            if test_flag(Inexact) and not isinstance(value, basestring):
+            if test_flag(Inexact) and not isinstance(value, str):
                 # since this is supposed to be an exact conversion, the
                 # inexact flag should never be set except when converting
                 # from a string.
@@ -352,9 +351,6 @@ class BigFloat(mpfr.Mpfr_t):
         else:
             n >>= -e
         return int(-n) if negative else int(n)
-
-    def __long__(self):
-        return long(int(self))
 
     def __float__(self):
         """BigFloat -> float.
@@ -453,7 +449,7 @@ class BigFloat(mpfr.Mpfr_t):
 
         sign = '-' if self._sign() else ''
         e = self._exponent()
-        if isinstance(e, basestring):
+        if isinstance(e, str):
             return sign + e
 
         m = self._significand()
@@ -722,7 +718,7 @@ class BigFloat(mpfr.Mpfr_t):
     def __ne__(self, other):
         return not (self == other)
 
-    def __nonzero__(self):
+    def __bool__(self):
         return not is_zero(self)
 
     @property
@@ -737,7 +733,7 @@ class BigFloat(mpfr.Mpfr_t):
 
         # ints, long and floats mix freely with BigFloats, and are
         # converted exactly.
-        if isinstance(arg, (int, long, float)):
+        if isinstance(arg, (int, float)):
             return cls.exact(arg)
         elif isinstance(arg, BigFloat):
             return arg

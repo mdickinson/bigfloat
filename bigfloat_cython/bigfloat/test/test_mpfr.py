@@ -375,7 +375,7 @@ class TestMpfr(unittest.TestCase):
     def test_constructor(self):
         x = Mpfr(10)
         self.assertIsInstance(x, Mpfr_t)
-        y = Mpfr(20L)
+        y = Mpfr(20)
         self.assertIsInstance(y, Mpfr_t)
 
     def test_get_and_set_prec(self):
@@ -407,15 +407,15 @@ class TestMpfr(unittest.TestCase):
 
     def test_fits_slong_p(self):
         x = Mpfr(64)
-        mpfr_set_si(x, sys.maxint, MPFR_RNDN)
+        mpfr_set_si(x, sys.maxsize, MPFR_RNDN)
         self.assertIs(mpfr_fits_slong_p(x, MPFR_RNDN), True)
 
         x = Mpfr(64)
-        mpfr_set_si(x, -sys.maxint - 1, MPFR_RNDN)
+        mpfr_set_si(x, -sys.maxsize - 1, MPFR_RNDN)
         self.assertIs(mpfr_fits_slong_p(x, MPFR_RNDN), True)
 
         x = Mpfr(28)
-        mpfr_set_si(x, sys.maxint, MPFR_RNDN)
+        mpfr_set_si(x, sys.maxsize, MPFR_RNDN)
         self.assertIs(mpfr_fits_slong_p(x, MPFR_RNDN), False)
 
     def test_get_si_and_set_si(self):
@@ -425,37 +425,37 @@ class TestMpfr(unittest.TestCase):
         self.assertEqual(mpfr_get_si(x, MPFR_RNDN), 2367)
 
         # Check set_si from long
-        mpfr_set_si(x, 5789L, MPFR_RNDN)
+        mpfr_set_si(x, 5789, MPFR_RNDN)
         self.assertEqual(mpfr_get_si(x, MPFR_RNDN), 5789)
 
         # Check set_si from out-of-range arguments.
         with self.assertRaises(OverflowError):
-            mpfr_set_si(x, sys.maxint + 1, MPFR_RNDN)
+            mpfr_set_si(x, sys.maxsize + 1, MPFR_RNDN)
 
         with self.assertRaises(OverflowError):
-            mpfr_set_si(x, -sys.maxint - 2, MPFR_RNDN)
+            mpfr_set_si(x, -sys.maxsize - 2, MPFR_RNDN)
 
         # None of the above should have set the erange flag.
         self.assertIs(mpfr_erangeflag_p(), False)
 
         # Check get_si with out-of-range values.
         mpfr_set_inf(x, 0)
-        self.assertEqual(mpfr_get_si(x, MPFR_RNDN), sys.maxint)
+        self.assertEqual(mpfr_get_si(x, MPFR_RNDN), sys.maxsize)
         self.assertIs(mpfr_erangeflag_p(), True)
         mpfr_clear_erangeflag()
 
         mpfr_set_inf(x, -1)
-        self.assertEqual(mpfr_get_si(x, MPFR_RNDN), -sys.maxint - 1)
+        self.assertEqual(mpfr_get_si(x, MPFR_RNDN), -sys.maxsize - 1)
         self.assertIs(mpfr_erangeflag_p(), True)
         mpfr_clear_erangeflag()
 
         mpfr_set_d(x, 1e100, MPFR_RNDN)
-        self.assertEqual(mpfr_get_si(x, MPFR_RNDN), sys.maxint)
+        self.assertEqual(mpfr_get_si(x, MPFR_RNDN), sys.maxsize)
         self.assertIs(mpfr_erangeflag_p(), True)
         mpfr_clear_erangeflag()
 
         mpfr_set_d(x, -1e100, MPFR_RNDN)
-        self.assertEqual(mpfr_get_si(x, MPFR_RNDN), -sys.maxint - 1)
+        self.assertEqual(mpfr_get_si(x, MPFR_RNDN), -sys.maxsize - 1)
         self.assertIs(mpfr_erangeflag_p(), True)
         mpfr_clear_erangeflag()
 
@@ -1970,15 +1970,15 @@ class TestMpfr(unittest.TestCase):
 
         # Invalid base
         with self.assertRaises(ValueError):
-            print mpfr_get_str(1, 0, x, MPFR_RNDN)
+            print(mpfr_get_str(1, 0, x, MPFR_RNDN))
         with self.assertRaises(ValueError):
-            print mpfr_get_str(63, 0, x, MPFR_RNDN)
+            print(mpfr_get_str(63, 0, x, MPFR_RNDN))
 
         # Invalid number of digits
         with self.assertRaises(ValueError):
-            print mpfr_get_str(10, 1, x, MPFR_RNDN)
+            print(mpfr_get_str(10, 1, x, MPFR_RNDN))
         with self.assertRaises((ValueError, OverflowError)):
-            print mpfr_get_str(10, -1, x, MPFR_RNDN)
+            print(mpfr_get_str(10, -1, x, MPFR_RNDN))
 
         # Bases other than 10
         x = Mpfr(20)
@@ -2013,12 +2013,12 @@ class TestMpfr(unittest.TestCase):
 
     def test_exponent_bounds(self):
         # Just exercise the exponent bound functions.
-        self.assertIsInstance(mpfr_get_emin(), (int, long))
-        self.assertIsInstance(mpfr_get_emin_min(), (int, long))
-        self.assertIsInstance(mpfr_get_emin_max(), (int, long))
-        self.assertIsInstance(mpfr_get_emax(), (int, long))
-        self.assertIsInstance(mpfr_get_emax_min(), (int, long))
-        self.assertIsInstance(mpfr_get_emax_max(), (int, long))
+        self.assertIsInstance(mpfr_get_emin(), int))
+        self.assertIsInstance(mpfr_get_emin_min(), int)
+        self.assertIsInstance(mpfr_get_emin_max(), int)
+        self.assertIsInstance(mpfr_get_emax(), int)
+        self.assertIsInstance(mpfr_get_emax_min(), int)
+        self.assertIsInstance(mpfr_get_emax_max(), int)
 
     def test_get_and_set_emin(self):
         # Setting exponent bounds

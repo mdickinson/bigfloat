@@ -4,7 +4,7 @@ import unittest
 
 class TestAll(unittest.TestCase):
     def test_from_import_star_on_bigfloat_package(self):
-        exec "from bigfloat import *"
+        exec("from bigfloat import *")
 
     def test_duplicates(self):
         # Check for duplicate entries in __all__.

@@ -16,7 +16,7 @@
 # along with the bigfloat package.  If not, see <http://www.gnu.org/licenses/>.
 
 # For Python 2.5
-from __future__ import with_statement
+
 
 # Standard library imports
 import doctest
@@ -192,7 +192,7 @@ class BigFloatTests(unittest.TestCase):
         if (MPFR_VERSION_MAJOR, MPFR_VERSION_MINOR) >= (2, 4):
             fns.append(mod)
 
-        values = [2, 3L, 1.234, BigFloat('0.678'), BigFloat('nan'),
+        values = [2, 3, 1.234, BigFloat('0.678'), BigFloat('nan'),
                   float('0.0'), float('inf'), True]
 
         # functions should accept operands of any integer, float or BigFloat
@@ -231,12 +231,9 @@ class BigFloatTests(unittest.TestCase):
         # arithmetic operators:  +, -, *, /, **, %
 
         x = BigFloat('17.29')
-        other_values = [2, 3L, 1.234, BigFloat('0.678'), False]
+        other_values = [2, 3, 1.234, BigFloat('0.678'), False]
         test_precisions = [2, 20, 53, 2000]
-        # note that division using '/' should work (giving true division)
-        # whether or not 'from __future__ import division' is enabled.
-        # So we test both operator.div and operator.truediv.
-        operations = [operator.add, operator.mul, operator.div,
+        operations = [operator.add, operator.mul,
                       operator.sub, operator.pow, operator.truediv]
 
         # % operator only works for MPFR version >= 2.4.
@@ -291,7 +288,7 @@ class BigFloatTests(unittest.TestCase):
             self.assertIs(is_regular(x), False)
 
         zeros = [
-            0, 0L,
+            0,
             float('0.0'), float('-0.0'),
             BigFloat('0.0'), BigFloat('-0.0'),
         ]
@@ -303,7 +300,7 @@ class BigFloatTests(unittest.TestCase):
             self.assertIs(is_integer(x), True)
             self.assertIs(is_regular(x), False)
 
-        for x in [-31L, -5.13, BigFloat('-2.34e1000')]:
+        for x in [-31, -5.13, BigFloat('-2.34e1000')]:
             self.assertIs(is_nan(x), False)
             self.assertIs(is_inf(x), False)
             self.assertIs(is_zero(x), False)
@@ -320,7 +317,7 @@ class BigFloatTests(unittest.TestCase):
             self.assertIs(is_negative(x), False)
 
         # test is_integer for finite nonzero values
-        for x in [2, -31L, 24.0, BigFloat('1e100'), sqrt(BigFloat('2e100'))]:
+        for x in [2, -31, 24.0, BigFloat('1e100'), sqrt(BigFloat('2e100'))]:
             self.assertIs(is_integer(x), True)
 
         for x in [2.1, BigFloat(-1.345), sqrt(BigFloat(2))]:
@@ -330,12 +327,12 @@ class BigFloatTests(unittest.TestCase):
         negatives = [
             float('-inf'), float('-0.0'),
             BigFloat('-inf'), BigFloat('-0.0'),
-            BigFloat(-2.3), -31, -1L,
+            BigFloat(-2.3), -31, -1,
         ]
         for x in negatives:
             self.assertIs(is_negative(x), True)
 
-        for x in [float('inf'), BigFloat('inf'), float('0.0'), 0, 0L, 2L, 123,
+        for x in [float('inf'), BigFloat('inf'), float('0.0'), 0, 2, 123,
                   BigFloat(1.23)]:
             self.assertIs(is_negative(x), False)
 
@@ -350,16 +347,16 @@ class BigFloatTests(unittest.TestCase):
         # entries have the same value; sublists are ordered by increasing value
         values = [
             [BigFloat('-Infinity'), float('-inf')],
-            [-1L, -1, -1.0, BigFloat(-1.0)],
+            [-1, -1.0, BigFloat(-1.0)],
             [
-                0L, 0,
+                0,
                 float('0.0'), float('-0.0'),
                 BigFloat('0.0'), BigFloat('-0.0'),
             ],
             [BigFloat('4e-324')],
             [4e-324],
             [1e-320, BigFloat(1e-320)],
-            [1L, 1, 1.0, BigFloat(1.0)],
+            [1, 1.0, BigFloat(1.0)],
             [BigFloat(2 ** 53 + 1)],
             [2 ** 53 + 1],
             [BigFloat('Infinity'), float('inf')],
@@ -434,7 +431,7 @@ class BigFloatTests(unittest.TestCase):
             self.assertIs(unordered(x, y), True)
 
     def test_creation_from_integer(self):
-        test_values = [-23, 0, 100, 7 ** 100, -23L, 0L, 100L]
+        test_values = [-23, 0, 100, 7 ** 100]
         test_precisions = [2, 20, 53, 2000]
         for value in test_values:
             for p in test_precisions:
@@ -478,7 +475,7 @@ class BigFloatTests(unittest.TestCase):
                        '+nan',
                        'inf',
                        '-inf',
-                       u'-451.001']
+                       '-451.001']
         test_precisions = [2, 20, 53, 2000]
         for value in test_values:
             for p in test_precisions:
@@ -565,7 +562,7 @@ class BigFloatTests(unittest.TestCase):
         self.assertEqual(flags, set())
 
     def test_exact_creation_from_integer(self):
-        test_values = [-23, 0, 100, 7 ** 100, -23L, 0L, 100L]
+        test_values = [-23, 0, 100, 7 ** 100]
         test_precisions = [2, 20, 53, 2000]
         for value in test_values:
             for p in test_precisions:
@@ -578,7 +575,7 @@ class BigFloatTests(unittest.TestCase):
                     self.assertEqual(int(bf), value)
 
         self.assertRaises(TypeError, BigFloat.exact, 1, precision=200)
-        self.assertRaises(TypeError, BigFloat.exact, -13L, precision=53)
+        self.assertRaises(TypeError, BigFloat.exact, -13, precision=53)
 
     def test_exact_creation_from_float(self):
         test_values = [-12.3456, float('-0.0'), float('0.0'), 5e-310, -1e308,
@@ -606,7 +603,7 @@ class BigFloatTests(unittest.TestCase):
                        '+nan',
                        'inf',
                        '-inf',
-                       u'-451.001']
+                       '-451.001']
         test_precisions = [2, 20, 53, 2000]
         for value in test_values:
             for p in test_precisions:
@@ -775,7 +772,7 @@ class BigFloatTests(unittest.TestCase):
                 sqrt(BigFloat(2), context=RoundTowardNegative),
                 (1592262918131443, 1125899906842624)
             ),
-            (const_pi(), (884279719003555L, 281474976710656L)),
+            (const_pi(), (884279719003555, 281474976710656)),
             (BigFloat('2.0'), (2, 1)),
             (BigFloat('0.5'), (1, 2)),
             (BigFloat('-1.125'), (-9, 8)),

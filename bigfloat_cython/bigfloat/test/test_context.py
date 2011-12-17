@@ -81,9 +81,9 @@ class ContextTests(unittest.TestCase):
 
     def test_attributes(self):
         c = DefaultContext
-        self.assert_(isinstance(c.precision, (int, long)))
-        self.assert_(isinstance(c.emax, (int, long)))
-        self.assert_(isinstance(c.emin, (int, long)))
+        self.assert_(isinstance(c.precision, int))
+        self.assert_(isinstance(c.emax, int))
+        self.assert_(isinstance(c.emin, int))
         self.assert_(isinstance(c.subnormalize, bool))
         self.assert_(c.rounding in all_rounding_modes)
 
