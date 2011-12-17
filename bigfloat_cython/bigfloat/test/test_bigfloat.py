@@ -220,10 +220,11 @@ class BigFloatTests(unittest.TestCase):
                     with rnd:
                         x = div(1, 3, context=RoundTowardPositive)
                         y = div(1, 3, context=RoundTowardNegative)
-                        self.assert_(y < x)
+                        self.assertLess(y, x)
                         x3 = mul(3, x, context=RoundTowardPositive)
                         y3 = mul(y, 3, context=RoundTowardNegative)
-                        self.assert_(y3 < 1 < x3)
+                        self.assertLess(y3, 1)
+                        self.assertLess(1, x3)
 
     def test_binary_operations(self):
         # check that BigFloats can be combined with themselves,
@@ -462,7 +463,7 @@ class BigFloatTests(unittest.TestCase):
         # check directly-supplied rounding mode
         lower = BigFloat(1.1, precision(24) + RoundTowardNegative)
         upper = BigFloat(1.1, RoundTowardPositive + precision(24))
-        self.assert_(lower < upper)
+        self.assertLess(lower, upper)
 
         # check directly-supplied exponent, subnormalize:
         nearest_half = BigFloat(123.456, Context(emin=0, subnormalize=True))
@@ -493,22 +494,22 @@ class BigFloatTests(unittest.TestCase):
             lower = BigFloat('1.1')
         with RoundTowardPositive:
             upper = BigFloat('1.1')
-        self.assert_(lower < upper)
+        self.assertLess(lower, upper)
 
         # alternative version, without with statements
         lower = BigFloat('1.1', RoundTowardNegative)
         upper = BigFloat('1.1', RoundTowardPositive)
-        self.assert_(lower < upper)
+        self.assertLess(lower, upper)
 
-        self.assert_(is_nan(BigFloat('nan')))
-        self.assert_(is_inf(BigFloat('inf')))
-        self.assert_(not is_negative(BigFloat('inf')))
-        self.assert_(is_inf(BigFloat('-inf')))
-        self.assert_(is_negative(BigFloat('-inf')))
-        self.assert_(is_zero(BigFloat('0')))
-        self.assert_(not is_negative(BigFloat('0')))
-        self.assert_(is_zero(BigFloat('-0')))
-        self.assert_(is_negative(BigFloat('-0')))
+        self.assertTrue(is_nan(BigFloat('nan')))
+        self.assertTrue(is_inf(BigFloat('inf')))
+        self.assertFalse(is_negative(BigFloat('inf')))
+        self.assertTrue(is_inf(BigFloat('-inf')))
+        self.assertTrue(is_negative(BigFloat('-inf')))
+        self.assertTrue(is_zero(BigFloat('0')))
+        self.assertFalse(is_negative(BigFloat('0')))
+        self.assertTrue(is_zero(BigFloat('-0')))
+        self.assertTrue(is_negative(BigFloat('-0')))
 
     def test_creation_from_BigFloat(self):
         test_values = [BigFloat(1.0),
