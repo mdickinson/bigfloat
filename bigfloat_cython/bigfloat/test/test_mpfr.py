@@ -1972,15 +1972,15 @@ class TestMpfr(unittest.TestCase):
 
         # Invalid base
         with self.assertRaises(ValueError):
-            print mpfr_get_str(1, 0, x, MPFR_RNDN)
+            mpfr_get_str(1, 0, x, MPFR_RNDN)
         with self.assertRaises(ValueError):
-            print mpfr_get_str(63, 0, x, MPFR_RNDN)
+            mpfr_get_str(63, 0, x, MPFR_RNDN)
 
         # Invalid number of digits
         with self.assertRaises(ValueError):
-            print mpfr_get_str(10, 1, x, MPFR_RNDN)
+            mpfr_get_str(10, 1, x, MPFR_RNDN)
         with self.assertRaises((ValueError, OverflowError)):
-            print mpfr_get_str(10, -1, x, MPFR_RNDN)
+            mpfr_get_str(10, -1, x, MPFR_RNDN)
 
         # Bases other than 10
         x = Mpfr(20)
