@@ -2217,7 +2217,7 @@ def mpfr_print_rnd_mode(cmpfr.mpfr_rnd_t rnd):
 
     """
     check_rounding_mode(rnd)
-    return cmpfr.mpfr_print_rnd_mode(rnd)
+    return cmpfr.mpfr_print_rnd_mode(rnd).decode('ascii')
 
 
 ###############################################################################
@@ -2361,7 +2361,7 @@ def mpfr_get_version():
     Return the MPFR version, as a string.
 
     """
-    return cmpfr.mpfr_get_version()
+    return cmpfr.mpfr_get_version().decode('ascii')
 
 MPFR_VERSION = cmpfr.MPFR_VERSION
 MPFR_VERSION_MAJOR = cmpfr.MPFR_VERSION_MAJOR
