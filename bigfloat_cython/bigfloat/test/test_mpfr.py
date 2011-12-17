@@ -20,6 +20,8 @@ import sys
 import unittest
 
 from bigfloat.mpfr import (
+    _LONG_MIN, _LONG_MAX,
+
     MPFR_RNDN, MPFR_RNDZ, MPFR_RNDU, MPFR_RNDD, MPFR_RNDA,
 
     # Base extension type
@@ -407,15 +409,15 @@ class TestMpfr(unittest.TestCase):
 
     def test_fits_slong_p(self):
         x = Mpfr(64)
-        mpfr_set_si(x, sys.maxsize, MPFR_RNDN)
+        mpfr_set_si(x, _LONG_MAX, MPFR_RNDN)
         self.assertIs(mpfr_fits_slong_p(x, MPFR_RNDN), True)
 
         x = Mpfr(64)
-        mpfr_set_si(x, -sys.maxsize - 1, MPFR_RNDN)
+        mpfr_set_si(x, _LONG_MIN, MPFR_RNDN)
         self.assertIs(mpfr_fits_slong_p(x, MPFR_RNDN), True)
 
         x = Mpfr(28)
-        mpfr_set_si(x, sys.maxsize, MPFR_RNDN)
+        mpfr_set_si(x, _LONG_MAX, MPFR_RNDN)
         self.assertIs(mpfr_fits_slong_p(x, MPFR_RNDN), False)
 
     def test_get_si_and_set_si(self):
@@ -430,32 +432,32 @@ class TestMpfr(unittest.TestCase):
 
         # Check set_si from out-of-range arguments.
         with self.assertRaises(OverflowError):
-            mpfr_set_si(x, sys.maxsize + 1, MPFR_RNDN)
+            mpfr_set_si(x, _LONG_MAX + 1, MPFR_RNDN)
 
         with self.assertRaises(OverflowError):
-            mpfr_set_si(x, -sys.maxsize - 2, MPFR_RNDN)
+            mpfr_set_si(x, _LONG_MIN - 1, MPFR_RNDN)
 
         # None of the above should have set the erange flag.
         self.assertIs(mpfr_erangeflag_p(), False)
 
         # Check get_si with out-of-range values.
         mpfr_set_inf(x, 0)
-        self.assertEqual(mpfr_get_si(x, MPFR_RNDN), sys.maxsize)
+        self.assertEqual(mpfr_get_si(x, MPFR_RNDN), _LONG_MAX)
         self.assertIs(mpfr_erangeflag_p(), True)
         mpfr_clear_erangeflag()
 
         mpfr_set_inf(x, -1)
-        self.assertEqual(mpfr_get_si(x, MPFR_RNDN), -sys.maxsize - 1)
+        self.assertEqual(mpfr_get_si(x, MPFR_RNDN), _LONG_MIN)
         self.assertIs(mpfr_erangeflag_p(), True)
         mpfr_clear_erangeflag()
 
         mpfr_set_d(x, 1e100, MPFR_RNDN)
-        self.assertEqual(mpfr_get_si(x, MPFR_RNDN), sys.maxsize)
+        self.assertEqual(mpfr_get_si(x, MPFR_RNDN), _LONG_MAX)
         self.assertIs(mpfr_erangeflag_p(), True)
         mpfr_clear_erangeflag()
 
         mpfr_set_d(x, -1e100, MPFR_RNDN)
-        self.assertEqual(mpfr_get_si(x, MPFR_RNDN), -sys.maxsize - 1)
+        self.assertEqual(mpfr_get_si(x, MPFR_RNDN), _LONG_MIN)
         self.assertIs(mpfr_erangeflag_p(), True)
         mpfr_clear_erangeflag()
 

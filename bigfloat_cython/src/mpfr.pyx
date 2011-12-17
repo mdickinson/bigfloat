@@ -20,10 +20,19 @@
 
 cimport cmpfr
 
+cdef extern from "limits.h":
+    cdef int LONG_MAX
+    cdef int LONG_MIN
+
 
 ###############################################################################
 # Various constants exported to Python
 ###############################################################################
+
+# Make LONG_MAX and LONG_MIN available to Python.  These are the limits of
+# values accepted by functions like e.g., mpfr_set_si.
+_LONG_MAX = LONG_MAX
+_LONG_MIN = LONG_MIN
 
 # Make precision limits available to Python
 MPFR_PREC_MIN = cmpfr.MPFR_PREC_MIN
