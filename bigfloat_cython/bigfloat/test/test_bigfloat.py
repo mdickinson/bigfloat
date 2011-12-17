@@ -668,14 +668,25 @@ class BigFloatTests(unittest.TestCase):
         self.assertEqual(hash(x1), hash(x3))
 
         # check that hash values match those of floats
-        self.assertEqual(hash(BigFloat('inf')), hash(float('inf')))
-        self.assertEqual(hash(BigFloat('-inf')), hash(float('-inf')))
-        self.assertEqual(hash(BigFloat('0')), hash(float('0')))
-        self.assertEqual(hash(BigFloat('-0')), hash(float('-0')))
-        self.assertEqual(hash(BigFloat('1')), hash(float('1')))
-        self.assertEqual(hash(BigFloat('-1')), hash(float('-1')))
-        self.assertEqual(hash(BigFloat('1.625')), hash(float('1.625')))
-        self.assertEqual(hash(BigFloat.exact(1.1)), hash(1.1))
+        test_values = [
+            float('inf'),
+            float('nan'),
+            0.0,
+            1.0,
+            1.625,
+            1.1,
+            1e100,
+            1.456789123123e10,
+            1.9876543456789e-10,
+            1e-100,
+            3.1415926535,
+        ]
+        test_values += [-x for x in test_values]
+        for test_value in test_values:
+            self.assertEqual(
+                hash(BigFloat.exact(test_value)),
+                hash(test_value)
+            )
 
         # check that hash(n) matches hash(BigFloat(n)) for integers n
         for n in range(-50, 50):
