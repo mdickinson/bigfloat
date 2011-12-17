@@ -775,7 +775,7 @@ class BigFloatTests(unittest.TestCase):
                 sqrt(BigFloat(2), context=RoundTowardNegative),
                 (1592262918131443, 1125899906842624)
             ),
-            (const_pi(), (884279719003555L, 281474976710656L)),
+            (const_pi(), (884279719003555, 281474976710656)),
             (BigFloat('2.0'), (2, 1)),
             (BigFloat('0.5'), (1, 2)),
             (BigFloat('-1.125'), (-9, 8)),
