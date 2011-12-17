@@ -1501,7 +1501,7 @@ def acos(x, context=None):
         >>> with precision(12):
         ...     x = acos(-1)
         ...
-        >>> print x
+        >>> print(x)
         3.1416
         >>> x > const_pi()
         True
@@ -1571,25 +1571,25 @@ def atan2(y, x, context=None):
         >>> negative = -2.3
         >>> inf = BigFloat('inf')
 
-        >>> print atan2(+0.0, -0.0)      # pi
+        >>> print(atan2(+0.0, -0.0))     # pi
         3.1415926535897931
-        >>> print atan2(+0.0, +0.0)      # 0
+        >>> print(atan2(+0.0, +0.0))     # 0
         0
-        >>> print atan2(+0.0, negative)  # pi
+        >>> print(atan2(+0.0, negative)) # pi
         3.1415926535897931
-        >>> print atan2(+0.0, positive)  # 0
+        >>> print(atan2(+0.0, positive)) # 0
         0
-        >>> print atan2(positive, 0.0)   # pi / 2
+        >>> print(atan2(positive, 0.0))  # pi / 2
         1.5707963267948966
-        >>> print atan2(inf, -inf)       # 3*pi / 4
+        >>> print(atan2(inf, -inf))      # 3*pi / 4
         2.3561944901923448
-        >>> print atan2(inf, inf)        # pi / 4
+        >>> print(atan2(inf, inf))       # pi / 4
         0.78539816339744828
-        >>> print atan2(inf, finite)     # pi / 2
+        >>> print(atan2(inf, finite))    # pi / 2
         1.5707963267948966
-        >>> print atan2(positive, -inf)  # pi
+        >>> print(atan2(positive, -inf)) # pi
         3.1415926535897931
-        >>> print atan2(positive, +inf)  # 0
+        >>> print(atan2(positive, +inf)) # 0
         0
 
     """
