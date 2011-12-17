@@ -2013,7 +2013,7 @@ class TestMpfr(unittest.TestCase):
 
     def test_exponent_bounds(self):
         # Just exercise the exponent bound functions.
-        self.assertIsInstance(mpfr_get_emin(), int))
+        self.assertIsInstance(mpfr_get_emin(), int)
         self.assertIsInstance(mpfr_get_emin_min(), int)
         self.assertIsInstance(mpfr_get_emin_max(), int)
         self.assertIsInstance(mpfr_get_emax(), int)

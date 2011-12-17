@@ -81,10 +81,10 @@ class ContextTests(unittest.TestCase):
 
     def test_attributes(self):
         c = DefaultContext
-        self.assertIsInstance(c.precision, int))
-        self.assertIsInstance(c.emax, int))
-        self.assertIsInstance(c.emin, int))
-        self.assertIsInstance(c.subnormalize, bool))
+        self.assertIsInstance(c.precision, int)
+        self.assertIsInstance(c.emax, int)
+        self.assertIsInstance(c.emin, int)
+        self.assertIsInstance(c.subnormalize, bool)
         self.assertIn(c.rounding, all_rounding_modes)
 
     def test_bad_rounding_mode(self):
