@@ -385,7 +385,7 @@ def mpfr_set_si_2exp(Mpfr_t rop not None, long int op,
     check_rounding_mode(rnd)
     return cmpfr.mpfr_set_si_2exp(&rop._value, op, e, rnd)
 
-def mpfr_set_str(Mpfr_t rop not None, bytes s, int base, cmpfr.mpfr_rnd_t rnd):
+def mpfr_set_str(Mpfr_t rop not None, unicode s, int base, cmpfr.mpfr_rnd_t rnd):
     """
     Set rop from a string s.
 
@@ -400,12 +400,14 @@ def mpfr_set_str(Mpfr_t rop not None, bytes s, int base, cmpfr.mpfr_rnd_t rnd):
     an overflow.
 
     """
+    cdef bytes bytes_s
+    bytes_s = s.encode('ascii')
     check_initialized(rop)
     check_base(base, False)
     check_rounding_mode(rnd)
-    return cmpfr.mpfr_set_str(&rop._value, s, base, rnd)
+    return cmpfr.mpfr_set_str(&rop._value, bytes_s, base, rnd)
 
-def mpfr_strtofr(Mpfr_t rop not None, bytes s, int base, cmpfr.mpfr_rnd_t rnd):
+def mpfr_strtofr(Mpfr_t rop not None, unicode s, int base, cmpfr.mpfr_rnd_t rnd):
     """
     Read a floating-point number from a string.
 
@@ -467,15 +469,18 @@ def mpfr_strtofr(Mpfr_t rop not None, bytes s, int base, cmpfr.mpfr_rnd_t rnd):
     """
     cdef char* endptr
     cdef char* startptr
+    cdef bytes bytes_s
 
-    startptr = s
+    bytes_s = s.encode('ascii')
+
+    startptr = bytes_s
 
     check_initialized(rop)
     check_base(base, True)
     check_rounding_mode(rnd)
     ternary = cmpfr.mpfr_strtofr(
         &rop._value,
-        s,
+        bytes_s,
         &endptr,
         base,
         rnd,
@@ -647,7 +652,7 @@ def mpfr_get_str(int b, size_t n, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     finally:
         cmpfr.mpfr_free_str(c_digits)
 
-    return digits, exp
+    return digits.decode('ascii'), exp
 
 def mpfr_fits_slong_p(Mpfr_t x not None, cmpfr.mpfr_rnd_t rnd):
     """

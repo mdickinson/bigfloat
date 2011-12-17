@@ -72,7 +72,6 @@ def _mpfr_get_str2(base, ndigits, op, rounding_mode):
 
     """
     digits, exp = mpfr.mpfr_get_str(base, ndigits, op, rounding_mode)
-    digits = digits.decode('ascii')
     negative = digits.startswith('-')
     if negative:
         digits = digits[1:]
@@ -846,7 +845,7 @@ def _set_from_whole_string(rop, s, base, rnd):
     a valid string in the given base.
 
     """
-    s = s.encode('ascii').strip()
+    s = s.strip()
     ternary, endindex = mpfr.mpfr_strtofr(rop, s, base, rnd)
     if len(s) != endindex:
         raise ValueError("not a valid numeric string")

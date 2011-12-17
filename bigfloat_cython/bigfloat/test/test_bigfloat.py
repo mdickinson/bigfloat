@@ -1282,7 +1282,6 @@ def mpfr_set_str2(rop, s, base, rnd):
 
     """
     import bigfloat.mpfr as mpfr
-    s = s.encode('ascii')
     if s == s.strip():
         ternary, endindex = mpfr.mpfr_strtofr(rop, s, base, rnd)
         if not s[endindex:]:
