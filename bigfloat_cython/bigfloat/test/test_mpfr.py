@@ -1876,10 +1876,12 @@ class TestMpfr(unittest.TestCase):
             assert t == 0
             with temporary_emin(0):
                 mpfr_clear_flags()
-                actual_ternary_out = cmp(
-                    mpfr_subnormalize(x, ternary_in, rnd),
-                    0
-                )
+                actual_ternary_out = mpfr_subnormalize(x, ternary_in, rnd)
+                # Normalize return value from mpfr_subnormalize to -1, 0 or 1.
+                if actual_ternary_out < 0:
+                    actual_ternary_out = -1
+                elif actual_ternary_out > 0:
+                    actual_ternary_out = 1
                 actual_flags = get_current_flags()
                 actual_val_out = mpfr_get_d(x, MPFR_RNDN)
             self.assertEqual(actual_val_out, val_out)
