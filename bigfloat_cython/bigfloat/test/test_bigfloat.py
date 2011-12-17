@@ -20,6 +20,7 @@
 
 # Standard library imports
 import doctest
+import fractions
 import operator
 import sys
 import unittest
@@ -692,14 +693,6 @@ class BigFloatTests(unittest.TestCase):
         for n in range(-50, 50):
             self.assertEqual(hash(n), hash(BigFloat.exact(n)))
 
-        # XXX It's expected that these tests will fail on Python 2.5,
-        # due to the unpredictability of the integer hashing algorithm.
-        # There are no plans to fix this problem (and it's not really
-        # a problem unless you're putting both integers and BigFloat
-        # instances into the same set or dict).
-        if sys.version_info < (2, 6):
-            return
-
         # values near powers of 2
         for e in [30, 31, 32, 33, 34, 62, 63, 64, 65, 66]:
             for n in range(2 ** e - 50, 2 ** e + 50):
@@ -709,6 +702,18 @@ class BigFloatTests(unittest.TestCase):
                 self.assertEqual(hash(BigFloat(n)), hash(int(BigFloat(n))),
                                  "hash(BigFloat(n)) != hash(int(BigFloat(n))) "
                                  "for n = %s" % n)
+
+        # Hash for a large integer.
+
+        n = 7**100
+        self.assertEqual(hash(BigFloat.exact(n)), hash(n))
+
+        d = 2**999
+        f = fractions.Fraction(n, d)
+        with precision(1000):
+            bigfloat_f = BigFloat.exact(n) / BigFloat.exact(d)
+        self.assertEqual(hash(bigfloat_f), hash(f))
+        self.assertEqual(hash(bigfloat_f), hash(f))
 
     def test_hex(self):
         # test conversion to a hex string
