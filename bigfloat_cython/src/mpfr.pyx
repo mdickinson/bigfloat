@@ -643,7 +643,7 @@ def mpfr_get_str(int b, size_t n, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     # It's possible for the conversion from c_digits to digits to raise, so use
     # a try-finally block to ensure that c_digits always gets freed.
     try:
-        digits = str(c_digits)
+        digits = bytes(c_digits)
     finally:
         cmpfr.mpfr_free_str(c_digits)
 

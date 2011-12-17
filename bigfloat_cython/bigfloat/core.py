@@ -60,8 +60,11 @@ def _mpfr_get_str2(base, ndigits, op, rounding_mode):
 
         (sign, digits, exp)
 
+    Also converts the byte-string produced by mpfr_get_str to Unicode.
+
     """
     digits, exp = mpfr.mpfr_get_str(base, ndigits, op, rounding_mode)
+    digits = digits.decode('ascii')
     negative = digits.startswith('-')
     if negative:
         digits = digits[1:]
