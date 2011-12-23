@@ -137,17 +137,6 @@ mpfr.mpfr_set_emax(EMAX_MAX)
 PRECISION_MIN = mpfr.MPFR_PREC_MIN
 PRECISION_MAX = mpfr.MPFR_PREC_MAX
 
-_bit_length_correction = {
-    '0': 4, '1': 3, '2': 2, '3': 2, '4': 1, '5': 1, '6': 1, '7': 1,
-    '8': 0, '9': 0, 'a': 0, 'b': 0, 'c': 0, 'd': 0, 'e': 0, 'f': 0,
-    }
-
-
-def _bit_length(n):
-    """Bit length of an integer"""
-    hex_n = '%x' % _builtin_abs(n)
-    return 4 * len(hex_n) - _bit_length_correction[hex_n[0]]
-
 
 def _format_finite(negative, digits, dot_pos):
     """Given a (possibly empty) string of digits and an integer
@@ -308,7 +297,7 @@ class BigFloat(mpfr.Mpfr_t):
             if isinstance(value, float):
                 precision = _builtin_max(DBL_PRECISION, PRECISION_MIN)
             elif isinstance(value, int):
-                precision = _builtin_max(_bit_length(value), PRECISION_MIN)
+                precision = _builtin_max(value.bit_length(), PRECISION_MIN)
             elif isinstance(value, BigFloat):
                 precision = value.precision
             else:
