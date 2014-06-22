@@ -1,4 +1,4 @@
-PYTHON=python3.4
+PYTHON=python
 
 .PHONY: build build_all clean develop dist html install pdf test upload
 
