@@ -2070,6 +2070,11 @@ class TestMpfr(unittest.TestCase):
         mpfr_clear_erangeflag()
         self.assertIs(mpfr_erangeflag_p(), False)
 
+    def test_limits(self):
+        # Regression test for badly-defined LONG_MAX and LONG_MIN.
+        self.assertGreaterEqual(_LONG_MAX, 2**31-1)
+        self.assertLessEqual(_LONG_MIN, -2**31)
+
 
 if __name__ == '__main__':
     unittest.main()

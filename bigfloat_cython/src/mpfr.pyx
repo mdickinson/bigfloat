@@ -21,8 +21,8 @@
 cimport cmpfr
 
 cdef extern from "limits.h":
-    cdef int LONG_MAX
-    cdef int LONG_MIN
+    cdef long LONG_MAX
+    cdef long LONG_MIN
 
 
 ###############################################################################
