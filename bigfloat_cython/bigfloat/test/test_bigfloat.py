@@ -776,6 +776,24 @@ class BigFloatTests(unittest.TestCase):
         self.assertRaises(ValueError, int, BigFloat('-inf'))
         self.assertRaises(ValueError, int, BigFloat('nan'))
 
+    if sys.version_info < (3,):
+        def test_long(self):
+            self.assertIsInstance(long(BigFloat(13.7)), long)
+            self.assertEqual(long(BigFloat(13.7)), 13L)
+            self.assertIsInstance(long(BigFloat(13.7)), long)
+            self.assertEqual(long(BigFloat(2.3)), 2L)
+            self.assertIsInstance(long(BigFloat(1729)), long)
+            self.assertEqual(long(BigFloat(1729)), 1729L)
+
+            self.assertIsInstance(long(BigFloat('0.0')), long)
+            self.assertEqual(long(BigFloat('0.0')), 0L)
+            self.assertIsInstance(long(BigFloat('-0.0')), long)
+            self.assertEqual(long(BigFloat('-0.0')), 0L)
+
+            self.assertRaises(ValueError, long, BigFloat('inf'))
+            self.assertRaises(ValueError, long, BigFloat('-inf'))
+            self.assertRaises(ValueError, long, BigFloat('nan'))
+
     def test_integer_ratio(self):
 
         ir = BigFloat.as_integer_ratio
