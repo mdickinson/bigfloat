@@ -706,17 +706,17 @@ class BigFloatTests(unittest.TestCase):
                                  "hash(BigFloat(n)) != hash(int(BigFloat(n))) "
                                  "for n = %s" % n)
 
-        # Hash for a large integer.
+        # Hash for a large integer.  Currently only works for Python 3.
+        if sys.version_info >= (3,):
+            n = 7**100
+            self.assertEqual(hash(BigFloat.exact(n)), hash(n))
 
-        n = 7**100
-        self.assertEqual(hash(BigFloat.exact(n)), hash(n))
-
-        d = 2**999
-        f = fractions.Fraction(n, d)
-        with precision(1000):
-            bigfloat_f = BigFloat.exact(n) / BigFloat.exact(d)
-        self.assertEqual(hash(bigfloat_f), hash(f))
-        self.assertEqual(hash(bigfloat_f), hash(f))
+            d = 2**999
+            f = fractions.Fraction(n, d)
+            with precision(1000):
+                bigfloat_f = BigFloat.exact(n) / BigFloat.exact(d)
+            self.assertEqual(hash(bigfloat_f), hash(f))
+            self.assertEqual(hash(bigfloat_f), hash(f))
 
     def test_hex(self):
         # test conversion to a hex string
