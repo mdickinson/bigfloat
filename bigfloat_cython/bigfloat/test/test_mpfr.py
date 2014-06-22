@@ -1687,10 +1687,16 @@ class TestMpfr(unittest.TestCase):
         patchlevel = MPFR_VERSION_PATCHLEVEL
         num = MPFR_VERSION_NUM(major, minor, patchlevel)
         self.assertEqual(num, MPFR_VERSION)
-        self.assertIsInstance(MPFR_VERSION_STRING, str)
+        if sys.version_info < (3,):
+            self.assertIsInstance(MPFR_VERSION_STRING, unicode)
+        else:
+            self.assertIsInstance(MPFR_VERSION_STRING, str)
 
     def test_get_version(self):
-        self.assertIsInstance(mpfr_get_version(), str)
+        if sys.version_info < (3,):
+            self.assertIsInstance(mpfr_get_version(), unicode)
+        else:
+            self.assertIsInstance(mpfr_get_version(), str)
 
     def test_get_patches(self):
         self.assertIsInstance(mpfr_get_patches(), list)
