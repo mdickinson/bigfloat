@@ -1,7 +1,7 @@
 Prerequisites
 -------------
 
-This package requires Python 2.5 or later.  The MPFR and GMP libraries will
+This package requires Python 2.6 or later.  The MPFR and GMP libraries will
 need to be already installed on your system.
 
 
