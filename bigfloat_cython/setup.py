@@ -20,6 +20,9 @@
 from distutils.core import setup
 from distutils.extension import Extension
 
+from Cython.Distutils import build_ext
+
+
 DESCRIPTION = """\
 Arbitrary precision correctly-rounded floating point arithmetic, via MPFR.\
 """
@@ -159,6 +162,7 @@ setup(
     author='Mark Dickinson',
     author_email='dickinsm@gmail.com',
     url='http://bitbucket.org/dickinsm/bigfloat',
+    cmdclass={'build_ext': build_ext},
     classifiers=[
         'Development Status :: 3 - Alpha',
         'License :: OSI Approved :: '
@@ -174,10 +178,8 @@ setup(
     ext_modules=[
         Extension(
             "bigfloat.mpfr",
-            ["src/mpfr.c"],
-            libraries=[
-                'mpfr', 'gmp',
-            ],
+            ["src/mpfr.pyx"],
+            libraries=['mpfr', 'gmp'],
         ),
     ],
     packages=[

@@ -15,7 +15,11 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with the bigfloat package.  If not, see <http://www.gnu.org/licenses/>.
 
-import unittest
+import sys
+if sys.version_info < (2, 7):
+    import unittest2 as unittest
+else:
+    import unittest
 
 from bigfloat.context import (
     setcontext,
@@ -81,11 +85,11 @@ class ContextTests(unittest.TestCase):
 
     def test_attributes(self):
         c = DefaultContext
-        self.assert_(isinstance(c.precision, (int, long)))
-        self.assert_(isinstance(c.emax, (int, long)))
-        self.assert_(isinstance(c.emin, (int, long)))
-        self.assert_(isinstance(c.subnormalize, bool))
-        self.assert_(c.rounding in all_rounding_modes)
+        self.assertIsInstance(c.precision, int)
+        self.assertIsInstance(c.emax, int)
+        self.assertIsInstance(c.emin, int)
+        self.assertIsInstance(c.subnormalize, bool)
+        self.assertIn(c.rounding, all_rounding_modes)
 
     def test_bad_rounding_mode(self):
         with self.assertRaises(ValueError):

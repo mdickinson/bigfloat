@@ -17,7 +17,10 @@
 
 import contextlib
 import sys
-import unittest
+if sys.version_info < (2, 7):
+    import unittest2 as unittest
+else:
+    import unittest
 
 from bigfloat.mpfr import (
     _LONG_MIN, _LONG_MAX,
@@ -377,7 +380,7 @@ class TestMpfr(unittest.TestCase):
     def test_constructor(self):
         x = Mpfr(10)
         self.assertIsInstance(x, Mpfr_t)
-        y = Mpfr(20L)
+        y = Mpfr(20)
         self.assertIsInstance(y, Mpfr_t)
 
     def test_get_and_set_prec(self):
@@ -427,7 +430,7 @@ class TestMpfr(unittest.TestCase):
         self.assertEqual(mpfr_get_si(x, MPFR_RNDN), 2367)
 
         # Check set_si from long
-        mpfr_set_si(x, 5789L, MPFR_RNDN)
+        mpfr_set_si(x, 5789, MPFR_RNDN)
         self.assertEqual(mpfr_get_si(x, MPFR_RNDN), 5789)
 
         # Check set_si from out-of-range arguments.
@@ -1126,7 +1129,7 @@ class TestMpfr(unittest.TestCase):
             self.assertEqual(
                 actual_output,
                 expected_output,
-                msg='{}'.format(fn),
+                msg='{0}'.format(fn),
             )
 
     def test_lgamma(self):
@@ -1332,8 +1335,8 @@ class TestMpfr(unittest.TestCase):
                 actual_output,
                 expected_output,
                 msg=(
-                    "Unexpected result for {}({}): expected {}, "
-                    "got {}.".format(
+                    "Unexpected result for {0}({1}): expected {2}, "
+                    "got {3}.".format(
                         fn.__name__, input, expected_output, actual_output,
                     ),
                 ),
@@ -1360,8 +1363,8 @@ class TestMpfr(unittest.TestCase):
                 actual_output,
                 expected_output,
                 msg=(
-                    "Unexpected result for {}({}): expected {}, "
-                    "got {}.".format(
+                    "Unexpected result for {0}({1}): expected {2}, "
+                    "got {3}.".format(
                         fn.__name__, input, expected_output, actual_output,
                     ),
                 ),
@@ -1687,10 +1690,16 @@ class TestMpfr(unittest.TestCase):
         patchlevel = MPFR_VERSION_PATCHLEVEL
         num = MPFR_VERSION_NUM(major, minor, patchlevel)
         self.assertEqual(num, MPFR_VERSION)
-        self.assertIsInstance(MPFR_VERSION_STRING, str)
+        if sys.version_info < (3,):
+            self.assertIsInstance(MPFR_VERSION_STRING, unicode)
+        else:
+            self.assertIsInstance(MPFR_VERSION_STRING, str)
 
     def test_get_version(self):
-        self.assertIsInstance(mpfr_get_version(), str)
+        if sys.version_info < (3,):
+            self.assertIsInstance(mpfr_get_version(), unicode)
+        else:
+            self.assertIsInstance(mpfr_get_version(), str)
 
     def test_get_patches(self):
         self.assertIsInstance(mpfr_get_patches(), list)
@@ -2017,12 +2026,12 @@ class TestMpfr(unittest.TestCase):
 
     def test_exponent_bounds(self):
         # Just exercise the exponent bound functions.
-        self.assertIsInstance(mpfr_get_emin(), (int, long))
-        self.assertIsInstance(mpfr_get_emin_min(), (int, long))
-        self.assertIsInstance(mpfr_get_emin_max(), (int, long))
-        self.assertIsInstance(mpfr_get_emax(), (int, long))
-        self.assertIsInstance(mpfr_get_emax_min(), (int, long))
-        self.assertIsInstance(mpfr_get_emax_max(), (int, long))
+        self.assertIsInstance(mpfr_get_emin(), int)
+        self.assertIsInstance(mpfr_get_emin_min(), int)
+        self.assertIsInstance(mpfr_get_emin_max(), int)
+        self.assertIsInstance(mpfr_get_emax(), int)
+        self.assertIsInstance(mpfr_get_emax_min(), int)
+        self.assertIsInstance(mpfr_get_emax_max(), int)
 
     def test_get_and_set_emin(self):
         # Setting exponent bounds
@@ -2069,6 +2078,11 @@ class TestMpfr(unittest.TestCase):
         self.assertIs(mpfr_erangeflag_p(), True)
         mpfr_clear_erangeflag()
         self.assertIs(mpfr_erangeflag_p(), False)
+
+    def test_limits(self):
+        # Regression test for badly-defined LONG_MAX and LONG_MIN.
+        self.assertGreaterEqual(_LONG_MAX, 2**31-1)
+        self.assertLessEqual(_LONG_MIN, -2**31)
 
 
 if __name__ == '__main__':

@@ -16,13 +16,17 @@
 # along with the bigfloat package.  If not, see <http://www.gnu.org/licenses/>.
 
 # For Python 2.5
-from __future__ import with_statement
+
 
 # Standard library imports
 import doctest
+import fractions
 import operator
 import sys
-import unittest
+if sys.version_info < (2, 7):
+    import unittest2 as unittest
+else:
+    import unittest
 
 import bigfloat.core
 
@@ -192,7 +196,7 @@ class BigFloatTests(unittest.TestCase):
         if (MPFR_VERSION_MAJOR, MPFR_VERSION_MINOR) >= (2, 4):
             fns.append(mod)
 
-        values = [2, 3L, 1.234, BigFloat('0.678'), BigFloat('nan'),
+        values = [2, 3, 1.234, BigFloat('0.678'), BigFloat('nan'),
                   float('0.0'), float('inf'), True]
 
         # functions should accept operands of any integer, float or BigFloat
@@ -220,10 +224,11 @@ class BigFloatTests(unittest.TestCase):
                     with rnd:
                         x = div(1, 3, context=RoundTowardPositive)
                         y = div(1, 3, context=RoundTowardNegative)
-                        self.assert_(y < x)
+                        self.assertLess(y, x)
                         x3 = mul(3, x, context=RoundTowardPositive)
                         y3 = mul(y, 3, context=RoundTowardNegative)
-                        self.assert_(y3 < 1 < x3)
+                        self.assertLess(y3, 1)
+                        self.assertLess(1, x3)
 
     def test_binary_operations(self):
         # check that BigFloats can be combined with themselves,
@@ -231,12 +236,9 @@ class BigFloatTests(unittest.TestCase):
         # arithmetic operators:  +, -, *, /, **, %
 
         x = BigFloat('17.29')
-        other_values = [2, 3L, 1.234, BigFloat('0.678'), False]
+        other_values = [2, 3, 1.234, BigFloat('0.678'), False]
         test_precisions = [2, 20, 53, 2000]
-        # note that division using '/' should work (giving true division)
-        # whether or not 'from __future__ import division' is enabled.
-        # So we test both operator.div and operator.truediv.
-        operations = [operator.add, operator.mul, operator.div,
+        operations = [operator.add, operator.mul,
                       operator.sub, operator.pow, operator.truediv]
 
         # % operator only works for MPFR version >= 2.4.
@@ -291,7 +293,7 @@ class BigFloatTests(unittest.TestCase):
             self.assertIs(is_regular(x), False)
 
         zeros = [
-            0, 0L,
+            0,
             float('0.0'), float('-0.0'),
             BigFloat('0.0'), BigFloat('-0.0'),
         ]
@@ -303,7 +305,7 @@ class BigFloatTests(unittest.TestCase):
             self.assertIs(is_integer(x), True)
             self.assertIs(is_regular(x), False)
 
-        for x in [-31L, -5.13, BigFloat('-2.34e1000')]:
+        for x in [-31, -5.13, BigFloat('-2.34e1000')]:
             self.assertIs(is_nan(x), False)
             self.assertIs(is_inf(x), False)
             self.assertIs(is_zero(x), False)
@@ -320,7 +322,7 @@ class BigFloatTests(unittest.TestCase):
             self.assertIs(is_negative(x), False)
 
         # test is_integer for finite nonzero values
-        for x in [2, -31L, 24.0, BigFloat('1e100'), sqrt(BigFloat('2e100'))]:
+        for x in [2, -31, 24.0, BigFloat('1e100'), sqrt(BigFloat('2e100'))]:
             self.assertIs(is_integer(x), True)
 
         for x in [2.1, BigFloat(-1.345), sqrt(BigFloat(2))]:
@@ -330,12 +332,12 @@ class BigFloatTests(unittest.TestCase):
         negatives = [
             float('-inf'), float('-0.0'),
             BigFloat('-inf'), BigFloat('-0.0'),
-            BigFloat(-2.3), -31, -1L,
+            BigFloat(-2.3), -31, -1,
         ]
         for x in negatives:
             self.assertIs(is_negative(x), True)
 
-        for x in [float('inf'), BigFloat('inf'), float('0.0'), 0, 0L, 2L, 123,
+        for x in [float('inf'), BigFloat('inf'), float('0.0'), 0, 2, 123,
                   BigFloat(1.23)]:
             self.assertIs(is_negative(x), False)
 
@@ -350,16 +352,16 @@ class BigFloatTests(unittest.TestCase):
         # entries have the same value; sublists are ordered by increasing value
         values = [
             [BigFloat('-Infinity'), float('-inf')],
-            [-1L, -1, -1.0, BigFloat(-1.0)],
+            [-1, -1.0, BigFloat(-1.0)],
             [
-                0L, 0,
+                0,
                 float('0.0'), float('-0.0'),
                 BigFloat('0.0'), BigFloat('-0.0'),
             ],
             [BigFloat('4e-324')],
             [4e-324],
             [1e-320, BigFloat(1e-320)],
-            [1L, 1, 1.0, BigFloat(1.0)],
+            [1, 1.0, BigFloat(1.0)],
             [BigFloat(2 ** 53 + 1)],
             [2 ** 53 + 1],
             [BigFloat('Infinity'), float('inf')],
@@ -434,7 +436,7 @@ class BigFloatTests(unittest.TestCase):
             self.assertIs(unordered(x, y), True)
 
     def test_creation_from_integer(self):
-        test_values = [-23, 0, 100, 7 ** 100, -23L, 0L, 100L]
+        test_values = [-23, 0, 100, 7 ** 100]
         test_precisions = [2, 20, 53, 2000]
         for value in test_values:
             for p in test_precisions:
@@ -465,7 +467,7 @@ class BigFloatTests(unittest.TestCase):
         # check directly-supplied rounding mode
         lower = BigFloat(1.1, precision(24) + RoundTowardNegative)
         upper = BigFloat(1.1, RoundTowardPositive + precision(24))
-        self.assert_(lower < upper)
+        self.assertLess(lower, upper)
 
         # check directly-supplied exponent, subnormalize:
         nearest_half = BigFloat(123.456, Context(emin=0, subnormalize=True))
@@ -478,7 +480,7 @@ class BigFloatTests(unittest.TestCase):
                        '+nan',
                        'inf',
                        '-inf',
-                       u'-451.001']
+                       '-451.001']
         test_precisions = [2, 20, 53, 2000]
         for value in test_values:
             for p in test_precisions:
@@ -496,22 +498,44 @@ class BigFloatTests(unittest.TestCase):
             lower = BigFloat('1.1')
         with RoundTowardPositive:
             upper = BigFloat('1.1')
-        self.assert_(lower < upper)
+        self.assertLess(lower, upper)
 
         # alternative version, without with statements
         lower = BigFloat('1.1', RoundTowardNegative)
         upper = BigFloat('1.1', RoundTowardPositive)
-        self.assert_(lower < upper)
+        self.assertLess(lower, upper)
 
-        self.assert_(is_nan(BigFloat('nan')))
-        self.assert_(is_inf(BigFloat('inf')))
-        self.assert_(not is_negative(BigFloat('inf')))
-        self.assert_(is_inf(BigFloat('-inf')))
-        self.assert_(is_negative(BigFloat('-inf')))
-        self.assert_(is_zero(BigFloat('0')))
-        self.assert_(not is_negative(BigFloat('0')))
-        self.assert_(is_zero(BigFloat('-0')))
-        self.assert_(is_negative(BigFloat('-0')))
+        self.assertTrue(is_nan(BigFloat('nan')))
+        self.assertTrue(is_inf(BigFloat('inf')))
+        self.assertFalse(is_negative(BigFloat('inf')))
+        self.assertTrue(is_inf(BigFloat('-inf')))
+        self.assertTrue(is_negative(BigFloat('-inf')))
+        self.assertTrue(is_zero(BigFloat('0')))
+        self.assertFalse(is_negative(BigFloat('0')))
+        self.assertTrue(is_zero(BigFloat('-0')))
+        self.assertTrue(is_negative(BigFloat('-0')))
+
+    if sys.version_info < (3,):
+        def test_creation_from_unicode(self):
+            test_values = map(unicode,
+                              ['123.456',
+                               '-1.23',
+                               '1e456',
+                               '+nan',
+                               'inf',
+                               '-inf',
+                               '-451.001'])
+            test_precisions = [2, 20, 53, 2000]
+            for value in test_values:
+                for p in test_precisions:
+                    with precision(p):
+                        bf = BigFloat(value)
+                        self.assertIs(type(bf), BigFloat)
+                        self.assertEqual(bf.precision, p)
+                    # check directly-supplied context
+                    bf = BigFloat(value, precision(p))
+                    self.assertIs(type(bf), BigFloat)
+                    self.assertEqual(bf.precision, p)
 
     def test_creation_from_BigFloat(self):
         test_values = [BigFloat(1.0),
@@ -565,7 +589,7 @@ class BigFloatTests(unittest.TestCase):
         self.assertEqual(flags, set())
 
     def test_exact_creation_from_integer(self):
-        test_values = [-23, 0, 100, 7 ** 100, -23L, 0L, 100L]
+        test_values = [-23, 0, 100, 7 ** 100]
         test_precisions = [2, 20, 53, 2000]
         for value in test_values:
             for p in test_precisions:
@@ -578,7 +602,7 @@ class BigFloatTests(unittest.TestCase):
                     self.assertEqual(int(bf), value)
 
         self.assertRaises(TypeError, BigFloat.exact, 1, precision=200)
-        self.assertRaises(TypeError, BigFloat.exact, -13L, precision=53)
+        self.assertRaises(TypeError, BigFloat.exact, -13, precision=53)
 
     def test_exact_creation_from_float(self):
         test_values = [-12.3456, float('-0.0'), float('0.0'), 5e-310, -1e308,
@@ -606,7 +630,7 @@ class BigFloatTests(unittest.TestCase):
                        '+nan',
                        'inf',
                        '-inf',
-                       u'-451.001']
+                       '-451.001']
         test_precisions = [2, 20, 53, 2000]
         for value in test_values:
             for p in test_precisions:
@@ -621,6 +645,30 @@ class BigFloatTests(unittest.TestCase):
         with RoundTowardPositive:
             upper = BigFloat.exact('1.1', precision=20)
         self.assertEqual(lower, upper)
+
+    if sys.version_info < (3,):
+        def test_exact_creation_from_unicode(self):
+            test_values = map(unicode, ['123.456',
+                                        '-1.23',
+                                        '1e456',
+                                        '+nan',
+                                        'inf',
+                                        '-inf',
+                                        '-451.001'])
+            test_precisions = [2, 20, 53, 2000]
+            for value in test_values:
+                for p in test_precisions:
+                    with precision(p):
+                        bf = BigFloat.exact(value, precision=p)
+                        self.assertIs(type(bf), BigFloat)
+                        self.assertEqual(bf.precision, p)
+
+            # check that rounding-mode doesn't affect the conversion
+            with RoundTowardNegative:
+                lower = BigFloat.exact('1.1', precision=20)
+            with RoundTowardPositive:
+                upper = BigFloat.exact('1.1', precision=20)
+            self.assertEqual(lower, upper)
 
     def test_exact_creation_from_BigFloat(self):
         for test_precision in [2, 20, 53, 2000]:
@@ -670,26 +718,29 @@ class BigFloatTests(unittest.TestCase):
         self.assertEqual(hash(x1), hash(x3))
 
         # check that hash values match those of floats
-        self.assertEqual(hash(BigFloat('inf')), hash(float('inf')))
-        self.assertEqual(hash(BigFloat('-inf')), hash(float('-inf')))
-        self.assertEqual(hash(BigFloat('0')), hash(float('0')))
-        self.assertEqual(hash(BigFloat('-0')), hash(float('-0')))
-        self.assertEqual(hash(BigFloat('1')), hash(float('1')))
-        self.assertEqual(hash(BigFloat('-1')), hash(float('-1')))
-        self.assertEqual(hash(BigFloat('1.625')), hash(float('1.625')))
-        self.assertEqual(hash(BigFloat.exact(1.1)), hash(1.1))
+        test_values = [
+            float('inf'),
+            float('nan'),
+            0.0,
+            1.0,
+            1.625,
+            1.1,
+            1e100,
+            1.456789123123e10,
+            1.9876543456789e-10,
+            1e-100,
+            3.1415926535,
+        ]
+        test_values += [-x for x in test_values]
+        for test_value in test_values:
+            self.assertEqual(
+                hash(BigFloat.exact(test_value)),
+                hash(test_value)
+            )
 
         # check that hash(n) matches hash(BigFloat(n)) for integers n
         for n in range(-50, 50):
             self.assertEqual(hash(n), hash(BigFloat.exact(n)))
-
-        # XXX It's expected that these tests will fail on Python 2.5,
-        # due to the unpredictability of the integer hashing algorithm.
-        # There are no plans to fix this problem (and it's not really
-        # a problem unless you're putting both integers and BigFloat
-        # instances into the same set or dict).
-        if sys.version_info < (2, 6):
-            return
 
         # values near powers of 2
         for e in [30, 31, 32, 33, 34, 62, 63, 64, 65, 66]:
@@ -700,6 +751,18 @@ class BigFloatTests(unittest.TestCase):
                 self.assertEqual(hash(BigFloat(n)), hash(int(BigFloat(n))),
                                  "hash(BigFloat(n)) != hash(int(BigFloat(n))) "
                                  "for n = %s" % n)
+
+        # Hash for a large integer.  Currently only works for Python 3.
+        if sys.version_info >= (3,):
+            n = 7**100
+            self.assertEqual(hash(BigFloat.exact(n)), hash(n))
+
+            d = 2**999
+            f = fractions.Fraction(n, d)
+            with precision(1000):
+                bigfloat_f = BigFloat.exact(n) / BigFloat.exact(d)
+            self.assertEqual(hash(bigfloat_f), hash(f))
+            self.assertEqual(hash(bigfloat_f), hash(f))
 
     def test_hex(self):
         # test conversion to a hex string
@@ -761,6 +824,24 @@ class BigFloatTests(unittest.TestCase):
         self.assertRaises(ValueError, int, BigFloat('inf'))
         self.assertRaises(ValueError, int, BigFloat('-inf'))
         self.assertRaises(ValueError, int, BigFloat('nan'))
+
+    if sys.version_info < (3,):
+        def test_long(self):
+            self.assertIsInstance(long(BigFloat(13.7)), long)
+            self.assertEqual(long(BigFloat(13.7)), 13)
+            self.assertIsInstance(long(BigFloat(13.7)), long)
+            self.assertEqual(long(BigFloat(2.3)), 2)
+            self.assertIsInstance(long(BigFloat(1729)), long)
+            self.assertEqual(long(BigFloat(1729)), 1729)
+
+            self.assertIsInstance(long(BigFloat('0.0')), long)
+            self.assertEqual(long(BigFloat('0.0')), 0)
+            self.assertIsInstance(long(BigFloat('-0.0')), long)
+            self.assertEqual(long(BigFloat('-0.0')), 0)
+
+            self.assertRaises(ValueError, long, BigFloat('inf'))
+            self.assertRaises(ValueError, long, BigFloat('-inf'))
+            self.assertRaises(ValueError, long, BigFloat('nan'))
 
     def test_integer_ratio(self):
 
@@ -1268,7 +1349,6 @@ def mpfr_set_str2(rop, s, base, rnd):
 
     """
     import bigfloat.mpfr as mpfr
-
     if s == s.strip():
         ternary, endindex = mpfr.mpfr_strtofr(rop, s, base, rnd)
         if not s[endindex:]:
