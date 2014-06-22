@@ -23,7 +23,10 @@ import doctest
 import fractions
 import operator
 import sys
-import unittest
+if sys.version_info < (2, 7):
+    import unittest2 as unittest
+else:
+    import unittest
 
 import bigfloat.core
 

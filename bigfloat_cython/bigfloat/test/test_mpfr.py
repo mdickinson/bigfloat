@@ -17,7 +17,10 @@
 
 import contextlib
 import sys
-import unittest
+if sys.version_info < (2, 7):
+    import unittest2 as unittest
+else:
+    import unittest
 
 from bigfloat.mpfr import (
     _LONG_MIN, _LONG_MAX,
@@ -1126,7 +1129,7 @@ class TestMpfr(unittest.TestCase):
             self.assertEqual(
                 actual_output,
                 expected_output,
-                msg='{}'.format(fn),
+                msg='{0}'.format(fn),
             )
 
     def test_lgamma(self):
@@ -1332,8 +1335,8 @@ class TestMpfr(unittest.TestCase):
                 actual_output,
                 expected_output,
                 msg=(
-                    "Unexpected result for {}({}): expected {}, "
-                    "got {}.".format(
+                    "Unexpected result for {0}({1}): expected {2}, "
+                    "got {3}.".format(
                         fn.__name__, input, expected_output, actual_output,
                     ),
                 ),
@@ -1360,8 +1363,8 @@ class TestMpfr(unittest.TestCase):
                 actual_output,
                 expected_output,
                 msg=(
-                    "Unexpected result for {}({}): expected {}, "
-                    "got {}.".format(
+                    "Unexpected result for {0}({1}): expected {2}, "
+                    "got {3}.".format(
                         fn.__name__, input, expected_output, actual_output,
                     ),
                 ),
