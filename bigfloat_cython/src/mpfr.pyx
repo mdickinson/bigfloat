@@ -394,7 +394,7 @@ def mpfr_set_si_2exp(Mpfr_t rop not None, long int op,
     check_rounding_mode(rnd)
     return cmpfr.mpfr_set_si_2exp(&rop._value, op, e, rnd)
 
-def mpfr_set_str(Mpfr_t rop not None, unicode s, int base, cmpfr.mpfr_rnd_t rnd):
+def mpfr_set_str(Mpfr_t rop not None, object s, int base, cmpfr.mpfr_rnd_t rnd):
     """
     Set rop from a string s.
 
@@ -416,7 +416,7 @@ def mpfr_set_str(Mpfr_t rop not None, unicode s, int base, cmpfr.mpfr_rnd_t rnd)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_set_str(&rop._value, bytes_s, base, rnd)
 
-def mpfr_strtofr(Mpfr_t rop not None, unicode s, int base, cmpfr.mpfr_rnd_t rnd):
+def mpfr_strtofr(Mpfr_t rop not None, object s, int base, cmpfr.mpfr_rnd_t rnd):
     """
     Read a floating-point number from a string.
 
