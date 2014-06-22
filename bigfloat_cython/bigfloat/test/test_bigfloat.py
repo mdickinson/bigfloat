@@ -240,6 +240,9 @@ class BigFloatTests(unittest.TestCase):
         test_precisions = [2, 20, 53, 2000]
         operations = [operator.add, operator.mul,
                       operator.sub, operator.pow, operator.truediv]
+        # operator.div only defined for Python 2
+        if sys.version_info < (3,):
+            operations.append(operator.div)
 
         # % operator only works for MPFR version >= 2.4.
         if (MPFR_VERSION_MAJOR, MPFR_VERSION_MINOR) >= (2, 4):

@@ -2439,14 +2439,18 @@ BigFloat.__abs__ = abs
 BigFloat.__add__ = _binop(add)
 BigFloat.__sub__ = _binop(sub)
 BigFloat.__mul__ = _binop(mul)
-BigFloat.__div__ = BigFloat.__truediv__ = _binop(div)
+BigFloat.__truediv__ = _binop(div)
+if _sys.version_info < (3,):
+    BigFloat.__div__ = _binop(div)
 BigFloat.__pow__ = _binop(pow)
 
 # and their reverse operations
 BigFloat.__radd__ = _rbinop(add)
 BigFloat.__rsub__ = _rbinop(sub)
 BigFloat.__rmul__ = _rbinop(mul)
-BigFloat.__rdiv__ = BigFloat.__rtruediv__ = _rbinop(div)
+BigFloat.__rtruediv__ = _rbinop(div)
+if _sys.version_info < (3,):
+    BigFloat.__rdiv__ = _rbinop(div)
 BigFloat.__rpow__ = _rbinop(pow)
 
 if (mpfr.MPFR_VERSION_MAJOR, mpfr.MPFR_VERSION_MINOR) >= (2, 4):
