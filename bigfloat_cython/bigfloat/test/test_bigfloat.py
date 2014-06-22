@@ -779,16 +779,16 @@ class BigFloatTests(unittest.TestCase):
     if sys.version_info < (3,):
         def test_long(self):
             self.assertIsInstance(long(BigFloat(13.7)), long)
-            self.assertEqual(long(BigFloat(13.7)), 13L)
+            self.assertEqual(long(BigFloat(13.7)), 13)
             self.assertIsInstance(long(BigFloat(13.7)), long)
-            self.assertEqual(long(BigFloat(2.3)), 2L)
+            self.assertEqual(long(BigFloat(2.3)), 2)
             self.assertIsInstance(long(BigFloat(1729)), long)
-            self.assertEqual(long(BigFloat(1729)), 1729L)
+            self.assertEqual(long(BigFloat(1729)), 1729)
 
             self.assertIsInstance(long(BigFloat('0.0')), long)
-            self.assertEqual(long(BigFloat('0.0')), 0L)
+            self.assertEqual(long(BigFloat('0.0')), 0)
             self.assertIsInstance(long(BigFloat('-0.0')), long)
-            self.assertEqual(long(BigFloat('-0.0')), 0L)
+            self.assertEqual(long(BigFloat('-0.0')), 0)
 
             self.assertRaises(ValueError, long, BigFloat('inf'))
             self.assertRaises(ValueError, long, BigFloat('-inf'))
