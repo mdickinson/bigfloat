@@ -55,6 +55,7 @@ _builtin_pow = pow
 
 if _sys.version_info < (3,):
     INTEGER_TYPES = int, long
+    STRING_TYPES = str, unicode
 
     if _sys.maxsize == 2**31 - 1:
         _PyHASH_MODULUS = 2**31 - 1
@@ -77,6 +78,7 @@ if _sys.version_info < (3,):
 
 else:
     INTEGER_TYPES = int,
+    STRING_TYPES = str,
 
     _PyHASH_MODULUS = _sys.hash_info.modulus
     _PyHASH_INF = _sys.hash_info.inf
@@ -287,7 +289,7 @@ class BigFloat(mpfr.Mpfr_t):
 
         if isinstance(value, float):
             return _set_d(value)
-        elif isinstance(value, str):
+        elif isinstance(value, STRING_TYPES):
             return set_str2(value.strip(), 10)
         elif isinstance(value, INTEGER_TYPES):
             return set_str2('%x' % value, 16)

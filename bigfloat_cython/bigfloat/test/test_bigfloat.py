@@ -515,6 +515,28 @@ class BigFloatTests(unittest.TestCase):
         self.assertTrue(is_zero(BigFloat('-0')))
         self.assertTrue(is_negative(BigFloat('-0')))
 
+    if sys.version_info < (3,):
+        def test_creation_from_unicode(self):
+            test_values = map(unicode,
+                              ['123.456',
+                               '-1.23',
+                               '1e456',
+                               '+nan',
+                               'inf',
+                               '-inf',
+                               '-451.001'])
+            test_precisions = [2, 20, 53, 2000]
+            for value in test_values:
+                for p in test_precisions:
+                    with precision(p):
+                        bf = BigFloat(value)
+                        self.assertIs(type(bf), BigFloat)
+                        self.assertEqual(bf.precision, p)
+                    # check directly-supplied context
+                    bf = BigFloat(value, precision(p))
+                    self.assertIs(type(bf), BigFloat)
+                    self.assertEqual(bf.precision, p)
+
     def test_creation_from_BigFloat(self):
         test_values = [BigFloat(1.0),
                        BigFloat('nan'),
