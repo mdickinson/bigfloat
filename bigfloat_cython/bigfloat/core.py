@@ -54,6 +54,8 @@ _builtin_pow = pow
 
 
 if _sys.version_info < (3,):
+    INTEGER_TYPES = int, long
+
     if _sys.maxsize == 2**31 - 1:
         _PyHASH_MODULUS = 2**31 - 1
     elif _sys.maxsize == 2**63 - 1:
@@ -63,6 +65,8 @@ if _sys.version_info < (3,):
     _PyHASH_INF = hash(float('inf'))
     _PyHASH_NAN = hash(float('nan'))
 else:
+    INTEGER_TYPES = int,
+
     _PyHASH_MODULUS = _sys.hash_info.modulus
     _PyHASH_INF = _sys.hash_info.inf
     _PyHASH_NAN = _sys.hash_info.nan
@@ -272,7 +276,7 @@ class BigFloat(mpfr.Mpfr_t):
             return _set_d(value)
         elif isinstance(value, str):
             return set_str2(value.strip(), 10)
-        elif isinstance(value, int):
+        elif isinstance(value, INTEGER_TYPES):
             return set_str2('%x' % value, 16)
         elif isinstance(value, BigFloat):
             return pos(value)
@@ -306,7 +310,7 @@ class BigFloat(mpfr.Mpfr_t):
                                 "from a string")
             if isinstance(value, float):
                 precision = _builtin_max(DBL_PRECISION, PRECISION_MIN)
-            elif isinstance(value, int):
+            elif isinstance(value, INTEGER_TYPES):
                 precision = _builtin_max(value.bit_length(), PRECISION_MIN)
             elif isinstance(value, BigFloat):
                 precision = value.precision
@@ -731,7 +735,7 @@ class BigFloat(mpfr.Mpfr_t):
 
         # ints, long and floats mix freely with BigFloats, and are
         # converted exactly.
-        if isinstance(arg, (int, float)):
+        if isinstance(arg, INTEGER_TYPES) or isinstance(arg, float):
             return cls.exact(arg)
         elif isinstance(arg, BigFloat):
             return arg
