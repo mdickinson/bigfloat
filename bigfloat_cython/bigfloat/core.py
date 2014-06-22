@@ -53,9 +53,19 @@ _builtin_abs = abs
 _builtin_pow = pow
 
 
-_PyHASH_MODULUS = _sys.hash_info.modulus
-_PyHASH_INF = _sys.hash_info.inf
-_PyHASH_NAN = _sys.hash_info.nan
+if _sys.version_info < (3,):
+    if _sys.maxsize == 2**31 - 1:
+        _PyHASH_MODULUS = 2**31 - 1
+    elif _sys.maxsize == 2**63 - 1:
+        _PyHASH_MODULUS = 2**61 - 1
+    else:
+        raise ValueError("Unexpected value for sys.maxsize.")
+    _PyHASH_INF = hash(float('inf'))
+    _PyHASH_NAN = hash(float('nan'))
+else:
+    _PyHASH_MODULUS = _sys.hash_info.modulus
+    _PyHASH_INF = _sys.hash_info.inf
+    _PyHASH_NAN = _sys.hash_info.nan
 
 # _PyHASH_2INV is the inverse of 2 modulo the prime _PyHASH_MODULUS
 _PyHASH_2INV = _builtin_pow(2, _PyHASH_MODULUS - 2, _PyHASH_MODULUS)
