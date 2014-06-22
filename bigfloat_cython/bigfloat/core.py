@@ -691,33 +691,41 @@ class BigFloat(mpfr.Mpfr_t):
 
         return negative, digits, -precision
 
-    def __hash__(self):
-        if is_nan(self):
-            return _PyHASH_NAN
-        elif is_inf(self):
-            return -_PyHASH_INF if is_negative(self) else _PyHASH_INF
-        elif is_zero(self):
-            return 0
-
-        negative, digits, e = _mpfr_get_str2(
-            16,
-            0,
-            self,
-            ROUND_TIES_TO_EVEN,
-        )
-        # Find binary exponent.
-        e = 4 * (e - len(digits))
-
-        # The value of self is (-1)**negative * int(digits, 16) * 2**e.
-        if e >= 0:
-            exp_hash = _builtin_pow(2, e, _PyHASH_MODULUS)
-        else:
-            exp_hash = _builtin_pow(_PyHASH_2INV, -e, _PyHASH_MODULUS)
-        hash_ = int(digits, 16) * exp_hash % _PyHASH_MODULUS
-        ans = -hash_ if negative else hash_
-        return -2 if ans == -1 else ans
-
     if _sys.version_info < (3,):
+        def __hash__(self):
+            # if self is exactly representable as a float, then its hash
+            # should match that of the float.  Note that this covers the
+            # case where self == 0.
+            if self == float(self) or is_nan(self):
+                return hash(float(self))
+
+            # now we must ensure that hash(self) == hash(int(self)) in the
+            # case where self is integral.  We use the (undocumented) fact
+            # that hash(n) == hash(m) for any two nonzero integers n and m
+            # that are congruent modulo 2**64-1 and have the same sign:
+            # see the source for long_hash in Objects/longobject.c.  An
+            # alternative would be to convert an integral self to an
+            # integer and take the hash of that, but that would be
+            # painfully slow for something like BigFloat('1e1000000000').
+            negative, digits, e = _mpfr_get_str2(
+                16,
+                0,
+                self,
+                ROUND_TIES_TO_EVEN,
+            )
+            e -= len(digits)
+            # The value of self is (-1)**negative * int(digits, 16) *
+            # 16**e.  Compute a strictly positive integer n such that n is
+            # congruent to abs(self) modulo 2**64-1 (e.g., in the sense
+            # that the numerator of n - abs(self) is divisible by
+            # 2**64-1).
+
+            if e >= 0:
+                n = int(digits, 16) * _builtin_pow(16, e, 2 ** 64 - 1)
+            else:
+                n = int(digits, 16) * _builtin_pow(2 ** 60, -e, 2 ** 64 - 1)
+            return hash(-n if negative else n)
+
         # != is automatically inferred from == for Python 3.
         def __ne__(self, other):
             return not (self == other)
@@ -728,6 +736,32 @@ class BigFloat(mpfr.Mpfr_t):
         def __long__(self):
             return long(int(self))
     else:
+        def __hash__(self):
+            if is_nan(self):
+                return _PyHASH_NAN
+            elif is_inf(self):
+                return -_PyHASH_INF if is_negative(self) else _PyHASH_INF
+            elif is_zero(self):
+                return 0
+
+            negative, digits, e = _mpfr_get_str2(
+                16,
+                0,
+                self,
+                ROUND_TIES_TO_EVEN,
+            )
+            # Find binary exponent.
+            e = 4 * (e - len(digits))
+
+            # The value of self is (-1)**negative * int(digits, 16) * 2**e.
+            if e >= 0:
+                exp_hash = _builtin_pow(2, e, _PyHASH_MODULUS)
+            else:
+                exp_hash = _builtin_pow(_PyHASH_2INV, -e, _PyHASH_MODULUS)
+            hash_ = int(digits, 16) * exp_hash % _PyHASH_MODULUS
+            ans = -hash_ if negative else hash_
+            return -2 if ans == -1 else ans
+
         def __bool__(self):
             return not is_zero(self)
 
