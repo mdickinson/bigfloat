@@ -717,11 +717,19 @@ class BigFloat(mpfr.Mpfr_t):
         ans = -hash_ if negative else hash_
         return -2 if ans == -1 else ans
 
-    def __ne__(self, other):
-        return not (self == other)
+    if _sys.version_info < (3,):
+        # != is automatically inferred from == for Python 3.
+        def __ne__(self, other):
+            return not (self == other)
 
-    def __bool__(self):
-        return not is_zero(self)
+        def __nonzero__(self):
+            return not is_zero(self)
+
+        def __long__(self):
+            return long(int(self))
+    else:
+        def __bool__(self):
+            return not is_zero(self)
 
     @property
     def precision(self):
