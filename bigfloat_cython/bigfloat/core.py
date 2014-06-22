@@ -314,7 +314,7 @@ class BigFloat(mpfr.Mpfr_t):
         """
 
         # figure out precision to use
-        if isinstance(value, str):
+        if isinstance(value, STRING_TYPES):
             if precision is None:
                 raise TypeError("precision must be supplied when "
                                 "converting from a string")
@@ -342,7 +342,7 @@ class BigFloat(mpfr.Mpfr_t):
                 raise ValueError("value too large to represent as a BigFloat")
             if test_flag(Underflow):
                 raise ValueError("value too small to represent as a BigFloat")
-            if test_flag(Inexact) and not isinstance(value, str):
+            if test_flag(Inexact) and not isinstance(value, STRING_TYPES):
                 # since this is supposed to be an exact conversion, the
                 # inexact flag should never be set except when converting
                 # from a string.

@@ -646,6 +646,30 @@ class BigFloatTests(unittest.TestCase):
             upper = BigFloat.exact('1.1', precision=20)
         self.assertEqual(lower, upper)
 
+    if sys.version_info < (3,):
+        def test_exact_creation_from_unicode(self):
+            test_values = map(unicode, ['123.456',
+                                        '-1.23',
+                                        '1e456',
+                                        '+nan',
+                                        'inf',
+                                        '-inf',
+                                        '-451.001'])
+            test_precisions = [2, 20, 53, 2000]
+            for value in test_values:
+                for p in test_precisions:
+                    with precision(p):
+                        bf = BigFloat.exact(value, precision=p)
+                        self.assertIs(type(bf), BigFloat)
+                        self.assertEqual(bf.precision, p)
+
+            # check that rounding-mode doesn't affect the conversion
+            with RoundTowardNegative:
+                lower = BigFloat.exact('1.1', precision=20)
+            with RoundTowardPositive:
+                upper = BigFloat.exact('1.1', precision=20)
+            self.assertEqual(lower, upper)
+
     def test_exact_creation_from_BigFloat(self):
         for test_precision in [2, 20, 53, 2000]:
             for test_rounding in all_rounding_modes:
