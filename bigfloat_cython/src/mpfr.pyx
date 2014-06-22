@@ -479,7 +479,6 @@ def mpfr_strtofr(Mpfr_t rop not None, object s, int base, cmpfr.mpfr_rnd_t rnd):
     cdef char* endptr
     cdef char* startptr
     cdef bytes bytes_s
-
     bytes_s = s.encode('ascii')
 
     startptr = bytes_s
