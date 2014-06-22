@@ -7,6 +7,8 @@ Library
 - Added support for the new 'divide-by-zero' flag (exposed as 'ZeroDivision' to
   bigfloat).
 
+- Python 3 now supported.
+
 
 What's new in bigfloat 0.3.0a2?
 ===============================
