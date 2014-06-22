@@ -474,7 +474,7 @@ class BigFloat(mpfr.Mpfr_t):
 
         sign = '-' if self._sign() else ''
         e = self._exponent()
-        if isinstance(e, str):
+        if isinstance(e, basestring):
             return sign + e
 
         m = self._significand()
