@@ -1,5 +1,7 @@
 Copyright 2009--2011 Mark Dickinson
 
+This is an outdated ctypes-based version of bigfloat.
+
 The bigfloat module is a Python module providing arbitrary-precision
 correctly-rounded floating-point arithmetic.  It's implemented as a wrapper
 around the MPFR library (http://www.mpfr.org).
