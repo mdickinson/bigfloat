@@ -19,7 +19,6 @@
 
 # Python wrapper for MPFR library
 
-from __future__ import with_statement
 
 import sys as _sys
 import contextlib as _contextlib
@@ -54,12 +53,51 @@ _builtin_abs = abs
 _builtin_pow = pow
 
 
+if _sys.version_info < (3,):
+    INTEGER_TYPES = int, long
+    STRING_TYPES = str, unicode
+
+    if _sys.maxsize == 2**31 - 1:
+        _PyHASH_MODULUS = 2**31 - 1
+    elif _sys.maxsize == 2**63 - 1:
+        _PyHASH_MODULUS = 2**61 - 1
+    else:
+        raise ValueError("Unexpected value for sys.maxsize.")
+    _PyHASH_INF = hash(float('inf'))
+    _PyHASH_NAN = hash(float('nan'))
+
+    _bit_length_correction = {
+        '0': 4, '1': 3, '2': 2, '3': 2, '4': 1, '5': 1, '6': 1, '7': 1,
+        '8': 0, '9': 0, 'a': 0, 'b': 0, 'c': 0, 'd': 0, 'e': 0, 'f': 0,
+        }
+
+    def _bit_length(n):
+        """Bit length of an integer"""
+        hex_n = '%x' % _builtin_abs(n)
+        return 4 * len(hex_n) - _bit_length_correction[hex_n[0]]
+
+else:
+    INTEGER_TYPES = int,
+    STRING_TYPES = str,
+
+    _PyHASH_MODULUS = _sys.hash_info.modulus
+    _PyHASH_INF = _sys.hash_info.inf
+    _PyHASH_NAN = _sys.hash_info.nan
+
+    _bit_length = int.bit_length
+
+# _PyHASH_2INV is the inverse of 2 modulo the prime _PyHASH_MODULUS
+_PyHASH_2INV = _builtin_pow(2, _PyHASH_MODULUS - 2, _PyHASH_MODULUS)
+
+
 def _mpfr_get_str2(base, ndigits, op, rounding_mode):
     """
     Variant of mpfr_get_str, for internal use:  simply splits off the '-'
     sign from the digit string, and returns a triple
 
         (sign, digits, exp)
+
+    Also converts the byte-string produced by mpfr_get_str to Unicode.
 
     """
     digits, exp = mpfr.mpfr_get_str(base, ndigits, op, rounding_mode)
@@ -127,17 +165,6 @@ mpfr.mpfr_set_emax(EMAX_MAX)
 
 PRECISION_MIN = mpfr.MPFR_PREC_MIN
 PRECISION_MAX = mpfr.MPFR_PREC_MAX
-
-_bit_length_correction = {
-    '0': 4, '1': 3, '2': 2, '3': 2, '4': 1, '5': 1, '6': 1, '7': 1,
-    '8': 0, '9': 0, 'a': 0, 'b': 0, 'c': 0, 'd': 0, 'e': 0, 'f': 0,
-    }
-
-
-def _bit_length(n):
-    """Bit length of an integer"""
-    hex_n = '%x' % _builtin_abs(n)
-    return 4 * len(hex_n) - _bit_length_correction[hex_n[0]]
 
 
 def _format_finite(negative, digits, dot_pos):
@@ -262,12 +289,9 @@ class BigFloat(mpfr.Mpfr_t):
 
         if isinstance(value, float):
             return _set_d(value)
-        elif isinstance(value, str):
+        elif isinstance(value, STRING_TYPES):
             return set_str2(value.strip(), 10)
-        elif isinstance(value, unicode):
-            value = value.strip().encode('ascii')
-            return set_str2(value, 10)
-        elif isinstance(value, (int, long)):
+        elif isinstance(value, INTEGER_TYPES):
             return set_str2('%x' % value, 16)
         elif isinstance(value, BigFloat):
             return pos(value)
@@ -290,7 +314,7 @@ class BigFloat(mpfr.Mpfr_t):
         """
 
         # figure out precision to use
-        if isinstance(value, basestring):
+        if isinstance(value, STRING_TYPES):
             if precision is None:
                 raise TypeError("precision must be supplied when "
                                 "converting from a string")
@@ -301,7 +325,7 @@ class BigFloat(mpfr.Mpfr_t):
                                 "from a string")
             if isinstance(value, float):
                 precision = _builtin_max(DBL_PRECISION, PRECISION_MIN)
-            elif isinstance(value, (int, long)):
+            elif isinstance(value, INTEGER_TYPES):
                 precision = _builtin_max(_bit_length(value), PRECISION_MIN)
             elif isinstance(value, BigFloat):
                 precision = value.precision
@@ -318,7 +342,7 @@ class BigFloat(mpfr.Mpfr_t):
                 raise ValueError("value too large to represent as a BigFloat")
             if test_flag(Underflow):
                 raise ValueError("value too small to represent as a BigFloat")
-            if test_flag(Inexact) and not isinstance(value, basestring):
+            if test_flag(Inexact) and not isinstance(value, STRING_TYPES):
                 # since this is supposed to be an exact conversion, the
                 # inexact flag should never be set except when converting
                 # from a string.
@@ -352,9 +376,6 @@ class BigFloat(mpfr.Mpfr_t):
         else:
             n >>= -e
         return int(-n) if negative else int(n)
-
-    def __long__(self):
-        return long(int(self))
 
     def __float__(self):
         """BigFloat -> float.
@@ -685,45 +706,79 @@ class BigFloat(mpfr.Mpfr_t):
 
         return negative, digits, -precision
 
-    def __hash__(self):
-        # if self is exactly representable as a float, then its hash
-        # should match that of the float.  Note that this covers the
-        # case where self == 0.
-        if self == float(self) or is_nan(self):
-            return hash(float(self))
+    if _sys.version_info < (3,):
+        def __hash__(self):
+            # if self is exactly representable as a float, then its hash
+            # should match that of the float.  Note that this covers the
+            # case where self == 0.
+            if self == float(self) or is_nan(self):
+                return hash(float(self))
 
-        # now we must ensure that hash(self) == hash(int(self)) in the
-        # case where self is integral.  We use the (undocumented) fact
-        # that hash(n) == hash(m) for any two nonzero integers n and m
-        # that are congruent modulo 2**64-1 and have the same sign:
-        # see the source for long_hash in Objects/longobject.c.  An
-        # alternative would be to convert an integral self to an
-        # integer and take the hash of that, but that would be
-        # painfully slow for something like BigFloat('1e1000000000').
-        negative, digits, e = _mpfr_get_str2(
-            16,
-            0,
-            self,
-            ROUND_TIES_TO_EVEN,
-        )
-        e -= len(digits)
-        # The value of self is (-1)**negative * int(digits, 16) *
-        # 16**e.  Compute a strictly positive integer n such that n is
-        # congruent to abs(self) modulo 2**64-1 (e.g., in the sense
-        # that the numerator of n - abs(self) is divisible by
-        # 2**64-1).
+            # now we must ensure that hash(self) == hash(int(self)) in the
+            # case where self is integral.  We use the (undocumented) fact
+            # that hash(n) == hash(m) for any two nonzero integers n and m
+            # that are congruent modulo 2**64-1 and have the same sign:
+            # see the source for long_hash in Objects/longobject.c.  An
+            # alternative would be to convert an integral self to an
+            # integer and take the hash of that, but that would be
+            # painfully slow for something like BigFloat('1e1000000000').
+            negative, digits, e = _mpfr_get_str2(
+                16,
+                0,
+                self,
+                ROUND_TIES_TO_EVEN,
+            )
+            e -= len(digits)
+            # The value of self is (-1)**negative * int(digits, 16) *
+            # 16**e.  Compute a strictly positive integer n such that n is
+            # congruent to abs(self) modulo 2**64-1 (e.g., in the sense
+            # that the numerator of n - abs(self) is divisible by
+            # 2**64-1).
 
-        if e >= 0:
-            n = int(digits, 16) * _builtin_pow(16, e, 2 ** 64 - 1)
-        else:
-            n = int(digits, 16) * _builtin_pow(2 ** 60, -e, 2 ** 64 - 1)
-        return hash(-n if negative else n)
+            if e >= 0:
+                n = int(digits, 16) * _builtin_pow(16, e, 2 ** 64 - 1)
+            else:
+                n = int(digits, 16) * _builtin_pow(2 ** 60, -e, 2 ** 64 - 1)
+            return hash(-n if negative else n)
 
-    def __ne__(self, other):
-        return not (self == other)
+        # != is automatically inferred from == for Python 3.
+        def __ne__(self, other):
+            return not (self == other)
 
-    def __nonzero__(self):
-        return not is_zero(self)
+        def __nonzero__(self):
+            return not is_zero(self)
+
+        def __long__(self):
+            return long(int(self))
+    else:
+        def __hash__(self):
+            if is_nan(self):
+                return _PyHASH_NAN
+            elif is_inf(self):
+                return -_PyHASH_INF if is_negative(self) else _PyHASH_INF
+            elif is_zero(self):
+                return 0
+
+            negative, digits, e = _mpfr_get_str2(
+                16,
+                0,
+                self,
+                ROUND_TIES_TO_EVEN,
+            )
+            # Find binary exponent.
+            e = 4 * (e - len(digits))
+
+            # The value of self is (-1)**negative * int(digits, 16) * 2**e.
+            if e >= 0:
+                exp_hash = _builtin_pow(2, e, _PyHASH_MODULUS)
+            else:
+                exp_hash = _builtin_pow(_PyHASH_2INV, -e, _PyHASH_MODULUS)
+            hash_ = int(digits, 16) * exp_hash % _PyHASH_MODULUS
+            ans = -hash_ if negative else hash_
+            return -2 if ans == -1 else ans
+
+        def __bool__(self):
+            return not is_zero(self)
 
     @property
     def precision(self):
@@ -737,7 +792,7 @@ class BigFloat(mpfr.Mpfr_t):
 
         # ints, long and floats mix freely with BigFloats, and are
         # converted exactly.
-        if isinstance(arg, (int, long, float)):
+        if isinstance(arg, INTEGER_TYPES) or isinstance(arg, float):
             return cls.exact(arg)
         elif isinstance(arg, BigFloat):
             return arg
@@ -1505,7 +1560,7 @@ def acos(x, context=None):
         >>> with precision(12):
         ...     x = acos(-1)
         ...
-        >>> print x
+        >>> print(x)
         3.1416
         >>> x > const_pi()
         True
@@ -1575,25 +1630,25 @@ def atan2(y, x, context=None):
         >>> negative = -2.3
         >>> inf = BigFloat('inf')
 
-        >>> print atan2(+0.0, -0.0)      # pi
+        >>> print(atan2(+0.0, -0.0))     # pi
         3.1415926535897931
-        >>> print atan2(+0.0, +0.0)      # 0
+        >>> print(atan2(+0.0, +0.0))     # 0
         0
-        >>> print atan2(+0.0, negative)  # pi
+        >>> print(atan2(+0.0, negative)) # pi
         3.1415926535897931
-        >>> print atan2(+0.0, positive)  # 0
+        >>> print(atan2(+0.0, positive)) # 0
         0
-        >>> print atan2(positive, 0.0)   # pi / 2
+        >>> print(atan2(positive, 0.0))  # pi / 2
         1.5707963267948966
-        >>> print atan2(inf, -inf)       # 3*pi / 4
+        >>> print(atan2(inf, -inf))      # 3*pi / 4
         2.3561944901923448
-        >>> print atan2(inf, inf)        # pi / 4
+        >>> print(atan2(inf, inf))       # pi / 4
         0.78539816339744828
-        >>> print atan2(inf, finite)     # pi / 2
+        >>> print(atan2(inf, finite))    # pi / 2
         1.5707963267948966
-        >>> print atan2(positive, -inf)  # pi
+        >>> print(atan2(positive, -inf)) # pi
         3.1415926535897931
-        >>> print atan2(positive, +inf)  # 0
+        >>> print(atan2(positive, +inf)) # 0
         0
 
     """
@@ -2384,14 +2439,18 @@ BigFloat.__abs__ = abs
 BigFloat.__add__ = _binop(add)
 BigFloat.__sub__ = _binop(sub)
 BigFloat.__mul__ = _binop(mul)
-BigFloat.__div__ = BigFloat.__truediv__ = _binop(div)
+BigFloat.__truediv__ = _binop(div)
+if _sys.version_info < (3,):
+    BigFloat.__div__ = _binop(div)
 BigFloat.__pow__ = _binop(pow)
 
 # and their reverse operations
 BigFloat.__radd__ = _rbinop(add)
 BigFloat.__rsub__ = _rbinop(sub)
 BigFloat.__rmul__ = _rbinop(mul)
-BigFloat.__rdiv__ = BigFloat.__rtruediv__ = _rbinop(div)
+BigFloat.__rtruediv__ = _rbinop(div)
+if _sys.version_info < (3,):
+    BigFloat.__rdiv__ = _rbinop(div)
 BigFloat.__rpow__ = _rbinop(pow)
 
 if (mpfr.MPFR_VERSION_MAJOR, mpfr.MPFR_VERSION_MINOR) >= (2, 4):

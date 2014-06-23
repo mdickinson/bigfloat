@@ -21,8 +21,8 @@
 cimport cmpfr
 
 cdef extern from "limits.h":
-    cdef int LONG_MAX
-    cdef int LONG_MIN
+    cdef long LONG_MAX
+    cdef long LONG_MIN
 
 
 ###############################################################################
@@ -394,7 +394,7 @@ def mpfr_set_si_2exp(Mpfr_t rop not None, long int op,
     check_rounding_mode(rnd)
     return cmpfr.mpfr_set_si_2exp(&rop._value, op, e, rnd)
 
-def mpfr_set_str(Mpfr_t rop not None, bytes s, int base, cmpfr.mpfr_rnd_t rnd):
+def mpfr_set_str(Mpfr_t rop not None, object s, int base, cmpfr.mpfr_rnd_t rnd):
     """
     Set rop from a string s.
 
@@ -409,12 +409,14 @@ def mpfr_set_str(Mpfr_t rop not None, bytes s, int base, cmpfr.mpfr_rnd_t rnd):
     an overflow.
 
     """
+    cdef bytes bytes_s
+    bytes_s = s.encode('ascii')
     check_initialized(rop)
     check_base(base, False)
     check_rounding_mode(rnd)
-    return cmpfr.mpfr_set_str(&rop._value, s, base, rnd)
+    return cmpfr.mpfr_set_str(&rop._value, bytes_s, base, rnd)
 
-def mpfr_strtofr(Mpfr_t rop not None, bytes s, int base, cmpfr.mpfr_rnd_t rnd):
+def mpfr_strtofr(Mpfr_t rop not None, object s, int base, cmpfr.mpfr_rnd_t rnd):
     """
     Read a floating-point number from a string.
 
@@ -476,15 +478,17 @@ def mpfr_strtofr(Mpfr_t rop not None, bytes s, int base, cmpfr.mpfr_rnd_t rnd):
     """
     cdef char* endptr
     cdef char* startptr
+    cdef bytes bytes_s
+    bytes_s = s.encode('ascii')
 
-    startptr = s
+    startptr = bytes_s
 
     check_initialized(rop)
     check_base(base, True)
     check_rounding_mode(rnd)
     ternary = cmpfr.mpfr_strtofr(
         &rop._value,
-        s,
+        bytes_s,
         &endptr,
         base,
         rnd,
@@ -652,11 +656,11 @@ def mpfr_get_str(int b, size_t n, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     # It's possible for the conversion from c_digits to digits to raise, so use
     # a try-finally block to ensure that c_digits always gets freed.
     try:
-        digits = str(c_digits)
+        digits = bytes(c_digits)
     finally:
         cmpfr.mpfr_free_str(c_digits)
 
-    return digits, exp
+    return digits.decode('ascii'), exp
 
 def mpfr_fits_slong_p(Mpfr_t x not None, cmpfr.mpfr_rnd_t rnd):
     """
@@ -2221,7 +2225,7 @@ def mpfr_print_rnd_mode(cmpfr.mpfr_rnd_t rnd):
 
     """
     check_rounding_mode(rnd)
-    return cmpfr.mpfr_print_rnd_mode(rnd)
+    return cmpfr.mpfr_print_rnd_mode(rnd).decode('ascii')
 
 
 ###############################################################################
@@ -2365,13 +2369,13 @@ def mpfr_get_version():
     Return the MPFR version, as a string.
 
     """
-    return cmpfr.mpfr_get_version()
+    return cmpfr.mpfr_get_version().decode('ascii')
 
 MPFR_VERSION = cmpfr.MPFR_VERSION
 MPFR_VERSION_MAJOR = cmpfr.MPFR_VERSION_MAJOR
 MPFR_VERSION_MINOR = cmpfr.MPFR_VERSION_MINOR
 MPFR_VERSION_PATCHLEVEL = cmpfr.MPFR_VERSION_PATCHLEVEL
-MPFR_VERSION_STRING = cmpfr.MPFR_VERSION_STRING
+MPFR_VERSION_STRING = cmpfr.MPFR_VERSION_STRING.decode('ascii')
 
 def MPFR_VERSION_NUM(int major, int minor, int patchlevel):
     """
