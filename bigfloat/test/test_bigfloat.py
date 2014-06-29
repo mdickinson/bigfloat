@@ -114,7 +114,7 @@ def diffBigFloat(x, y, match_precisions=True):
     if is_nan(x) or is_nan(y):
         if not (is_nan(x) and is_nan(y)):
             return ("One of %r and %r is a nan, but the other is not." %
-                      (x, y))
+                    (x, y))
         else:
             return None
 
@@ -454,7 +454,7 @@ class BigFloatTests(unittest.TestCase):
 
     def test_creation_from_float(self):
         test_values = [-12.3456, float('-0.0'), float('0.0'), 5e-310, -1e308,
-                        float('nan'), float('inf'), float('-inf')]
+                       float('nan'), float('inf'), float('-inf')]
         test_precisions = [2, 20, 53, 2000]
         for value in test_values:
             for p in test_precisions:
@@ -609,7 +609,7 @@ class BigFloatTests(unittest.TestCase):
 
     def test_exact_creation_from_float(self):
         test_values = [-12.3456, float('-0.0'), float('0.0'), 5e-310, -1e308,
-                        float('nan'), float('inf'), float('-inf')]
+                       float('nan'), float('inf'), float('-inf')]
         test_precisions = [2, 20, 53, 2000]
         for value in test_values:
             for p in test_precisions:
@@ -776,7 +776,7 @@ class BigFloatTests(unittest.TestCase):
             ('NaN', 24, 'NaN'),
             ('NaN', 53, 'NaN'),
             ('NaN', 100, 'NaN'),
-            #('-NaN', 10, '-NaN'),
+            # ('-NaN', 10, '-NaN'),
             ('Inf', 2, 'Infinity'),
             ('-Inf', 10, '-Infinity'),
             ('0', 53, '0'),
@@ -1328,11 +1328,11 @@ class FlagTests(unittest.TestCase):
         # Clear all flags.
         set_flagstate(set())
         self.assertEqual(get_flagstate(), set())
-        x = BigFloat(2) / BigFloat(0)
+        BigFloat(2) / BigFloat(0)
         self.assertEqual(get_flagstate(), set([ZeroDivision]))
         # Flag should be sticky, so after a simple exact operation, it
         # should still be set.
-        y = BigFloat(1) * BigFloat(3)
+        BigFloat(1) * BigFloat(3)
         self.assertEqual(get_flagstate(), set([ZeroDivision]))
 
 

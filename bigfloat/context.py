@@ -58,7 +58,7 @@ class Context(object):
                              "%d <= emax <= %d" % (EMAX_MIN, EMAX_MAX))
         if rounding is not None:
             rounding = RoundingMode(rounding)
-        if subnormalize is not None and not subnormalize in [False, True]:
+        if subnormalize is not None and subnormalize not in [False, True]:
             raise ValueError("subnormalize should be either False or True")
         self = object.__new__(cls)
         self._precision = precision
@@ -76,16 +76,16 @@ class Context(object):
 
         return Context(
             precision=(other.precision
-                         if other.precision is not None
-                         else self.precision),
+                       if other.precision is not None
+                       else self.precision),
             emin=other.emin if other.emin is not None else self.emin,
             emax=other.emax if other.emax is not None else self.emax,
             subnormalize=(other.subnormalize
-                            if other.subnormalize is not None
-                            else self.subnormalize),
+                          if other.subnormalize is not None
+                          else self.subnormalize),
             rounding=(other.rounding
-                        if other.rounding is not None
-                        else self.rounding),
+                      if other.rounding is not None
+                      else self.rounding),
             )
 
     def __eq__(self, other):
@@ -279,9 +279,11 @@ def _apply_function_in_context(cls, f, args, context):
 
             # if bf is zero but ternary is nonzero, the underflow
             # flag will already have been set by mpfr_check_range;
-            if (mpfr.mpfr_number_p(bf) and
+            underflow = (
+                mpfr.mpfr_number_p(bf) and
                 not mpfr.mpfr_zero_p(bf) and
-                mpfr.mpfr_get_exp(bf) < context.precision - 1 + context.emin):
+                mpfr.mpfr_get_exp(bf) < context.precision - 1 + context.emin)
+            if underflow:
                 mpfr.mpfr_set_underflow()
             ternary = mpfr.mpfr_subnormalize(bf, ternary, rounding)
             if ternary:
