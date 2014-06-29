@@ -17,7 +17,7 @@
 
 import contextlib as _contextlib
 
-import bigfloat.mpfr as mpfr
+import mpfr
 
 from bigfloat.rounding_mode import (
     RoundingMode,

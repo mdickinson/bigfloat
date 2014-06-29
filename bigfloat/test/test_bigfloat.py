@@ -1349,7 +1349,7 @@ def mpfr_set_str2(rop, s, base, rnd):
     If s is not a valid string for the given base, raise ValueError.
 
     """
-    import bigfloat.mpfr as mpfr
+    import mpfr
 
     if s == s.strip():
         ternary, endindex = mpfr.mpfr_strtofr(rop, s, base, rnd)
@@ -1363,7 +1363,7 @@ def _fromhex_exact(value):
     # private low-level version of fromhex that always does an exact
     # conversion.  Avoids using any heavy machinery (contexts, function
     # wrapping), since its main use is in the testing of that machinery.
-    import bigfloat.mpfr as mpfr
+    import mpfr
     from bigfloat.core import ROUND_TIES_TO_EVEN
 
     precision = len(value) * 4

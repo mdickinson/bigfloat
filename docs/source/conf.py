@@ -19,7 +19,8 @@ import os
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-#sys.path.insert(0, os.path.abspath('.'))
+package_dir = os.path.abspath(os.path.join(os.path.pardir, os.path.pardir))
+sys.path.insert(0, package_dir)
 
 # -- General configuration ------------------------------------------------
 
@@ -134,7 +135,7 @@ html_theme = 'default'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+#html_static_path = ['_static']
 
 # Add any extra paths that contain custom files (such as robots.txt or
 # .htaccess) here, relative to this directory. These files are copied
@@ -269,8 +270,55 @@ texinfo_documents = [
 intersphinx_mapping = {'http://docs.python.org/': None}
 
 
+# Workaround for failing PDF build due to a Unicode minus sign.
 def setup(app):
     from sphinx.util.texescape import tex_replacements
     tex_replacements.append(
         (u'\u2212', u'-'),
     )
+
+
+class MockMpfr(object):
+    MPFR_RNDN = 0
+
+    MPFR_RNDZ = 1
+
+    MPFR_RNDU = 2
+
+    MPFR_RNDD = 3
+
+    MPFR_RNDA = 4
+
+    MPFR_EMIN_DEFAULT = -1073741823
+
+    MPFR_EMAX_DEFAULT = 1073741823
+
+    MPFR_PREC_MIN = 2
+
+    MPFR_PREC_MAX = 9223372036854775807
+
+    Mpfr_t = object
+
+    MPFR_VERSION_MAJOR = 3
+
+    MPFR_VERSION_MINOR = 1
+
+    def mpfr_get_emin_max(self):
+        return 4611686018427387903
+
+    def mpfr_get_emax_min(self):
+        return -4611686018427387903
+
+    def mpfr_set_emin(self, precision):
+        pass
+
+    def mpfr_set_emax(self, precision):
+        pass
+
+    def __getattr__(self, name):
+        return None
+
+
+# For the doc build, replace 'mpfr' extension module with a dummy
+# object.
+sys.modules['mpfr'] = MockMpfr()

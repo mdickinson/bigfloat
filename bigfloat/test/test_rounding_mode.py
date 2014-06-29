@@ -21,7 +21,7 @@ if sys.version_info < (2, 7):
 else:
     import unittest
 
-import bigfloat.mpfr as mpfr
+import mpfr as mpfr
 from bigfloat.rounding_mode import (
     RoundingMode,
     ROUND_TIES_TO_EVEN,

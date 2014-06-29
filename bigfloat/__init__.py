@@ -167,7 +167,7 @@ from bigfloat.core import (
 
 )
 
-from bigfloat.mpfr import (
+from mpfr import (
     # MPFR Version information
     MPFR_VERSION,
     MPFR_VERSION_MAJOR,

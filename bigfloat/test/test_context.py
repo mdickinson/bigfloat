@@ -29,7 +29,7 @@ from bigfloat.context import (
 
     _temporary_exponent_bounds,
 )
-import bigfloat.mpfr as mpfr
+import mpfr
 from bigfloat.rounding_mode import (
     ROUND_TIES_TO_EVEN,
     ROUND_TOWARD_ZERO,

@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with the bigfloat package.  If not, see <http://www.gnu.org/licenses/>.
 
-from bigfloat.mpfr import (
+from mpfr import (
     MPFR_RNDN,
     MPFR_RNDZ,
     MPFR_RNDU,

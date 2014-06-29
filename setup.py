@@ -177,7 +177,7 @@ setup(
     license='GNU Library or Lesser General Public License (LGPL)',
     ext_modules=[
         Extension(
-            "bigfloat.mpfr",
+            "mpfr",
             ["src/mpfr.pyx"],
             libraries=['mpfr', 'gmp'],
         ),
