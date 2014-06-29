@@ -1,8 +1,26 @@
-Copyright 2009--2011 Mark Dickinson
+.. image:: https://travis-ci.org/mdickinson/bigfloat.svg?branch=master
+   :alt: Status of most recent Travis CI run
+   :target: https://travis-ci.org/mdickinson/bigfloat
+
+
+The bigfloat package
+--------------------
 
 The bigfloat package is a Python package providing arbitrary-precision
 correctly-rounded floating-point arithmetic.  It's implemented as a wrapper
-around the MPFR library (http://www.mpfr.org).
+around the `MPFR library <mpfr library_>`_.
+
+For installation instructions, please see the separate INSTALL file.
+
+Feedback is welcome!  Please use the `GitHub issue tracker <tracker_>`_ to
+report issues.  Alternatively, you can contact Mark Dickinson directly at
+dickinsm@gmail.com with suggestions, complaints, bug reports, etc.
+
+
+License
+-------
+
+Copyright 2009--2011 Mark Dickinson
 
 The bigfloat package is free software: you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -17,7 +35,6 @@ for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with the bigfloat package.  If not, see <http://www.gnu.org/licenses/>.
 
-For installation instructions, please see the separate INSTALL file.
 
-Feedback is welcome!  Please contact Mark Dickinson at
-dickinsm@gmail.com with suggestions, complaints, bug reports, etc.
+.. _mpfr library: http://www.mpfr.org
+.. _tracker: https://github.com/mdickinson/bigfloat/issues
