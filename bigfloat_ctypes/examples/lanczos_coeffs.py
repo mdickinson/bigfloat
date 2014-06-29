@@ -91,7 +91,7 @@ def H(g, j):
 def b(j, N):
     assert 0 <= j <= N-1
     coeffs = [1]
-    facs = range(j, N-1) + range(-1, -j-1, -1)
+    facs = list(range(j, N-1)) + list(range(-1, -j-1, -1))
     for i in facs:
         # multiply by (z+i)
         times_z = [0] + coeffs
@@ -142,10 +142,10 @@ g = bigfloat.BigFloat(6.024680040776729583740234375)
 N = 13
 
 with bigfloat.precision(p):
-    print "Numerator coefficients:"
+    print("Numerator coefficients:")
     for c in Lg_num_coeffs(g, N):
-        print c
+        print(c)
 
-    print "Denominator coefficients:"
+    print("Denominator coefficients:")
     for c in Lg_den_coeffs(g, N):
-        print c
+        print(c)
