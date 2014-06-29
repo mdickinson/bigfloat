@@ -6,6 +6,7 @@ install:
   - sudo apt-get update
   - sudo apt-get install libmpfr-dev
   - if [[ $TRAVIS_PYTHON_VERSION == '2.6' ]]; then pip install unittest2; fi
+  - pip install Cython
 script:
   - python setup.py build_ext --inplace
   - if [[ $TRAVIS_PYTHON_VERSION == '2.6' ]]; then unit2 discover -v; else python -m unittest discover -v; fi
