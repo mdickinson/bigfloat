@@ -15,8 +15,6 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with the bigfloat package.  If not, see <http://www.gnu.org/licenses/>.
 
-# For Python 2.5
-
 
 # Standard library imports
 import doctest
