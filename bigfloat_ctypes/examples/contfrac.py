@@ -34,7 +34,8 @@ We compare our results with those computed by Paul Zimmerman.
 
 from fractions import Fraction
 from bigfloat import log2, div, precision, next_up
-from bigfloat import RoundTowardPositive, RoundTowardNegative, RoundTiesToEven
+from bigfloat import RoundTowardPositive, RoundTowardNegative
+
 
 def semiconvergents(x):
     """Semiconvergents of continued fraction expansion of a Fraction x."""
@@ -48,6 +49,7 @@ def semiconvergents(x):
             p0, q0 = p0+p1, q0+q1
             yield Fraction(p0, q0)
         p0, q0, p1, q1 = p1, q1, p0, q0
+
 
 def logn2(n, p):
     """Best p-bit lower and upper bounds for log(2)/log(n), as Fractions."""
@@ -81,7 +83,8 @@ for n in all_n:
     # of the two lists.
     l, u = logn2(n, 100)  # 100 seems to be big enough
     for lc, uc in zip(semiconvergents(l), semiconvergents(u)):
-        if lc != uc: raise RuntimeError("not enough semiconvergents")
+        if lc != uc:
+            raise RuntimeError("not enough semiconvergents")
         if u <= lc < approx:
             marks_results[n] = lc.denominator
             break
@@ -113,4 +116,5 @@ print("{0:4s} {1:15s}".format("base", "precision"))
 print("{0:4s} {1:15s}".format("====", "==============="))
 for b, n in sorted(marks_results.items()):
     print("{0:4d} {1:15d}".format(b, n))
-print("Results match Paul Zimmerman's: {0}".format(marks_results == pauls_results))
+results_match = marks_results == pauls_results
+print("Results match Paul Zimmerman's: {0}".format(results_match))
