@@ -56,7 +56,7 @@
 # absorbing the (2j)!/j!/2**(2j) from F(g, j) gives:
 #            = (-1)**(j+k) (k+j-1)! * k / (k-j)! / j!
 
-# Okay, so that works in 
+# Okay, so that works in
 
 
 # F(g, j) = sqrt(2)/pi * (j-1/2)!*(j+g+1/2)^-(j+1/2)*exp(j+g+1/2)
@@ -72,6 +72,7 @@ from math import factorial
 import bigfloat
 from bigfloat import exp
 
+
 def M(k, j):
     # returns an integer, the combinatorial coefficient in the
     # Lanczos formula.
@@ -85,13 +86,15 @@ def M(k, j):
     assert top % bottom == 0
     return top // bottom
 
+
 def H(g, j):
     return exp(j+g+0.5) / (j+g+0.5)**(j+0.5)
+
 
 def b(j, N):
     assert 0 <= j <= N-1
     coeffs = [1]
-    facs = range(j, N-1) + range(-1, -j-1, -1)
+    facs = list(range(j, N-1)) + list(range(-1, -j-1, -1))
     for i in facs:
         # multiply by (z+i)
         times_z = [0] + coeffs
@@ -100,9 +103,10 @@ def b(j, N):
     assert len(coeffs) == N
     return coeffs
 
+
 def Lg_num_coeffs(g, N):
     B = [b(j, N) for j in range(N)]
-    MM = [[(M(k, j) if k == 0 else 2*M(k,j))
+    MM = [[(M(k, j) if k == 0 else 2*M(k, j))
            for j in range(N)] for k in range(N)]
     # BTM has only integer entries
     BTM = [[sum(B[k][l] * MM[k][j] for k in range(N))
@@ -112,8 +116,10 @@ def Lg_num_coeffs(g, N):
     coeffs = [sum(BTM[i][j] * HH[j] for j in range(N)) for i in range(N)]
     return coeffs
 
+
 def Lg_den_coeffs(g, N):
     return b(0, N)
+
 
 def L(g, z, N):
     num_coeffs = Lg_num_coeffs(g, N)
@@ -127,6 +133,7 @@ def L(g, z, N):
         den = den * z + c
     return num/den
 
+
 def gamma(z, g, N):
     return (z+g-0.5)**(z-0.5) / exp(z+g-0.5) * L(g, z, N)
 
@@ -137,15 +144,15 @@ def gamma(z, g, N):
 # b(j, N)[k] is the coefficient of p_j z^k in the numerator.
 # except: b(0, N)[k] is the coefficient of p_0/2 z^k in the numerator.
 
-p = 300 # bits of precision to use for computation
+p = 300  # bits of precision to use for computation
 g = bigfloat.BigFloat(6.024680040776729583740234375)
 N = 13
 
 with bigfloat.precision(p):
-    print "Numerator coefficients:"
+    print("Numerator coefficients:")
     for c in Lg_num_coeffs(g, N):
-        print c
+        print(c)
 
-    print "Denominator coefficients:"
+    print("Denominator coefficients:")
     for c in Lg_den_coeffs(g, N):
-        print c
+        print(c)
