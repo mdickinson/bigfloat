@@ -146,7 +146,7 @@ Links
 -----
 
 * `Package documentation <http://packages.python.org/bigfloat/>`_
-* `Project homepage at bitbucket <http://bitbucket.org/dickinsm/bigfloat/>`_
+* `Project homepage at GitHub <http://github.com/mdickinson/bigfloat/>`_
 
 
 """
@@ -161,7 +161,7 @@ setup(
     long_description=LONG_DESCRIPTION,
     author='Mark Dickinson',
     author_email='dickinsm@gmail.com',
-    url='http://bitbucket.org/dickinsm/bigfloat',
+    url='http://github.com/mdickinson/bigfloat',
     cmdclass={'build_ext': build_ext},
     classifiers=[
         'Development Status :: 3 - Alpha',

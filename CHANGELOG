@@ -10,6 +10,13 @@ Library
 - Python 3.2 and later are now supported.  Python 2 support requires Python 2.6
   or later.
 
+Miscellaneous
+-------------
+
+- Development moved from bitbucket (https://bitbucket.org/dickinsm/bigfloat)
+  to GitHub (https://github.com/mdickinson/bigfloat), and repository
+  converted from mercurial to Git.
+
 
 What's new in bigfloat 0.3.0a2?
 ===============================

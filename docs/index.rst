@@ -67,8 +67,8 @@ Where to get it
 The latest released version of the :mod:`bigfloat` package can be
 downloaded from its place at the `Python Package Index
 <http://pypi.python.org/pypi/bigfloat/>`_.  Development sources can be
-checked out from the project's `bitbucket page
-<http://bitbucket.org/dickinsm/bigfloat>`_.
+checked out from the project's `GitHub page
+<http://github.com/mdickinson/bigfloat>`_.
 
 Prerequisites
 ^^^^^^^^^^^^^

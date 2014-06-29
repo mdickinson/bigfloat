@@ -15,7 +15,7 @@ Steps to make a release of this package
 
     make upload
 
-* Also, optionally, add the distribution file to the bitbucket site.
+* Also, optionally, add the distribution file to the GitHub site.
 
 This requires being identified with the server, e.g., with
 
