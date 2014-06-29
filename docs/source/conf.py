@@ -267,3 +267,10 @@ texinfo_documents = [
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {'http://docs.python.org/': None}
+
+
+def setup(app):
+    from sphinx.util.texescape import tex_replacements
+    tex_replacements.append(
+        (u'\u2212', u'-'),
+    )
