@@ -33,7 +33,6 @@ We compare our results with those computed by Paul Zimmerman.
 """
 
 from fractions import Fraction
-from itertools import izip
 from bigfloat import log2, div, precision, next_up
 from bigfloat import RoundTowardPositive, RoundTowardNegative, RoundTiesToEven
 
@@ -45,7 +44,7 @@ def semiconvergents(x):
     p0, q0, p1, q1 = 1, 0, q, 1
     while n:
         (q, n), d = divmod(d, n), n
-        for _ in xrange(q):
+        for _ in range(q):
             p0, q0 = p0+p1, q0+q1
             yield Fraction(p0, q0)
         p0, q0, p1, q1 = p1, q1, p0, q0
@@ -72,7 +71,7 @@ def logn2(n, p):
             extra += 10
 
 marks_results = {}
-all_n = [n for n in xrange(3, 63) if n & (n-1)]
+all_n = [n for n in range(3, 63) if n & (n-1)]
 for n in all_n:
     # 76-bit upper approximation used for the computation of m
     approx = logn2(n, 76)[1]
@@ -81,7 +80,7 @@ for n in all_n:
     # find semiconvergents of those, then use the matching initial portions
     # of the two lists.
     l, u = logn2(n, 100)  # 100 seems to be big enough
-    for lc, uc in izip(semiconvergents(l), semiconvergents(u)):
+    for lc, uc in zip(semiconvergents(l), semiconvergents(u)):
         if lc != uc: raise RuntimeError("not enough semiconvergents")
         if u <= lc < approx:
             marks_results[n] = lc.denominator
@@ -111,5 +110,5 @@ pauls_results = dict(map(int, piece.split(','))
                      for piece in line.split('&'))
 
 for b, n in sorted(marks_results.items()):
-    print b, n
-print "Results match Paul Zimmerman's: ", marks_results == pauls_results
+    print(b, n)
+print("Results match Paul Zimmerman's: ", marks_results == pauls_results)
