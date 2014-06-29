@@ -22,7 +22,7 @@ if sys.version_info < (2, 7):
 else:
     import unittest
 
-from bigfloat.mpfr import (
+from mpfr import (
     _LONG_MIN, _LONG_MAX,
 
     MPFR_RNDN, MPFR_RNDZ, MPFR_RNDU, MPFR_RNDD, MPFR_RNDA,

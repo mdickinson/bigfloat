@@ -23,7 +23,7 @@
 import sys as _sys
 import contextlib as _contextlib
 
-import bigfloat.mpfr as mpfr
+import mpfr
 
 from bigfloat.rounding_mode import (
     ROUND_TIES_TO_EVEN,
