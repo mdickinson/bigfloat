@@ -823,12 +823,15 @@ _flag_translate = {
     'divby0': ZeroDivision,
 }
 
-_clear_flag_fns = dict((v, getattr(mpfr, 'mpfr_clear_' + k))
-                      for k, v in _flag_translate.items())
-_set_flag_fns = dict((v, getattr(mpfr, 'mpfr_set_' + k))
-                    for k, v in _flag_translate.items())
-_test_flag_fns = dict((v, getattr(mpfr, 'mpfr_' + k + '_p'))
-                     for k, v in _flag_translate.items())
+_clear_flag_fns = dict(
+    (v, getattr(mpfr, 'mpfr_clear_' + k))
+    for k, v in _flag_translate.items())
+_set_flag_fns = dict(
+    (v, getattr(mpfr, 'mpfr_set_' + k))
+    for k, v in _flag_translate.items())
+_test_flag_fns = dict(
+    (v, getattr(mpfr, 'mpfr_' + k + '_p'))
+    for k, v in _flag_translate.items())
 
 
 def test_flag(f):
