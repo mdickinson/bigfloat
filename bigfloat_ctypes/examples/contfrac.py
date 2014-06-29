@@ -109,6 +109,8 @@ pauls_results = dict(map(int, piece.split(','))
                      for line in check_values.rstrip('\\\n').split(r'\\')
                      for piece in line.split('&'))
 
+print("{0:4s} {1:15s}".format("base", "precision"))
+print("{0:4s} {1:15s}".format("====", "==============="))
 for b, n in sorted(marks_results.items()):
-    print(b, n)
-print("Results match Paul Zimmerman's: ", marks_results == pauls_results)
+    print("{0:4d} {1:15d}".format(b, n))
+print("Results match Paul Zimmerman's: {0}".format(marks_results == pauls_results))
