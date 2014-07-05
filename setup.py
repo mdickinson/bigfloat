@@ -19,8 +19,7 @@
 
 from distutils.core import setup
 from distutils.extension import Extension
-
-from Cython.Distutils import build_ext
+import os
 
 
 DESCRIPTION = """\
@@ -150,6 +149,31 @@ Links
 
 
 """
+# During package development, we want to use Cython, but the distributed
+# egg shouldn't use Cython.  We use the presence of PKG-INFO to determine
+# which of these is true.
+if os.path.exists('PKG-INFO'):
+    USE_CYTHON = False
+else:
+    USE_CYTHON = True
+
+
+if USE_CYTHON:
+    from Cython.Build import cythonize
+    extensions = cythonize(
+        Extension(
+            "mpfr", ["mpfr.pyx"],
+            libraries=['mpfr', 'gmp'],
+        )
+    )
+else:
+    extensions = [
+        Extension(
+            "mpfr", ["mpfr.c"],
+            libraries=['mpfr', 'gmp'],
+        ),
+    ]
+
 
 setup(
     # Name should really be capitalized as 'BigFloat'.  We keep 'bigfloat' to
@@ -162,7 +186,6 @@ setup(
     author='Mark Dickinson',
     author_email='dickinsm@gmail.com',
     url='http://github.com/mdickinson/bigfloat',
-    cmdclass={'build_ext': build_ext},
     classifiers=[
         'Development Status :: 3 - Alpha',
         'License :: OSI Approved :: '
@@ -175,13 +198,7 @@ setup(
         'OS X',
     ],
     license='GNU Library or Lesser General Public License (LGPL)',
-    ext_modules=[
-        Extension(
-            "mpfr",
-            ["src/mpfr.pyx"],
-            libraries=['mpfr', 'gmp'],
-        ),
-    ],
+    ext_modules=extensions,
     packages=[
         'bigfloat',
         'bigfloat.test',
