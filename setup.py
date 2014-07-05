@@ -180,7 +180,7 @@ setup(
     # avoid upload problems on PyPI.  (Previous versions of the package were
     # also called bigfloat.)
     name='bigfloat',
-    version='0.3.0a2',
+    version='0.3.0a3',
     description=DESCRIPTION,
     long_description=LONG_DESCRIPTION,
     author='Mark Dickinson',
