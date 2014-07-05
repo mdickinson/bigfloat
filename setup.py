@@ -28,39 +28,57 @@ Arbitrary precision correctly-rounded floating point arithmetic, via MPFR.\
 
 LONG_DESCRIPTION = """\
 The ``bigfloat`` package is a Python package providing arbitrary-precision
-correctly-rounded binary floating-point arithmetic.  It is currently
-implemented as a Python extension module (generated using Cython) around the
-MPFR library (http://www.mpfr.org).
+correctly-rounded binary floating-point arithmetic.  It is implemented as a
+Cython wrapper around the `GNU MPFR library <http://www.mpfr.org>`_.  A couple
+of lines of Python code should give the idea::
+
+    >>> from bigfloat import *
+    >>> with precision(200) + RoundTowardZero:
+    ...     print(sqrt(2))
+    ...
+    1.4142135623730950488016887242096980785696718753769480731766796
+    >>> with quadruple_precision:
+    ...     const_pi()
+    ...
+    BigFloat.exact('3.14159265358979323846264338327950280', precision=113)
 
 Features
 --------
 
-- supports Python 2 (>= 2.6) and Python 3 (>= 3.2).
+- Supports Python 2 (version 2.6 or later) and Python 3 (version 3.2 or later).
 
-- correct rounding on all operations;  precisely defined semantics
+- Correct rounding on all operations;  precisely defined semantics
   compatible with the IEEE 754-2008 standard.
 
-- support for mixed-type operations with Python integers and floats
+- Support for mixed-type operations with Python integers and floats.
 
-- support for emulating IEEE 754 arithmetic in any of the IEEE binary
+- Support for emulating IEEE 754 arithmetic in any of the IEEE binary
   interchange formats described in IEEE 754-2008.  Infinities, NaNs,
   signed zeros, and subnormals are all supported.
 
-- easy control of rounding modes and precisions, via Python's 'with'
+- Easy control of rounding modes and precisions via Python's ``with``
   statement.
+
+
+Documentation
+-------------
+
+`Package documentation <http://bigfloat.readthedocs.org>`_ is hosted at Read
+the Docs.
+
 
 A quick tour
 ------------
 
 The ``bigfloat`` module is small and simple to use.  Here's a quick
 tour of some of its features.  See the `full tutorial and reference
-documentation <http://bigfloat.rtfd.org>`_ for more details.
+documentation <http://bigfloat.readthedocs.org>`_ for more details.
 
 For demonstration purposes, start with::
 
     >>> from bigfloat import *
 
-Note that this import shadows some builtin Python functions, namely
+Note that this import shadows four builtin Python functions, namely
 ``abs``, ``max``, ``min`` and ``pow``.  In normal usage you'll
 probably only want to import the classes and functions that you
 actually need.
@@ -142,11 +160,50 @@ formats are predefined::
     BigFloat.exact('0.69336', precision=11)
 
 
+Installation
+------------
+
+The ``bigfloat`` package is `available on the Python package index
+<https://pypi.python.org/pypi/bigfloat>`_, and can be installed in the usual
+way using ``easy_install`` or ``pip``.  Alternatively, the development sources
+may be downloaded from the project's `homepage
+<https:/github.com/mdickinson/bigfloat>`_ on GitHub.
+
+For more comprehensive installation instructions, please see the `full
+documentation <http://bigfloat.readthedocs.org/en/latest/#installation>`_.
+
+Feedback
+--------
+
+Feedback is welcome!  Please use the `GitHub issue tracker
+<https://github.com/mdickinson/bigfloat/issues>`_ to report issues.
+Alternatively, you can contact Mark Dickinson directly at dickinsm@gmail.com
+with suggestions, complaints, bug reports, etc.
+
+License
+-------
+
+The bigfloat package is copyright (C) 2009–2014 Mark Dickinson
+
+The bigfloat package is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 3 of the License, or (at your
+option) any later version.
+
+The bigfloat package is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License
+for more details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with the bigfloat package.  If not, see <http://www.gnu.org/licenses/>.
+
 Links
 -----
-* `Documentation at Read the Docs <http://bigfloat.rtfd.org>`_
-* `Project homepage at GitHub <http://github.com/mdickinson/bigfloat/>`_
-
+- `Documentation at Read the Docs <http://bigfloat.readthedocs.org>`_
+- `Python package index <https://pypi.python.org/pypi/bigfloat>`_
+- `Project homepage at GitHub <https://github.com/mdickinson/bigfloat>`_
+- `Issue tracker <https://github.com/mdickinson/bigfloat/issues>`_
 """
 # During package development, we want to use Cython, but the distributed
 # egg shouldn't use Cython.  We use the presence of PKG-INFO to determine
