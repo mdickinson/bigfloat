@@ -45,8 +45,8 @@ Notes on creating a release.  These notes apply my own system, currently OS X
 
 7. Building docs to upload to PyPI.  In the docs directory, do::
 
-       LIBRARY_PATH=/opt/local/lib CPATH=/opt/local/include make html
-       cd docs/_build/html
+       make html
+       cd build/html
        zip -r bigfloat_docs.zip *
        mv -i bigfloat_docs.zip ~/Desktop
 
@@ -54,7 +54,9 @@ Notes on creating a release.  These notes apply my own system, currently OS X
 
        http://pypi.python.org/pypi?%3Aaction=pkg_edit&name=bigfloat
 
-   and upload the documentation from there.
+   and upload the documentation from there.  The documentation is uploaded
+   to http://pythonhosted.org/bigfloat.
+
 
 Post-release
 ============
