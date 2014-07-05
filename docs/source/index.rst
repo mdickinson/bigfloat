@@ -121,14 +121,12 @@ already installed it and its prerequisites) with:
 
    >>> from bigfloat import *
 
-This import brings a fairly large number of functions into the current
-namespace, and clobbers some builtin Python functions: ``abs``,
-``max``, ``min`` and ``pow``.  In normal usage you'll probably only
-want to import the classes and functions that you actually need.
+You should be a little bit careful here: this import brings a fairly large
+number of functions into the current namespace, four of which shadow existing
+Python builtins, namely ``abs``, ``max``, ``min`` and ``pow``.  In normal usage
+you'll probably only want to import the classes and functions that you actually
+need.
 
-If you're using Python 2.5 you'll also need to do:
-
-   >>> from __future__ import with_statement
 
 :class:`BigFloat` construction
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -227,7 +225,7 @@ the current context is to use Python's with statement.  More on this below.
 Note that (in contrast to Python's standard library decimal module),
 :class:`Context` instances are immutable.
 
-There's also a second method for constructing :class:`BigFloat`
+There's a second method for constructing :class:`BigFloat`
 instances: :meth:`BigFloat.exact`.  Just like the usual constructor,
 :meth:`BigFloat.exact` accepts integers, floats and strings.  However,
 for integers and floats it performs an exact conversion, creating a
