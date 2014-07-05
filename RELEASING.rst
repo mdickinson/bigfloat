@@ -43,7 +43,7 @@ Notes on creating a release.  These notes apply my own system, currently OS X
 
 7. Building docs to upload to PyPI:
 
-   Again in the bigfloat_cython directory, do:
+   In the docs directory, do:
 
        LIBRARY_PATH=/opt/local/lib CPATH=/opt/local/include make html
        cd docs/_build/html
