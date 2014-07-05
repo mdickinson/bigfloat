@@ -4,7 +4,8 @@ Prerequisites
 This package requires Python 2.6 or later.  The `MPFR <mpfr library_>`_ and
 `GMP <gmp library_>`_ libraries will need to be already installed on your
 system, along with any necessary development headers for both of those
-libraries.  On Linux, look for a package named something like ``libmpfr-dev``.
+libraries.  On Linux, look for a package named something like ``libmpfr-dev``
+or ``mpfr-devel``, and corresponding packages for GMP.
 
 
 Installation from a repository clone
@@ -53,49 +54,49 @@ Installation from a distribution tarball
 ----------------------------------------
 
 We'll assume that you've downloaded a tarball whose name is something like
-"bigfloat-0.3.0a2.tar.gz".  The exact version number may differ; just
-substitute the real version number everywhere that "0.3.0a2" appears in what
+``bigfloat-0.3.0a2.tar.gz``.  The exact version number may differ; just
+substitute the real version number everywhere that ``0.3.0a2`` appears in what
 follows.
 
-(1) Unpack the tarball with something like:
+(1) Unpack the tarball with something like::
 
-  tar -zxvf bigfloat-0.3.0a2.tar.gz
+        tar -zxvf bigfloat-0.3.0a2.tar.gz
 
-This should create a directory bigfloat-0.3.0a2/ containing a setup.py
-script and the rest of the bigfloat source.
+    This should create a directory ``bigfloat-0.3.0a2`` containing a
+    ``setup.py`` script and the rest of the bigfloat source.
 
-(2) Enter the created directory, and execute the command
+(2) Enter the created directory, and execute the command::
 
-  python setup.py install
+        python setup.py install
 
-from the bigfloat-0.3.0a2/ directory.  For a site-wide installation, you may
-need to become superuser, or use the 'sudo' command.  You can also build and
-install in two separate steps:
+    from the ``bigfloat-0.3.0a2`` directory.  For a site-wide installation, you
+    may need to become superuser, or use the 'sudo' command.  You can also
+    build and install in two separate steps::
 
-  python setup.py build
-  sudo python setup.py install
+        python setup.py build
+        sudo python setup.py install
 
-For this to work, the MPFR and GMP libraries must already be installed on your
-system (complete with any necessary header files: on Linux, look for a packages
-called 'mpfr-devel' and 'gmp-devel').  If the libraries or include files are
-found in an unusual place, you may need to modify environment variables so that
-the setup command can find the necessary header files.
+    For this to work, the MPFR and GMP libraries must already be installed on
+    your system (complete with any necessary header files: on Linux, look for a
+    packages called 'mpfr-devel' and 'gmp-devel').  If the libraries or include
+    files are found in an unusual place, you may need to modify environment
+    variables so that the setup command can find the necessary header files.
 
-An example: on Mac OS X, using the system Python, but with MPFR and GMP
-installed in /opt/local (e.g., by MacPorts), one can do:
+    An example: on Mac OS X, using the system Python, but with MPFR and GMP
+    installed in /opt/local (e.g., by MacPorts), one can do::
 
-    LIBRARY_PATH=/opt/local/lib CPATH=/opt/local/include python setup.py build
+        LIBRARY_PATH=/opt/local/lib CPATH=/opt/local/include python setup.py build
 
-Alternatively, the include and library directories can be supplied to the
-build_ext command:
+    Alternatively, the include and library directories can be supplied to the
+    build_ext command::
 
-    python setup.py build_ext -I /opt/local/include -L/opt/local/lib
+        python setup.py build_ext -I /opt/local/include -L/opt/local/lib
 
-(3) (Optional).  Test the installation by doing:
+(3) (Optional).  Test the installation by doing::
 
-  python -m bigfloat.test.test_bigfloat
+      python -m bigfloat.test.test_bigfloat
 
-If installation was successful, the bigfloat-0.3.0a2/ directory that you
+If installation was successful, the ``bigfloat-0.3.0a2`` directory that you
 created can now be deleted.
 
 

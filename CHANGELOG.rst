@@ -4,11 +4,11 @@ What's new in bigfloat 0.3.0a3?
 Library
 -------
 
-- Added support for the new 'divide-by-zero' flag (exposed as 'ZeroDivision' to
-  bigfloat).
-
 - Python 3.2 and later are now supported.  Python 2 support requires Python 2.6
   or later.
+
+- Added support for the new 'divide-by-zero' flag (exposed as ``ZeroDivision``
+  to bigfloat).
 
 Miscellaneous
 -------------
@@ -31,9 +31,9 @@ What's new in bigfloat 0.3.0a1?
 Prerequisites
 -------------
 
-- For now, Python 2.7 and MPFR version >= 3.0 are required.  Support for earlier
-  versions of Python is planned.  Support for MPFR 2.x will probably not be
-  added.
+- For now, Python 2.7 and MPFR version >= 3.0 are required.  Support for
+  earlier versions of Python is planned.  Support for MPFR 2.x will probably
+  not be added.
 
 
 Library
@@ -42,14 +42,15 @@ Library
 - Major rewrite and restructuring of the core code.  The core now uses Cython
   rather than ctypes.
 
-- mpfr module now separately available as an extension type, with semantics very close
-  to the Mpfr library.
+- mpfr module now separately available as an extension type, with semantics
+  very close to the Mpfr library.
 
-- Added bigfloat support for new rounding mode MPFR_RNDA (round away from zero).
+- Added bigfloat support for new rounding mode MPFR_RNDA (round away from
+  zero).
 
 - Rounding modes are now represented as named integers (instances of
-  RoundingMode, an int subclass), rather than strings.  This allows them to be passed
-  directly to Mpfr functions.
+  RoundingMode, an int subclass), rather than strings.  This allows them to be
+  passed directly to Mpfr functions.
 
 - Fixed a bug that meant old context wasn't restored when changing exponents
   with one valid exponent and one invalid. (eminmax)
@@ -66,7 +67,8 @@ Library
 Documentation
 -------------
 
-- Most of the documentation is now generated automatically using Sphinx's autodoc extension.
+- Most of the documentation is now generated automatically using Sphinx's
+  autodoc extension.
 
 
 What's new in bigfloat 0.2.1?
@@ -92,9 +94,9 @@ Library
   to give a hard-coded location.  Alternatively, ctypes should find the
   library if it's within the usual library search paths.  (If not, it
   might be necessary to set LD_LIBRARY_PATH or DYLD_LIBRARY_PATH.)
-  
-- Use a weakref callback to ensure mpfr_clear gets called, instead of
-  relying on __del__.
+
+- Use a weakref callback to ensure ``mpfr_clear`` gets called, instead of
+  relying on ``__del__``.
 
 - Make bigfloat compatible with versions of MPFR as far back as MPFR 2.3.0
 
@@ -105,11 +107,11 @@ Library
 Tests
 -----
 
-- Skip the hashing consistency tests (those that test whether hash(n)
-  == hash(BigFloat(n) for integers n) on Python 2.5.  In rare cases,
-  this equality fails with Python 2.5, and this is awkward to fix.  If
-  this affects you, upgrade to Python 2.6 or avoid mixing BigFloat
-  instances with ints in sets or dictionary keys.
+- Skip the hashing consistency tests (those that test whether ``hash(n) ==
+  hash(BigFloat(n))`` for integers ``n``) on Python 2.5.  In rare cases, this
+  equality fails with Python 2.5, and this is awkward to fix.  If this affects
+  you, upgrade to Python 2.6 or avoid mixing BigFloat instances with ints in
+  sets or dictionary keys.
 
 
 What's new in bigfloat 0.1.2?
@@ -118,7 +120,7 @@ What's new in bigfloat 0.1.2?
 Library
 -------
 
-- Make Context objects hashable.
+- Make ``Context`` objects hashable.
 
 Documentation
 -------------

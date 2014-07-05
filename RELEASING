@@ -15,8 +15,8 @@ output of 'hg summary').
 
    You might also look at:
 
-      CHANGELOG
-      INSTALL
+      CHANGELOG.rst
+      INSTALL.rst
       RELEASING
 
 2. Tag:
