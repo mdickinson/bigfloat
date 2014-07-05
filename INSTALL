@@ -14,11 +14,11 @@ Installation from a repository clone
 
       $ git clone https://github.com/mdickinson/bigfloat.git
 
-(2) Enter the top-level directory and use ``python setup.py install`` to install,
-    adding paths to the GMP and MPFR include and library files if necessary.
-    Depending on your Python installation, you may need superuser privileges.
-    On my OS X setup, MPFR and GMP are installed in /opt/local (via MacPorts)
-    and the following works::
+(2) Enter the top-level directory and use ``python setup.py install`` to
+    install, adding paths to the GMP and MPFR include and library files if
+    necessary.  Depending on your Python installation, you may need superuser
+    privileges.  On my OS X setup, MPFR and GMP are installed in /opt/local
+    (via MacPorts) and the following works::
 
       $ cd bigfloat
       $ sudo LIBRARY_PATH=/opt/local/lib CPATH=/opt/local/include python setup.py install
@@ -68,8 +68,8 @@ script and the rest of the bigfloat source.
 
   python setup.py install
 
-from the bigfloat-0.3.0a2/ directory.  For a site-wide installation, you may need
-to become superuser, or use the 'sudo' command.  You can also build and
+from the bigfloat-0.3.0a2/ directory.  For a site-wide installation, you may
+need to become superuser, or use the 'sudo' command.  You can also build and
 install in two separate steps:
 
   python setup.py build
@@ -86,7 +86,8 @@ installed in /opt/local (e.g., by MacPorts), one can do:
 
     LIBRARY_PATH=/opt/local/lib CPATH=/opt/local/include python setup.py build
 
-Alternatively, the include and library directories can be supplied to the build_ext command:
+Alternatively, the include and library directories can be supplied to the
+build_ext command:
 
     python setup.py build_ext -I /opt/local/include -L/opt/local/lib
 
