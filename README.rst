@@ -8,8 +8,9 @@ The bigfloat package
 
 The ``bigfloat`` package is a Python package providing arbitrary-precision
 correctly-rounded binary floating-point arithmetic.  It is implemented as a
-Cython wrapper around the `GNU MPFR library <http://www.mpfr.org>`_.  A couple
-of lines of Python code should give the idea::
+`Cython <http://cython.org>`_ wrapper around the `GNU MPFR library
+<http://www.mpfr.org>`_.  A couple of lines of Python code should give the
+idea::
 
     >>> from bigfloat import *
     >>> with precision(200) + RoundTowardZero:
@@ -38,20 +39,17 @@ Features
 - Easy control of rounding modes and precisions via Python's ``with``
   statement.
 
-
 Documentation
 -------------
 
-`Package documentation <http://bigfloat.readthedocs.org>`_ is hosted at Read
-the Docs.
-
+Full `package documentation <http://bigfloat.readthedocs.org>`_ is hosted at
+Read the Docs.  Read on for a quick tour.
 
 A quick tour
 ------------
 
 The ``bigfloat`` module is small and simple to use.  Here's a quick
-tour of some of its features.  See the `full tutorial and reference
-documentation <http://bigfloat.readthedocs.org>`_ for more details.
+tour of some of its features.
 
 For demonstration purposes, start with::
 
@@ -71,7 +69,6 @@ The main class is the ``BigFloat`` class::
     >>> BigFloat('0.1', precision(200)) # high-precision value from string
     BigFloat.exact('0.1000000000000000000000000000000000000000000000000000
     0000000002', precision=200)
-
 
 Newly-created ``BigFloat`` instances refer to the current *context* to
 determine what precision and rounding modes to use.  This current
@@ -137,7 +134,6 @@ formats are predefined::
             log(2)
     ...
     BigFloat.exact('0.69336', precision=11)
-
 
 Installation
 ------------
