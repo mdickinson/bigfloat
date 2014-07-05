@@ -6,7 +6,7 @@ Notes on creating a release.  These notes apply my own system, currently OS X
 
 0. Make sure that you have a clean and up-to-date source tree.
 
-1. Create a release branch.
+1. Create a release branch::
 
       git checkout release/0.3.0b1
 
@@ -18,9 +18,9 @@ Notes on creating a release.  These notes apply my own system, currently OS X
 
    You might also look at:
 
-      CHANGELOG.rst
-      INSTALL.rst
-      RELEASING.rst (this document).
+   * ``CHANGELOG.rst``
+   * ``INSTALL.rst``
+   * ``RELEASING.rst`` (this document).
 
 3. Create a test release with ``python setup.py sdist``; copy the generated
    tarball and check that it's possible to install from it.  Run tests.
@@ -41,16 +41,14 @@ Notes on creating a release.  These notes apply my own system, currently OS X
 
 6. Update tags on ReadTheDocs.
 
-7. Building docs to upload to PyPI:
-
-   In the docs directory, do:
+7. Building docs to upload to PyPI.  In the docs directory, do::
 
        LIBRARY_PATH=/opt/local/lib CPATH=/opt/local/include make html
        cd docs/_build/html
        zip -r bigfloat_docs.zip *
        mv -i bigfloat_docs.zip ~/Desktop
 
-   Now you can go to:
+   Now you can go to::
 
        http://pypi.python.org/pypi?%3Aaction=pkg_edit&name=bigfloat
 
