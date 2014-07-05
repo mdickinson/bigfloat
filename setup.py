@@ -161,14 +161,15 @@ else:
 if USE_CYTHON:
     from Cython.Build import cythonize
     extensions = cythonize(
-        ["src/mpfr.pyx"],
-        libraries=['mpfr', 'gmp'],
+        Extension(
+            "mpfr", ["mpfr.pyx"],
+            libraries=['mpfr', 'gmp'],
+        )
     )
-
 else:
     extensions = [
         Extension(
-            "mpfr", ["src/mpfr.c"],
+            "mpfr", ["mpfr.c"],
             libraries=['mpfr', 'gmp'],
         ),
     ]
