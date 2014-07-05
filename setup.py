@@ -54,8 +54,7 @@ A quick tour
 
 The ``bigfloat`` module is small and simple to use.  Here's a quick
 tour of some of its features.  See the `full tutorial and reference
-documentation <http://packages.python.org/bigfloat/>`_ for more
-details.
+documentation <http://bigfloat.rtfd.org>`_ for more details.
 
 For demonstration purposes, start with::
 
@@ -196,7 +195,7 @@ Topic :: Scientific/Engineering :: Mathematics
 
 setup(
     name='bigfloat',
-    version='0.3.0b1',
+    version='0.3.0b2',
     description=DESCRIPTION,
     long_description=LONG_DESCRIPTION,
     author='Mark Dickinson',

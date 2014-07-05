@@ -8,7 +8,7 @@ Notes on creating a release.  These notes apply my own system, currently OS X
 
 1. Create a release branch::
 
-      git checkout release/0.3.0b1
+      git checkout release/0.3.0b2
 
 2. Update version numbers if necessary.  Places that need to be updated
    include::
@@ -27,7 +27,7 @@ Notes on creating a release.  These notes apply my own system, currently OS X
 
 4. When satisfied, tag the release::
 
-      git tag -a v0.3.0b1
+      git tag -a v0.3.0b2
 
 5. Upload the release to PyPI.  Register first if necessary::
 
@@ -38,6 +38,8 @@ Notes on creating a release.  These notes apply my own system, currently OS X
    in the form::
 
       python setup.py sdist register upload
+
+   Make sure you answer "y" to the "Save your login (y/N)" prompt!
 
 6. Update tags on ReadTheDocs.
 

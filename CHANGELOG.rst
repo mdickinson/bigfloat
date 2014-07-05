@@ -1,3 +1,12 @@
+What's new in bigfloat 0.3.0b2?
+===============================
+
+Miscellaneous
+-------------
+
+- Fix documentation link for PyPI upload.
+
+
 What's new in bigfloat 0.3.0b1?
 ===============================
 
