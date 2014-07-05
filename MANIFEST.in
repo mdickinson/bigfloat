@@ -1,3 +1,20 @@
-include INSTALL.rst
 include CHANGELOG.rst
-include COPYING COPYING.LESSER
+include COPYING
+include COPYING.LESSER
+include INSTALL.rst
+include MANIFEST.in
+include README.rst
+
+# Distribution should include Cython source files, though the generated
+# C file is included, so neither Cython nor the Cython source is
+# necessary for installation.
+include cgmp.pxd
+include cmpfr.pxd
+include mpfr.pyx
+
+# Explicitly include the generated C source.
+include mpfr.c
+
+# Include docs and examples directories in their entirety.
+graft docs
+graft examples

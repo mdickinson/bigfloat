@@ -1,4 +1,4 @@
-What's new in bigfloat 0.3.0a3?
+What's new in bigfloat 0.3.0b1?
 ===============================
 
 Library
