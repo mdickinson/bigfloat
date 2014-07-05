@@ -1,6 +1,6 @@
 # -*- coding: UTF-8
 
-# Copyright 2009--2011 Mark Dickinson.
+# Copyright 2009--2014 Mark Dickinson.
 #
 # This file is part of the bigfloat package.
 #
@@ -34,6 +34,8 @@ MPFR library (http://www.mpfr.org).
 
 Features
 --------
+
+- supports Python 2 (>= 2.6) and Python 3 (>= 3.2).
 
 - correct rounding on all operations;  precisely defined semantics
   compatible with the IEEE 754-2008 standard.
@@ -143,10 +145,8 @@ formats are predefined::
 
 Links
 -----
-
-* `Package documentation <http://packages.python.org/bigfloat/>`_
+* `Documentation at Read the Docs <http://bigfloat.rtfd.org>`_
 * `Project homepage at GitHub <http://github.com/mdickinson/bigfloat/>`_
-
 
 """
 # During package development, we want to use Cython, but the distributed
@@ -175,10 +175,26 @@ else:
     ]
 
 
+CLASSIFIERS = """\
+Development Status :: 4 - Beta
+Intended Audience :: Developers
+Intended Audience :: Education
+Intended Audience :: Science/Research
+License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)
+Operating System :: OS Independent
+Programming Language :: Python :: 2
+Programming Language :: Python :: 2.6
+Programming Language :: Python :: 2.7
+Programming Language :: Python :: 3
+Programming Language :: Python :: 3.2
+Programming Language :: Python :: 3.3
+Programming Language :: Python :: 3.4
+Programming Language :: Python :: Implementation :: CPython
+Topic :: Scientific/Engineering :: Mathematics
+""".splitlines()
+
+
 setup(
-    # Name should really be capitalized as 'BigFloat'.  We keep 'bigfloat' to
-    # avoid upload problems on PyPI.  (Previous versions of the package were
-    # also called bigfloat.)
     name='bigfloat',
     version='0.3.0b1',
     description=DESCRIPTION,
@@ -186,13 +202,7 @@ setup(
     author='Mark Dickinson',
     author_email='dickinsm@gmail.com',
     url='http://github.com/mdickinson/bigfloat',
-    classifiers=[
-        'Development Status :: 3 - Alpha',
-        'License :: OSI Approved :: '
-        'GNU Library or Lesser General Public License (LGPL)',
-        'Programming Language :: Python',
-        'Topic :: Scientific/Engineering :: Mathematics',
-    ],
+    classifiers=CLASSIFIERS,
     platforms=[
         'Linux',
         'OS X',
@@ -203,14 +213,4 @@ setup(
         'bigfloat',
         'bigfloat.test',
     ],
-    package_data={
-        'bigfloat': [
-            'docs/html/*.html',
-            'docs/html/*.inv',
-            'docs/html/*.js',
-            'docs/html/_sources/*',
-            'docs/html/_static/*',
-            'docs/pdf/*.pdf',
-        ],
-    },
 )
