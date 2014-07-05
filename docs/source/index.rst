@@ -79,16 +79,16 @@ the GMP and MPFR libraries already installed on your system.  See the
 <http://gmplib.org>`_ for more information about these libraries.
 Currently, MPFR version 2.3.0 or later is required.
 
-This package requires Python version 2.5 or later.  For Python 2.5,
-you'll need to do a ``from __future__ import with_statement`` if you
-want to take advantage of all of the features of this package.
+The :mod:`bigfloat` package works with Python 2 (version 2.6 or later) or
+Python 3 (version 3.2 or later), using a single codebase for both Python
+dialects.
 
 Installation
 ^^^^^^^^^^^^
 
 Like most third party Python libraries, the :mod:`bigfloat` package is
 installed by means of the ``setup.py`` script included in the
-distribution.  On most systems, installation should be as simple as
+distribution.  On many systems, installation should be as simple as
 doing::
 
    python setup.py install
@@ -98,31 +98,19 @@ superuser privileges to install the library, for example with::
 
    sudo python setup.py install
 
+The MPFR and GMP libraries will need to be installed on your system prior to
+installation of :mod:`bigfloat`, along with any necessary development header
+files.  On Linux, look for a package called something like ``libmpfr-dev`` or
+``mpfr-devel``, along with correspondingly named packages for GMP.  If the
+libraries and/or include files are installed in an unusual place, it may be
+necessary to specify their location using environment variables on the command
+line.  As an example, on my OS X 10.9 system, with MPFR and GMP installed in
+/opt/local/, I need to do::
 
-Locating the MPFR library
-^^^^^^^^^^^^^^^^^^^^^^^^^
+    LIBRARY_PATH=/opt/local/lib CPATH=/opt/local/include python setup.py install
 
-On import, the :mod:`bigfloat` package attempts to locate an MPFR library on
-your system; if the library is in the usual library search path (as controlled
-by the LD_LIBRARY_PATH environment variable on Linux, for example) then it
-should be found as normal.  If the package fails to find the MPFR library, or if
-you have multiple MPFR libraries installed on your system and want to specify
-which one to use, you can edit the ``mpfr_library_location`` setting in the
-``bigfloat_config.py`` configuration file to specify the library location.
-This file should be found in the same location as the other installed source
-files for the bigfloat package.
-
-Other configuration
-^^^^^^^^^^^^^^^^^^^
-
-The ``bigfloat_config.py`` configuration file also allows you to specify some
-other system-dependent values.  On a typical system, with default installs of
-GMP and MPFR, it's unlikely that these values will need to be changed.  But if
-you're getting segmentation faults or crashes with the bigfloat library then
-you may need to edit the values in this file.  In this case it will probably
-also be useful to have the gmp.h and mpfr.h include files handy to refer to; on
-Linux systems, these files may be in a different package from the library files
-(e.g., 'mpfr-devel' instead of 'mpfr').
+Similarly, if installing from the Python package index using ``easy_install``
+or ``pip``, you may also need to add the necessary environment variables first.
 
 
 Tutorial
