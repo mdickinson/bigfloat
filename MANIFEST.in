@@ -1,3 +1,3 @@
-include INSTALL
+include INSTALL.rst
 include CHANGELOG
 include COPYING COPYING.LESSER

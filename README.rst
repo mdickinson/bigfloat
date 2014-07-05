@@ -10,7 +10,7 @@ The bigfloat package is a Python package providing arbitrary-precision
 correctly-rounded floating-point arithmetic.  It's implemented as a wrapper
 around the `MPFR library <mpfr library_>`_.
 
-For installation instructions, please see the separate INSTALL file.
+For installation instructions, please see the separate ``INSTALL.rst`` file.
 
 Feedback is welcome!  Please use the `GitHub issue tracker <tracker_>`_ to
 report issues.  Alternatively, you can contact Mark Dickinson directly at
