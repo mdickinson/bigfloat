@@ -41,7 +41,6 @@ from bigfloat.context import (
     RoundTowardNegative,
 
     _apply_function_in_current_context,
-    precision,
 )
 
 

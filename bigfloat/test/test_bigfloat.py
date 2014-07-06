@@ -807,8 +807,8 @@ class BigFloatTests(unittest.TestCase):
 
             ]
 
-        for strarg, precision, expected in test_values:
-            arg = BigFloat.exact(strarg, precision=precision)
+        for strarg, precision_in, expected in test_values:
+            arg = BigFloat.exact(strarg, precision=precision_in)
             got = arg.hex()
             self.assertEqual(expected, got)
 
