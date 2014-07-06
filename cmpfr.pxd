@@ -291,7 +291,7 @@ cdef extern from "mpfr.h":
     int MPFR_VERSION_MAJOR
     int MPFR_VERSION_MINOR
     int MPFR_VERSION_PATCHLEVEL
-    char *MPFR_VERSION_STRING
+    const char *MPFR_VERSION_STRING
     int MPFR_VERSION_NUM(int major, int minor, int patchlevel)
     const char *mpfr_get_patches()
     int mpfr_buildopt_tls_p()
