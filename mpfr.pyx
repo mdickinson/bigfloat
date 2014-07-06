@@ -2408,7 +2408,11 @@ def mpfr_get_patches():
     (however this information should not have much interest in general).
 
     """
-    return cmpfr.mpfr_get_patches().split()
+    cdef bytes patches = cmpfr.mpfr_get_patches()
+    if sys.version_info < (3,):
+        return patches.split()
+    else:
+        return patches.decode('ascii').split()
 
 def mpfr_buildopt_tls_p():
     """

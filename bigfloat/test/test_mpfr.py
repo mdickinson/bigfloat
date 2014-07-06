@@ -1700,6 +1700,8 @@ class TestMpfr(unittest.TestCase):
 
     def test_get_patches(self):
         self.assertIsInstance(mpfr_get_patches(), list)
+        for patch in mpfr_get_patches():
+            self.assertIsInstance(patch, str)
 
     def test_buildopt_tls_p(self):
         self.assertIsInstance(mpfr_buildopt_tls_p(), bool)
