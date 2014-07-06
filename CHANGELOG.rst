@@ -1,10 +1,37 @@
 What's new in bigfloat 0.3.0b2?
 ===============================
 
+Library
+-------
+
+- Fix string-returning functions and string constants in ``mpfr`` module to
+  return something of type ``str`` both on Python 2 and Python 3.  In earlier
+  0.3.0 pre-releases, objects of type ``unicode`` were being returned on
+  Python 2.
+
+- Declarations in ``cmpfr.pxd`` fixed to include ``const`` where necessary;
+  this fixes some compiler warnings.
+
+- Improved tests for hashing.
+
+
 Miscellaneous
 -------------
 
 - Fix documentation link for PyPI upload.
+
+- Docs updated to remove outdated instructions about use under Python 2.5 and
+  outdated information (dating from the earlier ctypes version) about runtime
+  location of the MPFR and GMP libraries.
+
+- ``README``, ``setup.py`` updates: include the quick tour in the ``README``,
+  make content match that of the ``setup.py`` long description.
+
+- ``CHANGELOG``, ``README``, ``INSTALL`` files updated with various
+  reStructuredText fixes; renamed to add ``.rst`` suffix so that they display
+  nicely on GitHub.
+
+- Update copyright notices.
 
 
 What's new in bigfloat 0.3.0b1?
@@ -25,6 +52,8 @@ Miscellaneous
 - Development moved from bitbucket (https://bitbucket.org/dickinsm/bigfloat)
   to GitHub (https://github.com/mdickinson/bigfloat), and repository
   converted from mercurial to Git.
+
+- Travis CI and Read the Docs GitHub hooks added.
 
 
 What's new in bigfloat 0.3.0a2?
