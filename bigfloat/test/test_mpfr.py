@@ -1696,6 +1696,7 @@ class TestMpfr(unittest.TestCase):
 
     def test_get_version(self):
         self.assertIsInstance(mpfr_get_version(), str)
+        self.assertEqual(mpfr_get_version(), MPFR_VERSION_STRING)
 
     def test_get_patches(self):
         self.assertIsInstance(mpfr_get_patches(), list)
