@@ -944,6 +944,7 @@ def pos(x, context=None):
     temporary increase in precision, back to the current context.  For
     example::
 
+        >>> from bigfloat import precision
         >>> pow(3, 20) + 1.234 - pow(3, 20)  # inaccurate due to precision loss
         BigFloat.exact('1.2340002059936523', precision=53)
         >>> with precision(100):  # compute result with extra precision
@@ -1559,6 +1560,7 @@ def acos(x, context=None):
     that as a result of rounding to the current context, it's possible for the
     actual value returned to be fractionally larger than π::
 
+        >>> from bigfloat import precision
         >>> with precision(12):
         ...     x = acos(-1)
         ...

@@ -1545,6 +1545,9 @@ class TestMpfr(unittest.TestCase):
         with self.assertRaises(ValueError):
             mpfr_print_rnd_mode(-1)
 
+        # Check that we get a 'str' instance on both Python 2 and Python 3.
+        self.assertIsInstance(mpfr_print_rnd_mode(MPFR_RNDN), str)
+
     # 5.12 Miscellaneous Functions
     def test_nexttoward(self):
         x = Mpfr(4)
@@ -2015,6 +2018,11 @@ class TestMpfr(unittest.TestCase):
             mpfr_get_str(62, 0, x, MPFR_RNDN),
             ('12000', 2),
         )
+
+        # Type of result.
+        digits, exp = mpfr_get_str(10, 0, x, MPFR_RNDN)
+        self.assertIsInstance(digits, str)
+        self.assertIsInstance(exp, int)
 
     def test_rounding_modes(self):
         self.assertEqual(MPFR_RNDN, 0)

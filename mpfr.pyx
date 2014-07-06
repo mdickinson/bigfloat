@@ -662,7 +662,10 @@ def mpfr_get_str(int b, size_t n, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     finally:
         cmpfr.mpfr_free_str(c_digits)
 
-    return digits.decode('ascii'), exp
+    if sys.version_info < (3,):
+        return digits, exp
+    else:
+        return digits.decode('ascii'), exp
 
 def mpfr_fits_slong_p(Mpfr_t x not None, cmpfr.mpfr_rnd_t rnd):
     """
@@ -2226,9 +2229,13 @@ def mpfr_print_rnd_mode(cmpfr.mpfr_rnd_t rnd):
     Raise a ValueError if rnd is an invalid rounding mode.
 
     """
+    cdef bytes rounding_mode
     check_rounding_mode(rnd)
-    return cmpfr.mpfr_print_rnd_mode(rnd).decode('ascii')
-
+    rounding_mode = cmpfr.mpfr_print_rnd_mode(rnd)
+    if sys.version_info < (3,):
+        return rounding_mode
+    else:
+        return rounding_mode.decode('ascii')
 
 ###############################################################################
 # 5.12 Miscellaneous Functions
