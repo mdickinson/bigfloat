@@ -1,5 +1,5 @@
-What's new in bigfloat 0.3.0b2?
-===============================
+What's new in bigfloat 0.3.0?
+=============================
 
 Library
 -------
