@@ -48,7 +48,7 @@ Read the Docs.  Read on for a quick tour.
 A quick tour
 ------------
 
-The ``bigfloat`` module is small and simple to use.  Here's a quick
+The ``bigfloat`` package is small and simple to use.  Here's a quick
 tour of some of its features.
 
 For demonstration purposes, start with::
@@ -99,7 +99,7 @@ is to use Python's ``with`` statement::
     232923048430871432145083976260362799525140798964
 
 Here, ``sqrt`` is one of a number of mathematical functions that the
-``bigfloat`` module exports.  As you can see, these functions operate on
+``bigfloat`` package exports.  As you can see, these functions operate on
 integers and floats as well as ``BigFloat`` instances, but always
 return a ``BigFloat`` instance.
 
