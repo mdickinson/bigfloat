@@ -708,7 +708,7 @@ class BigFloat(mpfr.Mpfr_t):
 
     if _sys.version_info < (3,):
         def __hash__(self):
-            # If self is exactly representable as a float, then its hash
+            # if self is exactly representable as a float, then its hash
             # should match that of the float.  Note that this covers the
             # case where self == 0.
             if self == float(self) or is_nan(self):
