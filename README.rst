@@ -27,8 +27,8 @@ Features
 
 - Supports Python 2 (version 2.6 or later) and Python 3 (version 3.2 or later).
 
-- Correct rounding on all operations;  precisely defined semantics
-  compatible with the IEEE 754-2008 standard.
+- Exactly reproducible correctly-rounded results across platforms;
+  precisely-defined semantics compatible with the IEEE 754-2008 standard.
 
 - Support for mixed-type operations with Python integers and floats.
 
@@ -36,8 +36,8 @@ Features
   interchange formats described in IEEE 754-2008.  Infinities, NaNs,
   signed zeros, and subnormals are all supported.
 
-- Easy control of rounding modes and precisions via Python's ``with``
-  statement.
+- Easy control of rounding modes and precisions via ``Context`` objects
+  and Python's ``with`` statement.
 
 Documentation
 -------------

@@ -29,8 +29,9 @@ Arbitrary precision correctly-rounded floating point arithmetic, via MPFR.\
 LONG_DESCRIPTION = """\
 The ``bigfloat`` package is a Python package providing arbitrary-precision
 correctly-rounded binary floating-point arithmetic.  It is implemented as a
-Cython wrapper around the `GNU MPFR library <http://www.mpfr.org>`_.  A couple
-of lines of Python code should give the idea::
+`Cython <http://cython.org>`_ wrapper around the `GNU MPFR library
+<http://www.mpfr.org>`_.  A couple of lines of Python code should give the
+idea::
 
     >>> from bigfloat import *
     >>> with precision(200) + RoundTowardZero:
@@ -47,8 +48,8 @@ Features
 
 - Supports Python 2 (version 2.6 or later) and Python 3 (version 3.2 or later).
 
-- Correct rounding on all operations;  precisely defined semantics
-  compatible with the IEEE 754-2008 standard.
+- Exactly reproducible correctly-rounded results across platforms;
+  precisely-defined semantics compatible with the IEEE 754-2008 standard.
 
 - Support for mixed-type operations with Python integers and floats.
 
@@ -56,23 +57,20 @@ Features
   interchange formats described in IEEE 754-2008.  Infinities, NaNs,
   signed zeros, and subnormals are all supported.
 
-- Easy control of rounding modes and precisions via Python's ``with``
-  statement.
-
+- Easy control of rounding modes and precisions via ``Context`` objects
+  and Python's ``with`` statement.
 
 Documentation
 -------------
 
-`Package documentation <http://bigfloat.readthedocs.org>`_ is hosted at Read
-the Docs.
-
+Full `package documentation <http://bigfloat.readthedocs.org>`_ is hosted at
+Read the Docs.  Read on for a quick tour.
 
 A quick tour
 ------------
 
-The ``bigfloat`` module is small and simple to use.  Here's a quick
-tour of some of its features.  See the `full tutorial and reference
-documentation <http://bigfloat.readthedocs.org>`_ for more details.
+The ``bigfloat`` package is small and simple to use.  Here's a quick
+tour of some of its features.
 
 For demonstration purposes, start with::
 
@@ -92,7 +90,6 @@ The main class is the ``BigFloat`` class::
     >>> BigFloat('0.1', precision(200)) # high-precision value from string
     BigFloat.exact('0.1000000000000000000000000000000000000000000000000000
     0000000002', precision=200)
-
 
 Newly-created ``BigFloat`` instances refer to the current *context* to
 determine what precision and rounding modes to use.  This current
@@ -123,7 +120,7 @@ is to use Python's ``with`` statement::
     232923048430871432145083976260362799525140798964
 
 Here, ``sqrt`` is one of a number of mathematical functions that the
-``bigfloat`` module exports.  As you can see, these functions operate on
+``bigfloat`` package exports.  As you can see, these functions operate on
 integers and floats as well as ``BigFloat`` instances, but always
 return a ``BigFloat`` instance.
 
@@ -158,7 +155,6 @@ formats are predefined::
             log(2)
     ...
     BigFloat.exact('0.69336', precision=11)
-
 
 Installation
 ------------
@@ -205,7 +201,8 @@ Links
 - `Project homepage at GitHub <https://github.com/mdickinson/bigfloat>`_
 - `Issue tracker <https://github.com/mdickinson/bigfloat/issues>`_
 """
-# During package development, we want to use Cython, but the distributed
+
+# During package development we want to use Cython, but the distributed
 # egg shouldn't use Cython.  We use the presence of PKG-INFO to determine
 # which of these is true.
 if os.path.exists('PKG-INFO'):
