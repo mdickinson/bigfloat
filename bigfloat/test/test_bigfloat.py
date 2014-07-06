@@ -753,11 +753,14 @@ class BigFloatTests(unittest.TestCase):
                                  "hash(BigFloat(n)) != hash(int(BigFloat(n))) "
                                  "for n = %s" % n)
 
-        # Hash for a large integer.  Currently only works for Python 3.
-        if sys.version_info >= (3,):
-            n = 7**100
-            self.assertEqual(hash(BigFloat.exact(n)), hash(n))
+        n = 7**100
+        self.assertEqual(hash(BigFloat.exact(n)), hash(n))
 
+    if sys.version_info >= (3,):
+        # Only Python 3 has consistent hashing for all numeric types,
+        # so we can't expect these tests to pass on Python 2.
+        def test_hash_compatibility_with_fraction(self):
+            n = 7**100
             d = 2**999
             f = fractions.Fraction(n, d)
             with precision(1000):
