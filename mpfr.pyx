@@ -2229,12 +2229,13 @@ def mpfr_print_rnd_mode(cmpfr.mpfr_rnd_t rnd):
     Raise a ValueError if rnd is an invalid rounding mode.
 
     """
+    cdef bytes rounding_mode
     check_rounding_mode(rnd)
-    cdef bytes rounding_mode_string = cmpfr.mpfr_print_rnd_mode(rnd)
+    rounding_mode = cmpfr.mpfr_print_rnd_mode(rnd)
     if sys.version_info < (3,):
-        return rounding_mode_string
+        return rounding_mode
     else:
-        return rounding_mode_string.decode('ascii')
+        return rounding_mode.decode('ascii')
 
 ###############################################################################
 # 5.12 Miscellaneous Functions
