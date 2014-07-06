@@ -23,7 +23,7 @@ import os
 
 
 DESCRIPTION = """\
-Arbitrary precision correctly-rounded floating point arithmetic, via MPFR.\
+Arbitrary-precision correctly-rounded floating-point arithmetic, via MPFR.\
 """
 
 LONG_DESCRIPTION = """\
