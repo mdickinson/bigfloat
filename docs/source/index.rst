@@ -1102,6 +1102,31 @@ Flags
 .. autofunction:: get_flagstate
 .. autofunction:: set_flagstate
 
+
+MPFR Version information
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. data:: MPFR_VERSION_STRING
+
+   The version of the MPFR library being used, as a string.
+
+.. data:: MPFR_VERSION
+
+   The version of the MPFR library being used, as an integer.
+
+.. data:: MPFR_VERSION_MAJOR
+
+   An integer giving the major level of the MPFR version.
+
+.. data:: MPFR_VERSION_MINOR
+
+   An integer giving the minor level of the MPFR version.
+
+.. data:: MPFR_VERSION_PATCHLEVEL
+
+   An integer giving the patch level of the MPFR version.
+
+
 .. rubric:: Footnotes
 
 .. [#harmonic] See http://mathworld.wolfram.com/HarmonicNumber.html
