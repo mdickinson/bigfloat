@@ -20,6 +20,8 @@
 
 cimport cmpfr
 
+import sys
+
 cdef extern from "limits.h":
     cdef long LONG_MAX
     cdef long LONG_MIN
@@ -2369,13 +2371,21 @@ def mpfr_get_version():
     Return the MPFR version, as a string.
 
     """
-    return cmpfr.mpfr_get_version().decode('ascii')
+    cdef bytes version = cmpfr.mpfr_get_version()
+    if sys.version_info < (3,):
+        return version
+    else:
+        return version.decode('ascii')
+
 
 MPFR_VERSION = cmpfr.MPFR_VERSION
 MPFR_VERSION_MAJOR = cmpfr.MPFR_VERSION_MAJOR
 MPFR_VERSION_MINOR = cmpfr.MPFR_VERSION_MINOR
 MPFR_VERSION_PATCHLEVEL = cmpfr.MPFR_VERSION_PATCHLEVEL
-MPFR_VERSION_STRING = cmpfr.MPFR_VERSION_STRING.decode('ascii')
+if sys.version_info < (3,):
+    MPFR_VERSION_STRING = cmpfr.MPFR_VERSION_STRING
+else:
+    MPFR_VERSION_STRING = cmpfr.MPFR_VERSION_STRING.decode('ascii')
 
 def MPFR_VERSION_NUM(int major, int minor, int patchlevel):
     """
