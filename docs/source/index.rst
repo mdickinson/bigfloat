@@ -386,10 +386,7 @@ We've seen one way of controlling precision and rounding mode, via the
 ``context`` keyword argument.  There's another way that's often more
 convenient, especially when a single context change is supposed to
 apply to multiple operations: contexts can be used directly in Python
-``with`` statements.  Note: if you're using Python 2.5, you'll need
-to enable with statements with:
-
-   >>> from __future__ import with_statement
+``with`` statements.
 
 For example, here we compute high-precision upper and lower-bounds for
 the thousandth harmonic number:
@@ -631,15 +628,10 @@ deviations from expected behaviour.
   otherwise.  None of these conversions is affected by the current
   context.
 
-* :class:`BigFloat` instances are hashable.  For Python 2.6 and later,
-  the hash function obeys the rule that objects that compare equal
-  should hash equal; in particular, if ``x == n`` for some
-  :class:`BigFloat` instance ``x`` and some Python int or long ``n``
-  then ``hash(x) == hash(n)``, and similarly for floats.  In Python
-  2.5, there are some rare cases where ``x == n`` does not imply
-  ``hash(x) == hash(n)``.  For that reason it's inadvisable to mix
-  integers and BigFloat instances in a set, or to use both integers
-  and BigFloat instances as keys in the same dictionary.
+* :class:`BigFloat` instances are hashable.  The hash function obeys the rule
+  that objects that compare equal should hash equal; in particular, if ``x ==
+  n`` for some :class:`BigFloat` instance ``x`` and some Python int or long
+  ``n`` then ``hash(x) == hash(n)``, and similarly for floats.
 
 
 The Context class
@@ -1101,6 +1093,31 @@ Flags
 .. autofunction:: test_flag
 .. autofunction:: get_flagstate
 .. autofunction:: set_flagstate
+
+
+MPFR Version information
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. data:: MPFR_VERSION_STRING
+
+   The version of the MPFR library being used, as a string.
+
+.. data:: MPFR_VERSION
+
+   The version of the MPFR library being used, as an integer.
+
+.. data:: MPFR_VERSION_MAJOR
+
+   An integer giving the major level of the MPFR version.
+
+.. data:: MPFR_VERSION_MINOR
+
+   An integer giving the minor level of the MPFR version.
+
+.. data:: MPFR_VERSION_PATCHLEVEL
+
+   An integer giving the patch level of the MPFR version.
+
 
 .. rubric:: Footnotes
 

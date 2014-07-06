@@ -1,4 +1,4 @@
-# Copyright 2009--2011 Mark Dickinson.
+# Copyright 2009--2014 Mark Dickinson.
 #
 # This file is part of the bigfloat module.
 #
@@ -14,8 +14,6 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with the bigfloat module.  If not, see <http://www.gnu.org/licenses/>.
-
-from __future__ import with_statement
 
 """
 The documentation for mpfr_get_str, for converting a precision n

@@ -1,4 +1,4 @@
-# Copyright 2009--2011 Mark Dickinson.
+# Copyright 2009--2014 Mark Dickinson.
 #
 # This file is part of the bigfloat module.
 #
@@ -67,7 +67,6 @@
 
 
 from __future__ import division
-from __future__ import with_statement
 from math import factorial
 import bigfloat
 from bigfloat import exp
