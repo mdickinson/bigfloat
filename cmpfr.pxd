@@ -81,10 +81,10 @@ cdef extern from "mpfr.h":
         mpfr_ptr rop, long int op, mpfr_exp_t e, mpfr_rnd_t rnd
     )
     int mpfr_set_str(
-        mpfr_ptr rop, char *s, int base, mpfr_rnd_t rnd
+        mpfr_ptr rop, const char *s, int base, mpfr_rnd_t rnd
     )
     int mpfr_strtofr(
-        mpfr_ptr rop, char *nptr, char **endptr, int base, mpfr_rnd_t rnd
+        mpfr_ptr rop, const char *nptr, char **endptr, int base, mpfr_rnd_t rnd
     )
     void mpfr_set_nan(mpfr_ptr x)
     void mpfr_set_inf(mpfr_ptr x, int sign)
@@ -269,7 +269,7 @@ cdef extern from "mpfr.h":
         mpfr_prec_t prec
     )
     mpfr_prec_t mpfr_min_prec(mpfr_ptr x)
-    char *mpfr_print_rnd_mode(mpfr_rnd_t rnd)
+    const char *mpfr_print_rnd_mode(mpfr_rnd_t rnd)
 
 
     ###########################################################################
@@ -286,14 +286,14 @@ cdef extern from "mpfr.h":
     int mpfr_signbit(mpfr_ptr op)
     int mpfr_setsign(mpfr_ptr rop, mpfr_ptr op, int s, mpfr_rnd_t rnd)
     int mpfr_copysign(mpfr_ptr rop, mpfr_ptr op1, mpfr_ptr op2, mpfr_rnd_t rnd)
-    char *mpfr_get_version()
+    const char *mpfr_get_version()
     int MPFR_VERSION
     int MPFR_VERSION_MAJOR
     int MPFR_VERSION_MINOR
     int MPFR_VERSION_PATCHLEVEL
-    char *MPFR_VERSION_STRING
+    const char *MPFR_VERSION_STRING
     int MPFR_VERSION_NUM(int major, int minor, int patchlevel)
-    char *mpfr_get_patches()
+    const char *mpfr_get_patches()
     int mpfr_buildopt_tls_p()
     int mpfr_buildopt_decimal_p()
 
