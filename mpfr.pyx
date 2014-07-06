@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # cython: embedsignature = True
 
-# Copyright 2009--2011 Mark Dickinson.
+# Copyright 2009--2014 Mark Dickinson.
 #
 # This file is part of the bigfloat package.
 #
