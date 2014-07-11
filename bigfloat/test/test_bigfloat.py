@@ -31,6 +31,9 @@ import bigfloat.core
 _builtin_abs = abs
 
 from bigfloat import (
+    # version number
+    __version__,
+
     # main class
     BigFloat,
 
@@ -132,6 +135,9 @@ def diffBigFloat(x, y, match_precisions=True):
 class BigFloatTests(unittest.TestCase):
     def setUp(self):
         setcontext(DefaultContext)
+
+    def test_version(self):
+        self.assertIsInstance(__version__, str)
 
     def assertIdenticalFloat(self, x, y):
         if not (isinstance(x, float) and isinstance(y, float)):

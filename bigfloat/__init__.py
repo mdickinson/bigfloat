@@ -16,6 +16,9 @@
 # along with the bigfloat package.  If not, see <http://www.gnu.org/licenses/>.
 
 __all__ = [
+    # version string for bigfloat
+    '__version__',
+
     # main class
     'BigFloat',
 
@@ -166,6 +169,8 @@ from bigfloat.core import (
     copysign,
 
 )
+
+from bigfloat.version import __version__
 
 from mpfr import (
     # MPFR Version information
