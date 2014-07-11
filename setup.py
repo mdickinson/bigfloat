@@ -247,9 +247,20 @@ Topic :: Scientific/Engineering :: Mathematics
 """.splitlines()
 
 
+def get_version_info():
+    """Extract version information as a dictionary from version.py."""
+    version_info = {}
+    with open(os.path.join("bigfloat", "version.py"), 'r') as f:
+        version_code = compile(f.read(), "version.py", 'exec')
+        exec(version_code, version_info)
+    return version_info
+
+
+version_info = get_version_info()
+
 setup(
     name='bigfloat',
-    version='0.3.0b2',
+    version=version_info,
     description=DESCRIPTION,
     long_description=LONG_DESCRIPTION,
     author='Mark Dickinson',
