@@ -1,3 +1,12 @@
+Changes since bigfloat 0.3.0
+============================
+
+Library
+-------
+
+- Add bigfloat.__version__ (#46).
+
+
 What's new in bigfloat 0.3.0?
 =============================
 
