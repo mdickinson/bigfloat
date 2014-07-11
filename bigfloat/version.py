@@ -28,7 +28,7 @@ else:
 # Release and version for Sphinx purposes.
 
 # The short X.Y version.
-version = "{}.{}".format(major, minor)
+version = "{0}.{1}".format(major, minor)
 
 # The full version, including patchlevel and alpha/beta/rc tags.
 release = __version__
