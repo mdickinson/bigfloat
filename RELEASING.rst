@@ -8,7 +8,7 @@ Notes on creating a release.  These notes apply my own system, currently OS X
 
 1. Create a release branch::
 
-      git checkout release/0.3.0
+      git checkout release/0.4.0
 
 2. Update version numbers if necessary.  Places that need to be updated
    include::
@@ -27,7 +27,7 @@ Notes on creating a release.  These notes apply my own system, currently OS X
 
 4. When satisfied, tag the release::
 
-      git tag -a v0.3.0
+      git tag -a v0.4.0
 
 5. Upload the release to PyPI.  Register first if necessary::
 

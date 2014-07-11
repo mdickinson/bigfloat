@@ -14,7 +14,7 @@ Installation from a release tarball
 The instructions cover installation from either a repository clone,
 or a source distribution tarball.  After cloning the repository
 or unpacking the tarball, you should have a top-level directory
-named something like ``bigfloat-0.3.0``.
+named something like ``bigfloat-0.4.0``.
 
 (1) Enter that top-level directory and execute the command::
 
@@ -62,7 +62,7 @@ named something like ``bigfloat-0.3.0``.
         ...
         1.4142135623730950488016887242096980785696718753769480731766796
 
-If installation was successful, the ``bigfloat-0.3.0`` directory that you
+If installation was successful, the ``bigfloat-0.4.0`` directory that you
 created can now be deleted.
 
 
