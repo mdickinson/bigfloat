@@ -16,6 +16,54 @@
 import sys
 import os
 
+# We need to mock out the mpfr module for the doc builds, since
+# Read the Docs doesn't support building extension modules.
+class MockMpfr(object):
+    MPFR_RNDN = 0
+
+    MPFR_RNDZ = 1
+
+    MPFR_RNDU = 2
+
+    MPFR_RNDD = 3
+
+    MPFR_RNDA = 4
+
+    MPFR_EMIN_DEFAULT = -1073741823
+
+    MPFR_EMAX_DEFAULT = 1073741823
+
+    MPFR_PREC_MIN = 2
+
+    MPFR_PREC_MAX = 9223372036854775807
+
+    Mpfr_t = object
+
+    MPFR_VERSION_MAJOR = 3
+
+    MPFR_VERSION_MINOR = 1
+
+    def mpfr_get_emin_max(self):
+        return 4611686018427387903
+
+    def mpfr_get_emax_min(self):
+        return -4611686018427387903
+
+    def mpfr_set_emin(self, precision):
+        pass
+
+    def mpfr_set_emax(self, precision):
+        pass
+
+    def __getattr__(self, name):
+        return None
+
+
+# For the doc build, replace 'mpfr' extension module with a dummy
+# object.
+print "Mocking mpfr"
+sys.modules['mpfr'] = MockMpfr()
+
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
@@ -278,49 +326,3 @@ def setup(app):
     tex_replacements.append(
         (u'\u2212', u'-'),
     )
-
-
-class MockMpfr(object):
-    MPFR_RNDN = 0
-
-    MPFR_RNDZ = 1
-
-    MPFR_RNDU = 2
-
-    MPFR_RNDD = 3
-
-    MPFR_RNDA = 4
-
-    MPFR_EMIN_DEFAULT = -1073741823
-
-    MPFR_EMAX_DEFAULT = 1073741823
-
-    MPFR_PREC_MIN = 2
-
-    MPFR_PREC_MAX = 9223372036854775807
-
-    Mpfr_t = object
-
-    MPFR_VERSION_MAJOR = 3
-
-    MPFR_VERSION_MINOR = 1
-
-    def mpfr_get_emin_max(self):
-        return 4611686018427387903
-
-    def mpfr_get_emax_min(self):
-        return -4611686018427387903
-
-    def mpfr_set_emin(self, precision):
-        pass
-
-    def mpfr_set_emax(self, precision):
-        pass
-
-    def __getattr__(self, name):
-        return None
-
-
-# For the doc build, replace 'mpfr' extension module with a dummy
-# object.
-sys.modules['mpfr'] = MockMpfr()
