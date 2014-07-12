@@ -211,6 +211,8 @@ from mpfr import (
     mpfr_get_patches,
     mpfr_buildopt_tls_p,
     mpfr_buildopt_decimal_p,
+    mpfr_buildopt_gmpinternals_p,
+    mpfr_buildopt_tune_case,
 
     # 5.13 Exception Related Functions
     mpfr_get_emin,
@@ -1711,6 +1713,12 @@ class TestMpfr(unittest.TestCase):
 
     def test_buildopt_decimal_p(self):
         self.assertIsInstance(mpfr_buildopt_decimal_p(), bool)
+
+    def test_buildopt_gmpinternals_p(self):
+        self.assertIsInstance(mpfr_buildopt_gmpinternals_p(), bool)
+
+    def test_buildopt_tune_case(self):
+        self.assertIsInstance(mpfr_buildopt_tune_case(), str)
 
     # 5.13 Exception Related Functions
     def test_check_range(self):

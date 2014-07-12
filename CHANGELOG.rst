@@ -4,6 +4,8 @@ Changes since bigfloat 0.3.0
 Library
 -------
 
+- Wrap mpfr_buildopt_gmpinternals_p and mpfr_buildopt_tune_case.
+
 - Add bigfloat.__version__ (#46).
 
 - Add bigfloat.notequal.
