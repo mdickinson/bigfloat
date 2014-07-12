@@ -260,7 +260,7 @@ version_info = get_version_info()
 
 setup(
     name='bigfloat',
-    version=version_info,
+    version=version_info['release'],
     description=DESCRIPTION,
     long_description=LONG_DESCRIPTION,
     author='Mark Dickinson',
