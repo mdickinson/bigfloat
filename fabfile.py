@@ -12,6 +12,7 @@ INCLUDE_PATH = "/opt/local/include"
 
 
 def build_in_place(python=PYTHON):
+    """Build the bigfloat library for in-place testing."""
     local(
         "LIBRARY_PATH={library_path} CPATH={include_path} {python} "
         "setup.py build_ext --inplace".format(
@@ -22,6 +23,7 @@ def build_in_place(python=PYTHON):
 
 
 def install(python=PYTHON):
+    """Install into site-packages"""
     local(
         "LIBRARY_PATH={library_path} CPATH={include_path} {python} "
         "setup.py build".format(
@@ -32,7 +34,20 @@ def install(python=PYTHON):
     local("sudo {python} setup.py install".format(python=python))
 
 
+def uninstall(python=PYTHON):
+    """Uninstall from site-packages"""
+    site_packages = local(
+        "{python} -c 'from distutils.sysconfig import get_python_lib; print(get_python_lib())'".format(python=python),
+        capture=True,
+    )
+    with lcd(site_packages):
+        local("sudo rm mpfr.so")
+        local("sudo rm -fr bigfloat")
+        local("sudo rm bigfloat*.egg-info")
+
+
 def clean():
+    """Remove build artifacts."""
     local("git clean -fdX")
 
 
