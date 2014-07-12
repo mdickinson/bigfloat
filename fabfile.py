@@ -37,7 +37,8 @@ def install(python=PYTHON):
 def uninstall(python=PYTHON):
     """Uninstall from site-packages"""
     site_packages = local(
-        "{python} -c 'from distutils.sysconfig import get_python_lib; print(get_python_lib())'".format(python=python),
+        "{python} -c 'from distutils.sysconfig import "
+        "get_python_lib; print(get_python_lib())'".format(python=python),
         capture=True,
     )
     with lcd(site_packages):
@@ -71,6 +72,7 @@ def html():
     clean()
     with lcd("docs"):
         local("make html")
+
 
 def pdf():
     """Build PDF documentation."""
