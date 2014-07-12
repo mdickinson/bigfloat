@@ -520,6 +520,7 @@ comparison operators.
 .. autofunction:: less
 .. autofunction:: lessequal
 .. autofunction:: equal 
+.. autofunction:: notequal
 
 There are two additional comparison functions that don't
 correspond to any of the Python comparison operators.

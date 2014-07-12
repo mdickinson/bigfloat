@@ -74,7 +74,7 @@ __all__ = [
     # 5.6 Comparison functions
     'cmp', 'cmpabs', 'is_nan', 'is_inf', 'is_finite', 'is_zero', 'is_regular',
     'sgn', 'greater', 'greaterequal', 'less', 'lessequal', 'equal',
-    'lessgreater', 'unordered',
+    'notequal', 'lessgreater', 'unordered',
 
     # 5.7 Special Functions
     'log', 'log2', 'log10', 'exp', 'exp2', 'exp10',
@@ -142,7 +142,8 @@ from bigfloat.core import (
 
     # 5.6 Comparison Functions
     cmp, cmpabs, is_nan, is_inf, is_finite, is_zero, is_regular, sgn,
-    greater, greaterequal, less, lessequal, equal, lessgreater, unordered,
+    greater, greaterequal, less, lessequal, equal, notequal, lessgreater,
+    unordered,
 
     # 5.7 Special Functions
     log, log2, log10, exp, exp2, exp10,

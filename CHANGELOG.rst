@@ -6,6 +6,8 @@ Library
 
 - Add bigfloat.__version__ (#46).
 
+- Add bigfloat.notequal.
+
 
 What's new in bigfloat 0.3.0?
 =============================

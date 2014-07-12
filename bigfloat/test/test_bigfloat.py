@@ -70,7 +70,7 @@ from bigfloat import (
 
     # 5.6 Comparison Functions
     cmp, cmpabs, is_nan, is_inf, is_finite, is_zero, is_regular, sgn,
-    lessgreater, unordered,
+    notequal, lessgreater, unordered,
 
     # 5.7 Special Functions
     exp,
@@ -409,6 +409,7 @@ class BigFloatTests(unittest.TestCase):
             self.assertIs(x > y, False)
             self.assertIs(x >= y, False)
             self.assertIs(x == y, False)
+            self.assertIs(notequal(x, y), True)
             self.assertIs(lessgreater(x, y), True)
             self.assertIs(unordered(x, y), False)
 
@@ -419,6 +420,7 @@ class BigFloatTests(unittest.TestCase):
             self.assertIs(x < y, False)
             self.assertIs(x > y, False)
             self.assertIs(x != y, False)
+            self.assertIs(notequal(x, y), False)
             self.assertIs(lessgreater(x, y), False)
             self.assertIs(unordered(x, y), False)
 
@@ -429,6 +431,7 @@ class BigFloatTests(unittest.TestCase):
             self.assertIs(x < y, False)
             self.assertIs(x <= y, False)
             self.assertIs(x == y, False)
+            self.assertIs(notequal(x, y), True)
             self.assertIs(lessgreater(x, y), True)
             self.assertIs(unordered(x, y), False)
 
@@ -439,6 +442,7 @@ class BigFloatTests(unittest.TestCase):
             self.assertIs(x >= y, False)
             self.assertIs(x == y, False)
             self.assertIs(x != y, True)
+            self.assertIs(notequal(x, y), True)
             self.assertIs(lessgreater(x, y), False)
             self.assertIs(unordered(x, y), True)
 
