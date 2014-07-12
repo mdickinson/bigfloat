@@ -24,7 +24,7 @@ def build_in_place(python=PYTHON):
 def install(python=PYTHON):
     local(
         "LIBRARY_PATH={library_path} CPATH={include_path} {python} "
-        "setup.py build_ext".format(
+        "setup.py build".format(
             library_path=LIBRARY_PATH,
             include_path=INCLUDE_PATH,
             python=python,
