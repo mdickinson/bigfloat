@@ -740,10 +740,6 @@ class BigFloat(mpfr.Mpfr_t):
                 n = int(digits, 16) * _builtin_pow(2 ** 60, -e, 2 ** 64 - 1)
             return hash(-n if negative else n)
 
-        # != is automatically inferred from == for Python 3.
-        def __ne__(self, other):
-            return not (self == other)
-
         def __nonzero__(self):
             return not is_zero(self)
 
@@ -1368,6 +1364,18 @@ def equal(x, y):
     x = BigFloat._implicit_convert(x)
     y = BigFloat._implicit_convert(y)
     return mpfr.mpfr_equal_p(x, y)
+
+
+def notequal(x, y):
+    """
+    Return True if x != y and False otherwise.
+
+    This function returns True whenever x and/or y is a NaN.
+
+    """
+    x = BigFloat._implicit_convert(x)
+    y = BigFloat._implicit_convert(y)
+    return not mpfr.mpfr_equal_p(x, y)
 
 
 def lessgreater(x, y):
@@ -2463,6 +2471,7 @@ if (mpfr.MPFR_VERSION_MAJOR, mpfr.MPFR_VERSION_MINOR) >= (2, 4):
 
 # comparisons
 BigFloat.__eq__ = _binop(equal)
+BigFloat.__ne__ = _binop(notequal)
 BigFloat.__le__ = _binop(lessequal)
 BigFloat.__lt__ = _binop(less)
 BigFloat.__ge__ = _binop(greaterequal)
