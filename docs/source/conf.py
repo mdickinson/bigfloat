@@ -61,7 +61,6 @@ class MockMpfr(object):
 
 # For the doc build, replace 'mpfr' extension module with a dummy
 # object.
-print "Mocking mpfr"
 sys.modules['mpfr'] = MockMpfr()
 
 # If extensions (or modules to document with autodoc) are in another directory,
