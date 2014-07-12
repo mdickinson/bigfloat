@@ -1635,7 +1635,6 @@ pos 1p+1024 -> Infinity Inexact Overflow
 
 def load_tests(loader, tests, ignore):
     """ Add bigfloat.core doctests to test suite. """
-    import bigfloat.core
     tests.addTests(doctest.DocTestSuite(bigfloat.core))
     return tests
 
