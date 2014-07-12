@@ -147,9 +147,8 @@ class MockBinaryOperation(object):
 
 
 # Dummy class with mock implementations of relevant special methods.
-class OperationRecorder(object):
-    def __init__(self):
-        self.record = []
+class RichObject(object):
+    pass
 
 
 dummy_ops = [
@@ -165,7 +164,7 @@ if sys.version_info >= (3, 5):
     dummy_ops.extend(["matmul", "rmatmul"])
 
 for op in dummy_ops:
-    setattr(OperationRecorder, '__{op}__'.format(op=op),
+    setattr(RichObject, '__{op}__'.format(op=op),
             MockBinaryOperation(op))
 
 
@@ -304,7 +303,7 @@ class BigFloatTests(unittest.TestCase):
         # Check that the binary operations behave well with
         # respect to third-party types.
         bf = BigFloat(123)
-        other = OperationRecorder()
+        other = RichObject()
 
         # Comparisons
         self.assertEqual(bf == other, "eq")
