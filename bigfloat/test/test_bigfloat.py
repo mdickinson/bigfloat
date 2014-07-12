@@ -21,6 +21,7 @@ import doctest
 import fractions
 import operator
 import sys
+import types
 if sys.version_info < (2, 7):
     import unittest2 as unittest
 else:
@@ -139,10 +140,10 @@ class MockBinaryOperation(object):
 
     """
     def __init__(self, returns=None):
-        self.returns = returns
+        self.call = lambda self, other: returns
 
     def __get__(self, obj, objtype=None):
-        return lambda other: self.returns
+        return self.call if obj is None else types.MethodType(self.call, obj)
 
 
 # Dummy class with mock implementations of relevant special methods.
