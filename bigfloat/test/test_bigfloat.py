@@ -17,6 +17,7 @@
 
 
 # Standard library imports
+import contextlib
 import doctest
 import fractions
 import operator
@@ -262,6 +263,110 @@ class BigFloatTests(unittest.TestCase):
                         bf = op(value, x)
                         self.assertIs(type(bf), BigFloat)
                         self.assertEqual(bf.precision, p)
+
+    @contextlib.contextmanager
+    def assertCallsOnce(self, method):
+        old_calls = len(method.record)
+        yield
+        new_calls = len(method.record)
+        self.assertEqual(old_calls+1, new_calls,
+                         "method not called")
+
+    def test_binary_operations_return_not_implemented(self):
+        # Check that the binary operations behave well with
+        # respect to third-party types.
+
+        class dummy_binop(object):
+            def __init__(self, returns=None):
+                self.record = []
+                self.returns = returns
+
+            def __call__(self, *args, **kwargs):
+                self.record.append((args, kwargs))
+
+        class OperationRecorder(object):
+            def __init__(self):
+                self.record = []
+
+            __eq__ = dummy_binop("eq")
+            __ne__ = dummy_binop("ne")
+            __le__ = dummy_binop("le")
+            __lt__ = dummy_binop("lt")
+            __ge__ = dummy_binop("ge")
+            __gt__ = dummy_binop("gt")
+
+            __radd__ = dummy_binop("radd")
+            __rsub__ = dummy_binop("rsub")
+            __rmul__ = dummy_binop("rmul")
+            __rtruediv__ = dummy_binop("rtruediv")
+            __rfloordiv__ = dummy_binop("rfloordiv")
+            __rmod__ = dummy_binop("rmod")
+            __rdivmod__ = dummy_binop("rdivmod")
+            __rpow__ = dummy_binop("rpow")
+
+            if sys.version_info < (3,):
+                __rdiv__ = dummy_binop("rdiv")
+
+            __rlshift__ = dummy_binop("rlshift")
+            __rrshift__ = dummy_binop("rrshift")
+            __rand__ = dummy_binop("rand")
+            __ror__ = dummy_binop("ror")
+            __rxor__ = dummy_binop("rxor")
+
+            if sys.version_info >= (3, 5):
+                __rmatmul__ = dummy_binop("rmatmul")
+
+
+        bf = BigFloat(123)
+        other = OperationRecorder()
+
+        # Comparisons
+        with self.assertCallsOnce(other.__eq__):
+            bf == other
+        with self.assertCallsOnce(other.__ne__):
+            bf != other
+        with self.assertCallsOnce(other.__gt__):
+            bf < other
+        with self.assertCallsOnce(other.__ge__):
+            bf <= other
+        with self.assertCallsOnce(other.__lt__):
+            bf > other
+        with self.assertCallsOnce(other.__le__):
+            bf >= other
+
+        # Arithmetic: +, -, *, /, //, %, divmod, **, %
+        with self.assertCallsOnce(other.__radd__):
+            bf + other
+        with self.assertCallsOnce(other.__rsub__):
+            bf - other
+        with self.assertCallsOnce(other.__rmul__):
+            bf * other
+        if sys.version_info < (3,):
+            operator.div(bf, other)
+        with self.assertCallsOnce(other.__rtruediv__):
+            operator.truediv(bf, other)
+        with self.assertCallsOnce(other.__rfloordiv__):
+            bf // other
+        with self.assertCallsOnce(other.__rmod__):
+            bf % other
+        with self.assertCallsOnce(other.__rdivmod__):
+            divmod(bf, other)
+        with self.assertCallsOnce(other.__rpow__):
+            bf ** other
+        if sys.version_info >= (3, 5):
+            operator.matmul(bf, other)
+
+        # Bitwise: &, ^, |, <<, >>
+        with self.assertCallsOnce(other.__rlshift__):
+            bf << other
+        with self.assertCallsOnce(other.__rrshift__):
+            bf >> other
+        with self.assertCallsOnce(other.__rand__):
+            bf & other
+        with self.assertCallsOnce(other.__rxor__):
+            bf ^ other
+        with self.assertCallsOnce(other.__ror__):
+            bf | other
 
     def test_bool(self):
         # test __nonzero__ / __bool__
@@ -1563,6 +1668,7 @@ pos 1p+1024 -> Infinity Inexact Overflow
 
 def load_tests(loader, tests, ignore):
     """ Add bigfloat.core doctests to test suite. """
+    import bigfloat.core
     tests.addTests(doctest.DocTestSuite(bigfloat.core))
     return tests
 
