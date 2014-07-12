@@ -17,7 +17,6 @@
 
 
 # Standard library imports
-import contextlib
 import doctest
 import fractions
 import operator
@@ -30,6 +29,7 @@ else:
 import bigfloat.core
 
 _builtin_abs = abs
+_builtin_pow = pow
 
 from bigfloat import (
     # version number
@@ -131,6 +131,41 @@ def diffBigFloat(x, y, match_precisions=True):
 
     # no essential difference between x and y
     return None
+
+
+class MockBinaryOperation(object):
+    """
+    Mock binary operation, for testing purposes.
+
+    """
+    def __init__(self, returns=None):
+        self.returns = returns
+
+    def __get__(self, obj, objtype=None):
+        return lambda other: self.returns
+
+
+# Dummy class with mock implementations of relevant special methods.
+class OperationRecorder(object):
+    def __init__(self):
+        self.record = []
+
+
+dummy_ops = [
+    'eq', 'ne', 'le', 'lt', 'ge', 'gt',
+    'add', 'sub', 'mul', 'truediv', 'floordiv', 'mod', 'divmod', 'pow',
+    'lshift', 'rshift', 'and', 'xor', 'or',
+    'radd', 'rsub', 'rmul', 'rtruediv', 'rfloordiv', 'rmod', 'rdivmod', 'rpow',
+    'rlshift', 'rrshift', 'rand', 'rxor', 'ror',
+]
+if sys.version_info < (3,):
+    dummy_ops.extend(["div", "rdiv"])
+if sys.version_info >= (3, 5):
+    dummy_ops.extend(["matmul", "rmatmul"])
+
+for op in dummy_ops:
+    setattr(OperationRecorder, '__{op}__'.format(op=op),
+            MockBinaryOperation(op))
 
 
 class BigFloatTests(unittest.TestCase):
@@ -264,109 +299,41 @@ class BigFloatTests(unittest.TestCase):
                         self.assertIs(type(bf), BigFloat)
                         self.assertEqual(bf.precision, p)
 
-    @contextlib.contextmanager
-    def assertCallsOnce(self, method):
-        old_calls = len(method.record)
-        yield
-        new_calls = len(method.record)
-        self.assertEqual(old_calls+1, new_calls,
-                         "method not called")
-
     def test_binary_operations_return_not_implemented(self):
         # Check that the binary operations behave well with
         # respect to third-party types.
-
-        class dummy_binop(object):
-            def __init__(self, returns=None):
-                self.record = []
-                self.returns = returns
-
-            def __call__(self, *args, **kwargs):
-                self.record.append((args, kwargs))
-
-        class OperationRecorder(object):
-            def __init__(self):
-                self.record = []
-
-            __eq__ = dummy_binop("eq")
-            __ne__ = dummy_binop("ne")
-            __le__ = dummy_binop("le")
-            __lt__ = dummy_binop("lt")
-            __ge__ = dummy_binop("ge")
-            __gt__ = dummy_binop("gt")
-
-            __radd__ = dummy_binop("radd")
-            __rsub__ = dummy_binop("rsub")
-            __rmul__ = dummy_binop("rmul")
-            __rtruediv__ = dummy_binop("rtruediv")
-            __rfloordiv__ = dummy_binop("rfloordiv")
-            __rmod__ = dummy_binop("rmod")
-            __rdivmod__ = dummy_binop("rdivmod")
-            __rpow__ = dummy_binop("rpow")
-
-            if sys.version_info < (3,):
-                __rdiv__ = dummy_binop("rdiv")
-
-            __rlshift__ = dummy_binop("rlshift")
-            __rrshift__ = dummy_binop("rrshift")
-            __rand__ = dummy_binop("rand")
-            __ror__ = dummy_binop("ror")
-            __rxor__ = dummy_binop("rxor")
-
-            if sys.version_info >= (3, 5):
-                __rmatmul__ = dummy_binop("rmatmul")
-
-
         bf = BigFloat(123)
         other = OperationRecorder()
 
         # Comparisons
-        with self.assertCallsOnce(other.__eq__):
-            bf == other
-        with self.assertCallsOnce(other.__ne__):
-            bf != other
-        with self.assertCallsOnce(other.__gt__):
-            bf < other
-        with self.assertCallsOnce(other.__ge__):
-            bf <= other
-        with self.assertCallsOnce(other.__lt__):
-            bf > other
-        with self.assertCallsOnce(other.__le__):
-            bf >= other
+        self.assertEqual(bf == other, "eq")
+        self.assertEqual(bf != other, "ne")
+        self.assertEqual(bf < other, "gt")
+        self.assertEqual(bf > other, "lt")
+        self.assertEqual(bf <= other, "ge")
+        self.assertEqual(bf >= other, "le")
 
         # Arithmetic: +, -, *, /, //, %, divmod, **, %
-        with self.assertCallsOnce(other.__radd__):
-            bf + other
-        with self.assertCallsOnce(other.__rsub__):
-            bf - other
-        with self.assertCallsOnce(other.__rmul__):
-            bf * other
+        self.assertEqual(bf + other, "radd")
+        self.assertEqual(bf - other, "rsub")
+        self.assertEqual(bf * other, "rmul")
+        self.assertEqual(operator.truediv(bf, other), "rtruediv")
+        self.assertEqual(bf // other, "rfloordiv")
+        self.assertEqual(bf % other, "rmod")
+        self.assertEqual(divmod(bf, other), "rdivmod")
+        self.assertEqual(bf ** other, "rpow")
+        self.assertEqual(_builtin_pow(bf, other), "rpow")
         if sys.version_info < (3,):
-            operator.div(bf, other)
-        with self.assertCallsOnce(other.__rtruediv__):
-            operator.truediv(bf, other)
-        with self.assertCallsOnce(other.__rfloordiv__):
-            bf // other
-        with self.assertCallsOnce(other.__rmod__):
-            bf % other
-        with self.assertCallsOnce(other.__rdivmod__):
-            divmod(bf, other)
-        with self.assertCallsOnce(other.__rpow__):
-            bf ** other
+            self.assertEqual(operator.div(bf, other), "rdiv")
         if sys.version_info >= (3, 5):
-            operator.matmul(bf, other)
+            self.assertEqual(operator.matmul(bf, other), "rmatmul")
 
         # Bitwise: &, ^, |, <<, >>
-        with self.assertCallsOnce(other.__rlshift__):
-            bf << other
-        with self.assertCallsOnce(other.__rrshift__):
-            bf >> other
-        with self.assertCallsOnce(other.__rand__):
-            bf & other
-        with self.assertCallsOnce(other.__rxor__):
-            bf ^ other
-        with self.assertCallsOnce(other.__ror__):
-            bf | other
+        self.assertEqual(bf << other, "rlshift")
+        self.assertEqual(bf >> other, "rrshift")
+        self.assertEqual(bf & other, "rand")
+        self.assertEqual(bf ^ other, "rxor")
+        self.assertEqual(bf | other, "ror")
 
     def test_bool(self):
         # test __nonzero__ / __bool__
