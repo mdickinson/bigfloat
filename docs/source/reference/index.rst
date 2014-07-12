@@ -522,6 +522,9 @@ comparison operators.
 .. autofunction:: equal 
 .. autofunction:: notequal
 
+.. versionadded:: 0.4
+   The :func:`notequal` function was added in version 0.4.
+
 There are two additional comparison functions that don't
 correspond to any of the Python comparison operators.
 
