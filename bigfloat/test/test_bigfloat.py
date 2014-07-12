@@ -21,6 +21,7 @@ import doctest
 import fractions
 import operator
 import sys
+import types
 if sys.version_info < (2, 7):
     import unittest2 as unittest
 else:
@@ -29,6 +30,7 @@ else:
 import bigfloat.core
 
 _builtin_abs = abs
+_builtin_pow = pow
 
 from bigfloat import (
     # version number
@@ -130,6 +132,40 @@ def diffBigFloat(x, y, match_precisions=True):
 
     # no essential difference between x and y
     return None
+
+
+class MockBinaryOperation(object):
+    """
+    Mock binary operation, for testing purposes.
+
+    """
+    def __init__(self, returns=None):
+        self.call = lambda self, other: returns
+
+    def __get__(self, obj, objtype=None):
+        return self.call if obj is None else types.MethodType(self.call, obj)
+
+
+# Dummy class with mock implementations of relevant special methods.
+class RichObject(object):
+    pass
+
+
+dummy_ops = [
+    'eq', 'ne', 'le', 'lt', 'ge', 'gt',
+    'add', 'sub', 'mul', 'truediv', 'floordiv', 'mod', 'divmod', 'pow',
+    'lshift', 'rshift', 'and', 'xor', 'or',
+    'radd', 'rsub', 'rmul', 'rtruediv', 'rfloordiv', 'rmod', 'rdivmod', 'rpow',
+    'rlshift', 'rrshift', 'rand', 'rxor', 'ror',
+]
+if sys.version_info < (3,):
+    dummy_ops.extend(["div", "rdiv"])
+if sys.version_info >= (3, 5):
+    dummy_ops.extend(["matmul", "rmatmul"])
+
+for op in dummy_ops:
+    setattr(RichObject, '__{op}__'.format(op=op),
+            MockBinaryOperation(op))
 
 
 class BigFloatTests(unittest.TestCase):
@@ -262,6 +298,42 @@ class BigFloatTests(unittest.TestCase):
                         bf = op(value, x)
                         self.assertIs(type(bf), BigFloat)
                         self.assertEqual(bf.precision, p)
+
+    def test_binary_operations_return_not_implemented(self):
+        # Check that the binary operations behave well with
+        # respect to third-party types.
+        bf = BigFloat(123)
+        other = RichObject()
+
+        # Comparisons
+        self.assertEqual(bf == other, "eq")
+        self.assertEqual(bf != other, "ne")
+        self.assertEqual(bf < other, "gt")
+        self.assertEqual(bf > other, "lt")
+        self.assertEqual(bf <= other, "ge")
+        self.assertEqual(bf >= other, "le")
+
+        # Arithmetic: +, -, *, /, //, %, divmod, **, %
+        self.assertEqual(bf + other, "radd")
+        self.assertEqual(bf - other, "rsub")
+        self.assertEqual(bf * other, "rmul")
+        self.assertEqual(operator.truediv(bf, other), "rtruediv")
+        self.assertEqual(bf // other, "rfloordiv")
+        self.assertEqual(bf % other, "rmod")
+        self.assertEqual(divmod(bf, other), "rdivmod")
+        self.assertEqual(bf ** other, "rpow")
+        self.assertEqual(_builtin_pow(bf, other), "rpow")
+        if sys.version_info < (3,):
+            self.assertEqual(operator.div(bf, other), "rdiv")
+        if sys.version_info >= (3, 5):
+            self.assertEqual(operator.matmul(bf, other), "rmatmul")
+
+        # Bitwise: &, ^, |, <<, >>
+        self.assertEqual(bf << other, "rlshift")
+        self.assertEqual(bf >> other, "rrshift")
+        self.assertEqual(bf & other, "rand")
+        self.assertEqual(bf ^ other, "rxor")
+        self.assertEqual(bf | other, "ror")
 
     def test_bool(self):
         # test __nonzero__ / __bool__
