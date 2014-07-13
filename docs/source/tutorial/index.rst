@@ -1,16 +1,17 @@
 Tutorial
 --------
 
-Start by importing the contents of the package (assuming that you've
-already installed it and its prerequisites) with:
+.. currentmodule:: bigfloat
+
+Start by importing the contents of the package with:
 
    >>> from bigfloat import *
 
 You should be a little bit careful here: this import brings a fairly large
 number of functions into the current namespace, four of which shadow existing
-Python builtins, namely ``abs``, ``max``, ``min`` and ``pow``.  In normal usage
-you'll probably only want to import the classes and functions that you actually
-need.
+Python builtins, namely :func:`abs`, :func:`max`, :func:`min` and :func:`pow`.
+In normal usage you'll probably only want to import the classes and functions
+that you actually need.
 
 
 :class:`BigFloat` construction
@@ -49,7 +50,7 @@ argument to the constructor:
 
 The first argument to the :class:`BigFloat` constructor is rounded to
 the correct precision using the *current rounding mode*, which
-defaults to ``RoundTiesToEven``; again, this can be overridden with
+defaults to :data:`RoundTiesToEven`; again, this can be overridden with
 the ``context`` keyword argument:
 
    >>> BigFloat('3.14')
@@ -59,45 +60,45 @@ the ``context`` keyword argument:
    >>> BigFloat('3.14', context=RoundTowardPositive + precision(24))
    BigFloat.exact('3.14000010', precision=24)
 
-More generally, the second argument to the :class:`BigFloat`
-constructor can be any instance of the :class:`Context` class.  The
-various rounding modes are all Context instances, and ``precision`` is
-a function returning a Context:
+More generally, the second argument to the :class:`BigFloat` constructor can be
+any instance of the :class:`Context` class.  The various rounding modes are all
+:class:`Context` instances, and :func:`precision` is a function returning a
+:class:`Context`:
 
    >>> RoundTowardNegative
-   Context(rounding='RoundTowardNegative')
+   Context(rounding=ROUND_TOWARD_NEGATIVE)
    >>> precision(1000)
    Context(precision=1000)
 
-Context instances can be combined by addition, as seen above.
+:class:`Context` instances can be combined by addition, as seen above.
 
    >>> precision(1000) + RoundTowardNegative
-   Context(precision=1000, rounding='RoundTowardNegative')
+   Context(precision=1000, rounding=ROUND_TOWARD_NEGATIVE)
 
 When adding two contexts that both specify values for a particular
 attribute, the value for the right-hand addend takes precedence::
 
-   >>> c = Context(subnormalize=False, rounding='RoundTowardPositive')
+   >>> c = Context(subnormalize=False, rounding=ROUND_TOWARD_POSITIVE)
    >>> double_precision
    Context(precision=53, emax=1024, emin=-1073, subnormalize=True)
    >>> double_precision + c
    Context(precision=53, emax=1024, emin=-1073, subnormalize=False,
-   rounding='RoundTowardPositive')
+   rounding=ROUND_TOWARD_POSITIVE)
    >>> c + double_precision
    Context(precision=53, emax=1024, emin=-1073, subnormalize=True,
-   rounding='RoundTowardPositive')
+   rounding=ROUND_TOWARD_POSITIVE)
 
-The :mod:`bigfloat` package also defines various constant Context instances.
-For example, ``quadruple_precision`` is a Context that corresponds to
-the IEEE 754 binary128 interchange format::
+The :mod:`bigfloat` package also defines various constant :class:`Context`
+instances.  For example, :data:`quadruple_precision` is a :class:`Context`
+object that corresponds to the IEEE 754 binary128 interchange format::
 
    >>> quadruple_precision
    Context(precision=113, emax=16384, emin=-16493, subnormalize=True)
    >>> BigFloat('1.1', quadruple_precision)
    BigFloat.exact('1.10000000000000000000000000000000008', precision=113)
 
-The current settings for precision and rounding mode given by the
-*current context*, accessible via the :func:`getcontext` function:
+The current settings for precision and rounding mode given by the :ref:`current
+context <current context>`, accessible via the :func:`getcontext` function:
 
    >>> getcontext()
    Context(precision=53, emax=1073741823, emin=-1073741823, subnormalize=False,
@@ -107,7 +108,7 @@ There's also a :func:`setcontext` function for changing the current
 context; however, the preferred method for making temporary changes to
 the current context is to use Python's with statement.  More on this below.
 
-Note that (in contrast to Python's standard library decimal module),
+Note that (in contrast to Python's standard library :mod:`decimal` module),
 :class:`Context` instances are immutable.
 
 There's a second method for constructing :class:`BigFloat`
@@ -125,16 +126,15 @@ setting):
    >>> BigFloat.exact(-56.7)
    BigFloat.exact('-56.700000000000003', precision=53)
 
-For strings, :meth:`BigFloat.exact` accepts a second ``precision``
-argument, and always rounds using the ``RoundTiesToEven`` rounding
-mode.
+For strings, :meth:`BigFloat.exact` accepts a second ``precision`` argument,
+and always rounds using the :data:`ROUND_TIES_TO_EVEN` rounding mode.
 
    >>> BigFloat.exact('1.1', precision=80)
    BigFloat.exact('1.1000000000000000000000003', precision=80)
 
-The result of a call to :class:`BigFloat`.exact is independent of the current
+The result of a call to :meth:`BigFloat.exact` is independent of the current
 context; this is why the :func:`repr` of a :class:`BigFloat` is expressed in
-terms of :meth:`BigFloat.exact`.  The :func:`str` of a :class:`BigFloat` looks
+terms of :meth:`BigFloat.exact`.  The :class:`str` of a :class:`BigFloat` looks
 prettier, but doesn't supply enough information to recover that
 :class:`BigFloat` exactly if you don't know the precision:
 
@@ -162,7 +162,7 @@ the exact mathematical result to the nearest :class:`BigFloat`.
 
 For mixed-type operations, the integer or float is converted *exactly*
 to a :class:`BigFloat` before the operation (as though the
-:class:`BigFloat`.exact constructor had been applied to it).  So
+:meth:`BigFloat.exact` constructor had been applied to it).  So
 there's only a single point where precision might be lost: namely,
 when the result of the operation is rounded to the nearest value
 representable as a :class:`BigFloat`.
@@ -193,7 +193,7 @@ corresponds to usual (true) division:
 
 This is useful for a couple of reasons: one reason is that it makes it
 possible to use ``div(x, y)`` in contexts where a :class:`BigFloat` result is
-desired but where one or both of x and y might be an integer or float.
+desired but where one or both of ``x`` and ``y`` might be an integer or float.
 But a more important reason is that these functions, like the :class:`BigFloat`
 constructor, accept an extra ``context`` keyword argument giving a
 context for the operation::
@@ -201,7 +201,7 @@ context for the operation::
    >>> div(355, 113, context=single_precision)
    BigFloat.exact('3.14159298', precision=24)
 
-Similarly, the ``sub`` function corresponds to Python's subtraction
+Similarly, the :func:`sub` function corresponds to Python's subtraction
 operation.  To fully appreciate some of the subtleties of the ways
 that binary arithmetic operations might be performed, note the
 difference in the results of the following:
@@ -234,44 +234,46 @@ The :mod:`bigfloat` package provides a number of standard mathematical
 functions.  These functions follow the same rules as the arithmetic
 operations above:
 
-  - the arguments can be integers, floats or :class:`BigFloat` instances
+- the arguments can be integers, floats or :class:`BigFloat` instances
 
-  - integers and float arguments are converted exactly to :class:`BigFloat`
-    instances before the function is applied
+- integers and float arguments are converted exactly to :class:`BigFloat`
+  instances before the function is applied
 
-  - the result is a :class:`BigFloat` instance, with the precision of
-    the result, and the rounding mode used to obtain the result, taken
-    from the current context.
+- the result is a :class:`BigFloat` instance, with the precision of
+  the result, and the rounding mode used to obtain the result, taken
+  from the current context.
 
-  - attributes of the current context can be overridden by providing
-    an additional ``context`` keyword argument.  Here are some
-    examples:
+- attributes of the current context can be overridden by providing
+  an additional ``context`` keyword argument.
 
-   >>> sqrt(1729, context=RoundTowardZero)
-   BigFloat.exact('41.581245772583578', precision=53)
-   >>> sqrt(1729, context=RoundTowardPositive)
-   BigFloat.exact('41.581245772583586', precision=53)
-   >>> atanh(0.5, context=precision(20))
-   BigFloat.exact('0.54930592', precision=20)
-   >>> const_catalan(precision(1000))
-   BigFloat.exact('0.9159655941772190150546035149323841107741493742816721342664
-   9811962176301977625476947935651292611510624857442261919619957903589880332585
-   9059431594737481158406995332028773319460519038727478164087865909024706484152
-   1630002287276409423882599577415088163974702524820115607076448838078733704899
-   00864775113226027', precision=1000)
-   >>> 4*exp(-const_pi()/2/agm(1, 1e-100))
-   BigFloat.exact('9.9999999999998517e-101', precision=53)
+Here are some examples::
 
-For a full list of the supported functions, see the reference manual.
+    >>> sqrt(1729, context=RoundTowardZero)
+    BigFloat.exact('41.581245772583578', precision=53)
+    >>> sqrt(1729, context=RoundTowardPositive)
+    BigFloat.exact('41.581245772583586', precision=53)
+    >>> atanh(0.5, context=precision(20))
+    BigFloat.exact('0.54930592', precision=20)
+    >>> const_catalan(precision(1000))
+    BigFloat.exact('0.9159655941772190150546035149323841107741493742816721342664
+    9811962176301977625476947935651292611510624857442261919619957903589880332585
+    9059431594737481158406995332028773319460519038727478164087865909024706484152
+    1630002287276409423882599577415088163974702524820115607076448838078733704899
+    00864775113226027', precision=1000)
+    >>> 4*exp(-const_pi()/2/agm(1, 1e-100))
+    BigFloat.exact('9.9999999999998517e-101', precision=53)
+
+For a full list of the supported functions, see the :ref:`standard functions`
+section of the :ref:`api reference`.
 
 Controlling the precision and rounding mode
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 We've seen one way of controlling precision and rounding mode, via the
 ``context`` keyword argument.  There's another way that's often more
-convenient, especially when a single context change is supposed to
-apply to multiple operations: contexts can be used directly in Python
-``with`` statements.
+convenient, especially when a single context change is supposed to apply to
+multiple operations: contexts can be used directly in Python's :ref:`with
+<with>` statement.
 
 For example, here we compute high-precision upper and lower-bounds for
 the thousandth harmonic number:
@@ -323,12 +325,12 @@ A more permanent change to the context can be effected using the
 An important point here is that in any place that a context is used,
 only the attributes specified by that context are changed.  For
 example, the context ``precision(30)`` only has the ``precision``
-attribute, so only that attribute is affected by the ``setcontext``
+attribute, so only that attribute is affected by the :func:`setcontext`
 call; the other attributes are not changed.  Similarly, the
 ``setcontext(RoundTowardZero)`` line above doesn't affect the
 precision.
 
-There's a ``DefaultContext`` constant giving the default context, so
+There's a :data:`DefaultContext` constant giving the default context, so
 you can always restore the original default context as follows:
 
    >>> setcontext(DefaultContext)
