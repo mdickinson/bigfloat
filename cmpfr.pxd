@@ -305,6 +305,8 @@ cdef extern from "mpfr.h":
     const char *mpfr_get_patches()
     int mpfr_buildopt_tls_p()
     int mpfr_buildopt_decimal_p()
+    int mpfr_buildopt_gmpinternals_p()
+    const char *mpfr_buildopt_tune_case()
 
 
     ###########################################################################

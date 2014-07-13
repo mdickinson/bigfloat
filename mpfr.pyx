@@ -2466,6 +2466,27 @@ def mpfr_buildopt_decimal_p():
     """
     return bool(cmpfr.mpfr_buildopt_decimal_p())
 
+def mpfr_buildopt_gmpinternals_p():
+    """
+    Return True if MPFR was compiled with GMP internals (that is, MPFR was
+    built with either --with-gmp-build or --enable-gmp-internals configure
+    option), return False otherwise.
+
+    """
+    return bool(cmpfr.mpfr_buildopt_gmpinternals_p())
+
+def mpfr_buildopt_tune_case():
+    """
+    Return a string saying which thresholds file has been used at compile
+    time. This file is normally selected from the processor type.
+
+    """
+    cdef bytes thresholds = cmpfr.mpfr_buildopt_tune_case()
+    if sys.version_info < (3,):
+        return thresholds
+    else:
+        return thresholds.decode('ascii')
+
 
 ###############################################################################
 # 5.13 Exception Related Functions

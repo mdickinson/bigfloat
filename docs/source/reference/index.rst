@@ -1,3 +1,5 @@
+.. _api reference:
+
 API Reference
 -------------
 
@@ -76,7 +78,7 @@ zero, and NaNs.
       resulting :class:`BigFloat` has a precision sufficiently large to hold the
       converted value exactly.  If value is a string, then the
       precision argument must be given.  The string is converted using
-      the given precision and the RoundTiesToEven rounding mode.
+      the given precision and the :data:`RoundTiesToEven` rounding mode.
 
    .. method:: fromhex(cls, value, context=None)
 
@@ -132,7 +134,7 @@ deviations from expected behaviour.
   does not affect the result of a comparison.
 
 * Conversions to int and long always round towards zero; conversions
-  to float always use the ``RoundTiesToEven`` rounding mode.
+  to float always use the :data:`ROUND_TIES_TO_EVEN` rounding mode.
   Conversion to bool returns False for a nonzero :class:`BigFloat` and True
   otherwise.  None of these conversions is affected by the current
   context.
@@ -152,16 +154,16 @@ a rounding mode.
 
 .. class:: Context(precision=None, emin=None, emax=None, subnormalize=None, rounding=None)
 
-   Create a new Context object with the given attributes.  Not all
-   attributes need to be specified.  Note that all attributes of the
-   generated Context are read-only.  Attributes that are unset for
-   this Context instance return ``None``.
+   Create a new :class:`Context` object with the given attributes.  Not all
+   attributes need to be specified.  Note that all attributes of the generated
+   :class:`Context` are read-only.  Attributes that are unset for this
+   :class:`Context` instance return ``None``.
 
    .. attribute:: precision
 
       Precision of the floating-point format, given in bits.  This
-      should be an integer in the range [``PRECISION_MIN``,
-      ``PRECISION_MAX``].  ``PRECISION_MIN`` is usually ``2``.
+      should be an integer in the range [:data:`PRECISION_MIN`,
+      :data:`PRECISION_MAX`].
 
    .. attribute:: emax
 
@@ -189,26 +191,25 @@ a rounding mode.
 
    .. attribute:: rounding
 
-      The rounding mode of this Context.  This should be a string.
-      Valid values are 'RoundTiesToEven', 'RoundTowardZero',
-      'RoundTowardPositive' and 'RoundTowardNegative'.  Note that the
-      rounding modes ``RoundTiesToEven``, etc. exported by the
-      :mod:`bigfloat` package are Context instances, not strings, so
-      cannot be used directly here.
+      The rounding mode of this :class:`Context`, for example
+      :data:`ROUND_TIES_TO_EVEN`.  The available rounding modes are described
+      in the :ref:`rounding modes` section.  Note that the values
+      :data:`RoundTiesToEven`, etc. exported by the :mod:`bigfloat` package are
+      :class:`Context` instances, not rounding modes, so cannot be used directly here.
 
 
 :class:`Context` instances can be added.  If ``x`` and ``y`` are
-Context instances then ``x + y`` is the Context whose attributes
+:class:`Context` instances then ``x + y`` is the :class:`Context` whose attributes
 combine those of ``x`` and ``y``.  In the case that both ``x`` and
 ``y`` have a particular attribute set, the value for ``y`` takes
 precedence:
 
-   >>> x = Context(precision=200, rounding='RoundTiesToEven')
+   >>> x = Context(precision=200, rounding=ROUND_TIES_TO_EVEN)
    >>> y = Context(precision=53, subnormalize=True)
    >>> x + y
-   Context(precision=53, subnormalize=True, rounding='RoundTiesToEven')
+   Context(precision=53, subnormalize=True, rounding=ROUND_TIES_TO_EVEN)
    >>> y + x
-   Context(precision=200, subnormalize=True, rounding='RoundTiesToEven')
+   Context(precision=200, subnormalize=True, rounding=ROUND_TIES_TO_EVEN)
 
 :class:`Context` instances can be used in with statements to alter
 the current context.  In effect, ::
@@ -227,7 +228,7 @@ except that nesting of with statements works as you'd expect, and the
 old context is guaranteed to be restored even if an exception occurs
 during execution of the block.
 
-Note that for Context instances ``x`` and ``y``, ::
+Note that for :class:`Context` instances ``x`` and ``y``, ::
 
    with x + y:
        <block>
@@ -249,7 +250,7 @@ instances.
 
 .. data:: EmptyContext
 
-   Equal to Context().  Occasionally useful where a context is
+   Equal to ``Context()``.  Occasionally useful where a context is
    syntactically required for a with statement, but no change to the
    current context is desired.  For example::
 
@@ -278,16 +279,18 @@ instances.
 
 .. data:: RoundTiesToEven
 .. data:: RoundTowardZero
+.. data:: RoundAwayFromZero
 .. data:: RoundTowardPositive
 .. data:: RoundTowardNegative
 
-   Contexts corresponding to the four available rounding modes.
-   ``RoundTiesToEven`` rounds the result of an operation or function
-   to the nearest representable :class:`BigFloat`, with ties rounded to the
-   :class:`BigFloat` whose least significant bit is zero.  ``RoundTowardZero``
-   rounds results towards zero.  ``RoundTowardPositive`` rounds
-   results towards positive infinity, and ``RoundTowardsNegative``
-   rounds results towards negative infinity.
+   :class:`Context` objects corresponding to the five available `rounding modes
+   <rounding modes_>`_.  ``RoundTiesToEven`` rounds the result of an operation
+   or function to the nearest representable :class:`BigFloat`, with ties
+   rounded to the :class:`BigFloat` whose least significant bit is zero.
+   ``RoundTowardZero`` rounds results towards zero.  ``RoundAwayFromZero``
+   rounds results away from zero.  ``RoundTowardPositive`` rounds results
+   towards positive infinity, and ``RoundTowardsNegative`` rounds results
+   towards negative infinity.
 
 Constants
 """""""""
@@ -295,32 +298,32 @@ Constants
 .. data:: PRECISION_MIN
 .. data:: PRECISION_MAX
 
-   Minimum and maximum precision that's valid for Contexts and
+   Minimum and maximum precision that's valid for :class:`Context` and
    :class:`BigFloat` instances.  In the current implementation,
    ``PRECISION_MIN`` is ``2`` and ``PRECISION_MAX`` is ``2**31-1``.
 
 .. data:: EMIN_MIN
 .. data:: EMIN_MAX
 
-   Minimum and maximum allowed values for the Context emin attribute.
+   Minimum and maximum allowed values for the :class:`Context` emin attribute.
    In the current implementation, ``EMIN_MIN == -EMIN_MAX == 1-2**30``.
 
 .. data:: EMAX_MIN
 .. data:: EMAX_MAX
 
-   Minimum and maximum allowed values for the Context emax attribute.
+   Minimum and maximum allowed values for the :class:`Context` emax attribute.
    In the current implementation, ``-EMAX_MIN == EMAX_MAX == 2**30-1``.
 
+.. _current context:
 
 The current context
 """""""""""""""""""
 
-There can be many Context objects in existence at one time, but
-there's only ever one *current context*.  The current context is given
-by a thread-local :class:`Context` instance.  Whenever the :class:`BigFloat`
-constructor is called, or any arithmetic operation or standard
-function computation is performed, the current context is consulted to
-determine:
+There can be many :class:`Context` objects in existence at one time, but
+there's only ever one *current context*.  The current context is given by a
+thread-local :class:`Context` instance.  Whenever the :class:`BigFloat`
+constructor is called, or any arithmetic operation or standard function
+computation is performed, the current context is consulted to determine:
 
 * The format that the result of the operation or function should take
   (as specified by the ``precision``, ``emax``, ``emin`` and
@@ -353,6 +356,41 @@ function that's often useful in calculations:
 
 .. autofunction:: extra_precision
 
+
+.. _rounding modes:
+
+Rounding modes
+^^^^^^^^^^^^^^
+
+.. data:: ROUND_TIES_TO_EVEN
+
+   This is the default rounding mode.  The number to be rounded is mapped to
+   the nearest representable value.  In the case where that number is exactly
+   midway between the two closest representable values, it is mapped to the
+   value with least significant bit set to zero.
+
+.. data:: ROUND_TOWARD_ZERO
+
+   The number to be rounded is mapped to the nearest representable value
+   that's smaller than or equal to the original number in absolute value.
+
+.. data:: ROUND_AWAY_FROM_ZERO
+
+   The number to be rounded is mapped to the nearest representable value
+   that's greater than or equal to the original number in absolute value.
+
+.. data:: ROUND_TOWARD_POSITIVE
+
+   The number to be rounded is mapped to the nearest representable value
+   greater than or equal to the original number. 
+
+.. data:: ROUND_TOWARD_NEGATIVE
+
+   The number to be rounded is mapped to the nearest representable value
+   less than or equal to the original number. 
+
+
+.. _standard functions:
 
 Standard functions
 ^^^^^^^^^^^^^^^^^^
