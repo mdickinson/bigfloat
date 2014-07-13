@@ -1818,6 +1818,33 @@ def mpfr_free_cache():
     cmpfr.mpfr_free_cache()
 
 
+###########################################################################
+# 5.9 Formatted Output Functions
+###########################################################################
+
+def mpfr_asprintf(object template, Mpfr_t op not None):
+    """
+    Compute a string representation of 'op' based on the given template.
+
+    XXX: Fill in details.
+    """
+    cdef char *output
+    cdef bytes template_bytes = template.encode('ascii')
+    rv = cmpfr.mpfr_asprintf(&output, template_bytes, &op._value)
+    if rv < 0:
+       raise RuntimeError("Error during string conversion.")
+
+    try:
+        output_as_bytes = bytes(output)
+    finally:
+        cmpfr.mpfr_free_str(output)
+
+    if sys.version_info < (3,):
+        return output_as_bytes
+    else:
+        return output_as_bytes.decode('ascii')
+
+
 ###############################################################################
 # 5.10 Integer and Remainder Related Functions
 ###############################################################################
@@ -2825,12 +2852,19 @@ def mpfr_erangeflag_p():
 #  5.8 Input and Output Functions
 #  ------------------------------
 #
+#  The following functions are unlikely to be implemented: it
+#  doesn't make a lot of sense to bypass Python's file handling
+#  mechanisms to read and write directly to a file.
+#
 #  mpfr_out_str
 #  mpfr_inp_str
 #
 #
 #  5.9 Formatted Output Functions
 #  ------------------------------
+#
+#  We wrap mpfr_asprintf (for a single argument Mpfr_t argument only).
+#  That's enough to expose MPFR's formatting capabilities to Python.
 #
 #  mpfr_fprintf
 #  mpfr_vfprintf
@@ -2844,7 +2878,6 @@ def mpfr_erangeflag_p():
 #  mpfr_snprintf
 #  mpfr_vsnprintf
 #
-#  mpfr_asprintf
 #  mpfr_vasprintf
 #
 #
