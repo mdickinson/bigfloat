@@ -76,10 +76,9 @@ For demonstration purposes, start with::
 
     >>> from bigfloat import *
 
-Note that this import shadows four builtin Python functions, namely
-``abs``, ``max``, ``min`` and ``pow``.  In normal usage you'll
-probably only want to import the classes and functions that you
-actually need.
+Note that this import shadows five builtin Python functions, namely ``abs``,
+``max``, ``min``, ``pow`` and ``round``.  In normal usage you'll probably only
+want to import the classes and functions that you actually need.
 
 The main class is the ``BigFloat`` class::
 
