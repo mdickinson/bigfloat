@@ -956,10 +956,10 @@ def get_formatted_str(op, conv,
     if alternative_form:
         flags += '#'
 
-    if conv not in 'a', 'A', 'b', 'e', 'E', 'f', 'F', 'g', 'G':
+    if conv not in ('a', 'A', 'b', 'e', 'E', 'f', 'F', 'g', 'G'):
         raise ValueError("Invalid conversion specifier: {0}".format(conv))
 
-    if rounding_mode not in 'U', 'D', 'Y', 'Z', 'N', '':
+    if rounding_mode not in ('U', 'D', 'Y', 'Z', 'N', ''):
         raise ValueError("Invalid rounding mode: {0}".format(rounding_mode))
 
     precision = '' if precision is None else '.{}'.format(precision)

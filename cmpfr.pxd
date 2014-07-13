@@ -237,7 +237,7 @@ cdef extern from "mpfr.h":
     # 5.9 Formatted Output Functions
     ###########################################################################
 
-    int mpfr_asprintf(char **str, const char *template, mpfr_ptr op)
+    int mpfr_asprintf(char **str, const char *template, ...)
 
     ###########################################################################
     # 5.10 Integer and Remainder Related Functions
