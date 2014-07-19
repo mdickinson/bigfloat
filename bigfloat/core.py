@@ -43,7 +43,7 @@ from bigfloat.context import (
     _apply_function_in_current_context,
 )
 
-from bigfloat.formatting import parse_format_specifier
+from bigfloat.formatting import parse_format_specifier, format_align
 
 
 # Alternative names for some builtins that get overwritten by functions created
@@ -407,25 +407,7 @@ class BigFloat(mpfr.Mpfr_t):
         if not sign and spec['sign'] in '+ ':
             sign = spec['sign']
 
-        # Post-process for filling and alignment.
-        align = spec['align']
-        fill = spec['fill']
-        pad_length = spec['minimumwidth'] - len(sign) - len(body)
-        pad1, pad2 = pad_length // 2 * fill, -(-pad_length // 2) * fill
-        if align == '<':
-            formatted = sign + body + pad1 + pad2
-        elif align == '>':
-            formatted = pad1 + pad2 + sign + body
-        elif align == '^':
-            formatted = pad1 + sign + body + pad2
-        elif align == '=':
-            formatted = sign + pad1 + pad2 + body
-        else:
-            raise ValueError(
-                "Invalid alignment specification "
-                "character: {!r}".format(align))
-
-        return formatted
+        return format_align(sign, body, spec)
 
     def _sign(self):
         return mpfr.mpfr_signbit(self)

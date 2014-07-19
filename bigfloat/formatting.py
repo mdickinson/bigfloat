@@ -59,3 +59,27 @@ def parse_format_specifier(specification):
     format_dict['minimumwidth'] = int(format_dict['minimumwidth'] or '0')
 
     return format_dict
+
+
+def format_align(sign, body, spec):
+    """Given an unpadded, non-aligned numeric string 'body' and sign
+    string 'sign', add padding and alignment conforming to the given
+    format specifier dictionary 'spec' (as produced by
+    parse_format_specifier).
+
+    """
+    padding = spec['fill'] * (spec['minimumwidth'] - len(sign) - len(body))
+    align = spec['align']
+    if align == '<':
+        result = sign + body + padding
+    elif align == '>':
+        result = padding + sign + body
+    elif align == '=':
+        result = sign + padding + body
+    elif align == '^':
+        half = len(padding)//2
+        result = padding[:half] + sign + body + padding[half:]
+    else:
+        raise ValueError("Unrecognised alignment field: {!r}".format(align))
+
+    return result
