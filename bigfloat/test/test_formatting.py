@@ -39,7 +39,6 @@ class TestFormatting(unittest.TestCase):
             # . only retained with 'alternate' formatting
             (BigFloat(2), ".0f", "2"),
             # Default precision is 6.
-            (BigFloat(2), ".f", "2.000000"),
             (BigFloat(2), "f", "2.000000"),
             (BigFloat('nan'), "f", "nan"),
             (BigFloat('-nan'), "f", "nan"),
@@ -141,7 +140,6 @@ class TestFormatting(unittest.TestCase):
             (BigFloat('-inf'), "E", "-INF"),
             (BigFloat(314.1592653589793), ".0e", "3e+02"),
             (BigFloat(314.1592653589793), "#.0e", "3.e+02"),
-            (BigFloat(314.1592653589793), ".e", "3.1415926535897933e+02"),
             (BigFloat(314.1592653589793), "e", "3.1415926535897933e+02"),
             (BigFloat(314.1592653589793), "6e", "3.1415926535897933e+02"),
 
@@ -166,7 +164,6 @@ class TestFormatting(unittest.TestCase):
             (BigFloat(314.1592653589793), ".1g", "3e+02"),
             (BigFloat(314.1592653589793), "#.0g", "3.e+02"),
             (BigFloat(314.1592653589793), "#.1g", "3.e+02"),
-            (BigFloat(314.1592653589793), ".g", "314.159"),
             (BigFloat(314.1592653589793), "g", "314.159"),
             (BigFloat(314.1592653589793), "6g", "314.159"),
             # Trailing zeros are stripped, except in alternate style.
@@ -196,7 +193,7 @@ class TestFormatting(unittest.TestCase):
             (BigFloat(3.141592653589793), ".0a", "0xdp-2"),
             # With no precision, outputs enough digits to give an
             # exact representation.
-            (BigFloat(3.141592653589793), ".a", "0x3.243f6a8885a3p+0"),
+            (BigFloat(3.141592653589793), "a", "0x3.243f6a8885a3p+0"),
             (BigFloat(10.0), ".6a", "0xa.000000p+0"),
             (BigFloat(16.0), ".6a", "0x1.000000p+4"),
             (BigFloat('nan'), "a", "nan"),
@@ -281,6 +278,9 @@ class TestFormatting(unittest.TestCase):
             "=010.2f",
             # ... even if the fill/align matches the zero padding!
             "0=010.2f",
+            # a . must be followed by a precision.
+            ".f",
+            "10.g",
         ]
         for fmt in invalid_formats:
             with self.assertRaises(ValueError):

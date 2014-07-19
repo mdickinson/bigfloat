@@ -393,7 +393,7 @@ class BigFloat(mpfr.Mpfr_t):
         # Convert to MPFR-style conversion specifier.  We'll handle the minimum
         # field width ourselves in post-processing, along with PEP 3101-style
         # filling and padding.
-        mpfr_format_template = "%{alternate}{dot}{precision}R{rounding}{type}"
+        mpfr_format_template = "%{alternate}{precision}R{rounding}{type}"
         mpfr_format_spec = mpfr_format_template.format(**spec)
         mpfr_formatted = mpfr.mpfr_asprintf(mpfr_format_spec, self)
 
