@@ -387,16 +387,45 @@ class BigFloat(mpfr.Mpfr_t):
         return mpfr.mpfr_get_d(self, ROUND_TIES_TO_EVEN)
 
     def __format__(self, format_specifier):
+        """ Support for formatting BigFloat instances. """
+
         spec = parse_format_specifier(format_specifier)
-        # Convert to MPFR-style conversion specifier.
-        sign = spec['sign']
-        if sign == '-':
-            sign = ''
-        mpfr_format_spec = "%{flags}{minimumwidth}{dot}{precision}R{type}".format(
-            flags=spec['alternate'] + spec['zeropad'] + sign,
-            **spec
-        )
-        return mpfr.mpfr_asprintf(mpfr_format_spec, self)
+        # Convert to MPFR-style conversion specifier.  We'll handle the minimum
+        # field width ourselves in post-processing, along with PEP 3101-style
+        # filling and padding.
+        mpfr_format_template = "%{alternate}{dot}{precision}R{type}"
+        mpfr_format_spec = mpfr_format_template.format(**spec)
+        mpfr_formatted = mpfr.mpfr_asprintf(mpfr_format_spec, self)
+
+        # Extract the sign, if any.
+        have_sign = mpfr_formatted[:1] == '-'
+        sign, body = mpfr_formatted[:have_sign], mpfr_formatted[have_sign:]
+
+        # Post-process to add signs (including for infinities and nans, for
+        # consistency with float and Decimal formatting.  MPFR doesn't do
+        # this.)
+        if not sign and spec['sign'] in '+ ':
+            sign = spec['sign']
+
+        # Post-process for filling and alignment.
+        align = spec['align']
+        fill = spec['fill']
+        pad_length = spec['minimumwidth'] - len(sign) - len(body)
+        pad1, pad2 = pad_length // 2 * fill, -(-pad_length // 2) * fill
+        if align == '<':
+            formatted = sign + body + pad1 + pad2
+        elif align == '>':
+            formatted = pad1 + pad2 + sign + body
+        elif align == '^':
+            formatted = pad1 + sign + body + pad2
+        elif align == '=':
+            formatted = sign + pad1 + pad2 + body
+        else:
+            raise ValueError(
+                "Invalid alignment specification "
+                "character: {!r}".format(align))
+
+        return formatted
 
     def _sign(self):
         return mpfr.mpfr_signbit(self)

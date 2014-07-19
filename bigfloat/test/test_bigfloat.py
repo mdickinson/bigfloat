@@ -1425,6 +1425,17 @@ class BigFloatTests(unittest.TestCase):
             (BigFloat(-2), "-.3f", "-2.000"),
             (BigFloat(+2), ".3f", "2.000"),
             (BigFloat(-2), ".3f", "-2.000"),
+            # With infinities and nans; note that MPFR doesn't include
+            # these signs.
+            (BigFloat('+inf'), "+.3f", "+inf"),
+            (BigFloat('-inf'), "+.3f", "-inf"),
+            (BigFloat('+nan'), "+.3f", "+nan"),
+            (BigFloat('+inf'), "-.3f", "inf"),
+            (BigFloat('-inf'), "-.3f", "-inf"),
+            (BigFloat('+nan'), "-.3f", "nan"),
+            (BigFloat('+inf'), " .3f", " inf"),
+            (BigFloat('-inf'), " .3f", "-inf"),
+            (BigFloat('+nan'), " .3f", " nan"),
             # Alternate formatting.
             (BigFloat(2), "#.0f", "2."),
             (BigFloat(2), "+#.0f", "+2."),
@@ -1434,23 +1445,44 @@ class BigFloatTests(unittest.TestCase):
             (BigFloat(2), "5.3f", "2.000"),
             (BigFloat(2), "4.3f", "2.000"),
             (BigFloat(2), "1.3f", "2.000"),
+            # Minimum field width in combination with sign.
+            (BigFloat(2), "+10.3f", "    +2.000"),
+            (BigFloat(-23), "+10.3f", "   -23.000"),
             # Zero padding.
             (BigFloat(2), "010.3f", "000002.000"),
             (BigFloat(2), "+010.3f", "+00002.000"),
             (BigFloat(2), " 010.3f", " 00002.000"),
-            # Alignment, with odd and even amounts of padding.
-            #(BigFloat(2), "<10.3f", "2.000     "),
-            #(BigFloat(2), ">10.3f", "     2.000"),
-            #(BigFloat(2), "^10.3f", "  2.000   "),
-            #(BigFloat(2), "<10.2f", "2.00      "),
-            #(BigFloat(2), ">10.2f", "      2.00"),
-            #(BigFloat(2), "^10.2f", "   2.00   "),
-            #(BigFloat(2), "<4.2f", "2.00"),
-            #(BigFloat(2), ">4.2f", "2.00"),
-            #(BigFloat(2), "^4.2f", "2.00"),
-            #(BigFloat(2), "<3.2f", "2.00"),
-            #(BigFloat(2), ">3.2f", "2.00"),
-            #(BigFloat(2), "^3.2f", "2.00"),
+            (BigFloat(2), "0010.3f", "000002.000"),
+            # Alignment and filling.
+            (BigFloat(2), "<10.3f", "2.000     "),
+            (BigFloat(2), ">10.3f", "     2.000"),
+            (BigFloat(2), "^10.3f", "  2.000   "),
+            (BigFloat(2), "<10.2f", "2.00      "),
+            (BigFloat(2), ">10.2f", "      2.00"),
+            (BigFloat(2), "^10.2f", "   2.00   "),
+            (BigFloat(2), "<4.2f", "2.00"),
+            (BigFloat(2), ">4.2f", "2.00"),
+            (BigFloat(2), "^4.2f", "2.00"),
+            (BigFloat(2), "<3.2f", "2.00"),
+            (BigFloat(2), ">3.2f", "2.00"),
+            (BigFloat(2), "^3.2f", "2.00"),
+            (BigFloat(2), "X<10.3f", "2.000XXXXX"),
+            (BigFloat(2), "X>10.3f", "XXXXX2.000"),
+            (BigFloat(2), "X^10.3f", "XX2.000XXX"),
+            (BigFloat(2), "X<10.2f", "2.00XXXXXX"),
+            (BigFloat(2), "X>10.2f", "XXXXXX2.00"),
+            (BigFloat(2), "X^10.2f", "XXX2.00XXX"),
+            (BigFloat(2), "X<4.2f", "2.00"),
+            (BigFloat(2), "X>4.2f", "2.00"),
+            (BigFloat(2), "X^4.2f", "2.00"),
+            (BigFloat(2), "X<3.2f", "2.00"),
+            (BigFloat(2), "X>3.2f", "2.00"),
+            (BigFloat(2), "X^3.2f", "2.00"),
+            (BigFloat(2), "X=+10.3f", "+XXXX2.000"),
+            (BigFloat(2), " =+10.3f", "+    2.000"),
+            (BigFloat(2), "0=+10.3f", "+00002.000"),
+            (BigFloat(2), "\x00=+10.3f", "+\x00\x00\x00\x002.000"),
+            (BigFloat(2), "\n=+10.3f", "+\n\n\n\n2.000"),
 
             # Hexadecimal formatting.  It's not 100% clear how MPFR
             # chooses the exponent here.
@@ -1485,11 +1517,28 @@ class BigFloatTests(unittest.TestCase):
             (BigFloat('nan'), 'b', 'nan'),
             (BigFloat('inf'), "b", "inf"),
             (BigFloat('-inf'), "b", "-inf"),
+
+            # ??? infinities and nans, with signs and fill?
+            # ??? missing type ???
          ]
         for bf, fmt, expected_output in test_triples:
             result = format(bf, fmt)
             self.assertEqual(result, expected_output,
                              msg=(bf, fmt, expected_output))
+
+    def test_invalid_formats(self):
+        invalid_formats = [
+            # Can't specify fill/align *and* zero padding at once ...
+            "X<010.2f",
+            ">010.2f",
+            " ^010.2f",
+            "=010.2f",
+            # ... even if the fill/align matches the zero padding!
+            "0=010.2f",
+        ]
+        for fmt in invalid_formats:
+            with self.assertRaises(ValueError):
+                format(BigFloat(2), fmt)
 
 
 class IEEEContextTests(unittest.TestCase):
