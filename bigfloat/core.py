@@ -43,6 +43,8 @@ from bigfloat.context import (
     _apply_function_in_current_context,
 )
 
+from bigfloat.formatting import parse_format_specifier
+
 
 # Alternative names for some builtins that get overwritten by functions created
 # in this module.
@@ -383,6 +385,18 @@ class BigFloat(mpfr.Mpfr_t):
 
         """
         return mpfr.mpfr_get_d(self, ROUND_TIES_TO_EVEN)
+
+    def __format__(self, format_specifier):
+        spec = parse_format_specifier(format_specifier)
+        # Convert to MPFR-style conversion specifier.
+        sign = spec['sign']
+        if sign == '-':
+            sign = ''
+        mpfr_format_spec = "%{flags}{minimumwidth}{dot}{precision}R{type}".format(
+            flags=spec['alternate'] + spec['zeropad'] + sign,
+            **spec
+        )
+        return mpfr.mpfr_asprintf(mpfr_format_spec, self)
 
     def _sign(self):
         return mpfr.mpfr_signbit(self)

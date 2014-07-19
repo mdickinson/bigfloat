@@ -1385,6 +1385,112 @@ class BigFloatTests(unittest.TestCase):
         self.assertEqual(copysign(-5, 7), 5)
         self.assertEqual(copysign(-5, -7), -5)
 
+    # String formatting.
+    def test_format(self):
+        # Fixed precision formatting.
+        test_triples = [
+            (BigFloat(2), ".6f", "2.000000"),
+            # 'F' behaves the same as 'f' except for infinities and nans.
+            (BigFloat(2), ".6F", "2.000000"),
+            # Extra zeros in the precision should be fine.
+            (BigFloat(2), ".06f", "2.000000"),
+            (BigFloat(2), ".5f", "2.00000"),
+            # . only retained with 'alternate' formatting
+            (BigFloat(2), ".0f", "2"),
+            # Default precision is 6.
+            (BigFloat(2), ".f", "2.000000"),
+            (BigFloat(2), "f", "2.000000"),
+            (BigFloat('nan'), "f", "nan"),
+            (BigFloat('-nan'), "f", "nan"),
+            (BigFloat('inf'), "f", "inf"),
+            (BigFloat('-inf'), "f", "-inf"),
+            (BigFloat('nan'), "F", "NAN"),
+            (BigFloat('-nan'), "F", "NAN"),
+            (BigFloat('inf'), "F", "INF"),
+            (BigFloat('-inf'), "F", "-INF"),
+            # Rounding behaviour.
+            (BigFloat('3.1415926535'), ".6f", "3.141593"),
+            (BigFloat('3.1415926535'), ".5f", "3.14159"),
+            (BigFloat('3.1415926535'), ".4f", "3.1416"),
+            (BigFloat('3.1415926535'), ".3f", "3.142"),
+            (BigFloat('3.1415926535'), ".2f", "3.14"),
+            (BigFloat('3.1415926535'), ".1f", "3.1"),
+            (BigFloat('3.1415926535'), ".0f", "3"),
+            # Sign specification.
+            (BigFloat(+2), "+.3f", "+2.000"),
+            (BigFloat(-2), "+.3f", "-2.000"),
+            (BigFloat(+2), " .3f", " 2.000"),
+            (BigFloat(-2), " .3f", "-2.000"),
+            (BigFloat(+2), "-.3f", "2.000"),
+            (BigFloat(-2), "-.3f", "-2.000"),
+            (BigFloat(+2), ".3f", "2.000"),
+            (BigFloat(-2), ".3f", "-2.000"),
+            # Alternate formatting.
+            (BigFloat(2), "#.0f", "2."),
+            (BigFloat(2), "+#.0f", "+2."),
+            # Minimum field width.
+            (BigFloat(2), "10.3f", "     2.000"),
+            (BigFloat(2), "6.3f", " 2.000"),
+            (BigFloat(2), "5.3f", "2.000"),
+            (BigFloat(2), "4.3f", "2.000"),
+            (BigFloat(2), "1.3f", "2.000"),
+            # Zero padding.
+            (BigFloat(2), "010.3f", "000002.000"),
+            (BigFloat(2), "+010.3f", "+00002.000"),
+            (BigFloat(2), " 010.3f", " 00002.000"),
+            # Alignment, with odd and even amounts of padding.
+            #(BigFloat(2), "<10.3f", "2.000     "),
+            #(BigFloat(2), ">10.3f", "     2.000"),
+            #(BigFloat(2), "^10.3f", "  2.000   "),
+            #(BigFloat(2), "<10.2f", "2.00      "),
+            #(BigFloat(2), ">10.2f", "      2.00"),
+            #(BigFloat(2), "^10.2f", "   2.00   "),
+            #(BigFloat(2), "<4.2f", "2.00"),
+            #(BigFloat(2), ">4.2f", "2.00"),
+            #(BigFloat(2), "^4.2f", "2.00"),
+            #(BigFloat(2), "<3.2f", "2.00"),
+            #(BigFloat(2), ">3.2f", "2.00"),
+            #(BigFloat(2), "^3.2f", "2.00"),
+
+            # Hexadecimal formatting.  It's not 100% clear how MPFR
+            # chooses the exponent here.
+            (BigFloat(1.5), ".6a", "0x1.800000p+0"),
+            (BigFloat(1.5), ".5a", "0x1.80000p+0"),
+            (BigFloat(1.5), ".1a", "0x1.8p+0"),
+            (BigFloat(1.5), ".0a", "0xcp-3"),
+            (BigFloat(1.5), ".6A", "0X1.800000P+0"),
+            (BigFloat(3.0), ".6a", "0x3.000000p+0"),
+            (BigFloat(3.141592653589793), ".6a", "0x3.243f6bp+0"),
+            (BigFloat(3.141592653589793), ".5a", "0x3.243f7p+0"),
+            (BigFloat(3.141592653589793), ".4a", "0x3.243fp+0"),
+            (BigFloat(3.141592653589793), ".3a", "0x3.244p+0"),
+            (BigFloat(3.141592653589793), ".2a", "0x3.24p+0"),
+            (BigFloat(3.141592653589793), ".1a", "0x3.2p+0"),
+            (BigFloat(3.141592653589793), ".0a", "0xdp-2"),
+            # With no precision, outputs enough digits to give an
+            # exact representation.
+            (BigFloat(3.141592653589793), ".a", "0x3.243f6a8885a3p+0"),
+            (BigFloat(10.0), ".6a", "0xa.000000p+0"),
+            (BigFloat(16.0), ".6a", "0x1.000000p+4"),
+            (BigFloat('nan'), "a", "nan"),
+            (BigFloat('-nan'), "a", "nan"),
+            (BigFloat('inf'), "a", "inf"),
+            (BigFloat('-inf'), "a", "-inf"),
+            (BigFloat('nan'), "A", "NAN"),
+            (BigFloat('-nan'), "A", "NAN"),
+            (BigFloat('inf'), "A", "INF"),
+            (BigFloat('-inf'), "A", "-INF"),
+
+            # Binary formatting.
+            (BigFloat('nan'), 'b', 'nan'),
+            (BigFloat('inf'), "b", "inf"),
+            (BigFloat('-inf'), "b", "-inf"),
+         ]
+        for bf, fmt, expected_output in test_triples:
+            result = format(bf, fmt)
+            self.assertEqual(result, expected_output,
+                             msg=(bf, fmt, expected_output))
+
 
 class IEEEContextTests(unittest.TestCase):
     def test_IEEEContext(self):
