@@ -16,6 +16,7 @@ _parse_format_specifier_regex = re.compile(r"""\A
 (?P<zeropad>0)?
 (?P<minimumwidth>[0-9]*)
 (?:(?P<dot>\.)(?P<precision>[0-9]*))?
+(?P<rounding>[UDYZN])?
 (?P<type>[aAbeEfFgG])?
 \Z""", re.VERBOSE|re.DOTALL)
 
