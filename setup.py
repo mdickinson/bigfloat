@@ -17,9 +17,9 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with the bigfloat package.  If not, see <http://www.gnu.org/licenses/>.
 
-from distutils.core import setup
-from distutils.extension import Extension
 import os
+
+from setuptools import setup, Extension
 
 
 DESCRIPTION = """\
@@ -262,6 +262,7 @@ setup(
     version=version_info['release'],
     description=DESCRIPTION,
     long_description=LONG_DESCRIPTION,
+    install_requires=["six"],
     author='Mark Dickinson',
     author_email='dickinsm@gmail.com',
     url='http://github.com/mdickinson/bigfloat',
