@@ -13,3 +13,7 @@ build/
 MANIFEST
 dist/
 bigfloat.egg-info/
+
+# Coverage output.
+.coverage
+htmlcov

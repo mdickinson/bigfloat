@@ -2,6 +2,7 @@ from fabric.api import local, lcd
 
 # Default choice for Python executable
 PYTHON = "python"
+COVERAGE = "coverage"
 
 # Unittest 2 runner for Python 2.6.
 UNIT2 = "unit2-2.6"
@@ -65,6 +66,10 @@ def test(python=PYTHON):
     """Run tests on a single version of Python."""
     build(python=python)
     run_tests(python=python)
+
+
+def coverage(coverage=COVERAGE):
+    local("{coverage} run -m unittest discover -v .".format(coverage=coverage))
 
 
 def html():
