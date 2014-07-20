@@ -92,17 +92,22 @@ cdef int check_base(int b, int allow_zero) except -1:
             raise ValueError("base should be in the range 2 to 62 (inclusive)")
 
 
-cdef int check_get_str_n(size_t n) except -1:
+cdef int check_get_str_n(int b, size_t n) except -1:
     """
-    Check that the given number of requested digits is valid.
+    Check that the given number of requested digits is valid
+    for the given base.
 
     Raise ValueError if not.
 
     """
     if n == 0 or 2 <= n:
         return 0
-    else:
-        raise ValueError("n should be either 0 or at least 2")
+    # Undocumented MPFR feature: mpfr_get_str works for n = 1
+    # in non-power-of-two bases.  See comments in vasprintf.c and
+    # get_str.c.
+    if n == 1 and (b & (b-1) != 0):
+        return 0
+    raise ValueError("n should be either 0 or at least 2")
 
 
 cdef int check_precision(cmpfr.mpfr_prec_t precision) except -1:
@@ -648,7 +653,7 @@ def mpfr_get_str(int b, size_t n, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     cdef char *c_digits
 
     check_base(b, False)
-    check_get_str_n(n)
+    check_get_str_n(b, n)
     check_initialized(op)
     check_rounding_mode(rnd)
     c_digits = cmpfr.mpfr_get_str(NULL, &exp, b, n, &op._value, rnd)
