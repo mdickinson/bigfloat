@@ -1546,6 +1546,33 @@ next_up nan -> nan
 """.split('\n'))
 
 
+ABCTests.test_next_down = process_lines("""\
+context double_precision
+
+next_down -inf -> -inf
+next_down -1.fffffffffffffp+1023 -> -inf
+next_down -1.ffffffffffffeffffp+1023 -> -1.fffffffffffffp+1023
+next_down -1.ffffffffffffep+1023 -> -1.fffffffffffffp+1023
+next_down -1p-1022 -> -1.0000000000001p-1022
+next_down -1p-1023 -> -1.0000000000002p-1023
+next_down -1p-1074 -> -2p-1074
+next_down -0.ffffffffffffffffffffp-1074 -> -1p-1074
+next_down -0.8p-1074 -> -1p-1074
+next_down -1p-999999999 -> -1p-1074
+next_down -0 -> -1p-1074
+next_down 0 -> -1p-1074
+next_down 1p-999999999 -> 0
+next_down 0.000000000000000000000000001p-1075 -> 0
+next_down 0.4p-1075 -> 0
+next_down 0.8p-1075 -> 0
+next_down 1p-1074 -> 0
+next_down inf -> 1.fffffffffffffp+1023
+
+next_down nan -> nan
+
+""".split('\n'))
+
+
 ABCTests.test_pos = process_lines("""\
 context double_precision
 context RoundTiesToEven
