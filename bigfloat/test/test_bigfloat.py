@@ -15,8 +15,10 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with the bigfloat package.  If not, see <http://www.gnu.org/licenses/>.
 
+import six
 
 # Standard library imports
+from six.moves import builtins
 import doctest
 import fractions
 import operator
@@ -28,9 +30,6 @@ else:
     import unittest
 
 import bigfloat.core
-
-_builtin_abs = abs
-_builtin_pow = pow
 
 from bigfloat import (
     # version number
@@ -96,6 +95,11 @@ from bigfloat.core import _all_flags
 
 all_rounding_modes = [RoundTowardZero, RoundTowardNegative,
                       RoundTowardPositive, RoundTiesToEven, RoundAwayFromZero]
+
+if sys.version_info < (3,):
+    long_integer_type = long  # noqa
+else:
+    long_integer_type = int
 
 
 def diffBigFloat(x, y, match_precisions=True):
@@ -322,7 +326,7 @@ class BigFloatTests(unittest.TestCase):
         self.assertEqual(bf % other, "rmod")
         self.assertEqual(divmod(bf, other), "rdivmod")
         self.assertEqual(bf ** other, "rpow")
-        self.assertEqual(_builtin_pow(bf, other), "rpow")
+        self.assertEqual(builtins.pow(bf, other), "rpow")
         if sys.version_info < (3,):
             self.assertEqual(operator.div(bf, other), "rdiv")
         if sys.version_info >= (3, 5):
@@ -600,7 +604,7 @@ class BigFloatTests(unittest.TestCase):
 
     if sys.version_info < (3,):
         def test_creation_from_unicode(self):
-            test_values = map(unicode,
+            test_values = map(six.text_type,
                               ['123.456',
                                '-1.23',
                                '1e456',
@@ -731,13 +735,14 @@ class BigFloatTests(unittest.TestCase):
 
     if sys.version_info < (3,):
         def test_exact_creation_from_unicode(self):
-            test_values = map(unicode, ['123.456',
-                                        '-1.23',
-                                        '1e456',
-                                        '+nan',
-                                        'inf',
-                                        '-inf',
-                                        '-451.001'])
+            test_values = map(six.text_type,
+                              ['123.456',
+                               '-1.23',
+                               '1e456',
+                               '+nan',
+                               'inf',
+                               '-inf',
+                               '-451.001'])
             test_precisions = [2, 20, 53, 2000]
             for value in test_values:
                 for p in test_precisions:
@@ -913,21 +918,26 @@ class BigFloatTests(unittest.TestCase):
 
     if sys.version_info < (3,):
         def test_long(self):
-            self.assertIsInstance(long(BigFloat(13.7)), long)
-            self.assertEqual(long(BigFloat(13.7)), 13)
-            self.assertIsInstance(long(BigFloat(13.7)), long)
-            self.assertEqual(long(BigFloat(2.3)), 2)
-            self.assertIsInstance(long(BigFloat(1729)), long)
-            self.assertEqual(long(BigFloat(1729)), 1729)
+            self.assertIsInstance(
+                long_integer_type(BigFloat(13.7)), long_integer_type)
+            self.assertEqual(long_integer_type(BigFloat(13.7)), 13)
+            self.assertIsInstance(
+                long_integer_type(BigFloat(13.7)), long_integer_type)
+            self.assertEqual(long_integer_type(BigFloat(2.3)), 2)
+            self.assertIsInstance(
+                long_integer_type(BigFloat(1729)), long_integer_type)
+            self.assertEqual(long_integer_type(BigFloat(1729)), 1729)
 
-            self.assertIsInstance(long(BigFloat('0.0')), long)
-            self.assertEqual(long(BigFloat('0.0')), 0)
-            self.assertIsInstance(long(BigFloat('-0.0')), long)
-            self.assertEqual(long(BigFloat('-0.0')), 0)
+            self.assertIsInstance(
+                long_integer_type(BigFloat('0.0')), long_integer_type)
+            self.assertEqual(long_integer_type(BigFloat('0.0')), 0)
+            self.assertIsInstance(
+                long_integer_type(BigFloat('-0.0')), long_integer_type)
+            self.assertEqual(long_integer_type(BigFloat('-0.0')), 0)
 
-            self.assertRaises(ValueError, long, BigFloat('inf'))
-            self.assertRaises(ValueError, long, BigFloat('-inf'))
-            self.assertRaises(ValueError, long, BigFloat('nan'))
+            self.assertRaises(ValueError, long_integer_type, BigFloat('inf'))
+            self.assertRaises(ValueError, long_integer_type, BigFloat('-inf'))
+            self.assertRaises(ValueError, long_integer_type, BigFloat('nan'))
 
     def test_integer_ratio(self):
 
@@ -1124,7 +1134,7 @@ class BigFloatTests(unittest.TestCase):
                 else:
                     self.assertEqual(x, -negx)
 
-                absx = _builtin_abs(x)
+                absx = builtins.abs(x)
                 self.assertEqual(absx.precision, p)
                 if p < 150:
                     self.assertNotEqual(x, absx)
