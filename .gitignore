@@ -12,3 +12,4 @@ build/
 # Distribution
 MANIFEST
 dist/
+bigfloat.egg-info/

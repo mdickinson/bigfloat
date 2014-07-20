@@ -8,10 +8,10 @@ Start by importing the contents of the package with:
    >>> from bigfloat import *
 
 You should be a little bit careful here: this import brings a fairly large
-number of functions into the current namespace, four of which shadow existing
-Python builtins, namely :func:`abs`, :func:`max`, :func:`min` and :func:`pow`.
-In normal usage you'll probably only want to import the classes and functions
-that you actually need.
+number of functions into the current namespace, five of which shadow existing
+Python builtins, namely :func:`abs`, :func:`max`, :func:`min`, :func:`pow` and
+:func:`round`.  In normal usage you'll probably only want to import the classes
+and functions that you actually need.
 
 
 :class:`BigFloat` construction

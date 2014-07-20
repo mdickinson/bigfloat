@@ -17,9 +17,9 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with the bigfloat package.  If not, see <http://www.gnu.org/licenses/>.
 
-from distutils.core import setup
-from distutils.extension import Extension
 import os
+
+from setuptools import setup, Extension
 
 
 DESCRIPTION = """\
@@ -76,10 +76,9 @@ For demonstration purposes, start with::
 
     >>> from bigfloat import *
 
-Note that this import shadows four builtin Python functions, namely
-``abs``, ``max``, ``min`` and ``pow``.  In normal usage you'll
-probably only want to import the classes and functions that you
-actually need.
+Note that this import shadows five builtin Python functions, namely ``abs``,
+``max``, ``min``, ``pow`` and ``round``.  In normal usage you'll probably only
+want to import the classes and functions that you actually need.
 
 The main class is the ``BigFloat`` class::
 
@@ -263,6 +262,7 @@ setup(
     version=version_info['release'],
     description=DESCRIPTION,
     long_description=LONG_DESCRIPTION,
+    install_requires=["six"],
     author='Mark Dickinson',
     author_email='dickinsm@gmail.com',
     url='http://github.com/mdickinson/bigfloat',

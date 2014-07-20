@@ -11,8 +11,9 @@ LIBRARY_PATH = "/opt/local/lib"
 INCLUDE_PATH = "/opt/local/include"
 
 
-def build_in_place(python=PYTHON):
+def build(python=PYTHON):
     """Build the bigfloat library for in-place testing."""
+    clean()
     local(
         "LIBRARY_PATH={library_path} CPATH={include_path} {python} "
         "setup.py build_ext --inplace".format(
@@ -62,8 +63,7 @@ def run_tests(python=PYTHON):
 
 def test(python=PYTHON):
     """Run tests on a single version of Python."""
-    clean()
-    build_in_place(python=python)
+    build(python=python)
     run_tests(python=python)
 
 

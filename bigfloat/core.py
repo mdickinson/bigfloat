@@ -23,6 +23,8 @@
 import sys as _sys
 import contextlib as _contextlib
 
+import six
+
 import mpfr
 
 from bigfloat.rounding_mode import (
@@ -59,9 +61,7 @@ _builtin_pow = pow
 
 
 if _sys.version_info < (3,):
-    INTEGER_TYPES = int, long
-    STRING_TYPES = str, unicode
-
+    long_integer_type = long  # noqa
     if _sys.maxsize == 2**31 - 1:
         _PyHASH_MODULUS = 2**31 - 1
     elif _sys.maxsize == 2**63 - 1:
@@ -82,9 +82,7 @@ if _sys.version_info < (3,):
         return 4 * len(hex_n) - _bit_length_correction[hex_n[0]]
 
 else:
-    INTEGER_TYPES = int,
-    STRING_TYPES = str,
-
+    long_integer_type = int
     _PyHASH_MODULUS = _sys.hash_info.modulus
     _PyHASH_INF = _sys.hash_info.inf
     _PyHASH_NAN = _sys.hash_info.nan
@@ -294,9 +292,9 @@ class BigFloat(mpfr.Mpfr_t):
 
         if isinstance(value, float):
             return _set_d(value)
-        elif isinstance(value, STRING_TYPES):
+        elif isinstance(value, six.string_types):
             return set_str2(value.strip(), 10)
-        elif isinstance(value, INTEGER_TYPES):
+        elif isinstance(value, six.integer_types):
             return set_str2('%x' % value, 16)
         elif isinstance(value, BigFloat):
             return pos(value)
@@ -319,7 +317,7 @@ class BigFloat(mpfr.Mpfr_t):
         """
 
         # figure out precision to use
-        if isinstance(value, STRING_TYPES):
+        if isinstance(value, six.string_types):
             if precision is None:
                 raise TypeError("precision must be supplied when "
                                 "converting from a string")
@@ -330,7 +328,7 @@ class BigFloat(mpfr.Mpfr_t):
                                 "from a string")
             if isinstance(value, float):
                 precision = _builtin_max(DBL_PRECISION, PRECISION_MIN)
-            elif isinstance(value, INTEGER_TYPES):
+            elif isinstance(value, six.integer_types):
                 precision = _builtin_max(_bit_length(value), PRECISION_MIN)
             elif isinstance(value, BigFloat):
                 precision = value.precision
@@ -347,7 +345,7 @@ class BigFloat(mpfr.Mpfr_t):
                 raise ValueError("value too large to represent as a BigFloat")
             if test_flag(Underflow):
                 raise ValueError("value too small to represent as a BigFloat")
-            if test_flag(Inexact) and not isinstance(value, STRING_TYPES):
+            if test_flag(Inexact) and not isinstance(value, six.string_types):
                 # since this is supposed to be an exact conversion, the
                 # inexact flag should never be set except when converting
                 # from a string.
@@ -511,7 +509,7 @@ class BigFloat(mpfr.Mpfr_t):
 
         sign = '-' if self._sign() else ''
         e = self._exponent()
-        if isinstance(e, STRING_TYPES):
+        if isinstance(e, six.string_types):
             return sign + e
 
         m = self._significand()
@@ -785,7 +783,7 @@ class BigFloat(mpfr.Mpfr_t):
             return not is_zero(self)
 
         def __long__(self):
-            return long(int(self))
+            return long_integer_type(self.__int__())
     else:
         def __hash__(self):
             if is_nan(self):
@@ -828,7 +826,7 @@ class BigFloat(mpfr.Mpfr_t):
 
         # ints, long and floats mix freely with BigFloats, and are
         # converted exactly.
-        if isinstance(arg, INTEGER_TYPES) or isinstance(arg, float):
+        if isinstance(arg, six.integer_types) or isinstance(arg, float):
             return cls.exact(arg)
         elif isinstance(arg, BigFloat):
             return arg
