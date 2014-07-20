@@ -1514,8 +1514,8 @@ def process_lines(lines):
             diff = diffBigFloat(actual_result, expected_result,
                                 match_precisions=False)
             if diff is not None:
-                self.fail(diff)
-            self.assertEqual(actual_flags, expected_flags)
+                self.fail("{}: {}".format(diff, l))
+            self.assertEqual(actual_flags, expected_flags, msg=l)
 
     return test_fn
 
@@ -1666,6 +1666,29 @@ pos 0.fffffffffffffcp-1022 -> 1p-1022                         Inexact
 pos 0.ffffffffffffffffffffffffp-1022 -> 1p-1022               Inexact
 pos 1p-1022 -> 1p-1022
 pos 1p+1024 -> Infinity Inexact Overflow
+
+""".split('\n'))
+
+
+ABCTests.test_various = process_lines("""\
+# The following tests are not supposed to be exhaustive tests of the behaviour
+# of the individual functions; that job is left to the MPFR test suite.
+# Instead, they're supposed to exercise the functions to catch simple errors
+# like mismatches in wrapping.  So we only need to check one or two
+# characteristic values per function.
+
+context double_precision
+context RoundTiesToEven
+
+sqr 1.8p0 -> 2.4p0
+rec_sqrt 2.4p0 -> 0.aaaaaaaaaaaaa8p0 Inexact
+cbrt 2p0 -> 1.428a2f98d728bp+0 Inexact
+log 2p0 -> 1.62e42fefa39efp-1 Inexact
+log2 2.8p0 -> 1.5269e12f346e3p+0 Inexact
+log10 1p4 -> 1.34413509f79ffp+0 Inexact
+exp 1p-2 -> 1.48b5e3c3e8186p+0 Inexact
+exp2 1p-2 -> 1.306fe0a31b715p+0 Inexact
+exp10 1p-2 -> 1.c73d51c54470ep+0 Inexact
 
 """.split('\n'))
 
