@@ -41,7 +41,7 @@ _parse_format_specifier_regex = re.compile(r"""\A
 (?P<precision>\.[0-9]+)?
 (?P<rounding>[UDYZN])?
 (?P<type>[aAbeEfFgG])?
-\Z""", re.VERBOSE|re.DOTALL)
+\Z""", re.VERBOSE | re.DOTALL)
 
 
 rounding_mode_from_specifier = {

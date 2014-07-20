@@ -966,45 +966,6 @@ def set_str2(s, base, context=None):
     )
 
 
-def get_formatted_str(op, conv,
-                      width=None,
-                      precision=None,
-                      rounding_mode='',
-                      # Flags
-                      left_justify=False,
-                      include_sign=False,
-                      align_sign=False,
-                      zero_pad=False,
-                      alternative_form=False):
-    
-    """
-    Format an Mpfr_t instance.
-
-    XXX Fill in details.
-
-    """
-    flags = ''
-    if left_justify:
-        flags += '-'
-    if include_sign:
-        flags += '+'
-    if align_sign and not include_sign:
-        flags += ' '
-    if zero_pad and not left_justify:
-        flags += '0'
-    if alternative_form:
-        flags += '#'
-
-    if conv not in ('a', 'A', 'b', 'e', 'E', 'f', 'F', 'g', 'G'):
-        raise ValueError("Invalid conversion specifier: {0}".format(conv))
-
-    if rounding_mode not in ('U', 'D', 'Y', 'Z', 'N', ''):
-        raise ValueError("Invalid rounding mode: {0}".format(rounding_mode))
-
-    precision = '' if precision is None else '.{}'.format(precision)
-
-
-
 ###############################################################################
 # 5.2 Assignment Functions
 ###############################################################################
