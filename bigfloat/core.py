@@ -43,7 +43,11 @@ from bigfloat.context import (
     _apply_function_in_current_context,
 )
 
-from bigfloat.formatting import parse_format_specifier, format_align
+from bigfloat.formatting import (
+    format_align,
+    parse_format_specifier,
+    rounding_mode_from_specifier,
+)
 
 
 # Alternative names for some builtins that get overwritten by functions created
@@ -390,16 +394,25 @@ class BigFloat(mpfr.Mpfr_t):
         """ Support for formatting BigFloat instances. """
 
         spec = parse_format_specifier(format_specifier)
-        # Convert to MPFR-style conversion specifier.  We'll handle the minimum
-        # field width ourselves in post-processing, along with PEP 3101-style
-        # filling and padding.
-        mpfr_format_template = "%{alternate}{precision}R{rounding}{type}"
-        mpfr_format_spec = mpfr_format_template.format(**spec)
-        mpfr_formatted = mpfr.mpfr_asprintf(mpfr_format_spec, self)
+
+        if not spec['type']:
+            rounding_mode = rounding_mode_from_specifier[spec['rounding']]
+            if spec['precision']:
+                precision = int(spec['precision'][1:])
+            else:
+                precision = None
+            formatted = self._str_format(rounding_mode, precision)
+        else:
+            # Convert to MPFR-style conversion specifier.  We'll handle the
+            # minimum field width ourselves in post-processing, along with PEP
+            # 3101-style filling and padding.
+            mpfr_format_template = "%{alternate}{precision}R{rounding}{type}"
+            mpfr_format_spec = mpfr_format_template.format(**spec)
+            formatted = mpfr.mpfr_asprintf(mpfr_format_spec, self)
 
         # Extract the sign, if any.
-        have_sign = mpfr_formatted[:1] == '-'
-        sign, body = mpfr_formatted[:have_sign], mpfr_formatted[have_sign:]
+        negative = formatted[:1] == '-'
+        sign, body = formatted[:negative], formatted[negative:]
 
         # Post-process to add signs (including for infinities and nans, for
         # consistency with float and Decimal formatting.  MPFR doesn't do
@@ -548,15 +561,15 @@ class BigFloat(mpfr.Mpfr_t):
 
         return (-n if negative else n), d
 
-    def __str__(self):
+    def _str_format(self, rounding_mode=ROUND_TIES_TO_EVEN, precision=None):
         if is_zero(self):
             return '-0' if is_negative(self) else '0'
         elif is_finite(self):
             negative, digits, e = _mpfr_get_str2(
                 10,
-                0,
+                0 if precision is None else max(1, precision),
                 self,
-                ROUND_TIES_TO_EVEN,
+                rounding_mode,
             )
             return _format_finite(negative, digits, e)
         elif is_inf(self):
@@ -564,6 +577,9 @@ class BigFloat(mpfr.Mpfr_t):
         else:
             assert is_nan(self)
             return 'NaN'
+
+    def __str__(self):
+        return self._str_format()
 
     def __repr__(self):
         return "BigFloat.exact('%s', precision=%d)" % (

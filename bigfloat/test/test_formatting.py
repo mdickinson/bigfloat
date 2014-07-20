@@ -262,12 +262,42 @@ class TestFormatting(unittest.TestCase):
             (BigFloat('56.125'), ".2f", "56.12"),
             (BigFloat('56.127'), ".2f", "56.13"),
 
-            # ??? missing type ???
-         ]
+            # Missing type behaves like str formatting.
+            (BigFloat('123'), ".0", "1e+2"),
+            (BigFloat('123'), ".1", "1e+2"),
+            (BigFloat('123'), ".2", "1.2e+2"),
+            (BigFloat('123'), ".2U", "1.3e+2"),
+            (BigFloat('123'), ".2D", "1.2e+2"),
+            (BigFloat('123'), ".3", "123"),
+            # 'alternate' flag is currently ignored.
+            (BigFloat('123'), "#.3", "123"),
+            (BigFloat('123'), ".4", "123.0"),
+            (BigFloat('123'), "#.4", "123.0"),
+            (BigFloat('123'), ".0", "1e+2"),
+            (BigFloat('123'), "", "123.00000000000000"),
+            (BigFloat('nan'), "", "NaN"),
+            (BigFloat('inf'), "", "Infinity"),
+            (BigFloat('-inf'), "", "-Infinity"),
+        ]
         for bf, fmt, expected_output in test_triples:
             result = format(bf, fmt)
             self.assertEqual(result, expected_output,
                              msg=(bf, fmt, expected_output))
+
+    def test_empty_format_matches_str(self):
+        test_values = [
+            BigFloat('0.0'),
+            BigFloat('-0.0'),
+            BigFloat('1.0'),
+            BigFloat('-2.3'),
+            BigFloat('1e100'),
+            BigFloat('1e-100'),
+            BigFloat('nan'),
+            BigFloat('inf'),
+            BigFloat('-inf'),
+        ]
+        for value in test_values:
+            self.assertEqual(str(value), format(value, ''))
 
     def test_invalid_formats(self):
         invalid_formats = [

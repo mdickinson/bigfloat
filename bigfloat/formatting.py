@@ -20,6 +20,13 @@ Helper functions for formatting.
 """
 import re
 
+from bigfloat.rounding_mode import (
+    ROUND_TIES_TO_EVEN,
+    ROUND_TOWARD_ZERO,
+    ROUND_TOWARD_POSITIVE,
+    ROUND_TOWARD_NEGATIVE,
+    ROUND_AWAY_FROM_ZERO,
+)
 
 # Regular expression matching valid format specifiers.
 _parse_format_specifier_regex = re.compile(r"""\A
@@ -37,6 +44,15 @@ _parse_format_specifier_regex = re.compile(r"""\A
 \Z""", re.VERBOSE|re.DOTALL)
 
 
+rounding_mode_from_specifier = {
+    'U': ROUND_TOWARD_POSITIVE,
+    'D': ROUND_TOWARD_NEGATIVE,
+    'Y': ROUND_AWAY_FROM_ZERO,
+    'Z': ROUND_TOWARD_ZERO,
+    'N': ROUND_TIES_TO_EVEN,
+}
+
+
 def parse_format_specifier(specification):
     """
     Parse the given format specification and return a dictionary
@@ -45,7 +61,8 @@ def parse_format_specifier(specification):
     """
     m = _parse_format_specifier_regex.match(specification)
     if m is None:
-        raise ValueError("Invalid format specifier: {!r}".format(specification))
+        raise ValueError(
+            "Invalid format specifier: {!r}".format(specification))
     format_dict = m.groupdict('')
 
     # Convert zero-padding into fill and alignment.
@@ -53,7 +70,8 @@ def parse_format_specifier(specification):
     if zeropad:
         # If zero padding is requested, fill and align fields should be absent.
         if format_dict['align']:
-            raise ValueError("Invalid format specifier: {!r}".format(specification))
+            raise ValueError(
+                "Invalid format specifier: {!r}".format(specification))
         # Impossible to have 'fill' without 'align'.
         assert not format_dict['fill']
         format_dict['align'] = '='
@@ -73,6 +91,10 @@ def parse_format_specifier(specification):
 
     # Convert minimum width to an int; default is zero.
     format_dict['minimumwidth'] = int(format_dict['minimumwidth'] or '0')
+
+    # If no rounding mode is given, assume 'N'.
+    if not format_dict['rounding']:
+        format_dict['rounding'] = 'N'
 
     return format_dict
 
