@@ -1675,21 +1675,51 @@ ABCTests.test_various = process_lines("""\
 # of the individual functions; that job is left to the MPFR test suite.
 # Instead, they're supposed to exercise the functions to catch simple errors
 # like mismatches in wrapping.  So we only need to check one or two
-# characteristic values per function.
+# characteristic values per function.  The test values below were computed
+# using independent sources (mainly Pari/GP).
 
 context double_precision
 context RoundTiesToEven
 
+# Powers.
 sqr 1.8p0 -> 2.4p0
 rec_sqrt 2.4p0 -> 0.aaaaaaaaaaaaa8p0 Inexact
 cbrt 2p0 -> 1.428a2f98d728bp+0 Inexact
+
+# Log and exponential functions.
 log 2p0 -> 1.62e42fefa39efp-1 Inexact
 log2 2.8p0 -> 1.5269e12f346e3p+0 Inexact
 log10 1p4 -> 1.34413509f79ffp+0 Inexact
+log1p 0.8p0 -> 1.9f323ecbf984cp-2 Inexact
+
 exp 1p-2 -> 1.48b5e3c3e8186p+0 Inexact
 exp2 1p-2 -> 1.306fe0a31b715p+0 Inexact
 exp10 1p-2 -> 1.c73d51c54470ep+0 Inexact
+expm1 0.8p0 -> 1.4c2531c3c0d38p-1 Inexact
 
+# Trigonometric functions and their inverses.
+cos 2p0 -> -1.aa22657537205p-2 Inexact
+sin 2p0 -> 1.d18f6ead1b446p-1 Inexact
+tan 2p0 -> -1.17af62e0950f8p+1 Inexact
+sec 2p0 -> -1.33956fecf9e48p+1 Inexact
+csc 2p0 -> 1.19893a272f912p+0 Inexact
+cot 2p0 -> -1.d4a42e92faa4ep-2 Inexact
+
+acos 0.8p0 -> 1.0c152382d7366p+0 Inexact
+asin 0.8p0 -> 1.0c152382d7366p-1 Inexact
+atan 0.8p0 -> 1.dac670561bb4fp-2 Inexact
+
+# Hyperbolic trigonometric functions and their inverses.
+cosh 0.8p0 -> 1.20ac1862ae8d0p+0 Inexact
+sinh 0.8p0 -> 1.0acd00fe63b97p-1 Inexact
+tanh 0.8p0 -> 1.d9353d7568af3p-2 Inexact
+sech 0.8p0 -> 1.c60d1ff040dd0p-1 Inexact
+csch 0.8p0 -> 1.eb45dc88defedp+0 Inexact
+coth 0.8p0 -> 1.14fc6ceb099bfp+1 Inexact
+
+acosh 1.8p0 -> 1.ecc2caec5160ap-1 Inexact
+asinh 0.8p0 -> 1.ecc2caec5160ap-2 Inexact
+atanh 0.8p0 -> 1.193ea7aad030bp-1 Inexact
 """.split('\n'))
 
 
