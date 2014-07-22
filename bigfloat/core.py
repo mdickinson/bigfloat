@@ -107,12 +107,7 @@ def _mpfr_get_str2(base, ndigits, op, rounding_mode):
 ###############################################################################
 # Context manager to give an easy way to change emin and emax temporarily.
 
-try:
-    DBL_PRECISION = _sys.float_info.mant_dig
-except AttributeError:
-    # Python 2.5 and earlier don't have sys.float_info; it's enough for
-    # DBL_PRECISION to be an upper bound.  64 bits should always be enough.
-    DBL_PRECISION = 64
+DBL_PRECISION = _sys.float_info.mant_dig
 
 # Dealing with exponent limits
 # ----------------------------
