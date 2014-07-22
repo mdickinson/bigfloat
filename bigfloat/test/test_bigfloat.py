@@ -18,7 +18,6 @@
 import six
 
 # Standard library imports
-from six.moves import builtins
 import doctest
 import fractions
 import operator
@@ -151,6 +150,7 @@ class MockBinaryOperation(object):
 
 
 # Dummy class with mock implementations of relevant special methods.
+
 class RichObject(object):
     pass
 
@@ -170,6 +170,12 @@ if sys.version_info >= (3, 5):
 for op in dummy_ops:
     setattr(RichObject, '__{op}__'.format(op=op),
             MockBinaryOperation(op))
+
+
+# Dummy class with *no* implementations of special methods.
+
+class PoorObject(object):
+    pass
 
 
 class BigFloatTests(unittest.TestCase):
@@ -326,7 +332,6 @@ class BigFloatTests(unittest.TestCase):
         self.assertEqual(bf % other, "rmod")
         self.assertEqual(divmod(bf, other), "rdivmod")
         self.assertEqual(bf ** other, "rpow")
-        self.assertEqual(builtins.pow(bf, other), "rpow")
         if sys.version_info < (3,):
             self.assertEqual(operator.div(bf, other), "rdiv")
         if sys.version_info >= (3, 5):
@@ -338,6 +343,34 @@ class BigFloatTests(unittest.TestCase):
         self.assertEqual(bf & other, "rand")
         self.assertEqual(bf ^ other, "rxor")
         self.assertEqual(bf | other, "ror")
+
+    def test_binary_operations_raise_type_error(self):
+        # Check that binary operations correctly raise TypeError,
+        # either way around, with an unsupported type.  Excludes
+        # == and !=, which need their own checks.
+        binary_ops = [
+            operator.gt, operator.lt, operator.ge, operator.le,
+            operator.add, operator.sub, operator.mul, operator.pow,
+            operator.truediv, operator.floordiv, operator.mod, divmod,
+            operator.lshift, operator.rshift,
+            operator.and_, operator.xor, operator.or_,
+        ]
+        if sys.version_info < (3,):
+            binary_ops.append(operator.div)
+        if sys.version_info >= (3, 5):
+            binary_ops.append(operator.matmul)
+
+        bf = BigFloat(123)
+        other = PoorObject()
+        for op in binary_ops:
+            with self.assertRaises(TypeError):
+                op(bf, other)
+            with self.assertRaises(TypeError):
+                op(other, bf)
+        self.assertFalse(bf == other)
+        self.assertFalse(other == bf)
+        self.assertTrue(bf != other)
+        self.assertTrue(other != bf)
 
     def test_bool(self):
         # test __nonzero__ / __bool__
@@ -646,6 +679,12 @@ class BigFloatTests(unittest.TestCase):
                 self.assertIs(type(bf), BigFloat)
                 self.assertEqual(bf.precision, p)
 
+    def test_creation_from_incompatible_object(self):
+        with self.assertRaises(TypeError):
+            BigFloat([1, 2, 3])
+        with self.assertRaises(TypeError):
+            BigFloat(1j)
+
     def test_exact_context_independent(self):
         with Context(emin=-1, emax=1):
             x = BigFloat.exact(123456)
@@ -726,12 +765,16 @@ class BigFloatTests(unittest.TestCase):
                     self.assertIs(type(bf), BigFloat)
                     self.assertEqual(bf.precision, p)
 
-        # check that rounding-mode doesn't affect the conversion
+        # Check that rounding-mode doesn't affect the conversion
         with RoundTowardNegative:
             lower = BigFloat.exact('1.1', precision=20)
         with RoundTowardPositive:
             upper = BigFloat.exact('1.1', precision=20)
         self.assertEqual(lower, upper)
+
+        # Check that TypeError is raised if precision not passed.
+        with self.assertRaises(TypeError):
+            BigFloat.exact('1.1')
 
     if sys.version_info < (3,):
         def test_exact_creation_from_unicode(self):
@@ -768,6 +811,12 @@ class BigFloatTests(unittest.TestCase):
                 self.assertEqual(x, y)
 
         self.assertRaises(TypeError, BigFloat.exact, BigFloat(23), 100)
+
+    def test_exact_creation_from_incompatible_object(self):
+        with self.assertRaises(TypeError):
+            BigFloat.exact([1, 2, 3])
+        with self.assertRaises(TypeError):
+            BigFloat.exact(1j, precision=20)
 
     def test_exponent_limits(self):
         with Context(emin=-1000, emax=0):
@@ -1134,7 +1183,7 @@ class BigFloatTests(unittest.TestCase):
                 else:
                     self.assertEqual(x, -negx)
 
-                absx = builtins.abs(x)
+                absx = operator.abs(x)
                 self.assertEqual(absx.precision, p)
                 if p < 150:
                     self.assertNotEqual(x, absx)
