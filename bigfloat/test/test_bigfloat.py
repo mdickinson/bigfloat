@@ -1385,6 +1385,10 @@ class BigFloatTests(unittest.TestCase):
 
     # 5.6 Comparison Functions
     def test_cmp(self):
+        self.assertGreater(cmp(BigFloat(2), BigFloat(1)), 0)
+        self.assertEqual(cmp(BigFloat(3.5), 3.5), 0)
+        self.assertLess(cmp(-3.5, -1), 0)
+
         # Comparisons involving NaNs should raise an exception
         with self.assertRaises(ValueError):
             cmp(BigFloat('nan'), 0)
@@ -1394,6 +1398,10 @@ class BigFloatTests(unittest.TestCase):
             cmp(BigFloat('-nan'), BigFloat('nan'))
 
     def test_cmpabs(self):
+        self.assertGreater(cmpabs(BigFloat(2), BigFloat(1)), 0)
+        self.assertEqual(cmpabs(BigFloat(3.5), 3.5), 0)
+        self.assertGreater(cmpabs(-3.5, -1), 0)
+
         # Comparisons involving NaNs should raise an exception
         with self.assertRaises(ValueError):
             cmpabs(BigFloat('nan'), 0)
@@ -1784,6 +1792,21 @@ coth 0.8p0 -> 1.14fc6ceb099bfp+1 Inexact
 acosh 1.8p0 -> 1.ecc2caec5160ap-1 Inexact
 asinh 0.8p0 -> 1.ecc2caec5160ap-2 Inexact
 atanh 0.8p0 -> 1.193ea7aad030bp-1 Inexact
+
+# Other transcendental functions.
+eint 1.8p0 -> 1.a690858762f6bp+1 Inexact
+li2 0.cp0 -> 1.f4f9f0b58b974p-1 Inexact
+gamma 2.8p0 -> 1.544fa6d47b390p+0 Inexact
+lngamma 2.8p0 -> 1.2383e809a67e8p-2 Inexact
+digamma 2.8p0 -> 1.680425af12b5ep-1 Inexact
+zeta 4.0p0 -> 1.151322ac7d848p+0 Inexact
+erf 3.8p0 -> 1.ffffe710d565ep-1 Inexact
+erfc 3.8p0 -> 1.8ef2a9a18d857p-21 Inexact
+
+# Arithmetic functions not tested elsewhere.
+dim 2.8p0 1p0 -> 1.8p0
+dim 1p0 2.8p0 -> 0p0
+
 """.split('\n'))
 
 
