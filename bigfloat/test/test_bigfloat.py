@@ -68,6 +68,9 @@ from bigfloat import (
     # Version information
     MPFR_VERSION_MAJOR, MPFR_VERSION_MINOR,
 
+    # 5.5 Basic Arithmetic Functions
+    root,
+
     # 5.6 Comparison Functions
     cmp, cmpabs, is_nan, is_inf, is_finite, is_zero, is_regular, sgn,
     notequal, lessgreater, unordered,
@@ -1367,6 +1370,18 @@ class BigFloatTests(unittest.TestCase):
             x._format_to_fixed_precision(3),
             (False, '1000', -3),
         )
+
+    # 5.5 Basic Arithmetic Functions
+    def test_root(self):
+        self.assertEqual(root(BigFloat(23), 1), BigFloat(23))
+        self.assertEqual(root(BigFloat(49), 2), BigFloat(7))
+        self.assertEqual(root(BigFloat(27), 3), BigFloat(3))
+        self.assertEqual(root(BigFloat(-27), 3), BigFloat(-3))
+        self.assertEqual(root(BigFloat(16), 4), BigFloat(2))
+        with self.assertRaises(ValueError):
+            root(BigFloat(23), -1)
+        self.assertTrue(is_nan(root(BigFloat(2), 0)))
+        self.assertTrue(is_nan(root(BigFloat(-2), 2)))
 
     # 5.6 Comparison Functions
     def test_cmp(self):

@@ -1093,8 +1093,8 @@ def root(x, k, context=None):
     """
     return _apply_function_in_current_context(
         BigFloat,
-        mpfr.mpfr_cbrt,
-        (BigFloat._implicit_convert(x),),
+        mpfr.mpfr_root,
+        (BigFloat._implicit_convert(x), k),
         context,
     )
 
