@@ -1802,10 +1802,73 @@ digamma 2.8p0 -> 1.680425af12b5ep-1 Inexact
 zeta 4.0p0 -> 1.151322ac7d848p+0 Inexact
 erf 3.8p0 -> 1.ffffe710d565ep-1 Inexact
 erfc 3.8p0 -> 1.8ef2a9a18d857p-21 Inexact
+agm 1p0 1.6a09e667f3bcdp+0 -> 1.32b95184360ccp+0 Inexact
+ai 0.ap0 -> 1.a2db43a6d812dp-3 Inexact
 
 # Arithmetic functions not tested elsewhere.
 dim 2.8p0 1p0 -> 1.8p0
 dim 1p0 2.8p0 -> 0p0
+fma 3p0 5p0 8p0 -> 17p0
+fms 3p0 5p0 8p0 -> 7p0
+hypot 5p0 cp0 -> dp0
+
+floor -1p0 -> -1p0
+floor -0.dp0 -> -1p0
+floor -0.1p0 -> -1p0
+floor -0p0 -> -0p0
+floor 0p0 -> 0p0
+floor 0.1p0 -> 0p0
+floor 0.dp0 -> 0p0
+floor 1p0 -> 1p0
+
+ceil -1p0 -> -1p0
+ceil -0.dp0 -> -0p0
+ceil -0.1p0 -> -0p0
+ceil -0p0 -> -0p0
+ceil 0p0 -> 0p0
+ceil 0.1p0 -> 1p0
+ceil 0.dp0 -> 1p0
+ceil 1p0 -> 1p0
+
+round -1p0 -> -1p0
+round -0.dp0 -> -1p0
+round -0.1p0 -> -0p0
+round -0p0 -> -0p0
+round 0p0 -> 0p0
+round 0.1p0 -> 0p0
+round 0.dp0 -> 1p0
+round 1p0 -> 1p0
+
+trunc -1p0 -> -1p0
+trunc -0.dp0 -> -0p0
+trunc -0.1p0 -> -0p0
+trunc -0p0 -> -0p0
+trunc 0p0 -> 0p0
+trunc 0.1p0 -> 0p0
+trunc 0.dp0 -> 0p0
+trunc 1p0 -> 1p0
+
+frac -1p0 -> -0p0
+frac -0.dp0 -> -0.dp0
+frac -0.1p0 -> -0.1p0
+frac -0p0 -> -0p0
+frac 0p0 -> 0p0
+frac 0.1p0 -> 0.1p0
+frac 0.dp0 -> 0.dp0
+frac 1p0 -> 0p0
+
+remainder -5p0 3p0 -> 1p0
+remainder -4p0 3p0 -> -1p0
+remainder -3p0 3p0 -> -0p0
+remainder -2p0 3p0 -> 1p0
+remainder -1p0 3p0 -> -1p0
+remainder -0p0 3p0 -> -0p0
+remainder 0p0 3p0 -> 0p0
+remainder 1p0 3p0 -> 1p0
+remainder 2p0 3p0 -> -1p0
+remainder 3p0 3p0 -> 0p0
+remainder 4p0 3p0 -> 1p0
+remainder 5p0 3p0 -> -1p0
 
 """.split('\n'))
 
