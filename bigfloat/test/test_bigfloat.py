@@ -352,7 +352,6 @@ class BigFloatTests(unittest.TestCase):
         # either way around, with an unsupported type.  Excludes
         # == and !=, which need their own checks.
         binary_ops = [
-            operator.gt, operator.lt, operator.ge, operator.le,
             operator.add, operator.sub, operator.mul, operator.pow,
             operator.truediv, operator.floordiv, operator.mod, divmod,
             operator.lshift, operator.rshift,
@@ -360,6 +359,12 @@ class BigFloatTests(unittest.TestCase):
         ]
         if sys.version_info < (3,):
             binary_ops.append(operator.div)
+        else:
+            # These only raise on Python 3; on Python 2 we get the
+            # usual arbitrary ordering.
+            binary_ops.extend(
+                [operator.gt, operator.lt, operator.ge, operator.le])
+
         if sys.version_info >= (3, 5):
             binary_ops.append(operator.matmul)
 
@@ -374,6 +379,17 @@ class BigFloatTests(unittest.TestCase):
         self.assertFalse(other == bf)
         self.assertTrue(bf != other)
         self.assertTrue(other != bf)
+
+        if sys.version_info < (3,):
+            # Check that comparisons don't raise.
+            self.assertIsInstance(bf < other, bool)
+            self.assertIsInstance(bf <= other, bool)
+            self.assertIsInstance(bf > other, bool)
+            self.assertIsInstance(bf >= other, bool)
+            self.assertIsInstance(other < bf, bool)
+            self.assertIsInstance(other <= bf, bool)
+            self.assertIsInstance(other > bf, bool)
+            self.assertIsInstance(other >= bf, bool)
 
     def test_bool(self):
         # test __nonzero__ / __bool__
