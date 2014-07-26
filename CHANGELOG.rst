@@ -1,14 +1,20 @@
 Changes since bigfloat 0.3.0
 ============================
 
-Library
--------
+Features
+--------
 
 - Wrap mpfr_buildopt_gmpinternals_p and mpfr_buildopt_tune_case.
 
 - Add bigfloat.__version__ (#46).
 
 - Add bigfloat.notequal.
+
+Bugfixes
+--------
+
+- The ``root`` function was accidentally wrapping ``cbrt`` (#60).
+  Now fixed (#62).
 
 
 What's new in bigfloat 0.3.0?

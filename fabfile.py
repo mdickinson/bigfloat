@@ -70,6 +70,7 @@ def test(python=PYTHON):
 
 def coverage(coverage=COVERAGE):
     local("{coverage} run -m unittest discover -v .".format(coverage=coverage))
+    local("{coverage} html".format(coverage=coverage))
 
 
 def html():
