@@ -781,7 +781,7 @@ def mpfr_cbrt(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     return cmpfr.mpfr_cbrt(&rop._value, &op._value, rnd)
 
 def mpfr_root(Mpfr_t rop not None, Mpfr_t op not None,
-              k, cmpfr.mpfr_rnd_t rnd):
+              unsigned long int k, cmpfr.mpfr_rnd_t rnd):
     """
     Set rop to the kth root of op, rounding in the direction rnd.
 
@@ -790,10 +790,6 @@ def mpfr_root(Mpfr_t rop not None, Mpfr_t op not None,
     whatever the parity of k.
 
     """
-    cdef unsigned long int k_unsigned
-    if k < 0:
-        raise ValueError("k should be nonnegative in mpfr_root")
-    k_unsigned = k
     check_initialized(rop)
     check_initialized(op)
     check_rounding_mode(rnd)

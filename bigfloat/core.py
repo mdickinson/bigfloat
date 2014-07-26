@@ -1090,7 +1090,12 @@ def root(x, k, context=None):
 
     The kth root of -0 is defined to be -0, whatever the parity of k.
 
+    This function is only implemented for nonnegative k.
+
     """
+    if k < 0:
+        raise ValueError("root function not implemented for negative k")
+
     return _apply_function_in_current_context(
         BigFloat,
         mpfr.mpfr_root,
