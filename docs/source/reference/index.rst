@@ -144,6 +144,37 @@ deviations from expected behaviour.
   n`` for some :class:`BigFloat` instance ``x`` and some Python int or long
   ``n`` then ``hash(x) == hash(n)``, and similarly for floats.
 
+* :class:`BigFloat` instances support :meth:`str.format`-based formatting,
+  as described in `PEP 3101 <pep 3101_>`_.  The format is as described
+  in the PEP, except that there's additional support for specification
+  of a rounding mode.  The general form of the format specifier looks
+  like this::
+
+     [[fill]align][sign][#][0][minimumwidth][.precision][rounding][type]
+
+  The optional ``rounding`` field consists of a single letter describing the
+  rounding direction to be used when converting a :class:`BigFloat` instance to
+  a decimal value.  The default is to use round-ties-to-even.  Valid values for
+  this field are described in the table below.
+
+  == =====================
+  U  Round toward positive
+  D  Round toward negative
+  Y  Round away from zero
+  Z  Round toward zero
+  N  Round ties to even
+  == =====================
+
+  Examples::
+
+    >>> from bigfloat import sqrt
+    >>> "{:.6f}".format(sqrt(2))
+    '1.414214'
+    >>> "{:.6Df}".format(sqrt(2))  # round down
+    '1.414213'
+    >>> "{:.^+20.6e}".format(sqrt(2))
+    '...+1.414214e+00....'
+
 
 The :class:`Context` class
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -668,3 +699,6 @@ MPFR Version information
 .. data:: MPFR_VERSION_PATCHLEVEL
 
    An integer giving the patch level of the MPFR version.
+
+
+.. _pep 3101: http://www.python.org/dev/peps/pep-3101/
