@@ -1831,7 +1831,13 @@ def mpfr_asprintf(object template, Mpfr_t op not None):
     """
     Compute a string representation of 'op' based on the given template.
 
-    XXX: Fill in details.
+    This is a restricted version of the function offered by the MPFR library.
+    It supports formatting of a single argument of type Mpfr_t.  The template
+    should have only a single conversion specifier.
+
+    See the MPFR documentation for full details of the conversion specifier
+    format.
+
     """
     cdef char *output
     cdef bytes template_bytes = template.encode('ascii')
