@@ -113,12 +113,7 @@ def _mpfr_get_str2(base, ndigits, op, rounding_mode):
 ###############################################################################
 # Context manager to give an easy way to change emin and emax temporarily.
 
-try:
-    DBL_PRECISION = _sys.float_info.mant_dig
-except AttributeError:
-    # Python 2.5 and earlier don't have sys.float_info; it's enough for
-    # DBL_PRECISION to be an upper bound.  64 bits should always be enough.
-    DBL_PRECISION = 64
+DBL_PRECISION = _sys.float_info.mant_dig
 
 # Dealing with exponent limits
 # ----------------------------
@@ -1136,11 +1131,16 @@ def root(x, k, context=None):
 
     The kth root of -0 is defined to be -0, whatever the parity of k.
 
+    This function is only implemented for nonnegative k.
+
     """
+    if k < 0:
+        raise ValueError("root function not implemented for negative k")
+
     return _apply_function_in_current_context(
         BigFloat,
-        mpfr.mpfr_cbrt,
-        (BigFloat._implicit_convert(x),),
+        mpfr.mpfr_root,
+        (BigFloat._implicit_convert(x), k),
         context,
     )
 

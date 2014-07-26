@@ -18,7 +18,6 @@
 import six
 
 # Standard library imports
-from six.moves import builtins
 import doctest
 import fractions
 import operator
@@ -68,6 +67,9 @@ from bigfloat import (
 
     # Version information
     MPFR_VERSION_MAJOR, MPFR_VERSION_MINOR,
+
+    # 5.5 Basic Arithmetic Functions
+    root,
 
     # 5.6 Comparison Functions
     cmp, cmpabs, is_nan, is_inf, is_finite, is_zero, is_regular, sgn,
@@ -151,6 +153,7 @@ class MockBinaryOperation(object):
 
 
 # Dummy class with mock implementations of relevant special methods.
+
 class RichObject(object):
     pass
 
@@ -170,6 +173,12 @@ if sys.version_info >= (3, 5):
 for op in dummy_ops:
     setattr(RichObject, '__{op}__'.format(op=op),
             MockBinaryOperation(op))
+
+
+# Dummy class with *no* implementations of special methods.
+
+class PoorObject(object):
+    pass
 
 
 class BigFloatTests(unittest.TestCase):
@@ -326,7 +335,6 @@ class BigFloatTests(unittest.TestCase):
         self.assertEqual(bf % other, "rmod")
         self.assertEqual(divmod(bf, other), "rdivmod")
         self.assertEqual(bf ** other, "rpow")
-        self.assertEqual(builtins.pow(bf, other), "rpow")
         if sys.version_info < (3,):
             self.assertEqual(operator.div(bf, other), "rdiv")
         if sys.version_info >= (3, 5):
@@ -338,6 +346,50 @@ class BigFloatTests(unittest.TestCase):
         self.assertEqual(bf & other, "rand")
         self.assertEqual(bf ^ other, "rxor")
         self.assertEqual(bf | other, "ror")
+
+    def test_binary_operations_raise_type_error(self):
+        # Check that binary operations correctly raise TypeError,
+        # either way around, with an unsupported type.  Excludes
+        # == and !=, which need their own checks.
+        binary_ops = [
+            operator.add, operator.sub, operator.mul, operator.pow,
+            operator.truediv, operator.floordiv, operator.mod, divmod,
+            operator.lshift, operator.rshift,
+            operator.and_, operator.xor, operator.or_,
+        ]
+        if sys.version_info < (3,):
+            binary_ops.append(operator.div)
+        else:
+            # These only raise on Python 3; on Python 2 we get the
+            # usual arbitrary ordering.
+            binary_ops.extend(
+                [operator.gt, operator.lt, operator.ge, operator.le])
+
+        if sys.version_info >= (3, 5):
+            binary_ops.append(operator.matmul)
+
+        bf = BigFloat(123)
+        other = PoorObject()
+        for op in binary_ops:
+            with self.assertRaises(TypeError):
+                op(bf, other)
+            with self.assertRaises(TypeError):
+                op(other, bf)
+        self.assertFalse(bf == other)
+        self.assertFalse(other == bf)
+        self.assertTrue(bf != other)
+        self.assertTrue(other != bf)
+
+        if sys.version_info < (3,):
+            # Check that comparisons don't raise.
+            self.assertIsInstance(bf < other, bool)
+            self.assertIsInstance(bf <= other, bool)
+            self.assertIsInstance(bf > other, bool)
+            self.assertIsInstance(bf >= other, bool)
+            self.assertIsInstance(other < bf, bool)
+            self.assertIsInstance(other <= bf, bool)
+            self.assertIsInstance(other > bf, bool)
+            self.assertIsInstance(other >= bf, bool)
 
     def test_bool(self):
         # test __nonzero__ / __bool__
@@ -646,6 +698,12 @@ class BigFloatTests(unittest.TestCase):
                 self.assertIs(type(bf), BigFloat)
                 self.assertEqual(bf.precision, p)
 
+    def test_creation_from_incompatible_object(self):
+        with self.assertRaises(TypeError):
+            BigFloat([1, 2, 3])
+        with self.assertRaises(TypeError):
+            BigFloat(1j)
+
     def test_exact_context_independent(self):
         with Context(emin=-1, emax=1):
             x = BigFloat.exact(123456)
@@ -726,12 +784,16 @@ class BigFloatTests(unittest.TestCase):
                     self.assertIs(type(bf), BigFloat)
                     self.assertEqual(bf.precision, p)
 
-        # check that rounding-mode doesn't affect the conversion
+        # Check that rounding-mode doesn't affect the conversion
         with RoundTowardNegative:
             lower = BigFloat.exact('1.1', precision=20)
         with RoundTowardPositive:
             upper = BigFloat.exact('1.1', precision=20)
         self.assertEqual(lower, upper)
+
+        # Check that TypeError is raised if precision not passed.
+        with self.assertRaises(TypeError):
+            BigFloat.exact('1.1')
 
     if sys.version_info < (3,):
         def test_exact_creation_from_unicode(self):
@@ -768,6 +830,12 @@ class BigFloatTests(unittest.TestCase):
                 self.assertEqual(x, y)
 
         self.assertRaises(TypeError, BigFloat.exact, BigFloat(23), 100)
+
+    def test_exact_creation_from_incompatible_object(self):
+        with self.assertRaises(TypeError):
+            BigFloat.exact([1, 2, 3])
+        with self.assertRaises(TypeError):
+            BigFloat.exact(1j, precision=20)
 
     def test_exponent_limits(self):
         with Context(emin=-1000, emax=0):
@@ -1134,7 +1202,7 @@ class BigFloatTests(unittest.TestCase):
                 else:
                     self.assertEqual(x, -negx)
 
-                absx = builtins.abs(x)
+                absx = operator.abs(x)
                 self.assertEqual(absx.precision, p)
                 if p < 150:
                     self.assertNotEqual(x, absx)
@@ -1319,8 +1387,24 @@ class BigFloatTests(unittest.TestCase):
             (False, '1000', -3),
         )
 
+    # 5.5 Basic Arithmetic Functions
+    def test_root(self):
+        self.assertEqual(root(BigFloat(23), 1), BigFloat(23))
+        self.assertEqual(root(BigFloat(49), 2), BigFloat(7))
+        self.assertEqual(root(BigFloat(27), 3), BigFloat(3))
+        self.assertEqual(root(BigFloat(-27), 3), BigFloat(-3))
+        self.assertEqual(root(BigFloat(16), 4), BigFloat(2))
+        with self.assertRaises(ValueError):
+            root(BigFloat(23), -1)
+        self.assertTrue(is_nan(root(BigFloat(2), 0)))
+        self.assertTrue(is_nan(root(BigFloat(-2), 2)))
+
     # 5.6 Comparison Functions
     def test_cmp(self):
+        self.assertGreater(cmp(BigFloat(2), BigFloat(1)), 0)
+        self.assertEqual(cmp(BigFloat(3.5), 3.5), 0)
+        self.assertLess(cmp(-3.5, -1), 0)
+
         # Comparisons involving NaNs should raise an exception
         with self.assertRaises(ValueError):
             cmp(BigFloat('nan'), 0)
@@ -1330,6 +1414,10 @@ class BigFloatTests(unittest.TestCase):
             cmp(BigFloat('-nan'), BigFloat('nan'))
 
     def test_cmpabs(self):
+        self.assertGreater(cmpabs(BigFloat(2), BigFloat(1)), 0)
+        self.assertEqual(cmpabs(BigFloat(3.5), 3.5), 0)
+        self.assertGreater(cmpabs(-3.5, -1), 0)
+
         # Comparisons involving NaNs should raise an exception
         with self.assertRaises(ValueError):
             cmpabs(BigFloat('nan'), 0)
@@ -1514,8 +1602,8 @@ def process_lines(lines):
             diff = diffBigFloat(actual_result, expected_result,
                                 match_precisions=False)
             if diff is not None:
-                self.fail(diff)
-            self.assertEqual(actual_flags, expected_flags)
+                self.fail("{}: {}".format(diff, l))
+            self.assertEqual(actual_flags, expected_flags, msg=l)
 
     return test_fn
 
@@ -1542,6 +1630,33 @@ next_up 1.fffffffffffffp+1023 -> inf
 next_up inf -> inf
 
 next_up nan -> nan
+
+""".split('\n'))
+
+
+ABCTests.test_next_down = process_lines("""\
+context double_precision
+
+next_down -inf -> -inf
+next_down -1.fffffffffffffp+1023 -> -inf
+next_down -1.ffffffffffffeffffp+1023 -> -1.fffffffffffffp+1023
+next_down -1.ffffffffffffep+1023 -> -1.fffffffffffffp+1023
+next_down -1p-1022 -> -1.0000000000001p-1022
+next_down -1p-1023 -> -1.0000000000002p-1023
+next_down -1p-1074 -> -2p-1074
+next_down -0.ffffffffffffffffffffp-1074 -> -1p-1074
+next_down -0.8p-1074 -> -1p-1074
+next_down -1p-999999999 -> -1p-1074
+next_down -0 -> -1p-1074
+next_down 0 -> -1p-1074
+next_down 1p-999999999 -> 0
+next_down 0.000000000000000000000000001p-1075 -> 0
+next_down 0.4p-1075 -> 0
+next_down 0.8p-1075 -> 0
+next_down 1p-1074 -> 0
+next_down inf -> 1.fffffffffffffp+1023
+
+next_down nan -> nan
 
 """.split('\n'))
 
@@ -1639,6 +1754,137 @@ pos 0.fffffffffffffcp-1022 -> 1p-1022                         Inexact
 pos 0.ffffffffffffffffffffffffp-1022 -> 1p-1022               Inexact
 pos 1p-1022 -> 1p-1022
 pos 1p+1024 -> Infinity Inexact Overflow
+
+""".split('\n'))
+
+
+ABCTests.test_various = process_lines("""\
+# The following tests are not supposed to be exhaustive tests of the behaviour
+# of the individual functions; that job is left to the MPFR test suite.
+# Instead, they're supposed to exercise the functions to catch simple errors
+# like mismatches in wrapping.  So we only need to check one or two
+# characteristic values per function.  The test values below were computed
+# using independent sources (mainly Pari/GP).
+
+context double_precision
+context RoundTiesToEven
+
+# Powers.
+sqr 1.8p0 -> 2.4p0
+rec_sqrt 2.4p0 -> 0.aaaaaaaaaaaaa8p0 Inexact
+cbrt 2p0 -> 1.428a2f98d728bp+0 Inexact
+
+# Log and exponential functions.
+log 2p0 -> 1.62e42fefa39efp-1 Inexact
+log2 2.8p0 -> 1.5269e12f346e3p+0 Inexact
+log10 1p4 -> 1.34413509f79ffp+0 Inexact
+log1p 0.8p0 -> 1.9f323ecbf984cp-2 Inexact
+
+exp 1p-2 -> 1.48b5e3c3e8186p+0 Inexact
+exp2 1p-2 -> 1.306fe0a31b715p+0 Inexact
+exp10 1p-2 -> 1.c73d51c54470ep+0 Inexact
+expm1 0.8p0 -> 1.4c2531c3c0d38p-1 Inexact
+
+# Trigonometric functions and their inverses.
+cos 2p0 -> -1.aa22657537205p-2 Inexact
+sin 2p0 -> 1.d18f6ead1b446p-1 Inexact
+tan 2p0 -> -1.17af62e0950f8p+1 Inexact
+sec 2p0 -> -1.33956fecf9e48p+1 Inexact
+csc 2p0 -> 1.19893a272f912p+0 Inexact
+cot 2p0 -> -1.d4a42e92faa4ep-2 Inexact
+
+acos 0.8p0 -> 1.0c152382d7366p+0 Inexact
+asin 0.8p0 -> 1.0c152382d7366p-1 Inexact
+atan 0.8p0 -> 1.dac670561bb4fp-2 Inexact
+
+# Hyperbolic trigonometric functions and their inverses.
+cosh 0.8p0 -> 1.20ac1862ae8d0p+0 Inexact
+sinh 0.8p0 -> 1.0acd00fe63b97p-1 Inexact
+tanh 0.8p0 -> 1.d9353d7568af3p-2 Inexact
+sech 0.8p0 -> 1.c60d1ff040dd0p-1 Inexact
+csch 0.8p0 -> 1.eb45dc88defedp+0 Inexact
+coth 0.8p0 -> 1.14fc6ceb099bfp+1 Inexact
+
+acosh 1.8p0 -> 1.ecc2caec5160ap-1 Inexact
+asinh 0.8p0 -> 1.ecc2caec5160ap-2 Inexact
+atanh 0.8p0 -> 1.193ea7aad030bp-1 Inexact
+
+# Other transcendental functions.
+eint 1.8p0 -> 1.a690858762f6bp+1 Inexact
+li2 0.cp0 -> 1.f4f9f0b58b974p-1 Inexact
+gamma 2.8p0 -> 1.544fa6d47b390p+0 Inexact
+lngamma 2.8p0 -> 1.2383e809a67e8p-2 Inexact
+digamma 2.8p0 -> 1.680425af12b5ep-1 Inexact
+zeta 4.0p0 -> 1.151322ac7d848p+0 Inexact
+erf 3.8p0 -> 1.ffffe710d565ep-1 Inexact
+erfc 3.8p0 -> 1.8ef2a9a18d857p-21 Inexact
+agm 1p0 1.6a09e667f3bcdp+0 -> 1.32b95184360ccp+0 Inexact
+ai 0.ap0 -> 1.a2db43a6d812dp-3 Inexact
+
+# Arithmetic functions not tested elsewhere.
+dim 2.8p0 1p0 -> 1.8p0
+dim 1p0 2.8p0 -> 0p0
+fma 3p0 5p0 8p0 -> 17p0
+fms 3p0 5p0 8p0 -> 7p0
+hypot 5p0 cp0 -> dp0
+
+floor -1p0 -> -1p0
+floor -0.dp0 -> -1p0
+floor -0.1p0 -> -1p0
+floor -0p0 -> -0p0
+floor 0p0 -> 0p0
+floor 0.1p0 -> 0p0
+floor 0.dp0 -> 0p0
+floor 1p0 -> 1p0
+
+ceil -1p0 -> -1p0
+ceil -0.dp0 -> -0p0
+ceil -0.1p0 -> -0p0
+ceil -0p0 -> -0p0
+ceil 0p0 -> 0p0
+ceil 0.1p0 -> 1p0
+ceil 0.dp0 -> 1p0
+ceil 1p0 -> 1p0
+
+round -1p0 -> -1p0
+round -0.dp0 -> -1p0
+round -0.1p0 -> -0p0
+round -0p0 -> -0p0
+round 0p0 -> 0p0
+round 0.1p0 -> 0p0
+round 0.dp0 -> 1p0
+round 1p0 -> 1p0
+
+trunc -1p0 -> -1p0
+trunc -0.dp0 -> -0p0
+trunc -0.1p0 -> -0p0
+trunc -0p0 -> -0p0
+trunc 0p0 -> 0p0
+trunc 0.1p0 -> 0p0
+trunc 0.dp0 -> 0p0
+trunc 1p0 -> 1p0
+
+frac -1p0 -> -0p0
+frac -0.dp0 -> -0.dp0
+frac -0.1p0 -> -0.1p0
+frac -0p0 -> -0p0
+frac 0p0 -> 0p0
+frac 0.1p0 -> 0.1p0
+frac 0.dp0 -> 0.dp0
+frac 1p0 -> 0p0
+
+remainder -5p0 3p0 -> 1p0
+remainder -4p0 3p0 -> -1p0
+remainder -3p0 3p0 -> -0p0
+remainder -2p0 3p0 -> 1p0
+remainder -1p0 3p0 -> -1p0
+remainder -0p0 3p0 -> -0p0
+remainder 0p0 3p0 -> 0p0
+remainder 1p0 3p0 -> 1p0
+remainder 2p0 3p0 -> -1p0
+remainder 3p0 3p0 -> 0p0
+remainder 4p0 3p0 -> 1p0
+remainder 5p0 3p0 -> -1p0
 
 """.split('\n'))
 
