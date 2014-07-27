@@ -449,7 +449,6 @@ class BigFloat(mpfr.Mpfr_t):
         of '0', 'inf' or 'nan'.
 
         """
-
         if self and is_finite(self):
             return mpfr.mpfr_get_exp(self)
 
