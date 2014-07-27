@@ -10,6 +10,9 @@ Features
 
 - Add bigfloat.notequal.
 
+- Add format support.
+
+
 Bugfixes
 --------
 
