@@ -800,7 +800,18 @@ class BigFloat(mpfr.Mpfr_t):
                 assert exponent == 0
                 return -int(digits) if sign else int(digits)
             else:
-                raise NotImplementedError("Round not implemented for non-zero n.")
+                if is_inf(self):
+                    return self
+                if is_nan(self):
+                    return self
+
+                negative, digits, exponent = self._format_to_fixed_precision(n)
+                decimal_string = "{sign}{digits}E{exponent}".format(
+                    sign='-' if negative else '',
+                    digits=digits,
+                    exponent=exponent,
+                )
+                return set_str2(decimal_string, 10)
 
     @property
     def precision(self):

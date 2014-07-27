@@ -1211,7 +1211,7 @@ class BigFloatTests(unittest.TestCase):
 
     @unittest.skipUnless(sys.version_info >= (3,),
                          "round tests only applicable to Python 3")
-    def test_round(self):
+    def test_single_argument_round(self):
         # Rounding with a single argument.
         test_values = [
             (BigFloat('-2.0'), -2),
@@ -1238,6 +1238,103 @@ class BigFloatTests(unittest.TestCase):
             round(BigFloat('inf'))
         with self.assertRaises(ValueError):
             round(BigFloat('nan'))
+
+    @unittest.skipUnless(sys.version_info >= (3,),
+                         "round tests only applicable to Python 3")
+    def test_two_argument_round(self):
+        test_triples = [
+            # n = -1 (round to nearest 10)
+            (BigFloat(-35), -1, BigFloat(-40)),
+            (BigFloat(-25), -1, BigFloat(-20)),
+            (BigFloat(-15), -1, BigFloat(-20)),
+            (BigFloat(-5), -1, BigFloat('-0')),
+            (BigFloat(5), -1, BigFloat(0)),
+            (BigFloat(15), -1, BigFloat(20)),
+            (BigFloat(25), -1, BigFloat(20)),
+            (BigFloat(35), -1, BigFloat(40)),
+
+            # n = 0
+            (BigFloat(-1.5), 0, BigFloat('-2')),
+            (BigFloat(-0.5), 0, BigFloat('-0')),
+            (BigFloat(0.49999999999999994), 0, BigFloat('0')),
+            (BigFloat(0.5), 0, BigFloat('0')),
+            (BigFloat(1.5), 0, BigFloat('2')),
+            (BigFloat(2.5), 0, BigFloat('2')),
+            (BigFloat('4503599627370495.5'), 0, BigFloat('4503599627370496')),
+            (BigFloat('4503599627370497'), 0, BigFloat('4503599627370497')),
+
+            # n = 1
+            (BigFloat('0.05'), 1, BigFloat('0.1')),
+            (BigFloat('0.1'), 1, BigFloat('0.1')),
+            (BigFloat('0.15'), 1, BigFloat('0.1')),
+            (BigFloat('0.2'), 1, BigFloat('0.2')),
+            (BigFloat('0.25'), 1, BigFloat('0.2')),
+            (BigFloat('0.3'), 1, BigFloat('0.3')),
+            (BigFloat('0.35'), 1, BigFloat('0.3')),
+            (BigFloat('0.4'), 1, BigFloat('0.4')),
+            (BigFloat('0.45'), 1, BigFloat('0.5')),
+            (BigFloat('0.5'), 1, BigFloat('0.5')),
+            (BigFloat('0.55'), 1, BigFloat('0.6')),
+            (BigFloat('0.6'), 1, BigFloat('0.6')),
+            (BigFloat('0.75'), 1, BigFloat('0.8')),
+            
+            # Various n.
+            (BigFloat('314159.265358979323'), -6, BigFloat('0')),
+            (BigFloat('314159.265358979323'), -5, BigFloat('300000')),
+            (BigFloat('314159.265358979323'), -4, BigFloat('310000')),
+            (BigFloat('314159.265358979323'), -3, BigFloat('314000')),
+            (BigFloat('314159.265358979323'), -2, BigFloat('314200')),
+            (BigFloat('314159.265358979323'), -1, BigFloat('314160')),
+            (BigFloat('314159.265358979323'), 0, BigFloat('314159')),
+            (BigFloat('314159.265358979323'), 1, BigFloat('314159.3')),
+            (BigFloat('314159.265358979323'), 2, BigFloat('314159.27')),
+            (BigFloat('314159.265358979323'), 3, BigFloat('314159.265')),
+            (BigFloat('314159.265358979323'), 4, BigFloat('314159.2654')),
+            (BigFloat('314159.265358979323'), 5, BigFloat('314159.26536')),
+            (BigFloat('314159.265358979323'), 6, BigFloat('314159.265359')),
+
+            # Special values.
+            (BigFloat('0'), 0, BigFloat('0')),
+            (BigFloat('-0'), 0, BigFloat('-0')),
+            (BigFloat('0'), 10, BigFloat('0')),
+            (BigFloat('-0'), 10, BigFloat('-0')),
+            (BigFloat('0'), -10, BigFloat('0')),
+            (BigFloat('-0'), -10, BigFloat('-0')),
+            (BigFloat('inf'), 0, BigFloat('inf')),
+            (BigFloat('-inf'), 0, BigFloat('-inf')),
+            (BigFloat('nan'), 0, BigFloat('nan')),
+            (BigFloat('inf'), 10, BigFloat('inf')),
+            (BigFloat('-inf'), 10, BigFloat('-inf')),
+            (BigFloat('nan'), 10, BigFloat('nan')),
+            (BigFloat('inf'), -10, BigFloat('inf')),
+            (BigFloat('-inf'), -10, BigFloat('-inf')),
+            (BigFloat('nan'), -10, BigFloat('nan')),
+        ]
+        for bf, n, expected in test_triples:
+            actual = round(bf, n)
+            self.assertIsInstance(actual, BigFloat)
+            self.assertIdenticalBigFloat(actual, expected)
+
+        # Check round-ties-to-even behaviour.
+        result = round(BigFloat(-1.5), 0)
+        self.assertIsInstance(result, BigFloat)
+        self.assertEqual(result, BigFloat(-2))
+
+        result = round(BigFloat(-0.5), 0)
+        self.assertIsInstance(result, BigFloat)
+        self.assertEqual(result, BigFloat(0))
+
+        result = round(BigFloat(0.5), 0)
+        self.assertIsInstance(result, BigFloat)
+        self.assertEqual(result, BigFloat(0))
+
+        result = round(BigFloat(1.5), 0)
+        self.assertIsInstance(result, BigFloat)
+        self.assertEqual(result, BigFloat(2))
+
+        result = round(BigFloat(2.5), 0)
+        self.assertIsInstance(result, BigFloat)
+        self.assertEqual(result, BigFloat(2))
 
     def test__format_to_floating_precision(self):
         # Formatting to precision 1.  We need extra testing for this, since
