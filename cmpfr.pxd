@@ -15,6 +15,10 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with the bigfloat package.  If not, see <http://www.gnu.org/licenses/>.
 
+# mpfr.h needs declarations from stdio.h.
+cdef extern from "stdio.h":
+    pass
+
 cimport cgmp
 
 cdef extern from "mpfr.h":
@@ -229,6 +233,11 @@ cdef extern from "mpfr.h":
     int mpfr_const_catalan(mpfr_ptr rop, mpfr_rnd_t rnd)
     void mpfr_free_cache()
 
+    ###########################################################################
+    # 5.9 Formatted Output Functions
+    ###########################################################################
+
+    int mpfr_asprintf(char **str, const char *template, ...)
 
     ###########################################################################
     # 5.10 Integer and Remainder Related Functions

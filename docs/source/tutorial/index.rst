@@ -353,7 +353,7 @@ set and test these flags:
    >>> get_flagstate()
    set([])
    >>> exp(10**100)
-   BigFloat.exact('Infinity', precision=53)
+   BigFloat.exact('inf', precision=53)
    >>> get_flagstate()
    set(['Overflow', 'Inexact'])
 
