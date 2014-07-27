@@ -45,6 +45,12 @@ from bigfloat.context import (
     _apply_function_in_current_context,
 )
 
+from bigfloat.formatting import (
+    format_align,
+    parse_format_specifier,
+    rounding_mode_from_specifier,
+)
+
 
 # Alternative names for some builtins that get overwritten by functions created
 # in this module.
@@ -184,7 +190,7 @@ def _format_finite(negative, digits, dot_pos):
     if dot_pos < len(digits):
         digits = digits[:dot_pos] + '.' + digits[dot_pos:]
     if use_exponent:
-        digits += "e%+d" % exp
+        digits += "e{0:+03d}".format(exp)
     return '-' + digits if negative else digits
 
 
@@ -377,6 +383,67 @@ class BigFloat(mpfr.Mpfr_t):
         """
         return mpfr.mpfr_get_d(self, ROUND_TIES_TO_EVEN)
 
+    def __format__(self, format_specifier):
+        """ Support for formatting BigFloat instances. """
+
+        spec = parse_format_specifier(format_specifier)
+
+        if not spec['type']:
+            rounding_mode = rounding_mode_from_specifier[spec['rounding']]
+            formatted = self._str_format(rounding_mode, spec['precision'])
+        elif spec['type'] == '%':
+            precision = spec['precision']
+            # Default number of digits after the point for %-formatting is 8.
+            digits_after = precision + 2 if precision is not None else 8
+            mpfr_format_template = "%{alternate}.{prec}R{rounding}f"
+            mpfr_format_spec = mpfr_format_template.format(prec=digits_after,
+                                                           **spec)
+            formatted = mpfr.mpfr_asprintf(mpfr_format_spec, self)
+
+            # Pick apart the result.
+            if formatted[:1] == '-':
+                sign, body = formatted[:1], formatted[1:]
+            else:
+                sign, body = '', formatted
+
+            if body not in ('inf', 'nan'):
+                before = body[:-digits_after-1]
+                after = body[-digits_after:]
+                assert before.isdigit()
+                assert after.isdigit()
+                assert body[-digits_after-1] == '.'
+
+                # Move two digits from after to before, strip leading zeros,
+                # and reconsistute.
+                before, after = before + after[:2], after[2:]
+                body = (
+                    (before.lstrip('0') or '0') +
+                    ('.' + after if after else ''))
+            formatted = sign + body + '%'
+        else:
+            # Convert to MPFR-style conversion specifier.  We'll handle the
+            # minimum field width ourselves in post-processing, along with PEP
+            # 3101-style filling and padding.
+            if spec['precision'] is not None:
+                prec = '.{0}'.format(spec['precision'])
+            else:
+                prec = ''
+            mpfr_format_template = "%{alternate}{prec}R{rounding}{type}"
+            mpfr_format_spec = mpfr_format_template.format(prec=prec, **spec)
+            formatted = mpfr.mpfr_asprintf(mpfr_format_spec, self)
+
+        # Extract the sign, if any.
+        negative = formatted[:1] == '-'
+        sign, body = formatted[:negative], formatted[negative:]
+
+        # Post-process to add signs (including for infinities and nans, for
+        # consistency with float and Decimal formatting.  MPFR doesn't do
+        # this.)
+        if not sign and spec['sign'] in '+ ':
+            sign = spec['sign']
+
+        return format_align(sign, body, spec)
+
     def _sign(self):
         return mpfr.mpfr_signbit(self)
 
@@ -408,19 +475,18 @@ class BigFloat(mpfr.Mpfr_t):
         2**(k-1) <= abs(self) < 2**k.
 
         If self is not finite and nonzero, return a string:  one
-        of '0', 'Infinity' or 'NaN'.
+        of '0', 'inf' or 'nan'.
 
         """
-
         if self and is_finite(self):
             return mpfr.mpfr_get_exp(self)
 
         if not self:
             return '0'
         elif is_inf(self):
-            return 'Infinity'
+            return 'inf'
         elif is_nan(self):
-            return 'NaN'
+            return 'nan'
         else:
             assert False, "shouldn't ever get here"
 
@@ -516,74 +582,29 @@ class BigFloat(mpfr.Mpfr_t):
 
         return (-n if negative else n), d
 
-    def __str__(self):
+    def _str_format(self, rounding_mode=ROUND_TIES_TO_EVEN, precision=None):
         if is_zero(self):
             return '-0' if is_negative(self) else '0'
         elif is_finite(self):
             negative, digits, e = _mpfr_get_str2(
                 10,
-                0,
+                0 if precision is None else max(1, precision),
                 self,
-                ROUND_TIES_TO_EVEN,
+                rounding_mode,
             )
             return _format_finite(negative, digits, e)
         elif is_inf(self):
-            return '-Infinity' if is_negative(self) else 'Infinity'
+            return '-inf' if is_negative(self) else 'inf'
         else:
             assert is_nan(self)
-            return 'NaN'
+            return 'nan'
+
+    def __str__(self):
+        return self._str_format()
 
     def __repr__(self):
         return "BigFloat.exact('%s', precision=%d)" % (
             str(self), self.precision)
-
-    def _format_to_precision_one(self):
-        """ Format 'self' to one significant figure.
-
-        This is a special case of _format_to_floating_precision, made necessary
-        because the mpfr_get_str function doesn't support passing a precision
-        smaller than 2 (according to the docs), so we need some trickery to
-        make this work.
-
-        Rounding is always round-to-nearest.
-        """
-
-        # Start by formatting to 2 digits; we'll then truncate to one digit,
-        # rounding appropriately.
-        sign, digits, exp = _mpfr_get_str2(
-            10,
-            2,
-            self,
-            ROUND_TOWARD_NEGATIVE,
-        )
-
-        # If the last digit is 5, we can't tell which way to round; instead,
-        # recompute with the opposite rounding direction, and round based on
-        # the result of that.
-        if digits[-1] == '5':
-            sign, digits, exp = _mpfr_get_str2(
-                10,
-                2,
-                self,
-                ROUND_TOWARD_POSITIVE,
-            )
-
-        if digits[-1] in '01234':
-            round_up = False
-        elif digits[-1] in '6789':
-            round_up = True
-        else:
-            # Halfway case: round to even.
-            round_up = digits[-2] in '13579'
-
-        digits = digits[:-1]
-        if round_up:
-            digits = str(int(digits) + 1)
-            if len(digits) == 2:
-                assert digits[-1] == '0'
-                digits = digits[:-1]
-                exp += 1
-        return sign, digits, exp - 1
 
     def _format_to_floating_precision(self, precision):
         """ Format a nonzero finite BigFloat instance to a given number of
@@ -602,9 +623,6 @@ class BigFloat(mpfr.Mpfr_t):
         """
         if precision <= 0:
             raise ValueError("precision argument should be at least 1")
-
-        if precision == 1:
-            return self._format_to_precision_one()
 
         sign, digits, exp = _mpfr_get_str2(
             10,
@@ -644,10 +662,10 @@ class BigFloat(mpfr.Mpfr_t):
 
         # Specials
         if is_inf(self):
-            return is_negative(self), 'Infinity', None
+            return is_negative(self), 'inf', None
 
         if is_nan(self):
-            return is_negative(self), 'NaN', None
+            return is_negative(self), 'nan', None
 
         # Figure out the exponent by making a call to get_str2.  exp satisfies
         # 10**(exp-1) <= self < 10**exp

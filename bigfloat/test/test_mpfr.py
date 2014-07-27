@@ -1997,11 +1997,28 @@ class TestMpfr(unittest.TestCase):
         with self.assertRaises(ValueError):
             mpfr_get_str(63, 0, x, MPFR_RNDN)
 
-        # Invalid number of digits
-        with self.assertRaises(ValueError):
-            mpfr_get_str(10, 1, x, MPFR_RNDN)
+        # Invalid number of digits: note that there's a currently (07/2014)
+        # undocumented feature of MPFR that mpfr_get_str works for n = 1
+        # and non-binary bases.  We make use of this for BigFloat string
+        # formatting.
         with self.assertRaises((ValueError, OverflowError)):
             mpfr_get_str(10, -1, x, MPFR_RNDN)
+        with self.assertRaises((ValueError, OverflowError)):
+            mpfr_get_str(8, -1, x, MPFR_RNDN)
+        with self.assertRaises(ValueError):
+            mpfr_get_str(8, 1, x, MPFR_RNDN)
+
+        # Check the undocumented feature mentioned above.
+        x = Mpfr(20)
+        mpfr_set_str(x, '64', 10, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_str(10, 1, x, MPFR_RNDN),
+            ('6', 2),
+        )
+        self.assertEqual(
+            mpfr_get_str(10, 1, x, MPFR_RNDU),
+            ('7', 2),
+        )
 
         # Bases other than 10
         x = Mpfr(20)

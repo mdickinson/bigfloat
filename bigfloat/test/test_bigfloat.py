@@ -486,7 +486,7 @@ class BigFloatTests(unittest.TestCase):
 
         # entries have the same value; sublists are ordered by increasing value
         values = [
-            [BigFloat('-Infinity'), float('-inf')],
+            [BigFloat('-inf'), float('-inf')],
             [-1, -1.0, BigFloat(-1.0)],
             [
                 0,
@@ -499,7 +499,7 @@ class BigFloatTests(unittest.TestCase):
             [1, 1.0, BigFloat(1.0)],
             [BigFloat(2 ** 53 + 1)],
             [2 ** 53 + 1],
-            [BigFloat('Infinity'), float('inf')],
+            [BigFloat('inf'), float('inf')],
             ]
 
         nans = [
@@ -928,13 +928,13 @@ class BigFloatTests(unittest.TestCase):
 
         test_values = [
             # (input, precision, output)
-            ('NaN', 2, 'NaN'),
-            ('NaN', 24, 'NaN'),
-            ('NaN', 53, 'NaN'),
-            ('NaN', 100, 'NaN'),
+            ('NaN', 2, 'nan'),
+            ('NaN', 24, 'nan'),
+            ('NaN', 53, 'nan'),
+            ('NaN', 100, 'nan'),
             # ('-NaN', 10, '-NaN'),
-            ('Inf', 2, 'Infinity'),
-            ('-Inf', 10, '-Infinity'),
+            ('Inf', 2, 'inf'),
+            ('-Inf', 10, '-inf'),
             ('0', 53, '0'),
             ('-0', 24, '-0'),
 
@@ -1058,15 +1058,15 @@ class BigFloatTests(unittest.TestCase):
         # check special values
         self.assertEqual(str(BigFloat('0.0')), '0')
         self.assertEqual(str(BigFloat('-0.0')), '-0')
-        self.assertEqual(str(BigFloat('inf')), 'Infinity')
-        self.assertEqual(str(BigFloat('-inf')), '-Infinity')
-        self.assertEqual(str(BigFloat('nan')), 'NaN')
+        self.assertEqual(str(BigFloat('inf')), 'inf')
+        self.assertEqual(str(BigFloat('-inf')), '-inf')
+        self.assertEqual(str(BigFloat('nan')), 'nan')
 
         self.assertEqual(str(BigFloat('1e100')), '1.0000000000000000e+100')
 
         # check switch from fixed-point to exponential notation
-        self.assertEqual(str(BigFloat('1e-5')), '1.0000000000000001e-5')
-        self.assertEqual(str(BigFloat('9.999e-5')), '9.9989999999999996e-5')
+        self.assertEqual(str(BigFloat('1e-5')), '1.0000000000000001e-05')
+        self.assertEqual(str(BigFloat('9.999e-5')), '9.9989999999999996e-05')
         self.assertEqual(str(BigFloat('1e-4')), '0.00010000000000000000')
         self.assertEqual(str(BigFloat('1e14')), '100000000000000.00')
         self.assertEqual(str(BigFloat('1e15')), '1000000000000000.0')
@@ -1312,20 +1312,20 @@ class BigFloatTests(unittest.TestCase):
         )
 
         # Specials
-        x = BigFloat('Infinity')
+        x = BigFloat('inf')
         self.assertEqual(
             x._format_to_fixed_precision(5),
-            (False, 'Infinity', None),
+            (False, 'inf', None),
         )
-        x = BigFloat('-Infinity')
+        x = BigFloat('-inf')
         self.assertEqual(
             x._format_to_fixed_precision(5),
-            (True, 'Infinity', None),
+            (True, 'inf', None),
         )
-        x = BigFloat('NaN')
+        x = BigFloat('nan')
         self.assertEqual(
             x._format_to_fixed_precision(5),
-            (False, 'NaN', None),
+            (False, 'nan', None),
         )
 
         x = BigFloat('4567.892391555555')
@@ -1824,7 +1824,7 @@ pos 0.fffffffffffffbffffffffffp-1022 -> 1p-1022               Inexact Underflow
 pos 0.fffffffffffffcp-1022 -> 1p-1022                         Inexact
 pos 0.ffffffffffffffffffffffffp-1022 -> 1p-1022               Inexact
 pos 1p-1022 -> 1p-1022
-pos 1p+1024 -> Infinity Inexact Overflow
+pos 1p+1024 -> inf Inexact Overflow
 
 """.split('\n'))
 

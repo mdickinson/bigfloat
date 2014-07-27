@@ -144,6 +144,60 @@ deviations from expected behaviour.
   n`` for some :class:`BigFloat` instance ``x`` and some Python int or long
   ``n`` then ``hash(x) == hash(n)``, and similarly for floats.
 
+* :class:`BigFloat` instances support :meth:`str.format`-based formatting, as
+  described in `PEP 3101 <pep 3101_>`_.  The format specifier is much as
+  described in the PEP, except that there's additional support for hexadecimal
+  and binary output, and for specification of a rounding mode.  The general
+  form of the format specifier looks like this::
+
+     [[fill]align][sign][#][0][minimumwidth][.precision][rounding][type]
+
+  The ``type`` field is a single letter, which may be any of the following.
+  The ``'e'``, ``'E'``, ``'f'``, ``'F'``, ``'g'``, ``'G'`` and ``'%'`` types
+  behave in the same way as for regular floats.  Only the ``'a'``, ``'A'`` and
+  ``'b'`` formats are particular to :class:`BigFloat` instances.  The type
+  may also be omitted, in which case ``str``-style formatting is performed.
+
+  =======  ============================================
+  ``'a'``  Output in hexadecimal format.
+  ``'A'``  Upper case variant of ``'a'``.
+  ``'b'``  Output in binary format.
+  ``'e'``  Scientific format.
+  ``'E'``  Upper case variant of ``'e'``.
+  ``'f'``  Fixed-point format.
+  ``'F'``  Upper case variant of ``'f'``.
+  ``'g'``  Friendly format.
+  ``'G'``  Upper case variant of ``'g'``.
+  ``'%'``  Like ``'f'``, but formatted as a percentage.
+  =======  ============================================
+
+  The optional ``rounding`` field consists of a single letter describing the
+  rounding direction to be used when converting a :class:`BigFloat` instance to
+  a decimal value.  The default is to use round-ties-to-even.  Valid values for
+  this field are described in the table below.
+
+  =======  =====================
+  ``'U'``  Round toward positive
+  ``'D'``  Round toward negative
+  ``'Y'``  Round away from zero
+  ``'Z'``  Round toward zero
+  ``'N'``  Round ties to even
+  =======  =====================
+
+  Examples::
+
+    >>> from bigfloat import sqrt
+    >>> "{0:.6f}".format(sqrt(2))
+    '1.414214'
+    >>> "{0:.6Df}".format(sqrt(2))  # round down
+    '1.414213'
+    >>> "{0:.^+20.6e}".format(sqrt(2))
+    '...+1.414214e+00....'
+    >>> "{0:a}".format(sqrt(2))
+    '0x1.6a09e667f3bcdp+0'
+    >>> "{0:b}".format(sqrt(2))
+    '1.0110101000001001111001100110011111110011101111001101p+0'
+
 
 The :class:`Context` class
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -668,3 +722,6 @@ MPFR Version information
 .. data:: MPFR_VERSION_PATCHLEVEL
 
    An integer giving the patch level of the MPFR version.
+
+
+.. _pep 3101: http://www.python.org/dev/peps/pep-3101/
