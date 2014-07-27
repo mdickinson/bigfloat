@@ -446,7 +446,7 @@ class BigFloat(mpfr.Mpfr_t):
         2**(k-1) <= abs(self) < 2**k.
 
         If self is not finite and nonzero, return a string:  one
-        of '0', 'Infinity' or 'NaN'.
+        of '0', 'inf' or 'nan'.
 
         """
 
@@ -456,9 +456,9 @@ class BigFloat(mpfr.Mpfr_t):
         if not self:
             return '0'
         elif is_inf(self):
-            return 'Infinity'
+            return 'inf'
         elif is_nan(self):
-            return 'NaN'
+            return 'nan'
         else:
             assert False, "shouldn't ever get here"
 
@@ -566,10 +566,10 @@ class BigFloat(mpfr.Mpfr_t):
             )
             return _format_finite(negative, digits, e)
         elif is_inf(self):
-            return '-Infinity' if is_negative(self) else 'Infinity'
+            return '-inf' if is_negative(self) else 'inf'
         else:
             assert is_nan(self)
-            return 'NaN'
+            return 'nan'
 
     def __str__(self):
         return self._str_format()
@@ -685,10 +685,10 @@ class BigFloat(mpfr.Mpfr_t):
 
         # Specials
         if is_inf(self):
-            return is_negative(self), 'Infinity', None
+            return is_negative(self), 'inf', None
 
         if is_nan(self):
-            return is_negative(self), 'NaN', None
+            return is_negative(self), 'nan', None
 
         # Figure out the exponent by making a call to get_str2.  exp satisfies
         # 10**(exp-1) <= self < 10**exp

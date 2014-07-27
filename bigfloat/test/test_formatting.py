@@ -280,9 +280,9 @@ class TestFormatting(unittest.TestCase):
             (BigFloat('123'), "#.4", "123.0"),
             (BigFloat('123'), ".0", "1e+2"),
             (BigFloat('123'), "", "123.00000000000000"),
-            (BigFloat('nan'), "", "NaN"),
-            (BigFloat('inf'), "", "Infinity"),
-            (BigFloat('-inf'), "", "-Infinity"),
+            (BigFloat('nan'), "", "nan"),
+            (BigFloat('inf'), "", "inf"),
+            (BigFloat('-inf'), "", "-inf"),
         ]
         for bf, fmt, expected_output in test_triples:
             result = format(bf, fmt)
