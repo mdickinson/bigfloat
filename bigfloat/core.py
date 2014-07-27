@@ -391,6 +391,35 @@ class BigFloat(mpfr.Mpfr_t):
         if not spec['type']:
             rounding_mode = rounding_mode_from_specifier[spec['rounding']]
             formatted = self._str_format(rounding_mode, spec['precision'])
+        elif spec['type'] == '%':
+            precision = spec['precision']
+            # Default number of digits after the point for %-formatting is 8.
+            digits_after = precision + 2 if precision is not None else 8
+            mpfr_format_template = "%{alternate}.{prec}R{rounding}f"
+            mpfr_format_spec = mpfr_format_template.format(prec=digits_after,
+                                                           **spec)
+            formatted = mpfr.mpfr_asprintf(mpfr_format_spec, self)
+
+            # Pick apart the result.
+            if formatted[:1] == '-':
+                sign, body = formatted[:1], formatted[1:]
+            else:
+                sign, body = '', formatted
+
+            if body not in ('inf', 'nan'):
+                before = body[:-digits_after-1]
+                after = body[-digits_after:]
+                assert before.isdigit()
+                assert after.isdigit()
+                assert body[-digits_after-1] == '.'
+
+                # Move two digits from after to before, strip leading zeros,
+                # and reconsistute.
+                before, after = before + after[:2], after[2:]
+                body = (
+                    (before.lstrip('0') or '0') +
+                    ('.' + after if after else ''))
+            formatted = sign + body + '%'
         else:
             # Convert to MPFR-style conversion specifier.  We'll handle the
             # minimum field width ourselves in post-processing, along with PEP
