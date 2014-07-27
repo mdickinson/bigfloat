@@ -92,6 +92,12 @@ def parse_format_specifier(specification):
     # Convert minimum width to an int; default is zero.
     format_dict['minimumwidth'] = int(format_dict['minimumwidth'] or '0')
 
+    # Convert precision to an int, or `None` if no precision given.
+    if format_dict['precision']:
+        format_dict['precision'] = int(format_dict['precision'][1:])
+    else:
+        format_dict['precision'] = None
+
     # If no rounding mode is given, assume 'N'.
     if not format_dict['rounding']:
         format_dict['rounding'] = 'N'

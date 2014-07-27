@@ -390,17 +390,17 @@ class BigFloat(mpfr.Mpfr_t):
 
         if not spec['type']:
             rounding_mode = rounding_mode_from_specifier[spec['rounding']]
-            if spec['precision']:
-                precision = int(spec['precision'][1:])
-            else:
-                precision = None
-            formatted = self._str_format(rounding_mode, precision)
+            formatted = self._str_format(rounding_mode, spec['precision'])
         else:
             # Convert to MPFR-style conversion specifier.  We'll handle the
             # minimum field width ourselves in post-processing, along with PEP
             # 3101-style filling and padding.
-            mpfr_format_template = "%{alternate}{precision}R{rounding}{type}"
-            mpfr_format_spec = mpfr_format_template.format(**spec)
+            if spec['precision'] is not None:
+                prec = '.{}'.format(spec['precision'])
+            else:
+                prec = ''
+            mpfr_format_template = "%{alternate}{prec}R{rounding}{type}"
+            mpfr_format_spec = mpfr_format_template.format(prec=prec, **spec)
             formatted = mpfr.mpfr_asprintf(mpfr_format_spec, self)
 
         # Extract the sign, if any.
