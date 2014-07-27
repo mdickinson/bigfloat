@@ -577,54 +577,6 @@ class BigFloat(mpfr.Mpfr_t):
         return "BigFloat.exact('%s', precision=%d)" % (
             str(self), self.precision)
 
-    def _format_to_precision_one(self):
-        """ Format 'self' to one significant figure.
-
-        This is a special case of _format_to_floating_precision, made necessary
-        because the mpfr_get_str function doesn't support passing a precision
-        smaller than 2 (according to the docs), so we need some trickery to
-        make this work.
-
-        Rounding is always round-to-nearest.
-        """
-
-        # Start by formatting to 2 digits; we'll then truncate to one digit,
-        # rounding appropriately.
-        sign, digits, exp = _mpfr_get_str2(
-            10,
-            2,
-            self,
-            ROUND_TOWARD_NEGATIVE,
-        )
-
-        # If the last digit is 5, we can't tell which way to round; instead,
-        # recompute with the opposite rounding direction, and round based on
-        # the result of that.
-        if digits[-1] == '5':
-            sign, digits, exp = _mpfr_get_str2(
-                10,
-                2,
-                self,
-                ROUND_TOWARD_POSITIVE,
-            )
-
-        if digits[-1] in '01234':
-            round_up = False
-        elif digits[-1] in '6789':
-            round_up = True
-        else:
-            # Halfway case: round to even.
-            round_up = digits[-2] in '13579'
-
-        digits = digits[:-1]
-        if round_up:
-            digits = str(int(digits) + 1)
-            if len(digits) == 2:
-                assert digits[-1] == '0'
-                digits = digits[:-1]
-                exp += 1
-        return sign, digits, exp - 1
-
     def _format_to_floating_precision(self, precision):
         """ Format a nonzero finite BigFloat instance to a given number of
         significant digits.
@@ -642,9 +594,6 @@ class BigFloat(mpfr.Mpfr_t):
         """
         if precision <= 0:
             raise ValueError("precision argument should be at least 1")
-
-        if precision == 1:
-            return self._format_to_precision_one()
 
         sign, digits, exp = _mpfr_get_str2(
             10,
