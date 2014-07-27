@@ -13,6 +13,14 @@ Features
 - Add format support. (#58).
 
 
+Changes
+-------
+
+- Infinities and NaNs are now represented as 'inf' and 'nan' rather
+  than 'Infinity' and 'NaN', for consistency with the float type, and
+  for consistency with the newly-introduced string formatting.
+
+
 Bugfixes
 --------
 
