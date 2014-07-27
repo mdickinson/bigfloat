@@ -768,6 +768,22 @@ class BigFloat(mpfr.Mpfr_t):
         def __bool__(self):
             return not is_zero(self)
 
+        def __round__(self, n=None):
+            """Round self to the nearest integer, or to a given precision.
+
+            """
+            if n is None:
+                if is_inf(self):
+                    raise ValueError("Cannot round infinity to an integer.")
+                if is_nan(self):
+                    raise ValueError("Cannot round nan to an integer.")
+
+                sign, digits, exponent = self._format_to_fixed_precision(0)
+                assert exponent == 0
+                return -int(digits) if sign else int(digits)
+            else:
+                raise NotImplementedError("Round not implemented for non-zero n.")
+
     @property
     def precision(self):
         return mpfr.mpfr_get_prec(self)

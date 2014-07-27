@@ -1209,6 +1209,36 @@ class BigFloatTests(unittest.TestCase):
                 else:
                     self.assertEqual(x, absx)
 
+    @unittest.skipUnless(sys.version_info >= (3,),
+                         "round tests only applicable to Python 3")
+    def test_round(self):
+        # Rounding with a single argument.
+        test_values = [
+            (BigFloat('-2.0'), -2),
+            (BigFloat('-1.5'), -2),
+            (BigFloat('-1.4999'), -1),
+            (BigFloat('-0.6'), -1),
+            (BigFloat('-0.5'), 0),
+            (BigFloat('-0.1'), 0),
+            (BigFloat('-0.0'), 0),
+            (BigFloat('0.0'), 0),
+            (BigFloat('0.1'), 0),
+            (BigFloat('0.5'), 0),
+            (BigFloat('0.6'), 1),
+            (BigFloat('1.4999'), 1),
+            (BigFloat('1.5'), 2),
+            (BigFloat('2.0'), 2),
+        ]
+        for value, expected_result in test_values:
+            result = round(value)
+            self.assertIsInstance(result, int)
+            self.assertEqual(result, expected_result)
+
+        with self.assertRaises(ValueError):
+            round(BigFloat('inf'))
+        with self.assertRaises(ValueError):
+            round(BigFloat('nan'))
+
     def test__format_to_floating_precision(self):
         # Formatting to precision 1.  We need extra testing for this, since
         # it's not supported by the MPFR library itself.
@@ -1338,6 +1368,10 @@ class BigFloatTests(unittest.TestCase):
             (False, '0', 0),
         )
         self.assertEqual(
+            BigFloat('0.47')._format_to_fixed_precision(0),
+            (False, '0', 0),
+        )
+        self.assertEqual(
             BigFloat('0.499999999')._format_to_fixed_precision(0),
             (False, '0', 0),
         )
@@ -1347,6 +1381,10 @@ class BigFloatTests(unittest.TestCase):
         )
         self.assertEqual(
             BigFloat('0.500000001')._format_to_fixed_precision(0),
+            (False, '1', 0),
+        )
+        self.assertEqual(
+            BigFloat('0.53')._format_to_fixed_precision(0),
             (False, '1', 0),
         )
         self.assertEqual(
@@ -1360,6 +1398,39 @@ class BigFloatTests(unittest.TestCase):
         self.assertEqual(
             BigFloat('0.999999999')._format_to_fixed_precision(0),
             (False, '1', 0),
+        )
+
+        self.assertEqual(
+            BigFloat('-0.0999999999')._format_to_fixed_precision(0),
+            (True, '0', 0),
+        )
+        self.assertEqual(
+            BigFloat('-0.1000000001')._format_to_fixed_precision(0),
+            (True, '0', 0),
+        )
+        self.assertEqual(
+            BigFloat('-0.499999999')._format_to_fixed_precision(0),
+            (True, '0', 0),
+        )
+        self.assertEqual(
+            BigFloat('-0.5')._format_to_fixed_precision(0),
+            (True, '0', 0),
+        )
+        self.assertEqual(
+            BigFloat('-0.500000001')._format_to_fixed_precision(0),
+            (True, '1', 0),
+        )
+        self.assertEqual(
+            BigFloat('-0.9')._format_to_fixed_precision(0),
+            (True, '1', 0),
+        )
+        self.assertEqual(
+            BigFloat('-0.99')._format_to_fixed_precision(0),
+            (True, '1', 0),
+        )
+        self.assertEqual(
+            BigFloat('-0.999999999')._format_to_fixed_precision(0),
+            (True, '1', 0),
         )
 
         # Values close to powers of 10; checking exponent calculation
