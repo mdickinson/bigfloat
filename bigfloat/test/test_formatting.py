@@ -268,17 +268,17 @@ class TestFormatting(unittest.TestCase):
             (BigFloat('56.127'), ".2f", "56.13"),
 
             # Missing type behaves like str formatting.
-            (BigFloat('123'), ".0", "1e+2"),
-            (BigFloat('123'), ".1", "1e+2"),
-            (BigFloat('123'), ".2", "1.2e+2"),
-            (BigFloat('123'), ".2U", "1.3e+2"),
-            (BigFloat('123'), ".2D", "1.2e+2"),
+            (BigFloat('123'), ".0", "1e+02"),
+            (BigFloat('123'), ".1", "1e+02"),
+            (BigFloat('123'), ".2", "1.2e+02"),
+            (BigFloat('123'), ".2U", "1.3e+02"),
+            (BigFloat('123'), ".2D", "1.2e+02"),
             (BigFloat('123'), ".3", "123"),
             # 'alternate' flag is currently ignored.
             (BigFloat('123'), "#.3", "123"),
             (BigFloat('123'), ".4", "123.0"),
             (BigFloat('123'), "#.4", "123.0"),
-            (BigFloat('123'), ".0", "1e+2"),
+            (BigFloat('123'), ".0", "1e+02"),
             (BigFloat('123'), "", "123.00000000000000"),
             (BigFloat('nan'), "", "nan"),
             (BigFloat('inf'), "", "inf"),

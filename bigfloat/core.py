@@ -190,7 +190,7 @@ def _format_finite(negative, digits, dot_pos):
     if dot_pos < len(digits):
         digits = digits[:dot_pos] + '.' + digits[dot_pos:]
     if use_exponent:
-        digits += "e%+d" % exp
+        digits += "e{0:+03d}".format(exp)
     return '-' + digits if negative else digits
 
 
@@ -396,7 +396,7 @@ class BigFloat(mpfr.Mpfr_t):
             # minimum field width ourselves in post-processing, along with PEP
             # 3101-style filling and padding.
             if spec['precision'] is not None:
-                prec = '.{}'.format(spec['precision'])
+                prec = '.{0}'.format(spec['precision'])
             else:
                 prec = ''
             mpfr_format_template = "%{alternate}{prec}R{rounding}{type}"

@@ -1065,8 +1065,8 @@ class BigFloatTests(unittest.TestCase):
         self.assertEqual(str(BigFloat('1e100')), '1.0000000000000000e+100')
 
         # check switch from fixed-point to exponential notation
-        self.assertEqual(str(BigFloat('1e-5')), '1.0000000000000001e-5')
-        self.assertEqual(str(BigFloat('9.999e-5')), '9.9989999999999996e-5')
+        self.assertEqual(str(BigFloat('1e-5')), '1.0000000000000001e-05')
+        self.assertEqual(str(BigFloat('9.999e-5')), '9.9989999999999996e-05')
         self.assertEqual(str(BigFloat('1e-4')), '0.00010000000000000000')
         self.assertEqual(str(BigFloat('1e14')), '100000000000000.00')
         self.assertEqual(str(BigFloat('1e15')), '1000000000000000.0')
