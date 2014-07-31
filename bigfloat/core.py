@@ -786,6 +786,63 @@ class BigFloat(mpfr.Mpfr_t):
         def __bool__(self):
             return not is_zero(self)
 
+        def _round_to_nearest_int(self):
+            """Round self to the nearest integer.
+
+            """
+            result = mpfr.Mpfr_t.__new__(BigFloat)
+            mpfr.mpfr_init2(result, self.precision)
+            ternary = mpfr.mpfr_rint(result, self, ROUND_TIES_TO_EVEN)
+            assert ternary in (-2, 0, 2)
+            return int(result)
+
+        def __round__(self, n=None):
+            """Round self to the nearest integer, or to a given precision.
+
+            """
+            if n is None:
+                return self._round_to_nearest_int()
+
+            if is_inf(self) or is_nan(self):
+                return self
+            negative, digits, exponent = self._format_to_fixed_precision(n)
+            decimal_string = "{sign}{digits}E{exponent}".format(
+                sign='-' if negative else '',
+                digits=digits,
+                exponent=exponent,
+            )
+            return set_str2(decimal_string, 10)
+
+        def __ceil__(self):
+            """Return the least integer greater than or equal to self.
+
+            """
+            result = mpfr.Mpfr_t.__new__(BigFloat)
+            mpfr.mpfr_init2(result, self.precision)
+            ternary = mpfr.mpfr_ceil(result, self)
+            assert ternary in (0, 2)
+            return int(result)
+
+        def __floor__(self):
+            """Return the least integer greater than or equal to self.
+
+            """
+            result = mpfr.Mpfr_t.__new__(BigFloat)
+            mpfr.mpfr_init2(result, self.precision)
+            ternary = mpfr.mpfr_floor(result, self)
+            assert ternary in (-2, 0)
+            return int(result)
+
+        def __trunc__(self):
+            """Return the integer part of self, discarding any fractional part.
+
+            """
+            result = mpfr.Mpfr_t.__new__(BigFloat)
+            mpfr.mpfr_init2(result, self.precision)
+            ternary = mpfr.mpfr_trunc(result, self)
+            assert ternary in (-2, 0, 2)
+            return int(result)
+
     @property
     def precision(self):
         return mpfr.mpfr_get_prec(self)
