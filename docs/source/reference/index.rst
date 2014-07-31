@@ -139,6 +139,10 @@ deviations from expected behaviour.
   otherwise.  None of these conversions is affected by the current
   context.
 
+* On Python 3, :func:`round`, :func:`math.floor`, :func:`math.ceil` and
+  :func:`math.trunc` all behave as expected, returning the appropriate integer.
+  They are unaffected by the current context.
+
 * :class:`BigFloat` instances are hashable.  The hash function obeys the rule
   that objects that compare equal should hash equal; in particular, if ``x ==
   n`` for some :class:`BigFloat` instance ``x`` and some Python int or long
