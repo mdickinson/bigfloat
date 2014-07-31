@@ -1,8 +1,8 @@
 Changes since bigfloat 0.3.0
 ============================
 
-Features
---------
+New Features
+------------
 
 - Wrap mpfr_buildopt_gmpinternals_p and mpfr_buildopt_tune_case.
 
@@ -11,6 +11,9 @@ Features
 - Add bigfloat.notequal.
 
 - Add format support. (#58).
+
+- Add support for ``round``, ``math.floor``, ``math.ceil``, ``math.trunc`` on
+  Python 3.
 
 
 Changes
