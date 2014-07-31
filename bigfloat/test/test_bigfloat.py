@@ -20,6 +20,7 @@ import six
 # Standard library imports
 import doctest
 import fractions
+import math
 import operator
 import sys
 import types
@@ -1277,7 +1278,7 @@ class BigFloatTests(unittest.TestCase):
             (BigFloat('0.55'), 1, BigFloat('0.6')),
             (BigFloat('0.6'), 1, BigFloat('0.6')),
             (BigFloat('0.75'), 1, BigFloat('0.8')),
-            
+
             # Various n.
             (BigFloat('314159.265358979323'), -6, BigFloat('0')),
             (BigFloat('314159.265358979323'), -5, BigFloat('300000')),
@@ -1335,6 +1336,105 @@ class BigFloatTests(unittest.TestCase):
         result = round(BigFloat(2.5), 0)
         self.assertIsInstance(result, BigFloat)
         self.assertEqual(result, BigFloat(2))
+
+    @unittest.skipUnless(sys.version_info >= (3,),
+                         "math.ceil tests only applicable to Python 3")
+    def test_math_ceil(self):
+        x = BigFloat('9.55')
+        y = math.ceil(x)
+        self.assertIsInstance(y, int)
+        self.assertEqual(y, 10)
+
+        x = BigFloat('-9.55')
+        y = math.ceil(x)
+        self.assertIsInstance(y, int)
+        self.assertEqual(y, -9)
+
+        x = BigFloat('-0.00')
+        y = math.ceil(x)
+        self.assertIsInstance(y, int)
+        self.assertEqual(y, 0)
+
+        x = BigFloat('0.00')
+        y = math.ceil(x)
+        self.assertIsInstance(y, int)
+        self.assertEqual(y, 0)
+
+        x = BigFloat.exact(7**100)
+        y = math.ceil(x)
+        self.assertIsInstance(y, int)
+        self.assertEqual(y, 7**100)
+
+        with self.assertRaises(ValueError):
+            y = math.ceil(BigFloat('inf'))
+        with self.assertRaises(ValueError):
+            y = math.ceil(BigFloat('nan'))
+
+    @unittest.skipUnless(sys.version_info >= (3,),
+                         "math.floor tests only applicable to Python 3")
+    def test_math_floor(self):
+        x = BigFloat('-9.55')
+        y = math.floor(x)
+        self.assertIsInstance(y, int)
+        self.assertEqual(y, -10)
+
+        x = BigFloat('9.55')
+        y = math.floor(x)
+        self.assertIsInstance(y, int)
+        self.assertEqual(y, 9)
+
+        x = BigFloat('-0.00')
+        y = math.floor(x)
+        self.assertIsInstance(y, int)
+        self.assertEqual(y, 0)
+
+        x = BigFloat('0.00')
+        y = math.floor(x)
+        self.assertIsInstance(y, int)
+        self.assertEqual(y, 0)
+
+        x = BigFloat.exact(7**100)
+        y = math.floor(x)
+        self.assertIsInstance(y, int)
+        self.assertEqual(y, 7**100)
+
+        with self.assertRaises(ValueError):
+            y = math.floor(BigFloat('inf'))
+        with self.assertRaises(ValueError):
+            y = math.floor(BigFloat('nan'))
+
+    @unittest.skipUnless(sys.version_info >= (3,),
+                         "math.trunc tests only applicable to Python 3")
+    def test_math_trunc(self):
+        x = BigFloat('-9.55')
+        y = math.trunc(x)
+        self.assertIsInstance(y, int)
+        self.assertEqual(y, -9)
+
+        x = BigFloat('9.55')
+        y = math.trunc(x)
+        self.assertIsInstance(y, int)
+        self.assertEqual(y, 9)
+
+        x = BigFloat('-0.00')
+        y = math.trunc(x)
+        self.assertIsInstance(y, int)
+        self.assertEqual(y, 0)
+
+        x = BigFloat('0.00')
+        y = math.trunc(x)
+        self.assertIsInstance(y, int)
+        self.assertEqual(y, 0)
+
+        x = BigFloat.exact(7**100)
+        y = math.trunc(x)
+        self.assertIsInstance(y, int)
+        self.assertEqual(y, 7**100)
+
+        with self.assertRaises(ValueError):
+            y = math.trunc(BigFloat('inf'))
+        with self.assertRaises(ValueError):
+            y = math.trunc(BigFloat('nan'))
 
     def test__format_to_floating_precision(self):
         # Formatting to precision 1.  We need extra testing for this, since
