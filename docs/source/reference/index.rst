@@ -141,7 +141,10 @@ deviations from expected behaviour.
 
 * On Python 3, :func:`round`, :func:`math.floor`, :func:`math.ceil` and
   :func:`math.trunc` all behave as expected, returning the appropriate integer.
-  They are unaffected by the current context.
+  They are unaffected by the current context.  Note that Python 2 does not
+  provided type-specific support for these four functions; the functions will
+  all work on Python, but only by doing an implicit conversion to the built-in
+  :class:`float` type first.
 
 * :class:`BigFloat` instances are hashable.  The hash function obeys the rule
   that objects that compare equal should hash equal; in particular, if ``x ==

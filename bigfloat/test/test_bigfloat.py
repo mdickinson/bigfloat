@@ -1337,6 +1337,30 @@ class BigFloatTests(unittest.TestCase):
         self.assertIsInstance(result, BigFloat)
         self.assertEqual(result, BigFloat(2))
 
+        # Check that rounding mode only affects the conversion of
+        # the rounded result from decimal back to binary, and not
+        # the round-ties-to-even used for the binary to decimal round.
+        with RoundTowardNegative:
+            # Exact halfway case; should round down.
+            lower = round(BigFloat('1.125'), 2)
+            expected = BigFloat('1.12')
+            self.assertEqual(lower, expected)
+        with RoundTowardPositive:
+            upper = round(BigFloat('1.125'), 2)
+            expected = BigFloat('1.12')
+            self.assertEqual(upper, expected)
+        self.assertLess(lower, upper)
+
+        with RoundTowardNegative:
+            lower = round(BigFloat('1.875'), 2)
+            expected = BigFloat('1.88')
+            self.assertEqual(lower, expected)
+        with RoundTowardPositive:
+            upper = round(BigFloat('1.875'), 2)
+            expected = BigFloat('1.88')
+            self.assertEqual(upper, expected)
+        self.assertLess(lower, upper)
+
     @unittest.skipUnless(sys.version_info >= (3,),
                          "math.ceil tests only applicable to Python 3")
     def test_math_ceil(self):
