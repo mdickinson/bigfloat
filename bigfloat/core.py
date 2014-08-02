@@ -1116,13 +1116,18 @@ def _quotient_exponent(x, y):
     integer e such that 2**(e-1) <= x / y < 2**e.
 
     """
+    assert mpfr.mpfr_regular_p(x)
+    assert mpfr.mpfr_regular_p(y)
+
     # Make copy of x with the exponent of y.
     x2 = mpfr.Mpfr_t()
     mpfr.mpfr_init2(x2, mpfr.mpfr_get_prec(x))
     mpfr.mpfr_set(x2, x, mpfr.MPFR_RNDN)
     mpfr.mpfr_set_exp(x2, mpfr.mpfr_get_exp(y))
-    return mpfr.mpfr_greaterequal_p(x2, y) + (
-        mpfr.mpfr_get_exp(x) - mpfr.mpfr_get_exp(y))
+
+    # Compare x2 and y, disregarding the sign.
+    extra = mpfr.mpfr_cmpabs(x2, y) >= 0
+    return extra + mpfr.mpfr_get_exp(x) - mpfr.mpfr_get_exp(y)
 
 
 def _mpfr_floordiv(rop, x, y, rnd):
@@ -1133,10 +1138,10 @@ def _mpfr_floordiv(rop, x, y, rnd):
     result in 'rop'.
 
     """
-    assert mpfr.mpfr_regular_p(x)
-    assert mpfr.mpfr_regular_p(y)
-    assert not mpfr.mpfr_signbit(x)
-    assert not mpfr.mpfr_signbit(y)
+    # In special cases, just defer to mpfr_div: the result in
+    # these cases is always 0, infinity, or nan.
+    if not mpfr.mpfr_regular_p(x) or not mpfr.mpfr_regular_p(y):
+        return mpfr.mpfr_div(rop, x, y, rnd)
 
     # Slow version: compute to sufficient bits
     # to get integer precision.

@@ -294,11 +294,11 @@ class BigFloatTests(unittest.TestCase):
         import struct
         with double_precision:
 
-            for _ in range(1000):
+            for _ in range(100000):
                 x = struct.unpack(
-                    '<d', struct.pack('<Q', random.randrange(2**63)))[0]
+                    '<d', struct.pack('<Q', random.randrange(2**64)))[0]
                 y = struct.unpack(
-                    '<d', struct.pack('<Q', random.randrange(2**63)))[0]
+                    '<d', struct.pack('<Q', random.randrange(2**64)))[0]
 
                 if math.isnan(x) or math.isinf(x) or x == 0.0:
                     continue
@@ -307,10 +307,10 @@ class BigFloatTests(unittest.TestCase):
 
                 bigfloat_result = floordiv(x, y)
                 try:
-                    python_result = float(fractions.Fraction(x) //
-                                          fractions.Fraction(y))
+                    z = fractions.Fraction(x) // fractions.Fraction(y)
+                    python_result = float(z)
                 except OverflowError:
-                    python_result = float('inf')
+                    python_result = float('inf') if z > 0 else float('-inf')
 
                 if bigfloat_result != python_result:
                     print("x, y: ", x.hex(), y.hex())
@@ -2090,11 +2090,76 @@ context RoundTiesToEven
 floordiv 0x2p0 0x1p0 -> 0x2p0
 floordiv 0x1p0 0x2p0 -> 0x0p0
 
+# Negative operands.
+floordiv -0x2p0 0x1p0 -> -0x2p0
+floordiv -0x1p0 0x2p0 -> -0x1p0
+
+floordiv 0x2p0 -0x1p0 -> -0x2p0
+floordiv 0x1p0 -0x2p0 -> -0x1p0
+
+# Zeros.
+floordiv 0x0p0 0x1.88p0 -> 0x0p0
+floordiv -0x0p0 0x1.88p0 -> -0x0p0
+floordiv 0x0p0 -0x1.88p0 -> -0x0p0
+floordiv -0x0p0 -0x1.88p0 -> 0x0p0
+
+floordiv 0x1.88p0 0x0p0 -> inf ZeroDivision
+floordiv -0x1.88p0 0x0p0 -> -inf ZeroDivision
+floordiv 0x1.88p0 -0x0p0 -> -inf ZeroDivision
+floordiv -0x1.88p0 -0x0p0 -> inf ZeroDivision
+
+floordiv 0x0p0 0x0p0 -> nan NanFlag
+floordiv -0x0p0 0x0p0 -> nan NanFlag
+floordiv 0x0p0 -0x0p0 -> nan NanFlag
+floordiv -0x0p0 -0x0p0 -> nan NanFlag
+
+# Infinities.
+floordiv 0x0p0 inf -> 0x0p0
+floordiv -0x0p0 inf -> -0x0p0
+floordiv 0x0p0 -inf -> -0x0p0
+floordiv -0x0p0 -inf -> 0x0p0
+
+floordiv 0x1.34ap-23 inf -> 0x0p0
+floordiv -0x1.34ap-23 inf -> -0x0p0
+floordiv 0x1.34ap-23 -inf -> -0x0p0
+floordiv -0x1.34ap-23 -inf -> 0x0p0
+
+floordiv inf inf -> nan NanFlag
+floordiv -inf inf -> nan NanFlag
+floordiv inf -inf -> nan NanFlag
+floordiv -inf -inf -> nan NanFlag
+
+floordiv inf 0x1.adep55 -> inf
+floordiv -inf 0x1.adep55 -> -inf
+floordiv inf -0x1.adep55 -> -inf
+floordiv -inf -0x1.adep55 -> inf
+
+floordiv inf 0x0p0 -> inf
+floordiv -inf 0x0p0 -> -inf
+floordiv inf -0x0p0 -> -inf
+floordiv -inf -0x0p0 -> inf
+
+# NaNs
+floordiv nan 0x0p0 -> nan
+floordiv nan 0x1p0 -> nan
+floordiv nan inf -> nan
+floordiv nan nan -> nan
+floordiv inf nan -> nan
+floordiv 0x1p0 nan -> nan
+floordiv 0x0p0 nan -> nan
+
+# A few random cases.
+floordiv 0x1.b2a98bbcc49b4p+98 0x1.3d74b2d390501p+48 -> 0x1.5e843fc46ffa8p+50
+floordiv -0x1.b2a98bbcc49b4p+98 -0x1.3d74b2d390501p+48 -> 0x1.5e843fc46ffa8p+50
+floordiv -0x1.b2a98bbcc49b4p+98 0x1.3d74b2d390501p+48 -> -0x1.5e843fc46ffacp+50
+floordiv 0x1.b2a98bbcc49b4p+98 -0x1.3d74b2d390501p+48 -> -0x1.5e843fc46ffacp+50
+
 # Some cases where Python's // on floats gets the wrong result.
 floordiv 0x1.0e31636b07d9dp-898 0x1.c68968514f16bp-954 -> 0x1.3059e434dd2bep+55 Inexact
 floordiv 0x1.2bb44bbf6a807p-537 0x1.94a4d2cd73882p-589 -> 0x1.7b3809b6af846p+51
 
-# Overflow and underflow.
+# Overflow and underflow.  (The latter shouldn't be possible unless
+# emin >= 0, which we currently don't check.)
 floordiv 0x1p1000 0x1p-1000 -> Infinity Inexact Overflow
 floordiv 0x1p512 0x1p-512 -> Infinity Inexact Overflow
 floordiv 0x1p511 0x1p-512 -> 0x1p1023
@@ -2108,15 +2173,13 @@ floordiv 0x1p53 0x0.ffffffffffffe8p0 -> 0x20000000000004p0 Inexact
 
 context RoundTowardPositive
 floordiv 0x1p53 0x0.fffffffffffff8p0 -> 0x20000000000002p0 Inexact
-#floordiv 0x1p53 0x0.fffffffffffff0p0 -> 0x20000000000002p0
+floordiv 0x1p53 0x0.fffffffffffff0p0 -> 0x20000000000002p0
 floordiv 0x1p53 0x0.ffffffffffffe8p0 -> 0x20000000000004p0 Inexact
 
 context RoundTowardNegative
 floordiv 0x1p53 0x0.fffffffffffff8p0 -> 0x20000000000000p0 Inexact
-#floordiv 0x1p53 0x0.fffffffffffff0p0 -> 0x20000000000002p0
+floordiv 0x1p53 0x0.fffffffffffff0p0 -> 0x20000000000002p0
 floordiv 0x1p53 0x0.ffffffffffffe8p0 -> 0x20000000000002p0 Inexact
-
-
 """.split('\n'))
 
 ABCTests.test_various = process_lines("""\
