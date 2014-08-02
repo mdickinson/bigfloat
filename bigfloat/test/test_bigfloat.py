@@ -294,7 +294,7 @@ class BigFloatTests(unittest.TestCase):
         import struct
         with double_precision:
 
-            for _ in range(100000):
+            for _ in range(10000):
                 x = struct.unpack(
                     '<d', struct.pack('<Q', random.randrange(2**64)))[0]
                 y = struct.unpack(
@@ -2140,13 +2140,13 @@ floordiv inf -0x0p0 -> -inf
 floordiv -inf -0x0p0 -> inf
 
 # NaNs
-floordiv nan 0x0p0 -> nan
-floordiv nan 0x1p0 -> nan
-floordiv nan inf -> nan
-floordiv nan nan -> nan
-floordiv inf nan -> nan
-floordiv 0x1p0 nan -> nan
-floordiv 0x0p0 nan -> nan
+floordiv nan 0x0p0 -> nan NanFlag
+floordiv nan 0x1p0 -> nan NanFlag
+floordiv nan inf -> nan NanFlag
+floordiv nan nan -> nan NanFlag
+floordiv inf nan -> nan NanFlag
+floordiv 0x1p0 nan -> nan NanFlag
+floordiv 0x0p0 nan -> nan NanFlag
 
 # A few random cases.
 floordiv 0x1.b2a98bbcc49b4p+98 0x1.3d74b2d390501p+48 -> 0x1.5e843fc46ffa8p+50
