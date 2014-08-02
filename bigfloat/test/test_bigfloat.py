@@ -64,7 +64,7 @@ from bigfloat import (
 
     # standard arithmetic functions
     add, sub, mul, div, mod, pow,
-    sqrt,
+    sqrt, floordiv,
 
     # Version information
     MPFR_VERSION_MAJOR, MPFR_VERSION_MINOR,
@@ -283,6 +283,38 @@ class BigFloatTests(unittest.TestCase):
                         y3 = mul(y, 3, context=RoundTowardNegative)
                         self.assertLess(y3, 1)
                         self.assertLess(1, x3)
+
+    def test_floordiv(self):
+        x = BigFloat(2.3)
+        y = BigFloat(1.2)
+        self.assertIdenticalBigFloat(floordiv(x, y), BigFloat(1))
+
+        # Check some random floats; compare with Python's operation.
+        import random
+        import struct
+        with double_precision:
+
+            for _ in range(1000):
+                x = struct.unpack(
+                    '<d', struct.pack('<Q', random.randrange(2**63)))[0]
+                y = struct.unpack(
+                    '<d', struct.pack('<Q', random.randrange(2**63)))[0]
+
+                if math.isnan(x) or math.isinf(x) or x == 0.0:
+                    continue
+                if math.isnan(y) or math.isinf(y) or y == 0.0:
+                    continue
+
+                bigfloat_result = floordiv(x, y)
+                try:
+                    python_result = float(fractions.Fraction(x) //
+                                          fractions.Fraction(y))
+                except OverflowError:
+                    python_result = float('inf')
+
+                if bigfloat_result != python_result:
+                    print("x, y: ", x.hex(), y.hex())
+                    self.assertEqual(bigfloat_result, python_result)
 
     def test_binary_operations(self):
         # check that BigFloats can be combined with themselves,
@@ -2049,6 +2081,43 @@ pos 1p+1024 -> inf Inexact Overflow
 
 """.split('\n'))
 
+
+ABCTests.test_floordiv = process_lines("""\
+context double_precision
+context RoundTiesToEven
+
+# Simple cases.
+floordiv 0x2p0 0x1p0 -> 0x2p0
+floordiv 0x1p0 0x2p0 -> 0x0p0
+
+# Some cases where Python's // on floats gets the wrong result.
+floordiv 0x1.0e31636b07d9dp-898 0x1.c68968514f16bp-954 -> 0x1.3059e434dd2bep+55 Inexact
+floordiv 0x1.2bb44bbf6a807p-537 0x1.94a4d2cd73882p-589 -> 0x1.7b3809b6af846p+51
+
+# Overflow and underflow.
+floordiv 0x1p1000 0x1p-1000 -> Infinity Inexact Overflow
+floordiv 0x1p512 0x1p-512 -> Infinity Inexact Overflow
+floordiv 0x1p511 0x1p-512 -> 0x1p1023
+floordiv 0x1p-1000 0x1p1000 -> 0x0p0
+
+
+#### Check that the rounding mode is being respected.
+floordiv 0x1p53 0x0.fffffffffffff8p0 -> 0x1p53 Inexact
+floordiv 0x1p53 0x0.fffffffffffff0p0 -> 0x20000000000002p0
+floordiv 0x1p53 0x0.ffffffffffffe8p0 -> 0x20000000000004p0 Inexact
+
+context RoundTowardPositive
+floordiv 0x1p53 0x0.fffffffffffff8p0 -> 0x20000000000002p0 Inexact
+#floordiv 0x1p53 0x0.fffffffffffff0p0 -> 0x20000000000002p0
+floordiv 0x1p53 0x0.ffffffffffffe8p0 -> 0x20000000000004p0 Inexact
+
+context RoundTowardNegative
+floordiv 0x1p53 0x0.fffffffffffff8p0 -> 0x20000000000000p0 Inexact
+#floordiv 0x1p53 0x0.fffffffffffff0p0 -> 0x20000000000002p0
+floordiv 0x1p53 0x0.ffffffffffffe8p0 -> 0x20000000000002p0 Inexact
+
+
+""".split('\n'))
 
 ABCTests.test_various = process_lines("""\
 # The following tests are not supposed to be exhaustive tests of the behaviour

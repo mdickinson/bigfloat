@@ -1109,6 +1109,71 @@ def div(x, y, context=None):
     )
 
 
+def _quotient_exponent(x, y):
+    """
+    Given two positive finite MPFR instances x and y,
+    find the exponent of x / y; that is, the unique
+    integer e such that 2**(e-1) <= x / y < 2**e.
+
+    """
+    # Make copy of x with the exponent of y.
+    x2 = mpfr.Mpfr_t()
+    mpfr.mpfr_init2(x2, mpfr.mpfr_get_prec(x))
+    mpfr.mpfr_set(x2, x, mpfr.MPFR_RNDN)
+    mpfr.mpfr_set_exp(x2, mpfr.mpfr_get_exp(y))
+    return mpfr.mpfr_greaterequal_p(x2, y) + (
+        mpfr.mpfr_get_exp(x) - mpfr.mpfr_get_exp(y))
+
+
+def _mpfr_floordiv(rop, x, y, rnd):
+    """
+    Given two positive finite MPFR numbers x and y,
+    compute floor(x / y), rounded if necessary
+    using the given rounding mode, and putting the
+    result in 'rop'.
+
+    """
+    assert mpfr.mpfr_regular_p(x)
+    assert mpfr.mpfr_regular_p(y)
+    assert not mpfr.mpfr_signbit(x)
+    assert not mpfr.mpfr_signbit(y)
+
+    # Slow version: compute to sufficient bits
+    # to get integer precision.
+    e = _quotient_exponent(x, y)
+
+    # Given that 2**(e-1) <= x / y < 2**e,
+    # need >= e bits of precision.
+    z_prec = max(e, 2)
+    z = mpfr.Mpfr_t()
+    mpfr.mpfr_init2(z, z_prec)
+
+    # Compute the floor exactly.
+    with _saved_flags():
+        mpfr.mpfr_div(z, x, y, mpfr.MPFR_RNDD)
+        err = mpfr.mpfr_floor(z, z)
+        assert err in (0, -2)
+
+    # ... and round to the given rounding mode.
+    return mpfr.mpfr_set(rop, z, rnd)
+
+
+def floordiv(x, y, context=None):
+    """
+    Return floor(x / y).
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        _mpfr_floordiv,
+        (
+            BigFloat._implicit_convert(x),
+            BigFloat._implicit_convert(y),
+        ),
+        context,
+    )
+
+
 def sqrt(x, context=None):
     """
     Return the square root of ``x``.

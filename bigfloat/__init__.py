@@ -69,7 +69,7 @@ __all__ = [
 
     # 5.5 Basic arithmetic functions
     'add', 'sub', 'mul', 'sqr', 'div', 'sqrt', 'rec_sqrt', 'cbrt', 'root',
-    'pow', 'neg', 'abs', 'dim',
+    'pow', 'neg', 'abs', 'dim', 'floordiv',
 
     # 5.6 Comparison functions
     'cmp', 'cmpabs', 'is_nan', 'is_inf', 'is_finite', 'is_zero', 'is_regular',
@@ -139,6 +139,7 @@ from bigfloat.core import (
 
     # 5.5 Basic Arithmetic Functions
     add, sub, mul, sqr, div, sqrt, rec_sqrt, cbrt, root, pow, neg, abs, dim,
+    floordiv,
 
     # 5.6 Comparison Functions
     cmp, cmpabs, is_nan, is_inf, is_finite, is_zero, is_regular, sgn,
