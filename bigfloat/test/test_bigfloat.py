@@ -284,6 +284,57 @@ class BigFloatTests(unittest.TestCase):
                         self.assertLess(y3, 1)
                         self.assertLess(1, x3)
 
+    def test__reround(self):
+        from bigfloat.core import _reround
+        import mpfr
+
+        # Take 10 bits of precision; round to 7, and then to 6 bits using
+        # reround; check that the effect is the same as rounding directly
+        # to 6 bits.
+
+        def test_n(n, rnd, rnd_intermediate):
+            # n an integer, 512 <= abs(n) <= 1024, say.
+
+            # Initialize variables.
+            input = mpfr.Mpfr_t()
+            intermediate = mpfr.Mpfr_t()
+            result_single_round = mpfr.Mpfr_t()
+            result_double_round = mpfr.Mpfr_t()
+            mpfr.mpfr_init2(input, 10)
+            mpfr.mpfr_init2(intermediate, 7)
+            mpfr.mpfr_init2(result_single_round, 6)
+            mpfr.mpfr_init2(result_double_round, 6)
+
+            # Input.
+            ternary = mpfr.mpfr_set_si(input, n, mpfr.MPFR_RNDN)
+            assert ternary == 0
+
+            # Result via double round.
+            ternary = mpfr.mpfr_set(intermediate, input, rnd_intermediate)
+            ternary_double_round = _reround(
+                result_double_round, intermediate, ternary, rnd)
+
+            # Result via single round.
+            ternary_single_round = mpfr.mpfr_set(
+                result_single_round, input, rnd)
+
+            self.assertEqual(ternary_single_round, ternary_double_round)
+            self.assertTrue(
+                mpfr.mpfr_equal_p(result_single_round, result_double_round))
+
+        ALL_ROUNDING_MODES = [
+            mpfr.MPFR_RNDN,
+            mpfr.MPFR_RNDA,
+            mpfr.MPFR_RNDZ,
+            mpfr.MPFR_RNDU,
+            mpfr.MPFR_RNDD,
+        ]
+
+        for rnd in ALL_ROUNDING_MODES:
+            for rnd2 in ALL_ROUNDING_MODES:
+                for n in range(512, 1025):
+                    test_n(754, rnd, rnd2)
+
     def test_floordiv(self):
         x = BigFloat(2.3)
         y = BigFloat(1.2)
@@ -294,7 +345,7 @@ class BigFloatTests(unittest.TestCase):
         import struct
         with double_precision:
 
-            for _ in range(10000):
+            for _ in range(100000):
                 x = struct.unpack(
                     '<d', struct.pack('<Q', random.randrange(2**64)))[0]
                 y = struct.unpack(
@@ -2165,6 +2216,13 @@ floordiv 0x1p512 0x1p-512 -> Infinity Inexact Overflow
 floordiv 0x1p511 0x1p-512 -> 0x1p1023
 floordiv 0x1p-1000 0x1p1000 -> 0x0p0
 
+# An extreme case where the floor of the quotient is exactly
+# representable but the quotient is not.
+floordiv 0x1.ff2e8e6fb6a62p+157 0x1.ff973c8000001p+52 -> 0x1.ff973c7ffffffp+104
+floordiv -0x1.ff2e8e6fb6a62p+157 0x1.ff973c8000001p+52 -> -0x1.ff973c7ffffffp+104 Inexact
+# ... and where neither are.
+floordiv 0x1.ff2e8e6fb6a62p+158 0x1.ff973c8000001p+52 -> 0x1.ff973c7ffffffp+105 Inexact
+floordiv -0x1.ff2e8e6fb6a62p+158 0x1.ff973c8000001p+52 -> -0x1.ff973c7ffffffp+105 Inexact
 
 #### Check that the rounding mode is being respected.
 floordiv 0x1p53 0x0.fffffffffffff8p0 -> 0x1p53 Inexact
@@ -2175,11 +2233,16 @@ context RoundTowardPositive
 floordiv 0x1p53 0x0.fffffffffffff8p0 -> 0x20000000000002p0 Inexact
 floordiv 0x1p53 0x0.fffffffffffff0p0 -> 0x20000000000002p0
 floordiv 0x1p53 0x0.ffffffffffffe8p0 -> 0x20000000000004p0 Inexact
+floordiv 0x1.ff2e8e6fb6a62p+157 0x1.ff973c8000001p+52 -> 0x1.ff973c7ffffffp+104
+floordiv -0x1.ff2e8e6fb6a62p+157 0x1.ff973c8000001p+52 -> -0x1.ff973c7ffffffp+104 Inexact
 
 context RoundTowardNegative
 floordiv 0x1p53 0x0.fffffffffffff8p0 -> 0x20000000000000p0 Inexact
 floordiv 0x1p53 0x0.fffffffffffff0p0 -> 0x20000000000002p0
 floordiv 0x1p53 0x0.ffffffffffffe8p0 -> 0x20000000000002p0 Inexact
+floordiv 0x1.ff2e8e6fb6a62p+157 0x1.ff973c8000001p+52 -> 0x1.ff973c7ffffffp+104
+floordiv -0x1.ff2e8e6fb6a62p+157 0x1.ff973c8000001p+52 -> -0x1.ff973c8000000p+104 Inexact
+
 """.split('\n'))
 
 ABCTests.test_various = process_lines("""\

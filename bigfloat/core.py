@@ -1130,6 +1130,60 @@ def _quotient_exponent(x, y):
     return extra + mpfr.mpfr_get_exp(x) - mpfr.mpfr_get_exp(y)
 
 
+_NEAREST_ROUNDING_ATTRIBUTES = (mpfr.MPFR_RNDN,)
+
+_DIRECTED_ROUNDING_ATTRIBUTES = (
+    mpfr.MPFR_RNDD, mpfr.MPFR_RNDU, mpfr.MPFR_RNDA, mpfr.MPFR_RNDZ)
+
+
+def _reround(rop, x, t, rnd):
+    """
+    Given rop with precision r, and x already rounded to precision r+1 with
+    ternary value t (with one of the directed rounding modes), round x to r
+    bits of precision using the given rounding mode rnd and return the new
+    ternary value.
+
+    That is, we've got an 'actual' mathematically correct value v,
+    x and t give the result of rounding v to precision r + 1 with
+    some (unspecified) rounding mode, and we want the result of
+    rounding v to precision r with the given rounding mode.
+
+    """
+    #  ---+-------------+---  rop
+    #  ---+------+------+---   x
+    #        *                 v
+
+    assert mpfr.mpfr_get_prec(x) == mpfr.mpfr_get_prec(rop) + 1
+
+    t2 = mpfr.mpfr_set(rop, x, rnd)
+    # ternary represents the overall rounding direction, from v to rop.
+    ternary = t2 or t
+
+    if rnd in _DIRECTED_ROUNDING_ATTRIBUTES:
+        if ternary == t2:  # i.e., if t2 is nonzero or t == 0
+            adjust = False
+        else:
+            round_up = (
+                rnd == mpfr.MPFR_RNDU or
+                rnd == mpfr.MPFR_RNDA and not mpfr.mpfr_signbit(x) or
+                rnd == mpfr.MPFR_RNDZ and mpfr.mpfr_signbit(x)
+            )
+            adjust = round_up != (ternary > 0)
+    elif rnd in _NEAREST_ROUNDING_ATTRIBUTES:
+        adjust = not (t <= 0 <= t2 or t2 <= 0 <= t)
+    else:
+        raise ValueError("Unrecognised rounding mode: {0}".format(rnd))
+
+    if adjust:
+        if ternary > 0:
+            mpfr.mpfr_nextbelow(rop)
+        else:
+            mpfr.mpfr_nextabove(rop)
+        ternary = -ternary
+
+    return ternary
+
+
 def _mpfr_floordiv(rop, x, y, rnd):
     """
     Given two positive finite MPFR numbers x and y,
@@ -1138,17 +1192,64 @@ def _mpfr_floordiv(rop, x, y, rnd):
     result in 'rop'.
 
     """
-    # In special cases, just defer to mpfr_div: the result in
+    # In special cases, it's safe to defer to mpfr_div: the result in
     # these cases is always 0, infinity, or nan.
     if not mpfr.mpfr_regular_p(x) or not mpfr.mpfr_regular_p(y):
         return mpfr.mpfr_div(rop, x, y, rnd)
 
-    # Slow version: compute to sufficient bits
-    # to get integer precision.
+    # Lemma 1. If x and y are positive numbers representable with p bits of
+    # precision and x != y then |x - y| >= max(|x|, |y|) 2**-p.
+    #
+    # Proof. Without loss of generality, x > y.  Write x = m * 2**e for
+    # integers m and e with 2**(p-1) < m <= 2**p, then y <= (m-1)*2**e,
+    # so x - y >= 2**e = x / m >= x / 2**p.
+    #
+    # Lemma 2. Suppose that x, y and z are positive numbers representable with
+    # p, q and r bits of precision respectively, and suppose that x / y != z.
+    # Then
+    #
+    #    abs(x / y - z) >= max(x / y, z) 2**-max(p, q + r).
+    #
+    # Proof. Let s = max(p, q+r), then both x and yz are exactly representable
+    # with s bits of precision.  By Lemma 1, abs(x - yz) >= max(x, yz) 2**-s.
+    # So abs(x / y - z) >= max(x / y, z) 2**-s.
+    #
+    # Corollary 3. Suppose that x, y and z are nonzero numbers representable
+    # with p, q and r bits of precision respectively, and that abs(x / y) >=
+    # 2**max(p, q + r). Then z < x / y if and only if z < floor(x / y).
+    #
+    # Proof. That z < floor(x / y) implies z < x / y is clear; we must show the
+    # converse. If z is negative and x / y is positive then z < 0 <= floor(x /
+    # y) and the result is also clear, so we may assume that z and x / y have
+    # the same sign (and furthermore that y is positive, by negating x and y if
+    # necessary). Now apply Lemma 2 to either x, y and z or to -x, y and -z as
+    # appropriate to deduce that x / y - z >= 1, hence that floor(x / y) > z.
+
     e = _quotient_exponent(x, y)
 
-    # Given that 2**(e-1) <= x / y < 2**e,
-    # need >= e bits of precision.
+    p = mpfr.mpfr_get_prec(x)
+    q = mpfr.mpfr_get_prec(y)
+    r = mpfr.mpfr_get_prec(rop)
+
+    # We need to be able to compute to r + 1 bits of precision, and x / y >=
+    # 2 ** (e - 1).
+    if e - 1 >= max(p, q + r + 1):
+        tmp = mpfr.Mpfr_t()
+        mpfr.mpfr_init2(tmp, r + 1)
+        err = mpfr.mpfr_div(tmp, x, y, mpfr.MPFR_RNDD)
+        # At this point:
+        #   * tmp <= x / y < next_up(tmp).
+        #   * tmp is an integer (because tmp >= 2**(e-1) >= 2**(q+r+1) >=
+        #     2**(r+3), and tmp has precision r + 1).
+        #   * so tmp <= floor(x / y) < next_up(tmp).
+        #   * By the corollary above: tmp < floor(x / y) iff tmp < x / y,
+        #   * From MPFR's handling of ternary values, tmp < x / y iff err < 0.
+        assert err <= 0
+        # Reround with the appropriate rounding mode.
+        return _reround(rop, tmp, err, rnd)
+
+    # Slow version: compute to sufficient bits to get integer precision.  Given
+    # that 2**(e-1) <= x / y < 2**e, need >= e bits of precision.
     z_prec = max(e, 2)
     z = mpfr.Mpfr_t()
     mpfr.mpfr_init2(z, z_prec)
