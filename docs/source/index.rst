@@ -103,6 +103,10 @@ The :mod:`bigfloat` package works with Python 2 (version 2.6 or later) or
 Python 3 (version 3.2 or later), using a single codebase for both Python
 dialects.
 
+On Ubuntu, prerequisites can be installed with::
+
+   sudo apt-get install libmpfr-dev libgmp3-dev
+
 Installation
 ^^^^^^^^^^^^
 
