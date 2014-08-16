@@ -171,7 +171,7 @@ Installation from source
 
 Installation from source (for example, from a GitHub checkout, or from an
 unpacked source distribution), is similar to installation from the Python
-Package Index: the only different is that you should use the ``setup.py ``
+Package Index: the only difference is that you should use the ``setup.py ``
 script instead of using ``pip`` or ``easy_install``.  On many systems,
 installation should be as simple as typing::
 
