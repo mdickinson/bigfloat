@@ -97,7 +97,7 @@ The :mod:`bigfloat` package works with Python 2 (version 2.6 or later) or
 Python 3 (version 3.2 or later).  It uses a single codebase for both Python
 dialects, so the same source works on both dialects of Python.
 
-Whether installing ``bigfloat`` from source or from the Python package index,
+Whether installing ``bigfloat`` from source or from the Python Package Index,
 you will need to have both the GMP and MPFR libraries already installed on your
 system, along with the include files for those libraries.  See the `MPFR
 homepage <http://www.mpfr.org>`_ and the `GMP homepage <http://gmplib.org>`_
