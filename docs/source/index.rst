@@ -84,18 +84,18 @@ Installation
 Where to get it
 ^^^^^^^^^^^^^^^
 
-The latest released version of the :mod:`bigfloat` package can be downloaded
-from its place at the `Python Package Index
-<http://pypi.python.org/pypi/bigfloat/>`_.  Development sources can be checked
-out from the project's `GitHub page <http://github.com/mdickinson/bigfloat>`_.
+The latest released version of the :mod:`bigfloat` package can be obtained from
+the `Python Package Index <http://pypi.python.org/pypi/bigfloat/>`_.
+Development sources can be checked out from the project's `GitHub page
+<http://github.com/mdickinson/bigfloat>`_.
 
 
 Prerequisites
 ^^^^^^^^^^^^^
 
 The :mod:`bigfloat` package works with Python 2 (version 2.6 or later) or
-Python 3 (version 3.2 or later), using a single codebase for both Python
-dialects.
+Python 3 (version 3.2 or later).  It uses a single codebase for both Python
+dialects, so the same source works on both dialects of Python.
 
 Whether installing ``bigfloat`` from source or from the Python package index,
 you will need to have both the GMP and MPFR libraries already installed on your
