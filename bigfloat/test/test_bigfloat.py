@@ -2199,11 +2199,50 @@ floordiv inf nan -> nan NanFlag
 floordiv 0x1p0 nan -> nan NanFlag
 floordiv 0x0p0 nan -> nan NanFlag
 
-# A few random cases.
+# A few randomly-generated cases.
 floordiv 0x1.b2a98bbcc49b4p+98 0x1.3d74b2d390501p+48 -> 0x1.5e843fc46ffa8p+50
 floordiv -0x1.b2a98bbcc49b4p+98 -0x1.3d74b2d390501p+48 -> 0x1.5e843fc46ffa8p+50
 floordiv -0x1.b2a98bbcc49b4p+98 0x1.3d74b2d390501p+48 -> -0x1.5e843fc46ffacp+50
 floordiv 0x1.b2a98bbcc49b4p+98 -0x1.3d74b2d390501p+48 -> -0x1.5e843fc46ffacp+50
+
+# Randomly-generated near-halfway cases.
+floordiv 0x1.7455b4855c470p+158 0x1.9f63221b65037p+52 -> 0x1.caef27bbd32c3p+105 Inexact
+floordiv -0x1.7455b4855c470p+158 0x1.9f63221b65037p+52 -> -0x1.caef27bbd32c4p+105 Inexact
+floordiv 0x1.3e80b2f3da4e3p+158 0x1.55d84f1af57e3p+52 -> 0x1.dd0a000b852e5p+105 Inexact
+floordiv -0x1.3e80b2f3da4e3p+158 0x1.55d84f1af57e3p+52 -> -0x1.dd0a000b852e6p+105 Inexact
+floordiv 0x1.1ef2d934ebab9p+158 0x1.b1f7b86b3147fp+52 -> 0x1.528b96ac455bfp+105 Inexact
+floordiv -0x1.1ef2d934ebab9p+158 0x1.b1f7b86b3147fp+52 -> -0x1.528b96ac455c0p+105 Inexact
+floordiv 0x1.d9e46ba382852p+158 0x1.e12e2c5c55f27p+52 -> 0x1.f83ebede8104bp+105 Inexact
+floordiv -0x1.d9e46ba382852p+158 0x1.e12e2c5c55f27p+52 -> -0x1.f83ebede8104cp+105 Inexact
+floordiv 0x1.0a29a5b5b8f7dp+158 0x1.2c53d755c382dp+52 -> 0x1.c5c170a956bd2p+105 Inexact
+floordiv -0x1.0a29a5b5b8f7dp+158 0x1.2c53d755c382dp+52 -> -0x1.c5c170a956bd2p+105 Inexact
+floordiv 0x1.236ba96f8838bp+158 0x1.e2e23e8730f95p+52 -> 0x1.34fe01ad9e1dep+105 Inexact
+floordiv -0x1.236ba96f8838bp+158 0x1.e2e23e8730f95p+52 -> -0x1.34fe01ad9e1dep+105 Inexact
+floordiv 0x1.1ff3215dc95f4p+158 0x1.ec809f7a6c20bp+52 -> 0x1.2b596bfcd1cd1p+105 Inexact
+floordiv -0x1.1ff3215dc95f4p+158 0x1.ec809f7a6c20bp+52 -> -0x1.2b596bfcd1cd2p+105 Inexact
+floordiv 0x1.b55d8ec0da9fep+158 0x1.f6d8adea89b9fp+52 -> 0x1.bd53bacf4e02fp+105 Inexact
+floordiv -0x1.b55d8ec0da9fep+158 0x1.f6d8adea89b9fp+52 -> -0x1.bd53bacf4e030p+105 Inexact
+floordiv 0x1.2852761e5852bp+158 0x1.7ddb08bf86a6fp+52 -> 0x1.8d509db211a47p+105 Inexact
+floordiv -0x1.2852761e5852bp+158 0x1.7ddb08bf86a6fp+52 -> -0x1.8d509db211a48p+105 Inexact
+floordiv 0x1.1c97fd65f4e7cp+158 0x1.a6ba81f4da293p+52 -> 0x1.58b1a7e0e65cdp+105 Inexact
+floordiv -0x1.1c97fd65f4e7cp+158 0x1.a6ba81f4da293p+52 -> -0x1.58b1a7e0e65cep+105 Inexact
+
+floordiv 0x1.8ae6742f94fcap+158 0x1.af61efd069439p+52 -> 0x1.d4b323e4872fcp+105 Inexact
+floordiv -0x1.8ae6742f94fcap+158 0x1.af61efd069439p+52 -> -0x1.d4b323e4872fcp+105 Inexact
+floordiv 0x1.50371bfb1ded8p+158 0x1.64df147fa2c0bp+52 -> 0x1.e25d6618d002ep+105 Inexact
+floordiv -0x1.50371bfb1ded8p+158 0x1.64df147fa2c0bp+52 -> -0x1.e25d6618d002fp+105 Inexact
+floordiv 0x1.29ad82f921e61p+158 0x1.ee88b9d5af47fp+52 -> 0x1.3430ee7ff9a40p+105 Inexact
+floordiv -0x1.29ad82f921e61p+158 0x1.ee88b9d5af47fp+52 -> -0x1.3430ee7ff9a41p+105 Inexact
+floordiv 0x1.341e592b2ef12p+158 0x1.c5715b0058be3p+52 -> 0x1.5be8a10c7f71ap+105 Inexact
+floordiv -0x1.341e592b2ef12p+158 0x1.c5715b0058be3p+52 -> -0x1.5be8a10c7f71bp+105 Inexact
+floordiv 0x1.281ad0d0b6e5ap+158 0x1.84ad50291a943p+52 -> 0x1.860e39fb7ea4ap+105 Inexact
+floordiv -0x1.281ad0d0b6e5ap+158 0x1.84ad50291a943p+52 -> -0x1.860e39fb7ea4bp+105 Inexact
+floordiv 0x1.1016dc07e1acep+158 0x1.70c44c2b976c1p+52 -> 0x1.79c5994d7f360p+105 Inexact
+floordiv -0x1.1016dc07e1acep+158 0x1.70c44c2b976c1p+52 -> -0x1.79c5994d7f360p+105 Inexact
+floordiv 0x1.c348cf5e24425p+158 0x1.d34d5e92de493p+52 -> 0x1.ee73382469332p+105 Inexact
+floordiv -0x1.c348cf5e24425p+158 0x1.d34d5e92de493p+52 -> -0x1.ee73382469333p+105 Inexact
+floordiv 0x1.bcfea94be48e6p+158 0x1.dde69c1267a85p+52 -> 0x1.dcbefc6ebc8dap+105 Inexact
+floordiv -0x1.bcfea94be48e6p+158 0x1.dde69c1267a85p+52 -> -0x1.dcbefc6ebc8dap+105 Inexact
 
 # Some cases where Python's // on floats gets the wrong result.
 floordiv 0x1.0e31636b07d9dp-898 0x1.c68968514f16bp-954 -> 0x1.3059e434dd2bep+55 Inexact
@@ -2223,6 +2262,20 @@ floordiv -0x1.ff2e8e6fb6a62p+157 0x1.ff973c8000001p+52 -> -0x1.ff973c7ffffffp+10
 # ... and where neither are.
 floordiv 0x1.ff2e8e6fb6a62p+158 0x1.ff973c8000001p+52 -> 0x1.ff973c7ffffffp+105 Inexact
 floordiv -0x1.ff2e8e6fb6a62p+158 0x1.ff973c8000001p+52 -> -0x1.ff973c7ffffffp+105 Inexact
+
+#### Halfway cases: exact quotient is within 1 of a halfway case.
+# Exact quotient is 0x1.b6cb791cacbf37ffffffffffffb6de167b388b7fc8b3666a53bb....p+105
+# floordiv result is 1 smaller than halfway case, rounds down (towards zero)
+floordiv 0x1.800000000003bp+158 0x1.c0104a4a58bd7p+52 -> 0x1.b6cb791cacbf3p+105 Inexact
+# floordiv result *is* halfway case, rounds down (away from zero)
+floordiv -0x1.800000000003bp+158 0x1.c0104a4a58bd7p+52 -> -0x1.b6cb791cacbf4p+105 Inexact
+
+# Exact quotient is 0x1.98aa85ad41b278000000000000441c6b9ce0480bae415da0f245....p+105
+# floordiv result *is* halfway case, rounds up (away from zero)
+floordiv 0x1.8000000000021p+158 0x1.e118cf408df51p+52 -> 0x1.98aa85ad41b28p+105 Inexact
+# floordiv result one smaller than halfway case; rounds down (away from zero)
+floordiv -0x1.8000000000021p+158 0x1.e118cf408df51p+52 -> -0x1.98aa85ad41b28p+105 Inexact
+
 
 #### Check that the rounding mode is being respected.
 floordiv 0x1p53 0x0.fffffffffffff8p0 -> 0x1p53 Inexact

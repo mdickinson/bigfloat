@@ -1192,38 +1192,72 @@ def _mpfr_floordiv(rop, x, y, rnd):
     result in 'rop'.
 
     """
+    # Algorithm notes
+    # ---------------
+    # A simple algorithm is to compute floor(x / y) exactly, and then round to
+    # the nearest representable value using the given rounding mode.  This
+    # requires computing x / y to a precision sufficient to ensure that floor(x
+    # / y) is exactly representable.  If abs(x / y) < 2**r, then abs(floor(x /
+    # y)) <= 2**r, and so r bits of precision is enough.  However, for large
+    # quotients this is impractical, and we need some other method.
+    #
+    # In order to do correct rounding, we need to be able to identify when
+    # floor(x / y) is *exactly* equal to a given result z representable in the
+    # target format.  That's equivalent to determining when z lies in the
+    # interval [x / y, x / y + 1), and if x / y is very large that could mean
+    # computing the quotient to many many bits of precision: z >= x / y + 1 iff
+    # y * z >= x + y.
+    #
+    # The last expression is problematic because when x is much larger than y,
+    # x + y takes many bits to represent.  But since y * z should have
+    # relatively few bits, we should be able to take advantage of this: y * z
+    # >= x + y if and only if y * z - x >= y.  Now if y*z and x are both
+    # representable with 's' bits of precision (say), and y * z - x > 0, then y
+    # * z - x >= ulp_s(max(y*z, x)), so if ulp_s(max(y*z, x)) >= y then y * z -
+    # x > 0 is all we need.  The lemmas below develop this idea rigorously.
+    #
+    # Lemma 1. If x and y are finite numbers representable with p bits of
+    # precision and x != y then |x - y| >= max(|x|, |y|) 2**-p.
+    #
+    # Proof. If x and y have different signs or either is zero, then |x - y|
+    # >= max(|x|, |y|) and we're done.  So without loss of generality we may
+    # assume that x > y > 0, and then it's enough to show that x - y > x *
+    # 2**-p.  Write x = m * 2**e for integers m and e with 2**(p-1) < m <=
+    # 2**p, then y <= (m-1)*2**e, so x - y >= 2**e = x / m >= x * 2**-p.
+    #
+    # Lemma 2. Suppose that x, y and z are finite numbers representable with p,
+    # q and r bits of precision respectively, that y is nonzero, and that x / y
+    # != z.  Then
+    #
+    #    |x / y - z| >= max(|x / y|, |z|) 2**-max(p, q + r).
+    #
+    # Proof. Let s = max(p, q+r), then both x and yz are exactly representable
+    # with s bits of precision.  By Lemma 1, |x - yz| >= max(|x|, |yz|) 2**-s.
+    # Dividing through by |y| gives |x / y - z| >= max(|x / y|, |z|) 2**-s.
+    #
+    # Lemma 3. Suppose that x, y and z are finite numbers representable
+    # with p, q and r bits of precision respectively, that y is nonzero, and
+    # that |x / y| >= 2**max(p, q + r). Then z < x / y if and only if z <
+    # floor(x / y).
+    #
+    # Proof. It's clear that z < floor(x / y) implies z < x / y. To show the
+    # converse, if z < x / y then Lemma 2 implies that x / y - z >= 1, hence
+    # that floor(x / y) > z.
+    #
+    # Corollary 4. Suppose that x and y are finite numbers representable with p
+    # and q bits of precision, respectively.  Choose a rounding mode R: any of
+    # the directed rounding modes or round-to-nearest, and a target precision r
+    # >= 1.  If |x / y| >= 2**max(p, q + r + 1), then rnd_{R,r}(x / y) ==
+    # rnd_{R,r}(floor(x / y)), and rnd_R(x / y) is less than, equal to, or
+    # greater that x / y if and only if rnd_R(floor(x / y)) is less than, equal
+    # to, or greater than x / y respectively.
+    #
+    # Proof.
+
     # In special cases, it's safe to defer to mpfr_div: the result in
     # these cases is always 0, infinity, or nan.
     if not mpfr.mpfr_regular_p(x) or not mpfr.mpfr_regular_p(y):
         return mpfr.mpfr_div(rop, x, y, rnd)
-
-    # Lemma 1. If x and y are positive numbers representable with p bits of
-    # precision and x != y then |x - y| >= max(|x|, |y|) 2**-p.
-    #
-    # Proof. Without loss of generality, x > y.  Write x = m * 2**e for
-    # integers m and e with 2**(p-1) < m <= 2**p, then y <= (m-1)*2**e,
-    # so x - y >= 2**e = x / m >= x / 2**p.
-    #
-    # Lemma 2. Suppose that x, y and z are positive numbers representable with
-    # p, q and r bits of precision respectively, and suppose that x / y != z.
-    # Then
-    #
-    #    abs(x / y - z) >= max(x / y, z) 2**-max(p, q + r).
-    #
-    # Proof. Let s = max(p, q+r), then both x and yz are exactly representable
-    # with s bits of precision.  By Lemma 1, abs(x - yz) >= max(x, yz) 2**-s.
-    # So abs(x / y - z) >= max(x / y, z) 2**-s.
-    #
-    # Corollary 3. Suppose that x, y and z are nonzero numbers representable
-    # with p, q and r bits of precision respectively, and that abs(x / y) >=
-    # 2**max(p, q + r). Then z < x / y if and only if z < floor(x / y).
-    #
-    # Proof. That z < floor(x / y) implies z < x / y is clear; we must show the
-    # converse. If z is negative and x / y is positive then z < 0 <= floor(x /
-    # y) and the result is also clear, so we may assume that z and x / y have
-    # the same sign (and furthermore that y is positive, by negating x and y if
-    # necessary). Now apply Lemma 2 to either x, y and z or to -x, y and -z as
-    # appropriate to deduce that x / y - z >= 1, hence that floor(x / y) > z.
 
     e = _quotient_exponent(x, y)
 
@@ -1234,19 +1268,7 @@ def _mpfr_floordiv(rop, x, y, rnd):
     # We need to be able to compute to r + 1 bits of precision, and x / y >=
     # 2 ** (e - 1).
     if e - 1 >= max(p, q + r + 1):
-        tmp = mpfr.Mpfr_t()
-        mpfr.mpfr_init2(tmp, r + 1)
-        err = mpfr.mpfr_div(tmp, x, y, mpfr.MPFR_RNDD)
-        # At this point:
-        #   * tmp <= x / y < next_up(tmp).
-        #   * tmp is an integer (because tmp >= 2**(e-1) >= 2**(q+r+1) >=
-        #     2**(r+3), and tmp has precision r + 1).
-        #   * so tmp <= floor(x / y) < next_up(tmp).
-        #   * By the corollary above: tmp < floor(x / y) iff tmp < x / y,
-        #   * From MPFR's handling of ternary values, tmp < x / y iff err < 0.
-        assert err <= 0
-        # Reround with the appropriate rounding mode.
-        return _reround(rop, tmp, err, rnd)
+        return mpfr.mpfr_div(rop, x, y, rnd)
 
     # Slow version: compute to sufficient bits to get integer precision.  Given
     # that 2**(e-1) <= x / y < 2**e, need >= e bits of precision.
