@@ -284,6 +284,57 @@ class BigFloatTests(unittest.TestCase):
                         self.assertLess(y3, 1)
                         self.assertLess(1, x3)
 
+    def test__reround(self):
+        from bigfloat.core import _reround
+        import mpfr
+
+        # Take 10 bits of precision; round to 7, and then to 6 bits using
+        # reround; check that the effect is the same as rounding directly
+        # to 6 bits.
+
+        def test_n(n, rnd, rnd_intermediate):
+            # n an integer, 512 <= abs(n) <= 1024, say.
+
+            # Initialize variables.
+            input = mpfr.Mpfr_t()
+            intermediate = mpfr.Mpfr_t()
+            result_single_round = mpfr.Mpfr_t()
+            result_double_round = mpfr.Mpfr_t()
+            mpfr.mpfr_init2(input, 10)
+            mpfr.mpfr_init2(intermediate, 7)
+            mpfr.mpfr_init2(result_single_round, 6)
+            mpfr.mpfr_init2(result_double_round, 6)
+
+            # Input.
+            ternary = mpfr.mpfr_set_si(input, n, mpfr.MPFR_RNDN)
+            assert ternary == 0
+
+            # Result via double round.
+            ternary = mpfr.mpfr_set(intermediate, input, rnd_intermediate)
+            ternary_double_round = _reround(
+                result_double_round, intermediate, ternary, rnd)
+
+            # Result via single round.
+            ternary_single_round = mpfr.mpfr_set(
+                result_single_round, input, rnd)
+
+            self.assertEqual(ternary_single_round, ternary_double_round)
+            self.assertTrue(
+                mpfr.mpfr_equal_p(result_single_round, result_double_round))
+
+        ALL_ROUNDING_MODES = [
+            mpfr.MPFR_RNDN,
+            mpfr.MPFR_RNDA,
+            mpfr.MPFR_RNDZ,
+            mpfr.MPFR_RNDU,
+            mpfr.MPFR_RNDD,
+        ]
+
+        for rnd in ALL_ROUNDING_MODES:
+            for rnd2 in ALL_ROUNDING_MODES:
+                for n in range(512, 1025):
+                    test_n(754, rnd, rnd2)
+
     def test_floordiv(self):
         x = BigFloat(2.3)
         y = BigFloat(1.2)
