@@ -1254,6 +1254,55 @@ def _mpfr_floordiv(rop, x, y, rnd):
     #
     # Proof.
 
+    # Theorem.  Suppose that x and y are nonzero finite binary floats
+    # representable with p and q bits of precision, respectively.  Choose a
+    # rounding mode R and a target precision r, and write rnd for the
+    # corresponding rounding operation from Q to precision-r binary floats.
+    #
+    # If R is a round-to-nearest rounding mode, and either
+    #
+    # (1) p <= q + r and |x / y| >= 2^(q + r), or
+    # (2) p > q + r and bin(x) - bin(y) >= p
+    #
+    # then
+    #
+    #    rnd(floor(x / y)) == rnd(x / y)
+    #
+    # If R is a directed rounding mode, and either
+    # (1) p < q + r and |x / y| >= 2^(q + r - 1), or
+    # (2) p >= q + r and bin(x) - bin(y) >= p
+    #
+    # then again
+    #
+    #    rnd(floor(x / y)) == rnd(x / y).
+    #
+    # Here's a weaker but simpler result that follows from the above.
+    #
+    # Corollary 1. With x, y, p, q, R, r and rnd as above, if
+    #
+    #     |x / y| >= 2^max(q + r, p)
+    #
+    # then
+    #
+    #     rnd(floor(x / y)) == rnd(x / y).
+    #
+    # Proof. Note that |x / y| >= 2^p implies bin(x) - bin(y) >= p,
+    # so it's enough that |x / y| >= 2^max(p, q + r) in the case of
+    # a round-to-nearest mode, and that |x / y| >= 2^max(p, q + r - 1)
+    # in the case of a directed rounding mode.
+    #
+    # Or an alternative simplification.
+    #
+    # Corollary 2. With x, y, p, q, R, r and rnd as above, if
+    #
+    #     bin(x) - bin(y) >= max(p, q + r + 1)
+    #
+    # then
+    #
+    #     rnd(floor(x / y)) == rnd(x / y)
+    #
+    # Proof. If bin(x) - bin(y) >= q + r + 1 then |x / y| > 2^(q + r).
+
     # In special cases, it's safe to defer to mpfr_div: the result in
     # these cases is always 0, infinity, or nan.
     if not mpfr.mpfr_regular_p(x) or not mpfr.mpfr_regular_p(y):

@@ -343,29 +343,46 @@ class BigFloatTests(unittest.TestCase):
         # Check some random floats; compare with Python's operation.
         import random
         import struct
-        with double_precision:
 
-            for _ in range(100000):
+        test_pairs = [
+            ('-0x1.5921f71f3a8b7p-407', '0x1.4c71c92d27a31p-460'),
+            ('-0x1.884ea5a94b5f5p+513', '0x1.c058519564476p+460'),
+            ('-0x1.b71ef34af0215p-459', '-0x1.d7c7b08970e2dp-514'),
+            ('-0x1.55b19f5f1eaf4p+888', '-0x1.eab0f46fc89fcp+834'),
+            ('0x1.c655a7928d80ap-148', '0x1.ed6b2d073dbaap-202'),
+        ]
+
+        with double_precision:
+            # Some troublesome values.
+            for xhex, yhex in test_pairs:
+                x = float.fromhex(xhex)
+                y = float.fromhex(yhex)
+                x_frac = fractions.Fraction(*x.as_integer_ratio())
+                y_frac = fractions.Fraction(*y.as_integer_ratio())
+                expected_result = float(x_frac // y_frac)
+                actual_result = floordiv(x, y)
+                self.assertEqual(actual_result, expected_result)
+
+            # Check a selection of random values.
+            for _ in range(10000):
                 x = struct.unpack(
                     '<d', struct.pack('<Q', random.randrange(2**64)))[0]
                 y = struct.unpack(
                     '<d', struct.pack('<Q', random.randrange(2**64)))[0]
-
                 if math.isnan(x) or math.isinf(x) or x == 0.0:
                     continue
                 if math.isnan(y) or math.isinf(y) or y == 0.0:
                     continue
 
-                bigfloat_result = floordiv(x, y)
+                actual_result = floordiv(x, y)
                 try:
-                    z = fractions.Fraction(x) // fractions.Fraction(y)
-                    python_result = float(z)
+                    x_frac = fractions.Fraction(*x.as_integer_ratio())
+                    y_frac = fractions.Fraction(*y.as_integer_ratio())
+                    expected_result = float(x_frac // y_frac)
                 except OverflowError:
-                    python_result = float('inf') if z > 0 else float('-inf')
+                    expected_result = float('inf') if x_frac / y_frac > 0 else float('-inf')
 
-                if bigfloat_result != python_result:
-                    print("x, y: ", x.hex(), y.hex())
-                    self.assertEqual(bigfloat_result, python_result)
+                self.assertEqual(actual_result, expected_result)
 
     def test_binary_operations(self):
         # check that BigFloats can be combined with themselves,
