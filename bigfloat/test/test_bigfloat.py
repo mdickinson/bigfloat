@@ -331,7 +331,10 @@ class BigFloatTests(unittest.TestCase):
                 except OverflowError:
                     expected_result = float('inf') if x_frac / y_frac > 0 else float('-inf')
 
-                self.assertEqual(actual_result, expected_result)
+                self.assertEqual(
+                    actual_result, expected_result,
+                    msg="failure for x = {0}, y = {0}".format(x, y)
+                )
 
     def test_binary_operations(self):
         # check that BigFloats can be combined with themselves,
