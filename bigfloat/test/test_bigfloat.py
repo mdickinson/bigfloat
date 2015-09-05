@@ -299,6 +299,7 @@ class BigFloatTests(unittest.TestCase):
             ('-0x1.b71ef34af0215p-459', '-0x1.d7c7b08970e2dp-514'),
             ('-0x1.55b19f5f1eaf4p+888', '-0x1.eab0f46fc89fcp+834'),
             ('0x1.c655a7928d80ap-148', '0x1.ed6b2d073dbaap-202'),
+            ('0x1.80574cc232b58p+407', '0x1.8017ad6a5cd65p+247'),
         ]
 
         with double_precision:
@@ -327,7 +328,9 @@ class BigFloatTests(unittest.TestCase):
                 try:
                     x_frac = fractions.Fraction(*x.as_integer_ratio())
                     y_frac = fractions.Fraction(*y.as_integer_ratio())
-                    expected_result = float(x_frac // y_frac)
+                    # Would like to simply use float(x_frac // y_frac), but the
+                    # float-to-int conversion is not correctly rounded on Python 2.6.
+                    expected_result = BigFloat(x_frac // y_frac)
                 except OverflowError:
                     expected_result = float('inf') if x_frac / y_frac > 0 else float('-inf')
 
