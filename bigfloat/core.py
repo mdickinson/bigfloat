@@ -1130,60 +1130,6 @@ def _quotient_exponent(x, y):
     return extra + mpfr.mpfr_get_exp(x) - mpfr.mpfr_get_exp(y)
 
 
-_NEAREST_ROUNDING_ATTRIBUTES = (mpfr.MPFR_RNDN,)
-
-_DIRECTED_ROUNDING_ATTRIBUTES = (
-    mpfr.MPFR_RNDD, mpfr.MPFR_RNDU, mpfr.MPFR_RNDA, mpfr.MPFR_RNDZ)
-
-
-def _reround(rop, x, t, rnd):
-    """
-    Given rop with precision r, and x already rounded to precision r+1 with
-    ternary value t (with one of the directed rounding modes), round x to r
-    bits of precision using the given rounding mode rnd and return the new
-    ternary value.
-
-    That is, we've got an 'actual' mathematically correct value v,
-    x and t give the result of rounding v to precision r + 1 with
-    some (unspecified) rounding mode, and we want the result of
-    rounding v to precision r with the given rounding mode.
-
-    """
-    #  ---+-------------+---  rop
-    #  ---+------+------+---   x
-    #        *                 v
-
-    assert mpfr.mpfr_get_prec(x) == mpfr.mpfr_get_prec(rop) + 1
-
-    t2 = mpfr.mpfr_set(rop, x, rnd)
-    # ternary represents the overall rounding direction, from v to rop.
-    ternary = t2 or t
-
-    if rnd in _DIRECTED_ROUNDING_ATTRIBUTES:
-        if ternary == t2:  # i.e., if t2 is nonzero or t == 0
-            adjust = False
-        else:
-            round_up = (
-                rnd == mpfr.MPFR_RNDU or
-                rnd == mpfr.MPFR_RNDA and not mpfr.mpfr_signbit(x) or
-                rnd == mpfr.MPFR_RNDZ and mpfr.mpfr_signbit(x)
-            )
-            adjust = round_up != (ternary > 0)
-    elif rnd in _NEAREST_ROUNDING_ATTRIBUTES:
-        adjust = not (t <= 0 <= t2 or t2 <= 0 <= t)
-    else:
-        raise ValueError("Unrecognised rounding mode: {0}".format(rnd))
-
-    if adjust:
-        if ternary > 0:
-            mpfr.mpfr_nextbelow(rop)
-        else:
-            mpfr.mpfr_nextabove(rop)
-        ternary = -ternary
-
-    return ternary
-
-
 def _mpfr_floordiv(rop, x, y, rnd):
     """
     Given two positive finite MPFR numbers x and y,
