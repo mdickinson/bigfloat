@@ -309,7 +309,7 @@ class BigFloatTests(unittest.TestCase):
                 y = float.fromhex(yhex)
                 x_frac = fractions.Fraction(*x.as_integer_ratio())
                 y_frac = fractions.Fraction(*y.as_integer_ratio())
-                expected_result = float(x_frac // y_frac)
+                expected_result = BigFloat(x_frac // y_frac)
                 actual_result = floordiv(x, y)
                 self.assertEqual(actual_result, expected_result)
 
