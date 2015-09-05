@@ -333,7 +333,7 @@ class BigFloatTests(unittest.TestCase):
 
                 self.assertEqual(
                     actual_result, expected_result,
-                    msg="failure for x = {0!r}, y = {0!r}".format(x, y)
+                    msg="failure for x = {0!r}, y = {1!r}".format(x, y)
                 )
 
     def test_binary_operations(self):
