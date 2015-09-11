@@ -1140,70 +1140,21 @@ def _mpfr_floordiv(rop, x, y, rnd):
     """
     # Algorithm notes
     # ---------------
-    # A simple algorithm is to compute floor(x / y) exactly, and then round to
-    # the nearest representable value using the given rounding mode.  This
-    # requires computing x / y to a precision sufficient to ensure that floor(x
-    # / y) is exactly representable.  If abs(x / y) < 2**r, then abs(floor(x /
-    # y)) <= 2**r, and so r bits of precision is enough.  However, for large
-    # quotients this is impractical, and we need some other method.
+    # A simple and obvious approach is to compute floor(x / y) exactly, and
+    # then round to the nearest representable value using the given rounding
+    # mode.  This requires computing x / y to a precision sufficient to ensure
+    # that floor(x / y) is exactly representable.  If abs(x / y) < 2**r, then
+    # abs(floor(x / y)) <= 2**r, and so r bits of precision is enough.
+    # However, for large quotients this is impractical, and we need some other
+    # method.  For x / y sufficiently large, it's possible to show that x / y
+    # and floor(x / y) are indistinguishable, in the sense that both quantities
+    # round to the same value.  More precisely, we have the following theorem:
     #
-    # In order to do correct rounding, we need to be able to identify when
-    # floor(x / y) is *exactly* equal to a given result z representable in the
-    # target format.  That's equivalent to determining when z lies in the
-    # interval [x / y, x / y + 1), and if x / y is very large that could mean
-    # computing the quotient to many many bits of precision: z >= x / y + 1 iff
-    # y * z >= x + y.
-    #
-    # The last expression is problematic because when x is much larger than y,
-    # x + y takes many bits to represent.  But since y * z should have
-    # relatively few bits, we should be able to take advantage of this: y * z
-    # >= x + y if and only if y * z - x >= y.  Now if y*z and x are both
-    # representable with 's' bits of precision (say), and y * z - x > 0, then y
-    # * z - x >= ulp_s(max(y*z, x)), so if ulp_s(max(y*z, x)) >= y then y * z -
-    # x > 0 is all we need.  The lemmas below develop this idea rigorously.
-    #
-    # Lemma 1. If x and y are finite numbers representable with p bits of
-    # precision and x != y then |x - y| >= max(|x|, |y|) 2**-p.
-    #
-    # Proof. If x and y have different signs or either is zero, then |x - y|
-    # >= max(|x|, |y|) and we're done.  So without loss of generality we may
-    # assume that x > y > 0, and then it's enough to show that x - y > x *
-    # 2**-p.  Write x = m * 2**e for integers m and e with 2**(p-1) < m <=
-    # 2**p, then y <= (m-1)*2**e, so x - y >= 2**e = x / m >= x * 2**-p.
-    #
-    # Lemma 2. Suppose that x, y and z are finite numbers representable with p,
-    # q and r bits of precision respectively, that y is nonzero, and that x / y
-    # != z.  Then
-    #
-    #    |x / y - z| >= max(|x / y|, |z|) 2**-max(p, q + r).
-    #
-    # Proof. Let s = max(p, q+r), then both x and yz are exactly representable
-    # with s bits of precision.  By Lemma 1, |x - yz| >= max(|x|, |yz|) 2**-s.
-    # Dividing through by |y| gives |x / y - z| >= max(|x / y|, |z|) 2**-s.
-    #
-    # Lemma 3. Suppose that x, y and z are finite numbers representable
-    # with p, q and r bits of precision respectively, that y is nonzero, and
-    # that |x / y| >= 2**max(p, q + r). Then z < x / y if and only if z <
-    # floor(x / y).
-    #
-    # Proof. It's clear that z < floor(x / y) implies z < x / y. To show the
-    # converse, if z < x / y then Lemma 2 implies that x / y - z >= 1, hence
-    # that floor(x / y) > z.
-    #
-    # Corollary 4. Suppose that x and y are finite numbers representable with p
-    # and q bits of precision, respectively.  Choose a rounding mode R: any of
-    # the directed rounding modes or round-to-nearest, and a target precision r
-    # >= 1.  If |x / y| >= 2**max(p, q + r + 1), then rnd_{R,r}(x / y) ==
-    # rnd_{R,r}(floor(x / y)), and rnd_R(x / y) is less than, equal to, or
-    # greater that x / y if and only if rnd_R(floor(x / y)) is less than, equal
-    # to, or greater than x / y respectively.
-    #
-    # Proof.
-
     # Theorem.  Suppose that x and y are nonzero finite binary floats
-    # representable with p and q bits of precision, respectively.  Choose a
-    # rounding mode R and a target precision r, and write rnd for the
-    # corresponding rounding operation from Q to precision-r binary floats.
+    # representable with p and q bits of precision, respectively.  Let R be any
+    # of the IEEE 754 standard rounding modes, and choose a target precision r.
+    # Write rnd for the rounding operation from Q to precision-r binary floats
+    # with rounding mode R.  Write bin(x) for the binade of a nonzero float x.
     #
     # If R is a round-to-nearest rounding mode, and either
     #
@@ -1214,7 +1165,8 @@ def _mpfr_floordiv(rop, x, y, rnd):
     #
     #    rnd(floor(x / y)) == rnd(x / y)
     #
-    # If R is a directed rounding mode, and either
+    # Conversely, if R is a directed rounding mode, and either
+    #
     # (1) p < q + r and |x / y| >= 2^(q + r - 1), or
     # (2) p >= q + r and bin(x) - bin(y) >= p
     #
@@ -1222,7 +1174,12 @@ def _mpfr_floordiv(rop, x, y, rnd):
     #
     #    rnd(floor(x / y)) == rnd(x / y).
     #
-    # Here's a weaker but simpler result that follows from the above.
+    # Proof.  See separate notes and Coq proof in the float-proofs
+    # repository.
+    #
+    # Rather than distinguish between the various cases (R directed
+    # or not, p large versus p small) above, we use a weaker but
+    # simpler amalgamation of the above result:
     #
     # Corollary 1. With x, y, p, q, R, r and rnd as above, if
     #
@@ -1236,18 +1193,6 @@ def _mpfr_floordiv(rop, x, y, rnd):
     # so it's enough that |x / y| >= 2^max(p, q + r) in the case of
     # a round-to-nearest mode, and that |x / y| >= 2^max(p, q + r - 1)
     # in the case of a directed rounding mode.
-    #
-    # Or an alternative simplification.
-    #
-    # Corollary 2. With x, y, p, q, R, r and rnd as above, if
-    #
-    #     bin(x) - bin(y) >= max(p, q + r + 1)
-    #
-    # then
-    #
-    #     rnd(floor(x / y)) == rnd(x / y)
-    #
-    # Proof. If bin(x) - bin(y) >= q + r + 1 then |x / y| > 2^(q + r).
 
     # In special cases, it's safe to defer to mpfr_div: the result in
     # these cases is always 0, infinity, or nan.
@@ -1260,9 +1205,9 @@ def _mpfr_floordiv(rop, x, y, rnd):
     q = mpfr.mpfr_get_prec(y)
     r = mpfr.mpfr_get_prec(rop)
 
-    # We need to be able to compute to r + 1 bits of precision, and x / y >=
-    # 2 ** (e - 1).
-    if e - 1 >= max(p, q + r + 1):
+    # If e - 1 >= max(p, q+r) then |x / y| >= 2^(e-1) >= 2^max(p, q+r),
+    # so by the above theorem, round(floordiv(x, y)) == round(div(x, y)).
+    if e - 1 >= max(p, q + r):
         return mpfr.mpfr_div(rop, x, y, rnd)
 
     # Slow version: compute to sufficient bits to get integer precision.  Given
