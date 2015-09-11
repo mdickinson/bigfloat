@@ -300,6 +300,17 @@ class BigFloatTests(unittest.TestCase):
             ('-0x1.55b19f5f1eaf4p+888', '-0x1.eab0f46fc89fcp+834'),
             ('0x1.c655a7928d80ap-148', '0x1.ed6b2d073dbaap-202'),
             ('0x1.80574cc232b58p+407', '0x1.8017ad6a5cd65p+247'),
+            # Cases where the fast method doesn't quite apply
+            ('0x1.29dbe528a1eddp+158', '0x1.ab3bd461baacfp+52'),
+            ('0x1.f0cd027b645e8p+157', '0x1.afc4d2171de7fp+52'),
+            ('0x1.49c34cd7726e3p+158', '0x1.b16193d9ac917p+52'),
+            ('0x1.499cd0115b703p+158', '0x1.ecb8a19525c13p+52'),
+            ('0x1.c042a3dd22594p+157', '0x1.9d26c3340d073p+52'),
+            ('0x1.085e2c60727e6p+158', '0x1.4ab6dab81c08bp+52'),
+            ('0x1.085e2c60727e6p+158', '0x1.945a8d6633e67p+52'),
+            ('0x1.bfed7fed4e317p+158', '0x1.e677da37e992bp+52'),
+            ('0x1.bfed7fed4e317p+158', '0x1.fbb37fe2fe157p+52'),
+            ('0x1.d551fa1318722p+157', '0x1.993e3b11333cbp+52'),
         ]
 
         with double_precision:
