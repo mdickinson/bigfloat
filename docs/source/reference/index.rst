@@ -110,11 +110,11 @@ deviations from expected behaviour.
   current context, and has the property that ``eval(repr(x))``
   recovers ``x`` exactly.
 
-* The '+' ,'-', '*', '/', '//' and '**' binary operators are supported.  For
-  MPFR version >= 2.4.0, the '%' operation is also supported.  The '/' operator
-  implements true division, regardless of whether ``from __future__ import
-  division`` is in effect or not.  The result of '%' has the same sign as the
-  first argument, not the second.
+* The '+' ,'-', '*', '/', '//', '%' and '**' binary operators are supported.
+  The '/' operator implements true division, regardless of whether ``from
+  __future__ import division`` is in effect or not.  The result of '%' has the
+  same sign as the second argument, so follows the existing Python semantics
+  for '%' on Python floats.
 
 * For the above operators, mixed-type operations involving a :class:`BigFloat`
   and an integer or float are permitted. These behave as though the non
