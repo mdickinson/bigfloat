@@ -2743,7 +2743,7 @@ BigFloat.__floordiv__ = _binop(floordiv)
 if _sys.version_info < (3,):
     BigFloat.__div__ = _binop(div)
 BigFloat.__pow__ = _binop(pow)
-BigFloat.__mod__ = _binop(fmod)
+BigFloat.__mod__ = _binop(mod)
 
 # and their reverse operations
 BigFloat.__radd__ = _rbinop(add)
@@ -2754,7 +2754,7 @@ BigFloat.__rfloordiv__ = _rbinop(floordiv)
 if _sys.version_info < (3,):
     BigFloat.__rdiv__ = _rbinop(div)
 BigFloat.__rpow__ = _rbinop(pow)
-BigFloat.__rmod__ = _rbinop(fmod)
+BigFloat.__rmod__ = _rbinop(mod)
 
 # comparisons
 BigFloat.__eq__ = _binop(equal)
