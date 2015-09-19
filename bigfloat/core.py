@@ -1130,7 +1130,7 @@ def _quotient_exponent(x, y):
     return extra + mpfr.mpfr_get_exp(x) - mpfr.mpfr_get_exp(y)
 
 
-def _mpfr_pmod(rop, x, y, rnd):
+def _mpfr_mod(rop, x, y, rnd):
     """
     Given two MPRF numbers x and y, compute
     x - floor(x / y) * y, rounded if necessary using the given
@@ -1307,14 +1307,14 @@ def floordiv(x, y, context=None):
     )
 
 
-def pmod(x, y, context=None):
+def mod(x, y, context=None):
     """
     Return the remainder of x divided by y, with sign matching that of y.
 
     """
     return _apply_function_in_current_context(
         BigFloat,
-        _mpfr_pmod,
+        _mpfr_mod,
         (
             BigFloat._implicit_convert(x),
             BigFloat._implicit_convert(y),

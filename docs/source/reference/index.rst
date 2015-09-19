@@ -476,9 +476,10 @@ Arithmetic functions
 .. autofunction:: sub
 .. autofunction:: mul
 .. autofunction:: div
-.. autofunction:: floordiv
 .. autofunction:: pow
 .. autofunction:: fmod
+.. autofunction:: floordiv
+.. autofunction:: mod
 
 .. autofunction:: remainder
 

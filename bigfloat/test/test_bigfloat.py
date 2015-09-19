@@ -22,6 +22,8 @@ import doctest
 import fractions
 import math
 import operator
+import random
+import struct
 import sys
 import types
 if sys.version_info < (2, 7):
@@ -64,7 +66,7 @@ from bigfloat import (
 
     # standard arithmetic functions
     add, sub, mul, div, fmod, pow,
-    sqrt, floordiv, pmod,
+    sqrt, floordiv, mod,
 
     # Version information
     MPFR_VERSION_MAJOR, MPFR_VERSION_MINOR,
@@ -281,15 +283,25 @@ class BigFloatTests(unittest.TestCase):
                         self.assertLess(y3, 1)
                         self.assertLess(1, x3)
 
+    def test_mod(self):
+        # Compare with Python's % operation.
+        for _ in range(10000):
+            x = struct.unpack(
+                '<d', struct.pack('<Q', random.randrange(2**64)))[0]
+            y = struct.unpack(
+                '<d', struct.pack('<Q', random.randrange(2**64)))[0]
+
+            bigfloat_result = mod(x, y)
+            python_result = x % y
+            self.assertIdenticalBigFloat(bigfloat_result,
+                                         BigFloat(python_result))
+
     def test_floordiv(self):
         x = BigFloat(2.3)
         y = BigFloat(1.2)
         self.assertIdenticalBigFloat(floordiv(x, y), BigFloat(1))
 
         # Check some random floats; compare with Python's operation.
-        import random
-        import struct
-
         test_pairs = [
             ('-0x1.5921f71f3a8b7p-407', '0x1.4c71c92d27a31p-460'),
             ('-0x1.884ea5a94b5f5p+513', '0x1.c058519564476p+460'),
@@ -2112,86 +2124,86 @@ pos 1p+1024 -> inf Inexact Overflow
 """.split('\n'))
 
 
-ABCTests.test_pmod = process_lines("""\
+ABCTests.test_mod = process_lines("""\
 context double_precision
 context RoundTiesToEven
 
 # Check treatment of signs in normal cases.
-pmod 0x5p0 0x3p0 -> 0x2p0
-pmod -0x5p0 0x3p0 -> 0x1p0
-pmod 0x5p0 -0x3p0 -> -0x1p0
-pmod -0x5p0 -0x3p0 -> -0x2p0
+mod 0x5p0 0x3p0 -> 0x2p0
+mod -0x5p0 0x3p0 -> 0x1p0
+mod 0x5p0 -0x3p0 -> -0x1p0
+mod -0x5p0 -0x3p0 -> -0x2p0
 
 # A result of zero should have the same sign
 # as the second argument.
-pmod 0x2p0 0x1p0 -> 0x0p0
-pmod -0x2p0 0x1p0 -> 0x0p0
-pmod 0x2p0 -0x1p0 -> -0x0p0
-pmod -0x2p0 -0x1p0 -> -0x0p0
+mod 0x2p0 0x1p0 -> 0x0p0
+mod -0x2p0 0x1p0 -> 0x0p0
+mod 0x2p0 -0x1p0 -> -0x0p0
+mod -0x2p0 -0x1p0 -> -0x0p0
 
 # Finite input cases where the result may not be exact.
-pmod 0x1p-100 0x1p0 -> 0x1p-100
-pmod -0x1p-100 0x1p0 -> 0x1p0         Inexact
-pmod 0x1p-100 -0x1p0 -> -0x1p0        Inexact
-pmod -0x1p-100 -0x1p0 -> -0x1p-100
+mod 0x1p-100 0x1p0 -> 0x1p-100
+mod -0x1p-100 0x1p0 -> 0x1p0         Inexact
+mod 0x1p-100 -0x1p0 -> -0x1p0        Inexact
+mod -0x1p-100 -0x1p0 -> -0x1p-100
 
 # NaN inputs
-pmod nan nan -> nan                   NanFlag
-pmod -inf nan -> nan                  NanFlag
-pmod -0x1p0 nan -> nan                NanFlag
-pmod -0x0p0 nan -> nan                NanFlag
-pmod 0x0p0 nan -> nan                 NanFlag
-pmod 0x1p0 nan -> nan                 NanFlag
-pmod nan inf -> nan                   NanFlag
-pmod nan -inf -> nan                  NanFlag
-pmod nan -0x1p0 -> nan                NanFlag
-pmod nan -0x0p0 -> nan                NanFlag
-pmod nan 0x0p0 -> nan                 NanFlag
-pmod nan 0x1p0 -> nan                 NanFlag
-pmod nan inf -> nan                   NanFlag
+mod nan nan -> nan                   NanFlag
+mod -inf nan -> nan                  NanFlag
+mod -0x1p0 nan -> nan                NanFlag
+mod -0x0p0 nan -> nan                NanFlag
+mod 0x0p0 nan -> nan                 NanFlag
+mod 0x1p0 nan -> nan                 NanFlag
+mod nan inf -> nan                   NanFlag
+mod nan -inf -> nan                  NanFlag
+mod nan -0x1p0 -> nan                NanFlag
+mod nan -0x0p0 -> nan                NanFlag
+mod nan 0x0p0 -> nan                 NanFlag
+mod nan 0x1p0 -> nan                 NanFlag
+mod nan inf -> nan                   NanFlag
 
 # Other invalid cases: x infinite, y zero.
-pmod inf -inf -> nan                  NanFlag
-pmod inf -0x1p0 -> nan                NanFlag
-pmod inf -0x0p0 -> nan                NanFlag
-pmod inf 0x0p0 -> nan                 NanFlag
-pmod inf 0x1p0 -> nan                 NanFlag
-pmod inf inf -> nan                   NanFlag
-pmod -inf -inf -> nan                 NanFlag
-pmod -inf -0x1p0 -> nan               NanFlag
-pmod -inf -0x0p0 -> nan               NanFlag
-pmod -inf 0x0p0 -> nan                NanFlag
-pmod -inf 0x1p0 -> nan                NanFlag
-pmod -inf inf -> nan                  NanFlag
-pmod -inf 0x0p0 -> nan                NanFlag
-pmod -0x1p0 0x0p0 -> nan              NanFlag
-pmod -0x0p0 0x0p0 -> nan              NanFlag
-pmod 0x0p0 0x0p0 -> nan               NanFlag
-pmod 0x1p0 0x0p0 -> nan               NanFlag
-pmod inf 0x0p0 -> nan                 NanFlag
-pmod -inf -0x0p0 -> nan               NanFlag
-pmod -0x1p0 -0x0p0 -> nan             NanFlag
-pmod -0x0p0 -0x0p0 -> nan             NanFlag
-pmod 0x0p0 -0x0p0 -> nan              NanFlag
-pmod 0x1p0 -0x0p0 -> nan              NanFlag
-pmod inf -0x0p0 -> nan                NanFlag
+mod inf -inf -> nan                  NanFlag
+mod inf -0x1p0 -> nan                NanFlag
+mod inf -0x0p0 -> nan                NanFlag
+mod inf 0x0p0 -> nan                 NanFlag
+mod inf 0x1p0 -> nan                 NanFlag
+mod inf inf -> nan                   NanFlag
+mod -inf -inf -> nan                 NanFlag
+mod -inf -0x1p0 -> nan               NanFlag
+mod -inf -0x0p0 -> nan               NanFlag
+mod -inf 0x0p0 -> nan                NanFlag
+mod -inf 0x1p0 -> nan                NanFlag
+mod -inf inf -> nan                  NanFlag
+mod -inf 0x0p0 -> nan                NanFlag
+mod -0x1p0 0x0p0 -> nan              NanFlag
+mod -0x0p0 0x0p0 -> nan              NanFlag
+mod 0x0p0 0x0p0 -> nan               NanFlag
+mod 0x1p0 0x0p0 -> nan               NanFlag
+mod inf 0x0p0 -> nan                 NanFlag
+mod -inf -0x0p0 -> nan               NanFlag
+mod -0x1p0 -0x0p0 -> nan             NanFlag
+mod -0x0p0 -0x0p0 -> nan             NanFlag
+mod 0x0p0 -0x0p0 -> nan              NanFlag
+mod 0x1p0 -0x0p0 -> nan              NanFlag
+mod inf -0x0p0 -> nan                NanFlag
 
 # x finite, y infinite.
-pmod -0x1p0 inf -> inf
-pmod -0x0p0 inf -> 0x0p0
-pmod 0x0p0 inf -> 0x0p0
-pmod 0x1p0 inf -> 0x1p0
+mod -0x1p0 inf -> inf
+mod -0x0p0 inf -> 0x0p0
+mod 0x0p0 inf -> 0x0p0
+mod 0x1p0 inf -> 0x1p0
 
-pmod -0x1p0 -inf -> -0x1p0
-pmod -0x0p0 -inf -> -0x0p0
-pmod 0x0p0 -inf -> -0x0p0
-pmod 0x1p0 -inf -> -inf
+mod -0x1p0 -inf -> -0x1p0
+mod -0x0p0 -inf -> -0x0p0
+mod 0x0p0 -inf -> -0x0p0
+mod 0x1p0 -inf -> -inf
 
 # x zero, y finite but nonzero: sign of x is irrelevant.
-pmod 0x0p0 0x5p0 -> 0x0p0
-pmod -0x0p0 0x5p0 -> 0x0p0
-pmod 0x0p0 -0x5p0 -> -0x0p0
-pmod -0x0p0 -0x5p0 -> -0x0p0
+mod 0x0p0 0x5p0 -> 0x0p0
+mod -0x0p0 0x5p0 -> 0x0p0
+mod 0x0p0 -0x5p0 -> -0x0p0
+mod -0x0p0 -0x5p0 -> -0x0p0
 """.split('\n'))
 
 
