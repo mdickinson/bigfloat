@@ -1323,6 +1323,10 @@ def mod(x, y, context=None):
     )
 
 
+def _divmod(x, y, context=None):
+    return floordiv(x, y, context=context), mod(x, y, context=context)
+
+
 def sqrt(x, context=None):
     """
     Return the square root of ``x``.
@@ -2744,6 +2748,7 @@ if _sys.version_info < (3,):
     BigFloat.__div__ = _binop(div)
 BigFloat.__pow__ = _binop(pow)
 BigFloat.__mod__ = _binop(mod)
+BigFloat.__divmod__ = _binop(_divmod)
 
 # and their reverse operations
 BigFloat.__radd__ = _rbinop(add)
@@ -2755,6 +2760,7 @@ if _sys.version_info < (3,):
     BigFloat.__rdiv__ = _rbinop(div)
 BigFloat.__rpow__ = _rbinop(pow)
 BigFloat.__rmod__ = _rbinop(mod)
+BigFloat.__rdivmod__ = _rbinop(_divmod)
 
 # comparisons
 BigFloat.__eq__ = _binop(equal)

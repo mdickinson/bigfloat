@@ -779,6 +779,22 @@ class BigFloatTests(unittest.TestCase):
         with self.assertRaises(TypeError):
             BigFloat(1j)
 
+    def test_divmod(self):
+        x = BigFloat.exact(1729)
+        y = BigFloat.exact(53)
+
+        q, r = divmod(x, y)
+        self.assertIsInstance(q, BigFloat)
+        self.assertIsInstance(r, BigFloat)
+        self.assertEqual(q, BigFloat.exact(1729 // 53))
+        self.assertEqual(r, BigFloat.exact(1729 % 53))
+
+        q, r = divmod(-x, y)
+        self.assertIsInstance(q, BigFloat)
+        self.assertIsInstance(r, BigFloat)
+        self.assertEqual(q, BigFloat.exact(-1729 // 53))
+        self.assertEqual(r, BigFloat.exact(-1729 % 53))
+
     def test_exact_context_independent(self):
         with Context(emin=-1, emax=1):
             x = BigFloat.exact(123456)
