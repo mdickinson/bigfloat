@@ -1283,7 +1283,11 @@ def _mpfr_floordiv(rop, x, y, rnd):
 
 def floordiv(x, y, context=None):
     """
-    Return floor(x / y).
+    Return the floor of ``x`` divided by ``y``.
+
+    The result is a ``BigFloat`` instance, rounded to the
+    context if necessary.  Special cases match those of the
+    ``div`` function.
 
     """
     return _apply_function_in_current_context(
@@ -2713,6 +2717,7 @@ BigFloat.__add__ = _binop(add)
 BigFloat.__sub__ = _binop(sub)
 BigFloat.__mul__ = _binop(mul)
 BigFloat.__truediv__ = _binop(div)
+BigFloat.__floordiv__ = _binop(floordiv)
 if _sys.version_info < (3,):
     BigFloat.__div__ = _binop(div)
 BigFloat.__pow__ = _binop(pow)
@@ -2722,6 +2727,7 @@ BigFloat.__radd__ = _rbinop(add)
 BigFloat.__rsub__ = _rbinop(sub)
 BigFloat.__rmul__ = _rbinop(mul)
 BigFloat.__rtruediv__ = _rbinop(div)
+BigFloat.__rfloordiv__ = _rbinop(floordiv)
 if _sys.version_info < (3,):
     BigFloat.__rdiv__ = _rbinop(div)
 BigFloat.__rpow__ = _rbinop(pow)

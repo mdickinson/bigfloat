@@ -103,23 +103,23 @@ Special methods
 """""""""""""""
 
 The :class:`BigFloat` type has a full complement of special methods.
-Here are some brief notes on those methods, indicating some possible
+Here are some brief notes on those methods, indicating possible
 deviations from expected behaviour.
 
 * The repr of a :class:`BigFloat` instance ``x`` is independent of the
   current context, and has the property that ``eval(repr(x))``
   recovers ``x`` exactly.
 
-* The '+' ,'-', '*', '/' and '**' binary operators are supported, and
-  mixed-type operations involving a :class:`BigFloat` and an integer
-  or float are permitted.  For MPFR version >= 2.4.0, the '%' is also
-  supported.  Mixed-type operations behave as though the non
-  :class:`BigFloat` operand is first converted to a :class:`BigFloat`
-  with no loss of accuracy.  The '/' operator implements true
-  division, regardless of whether 'from __future__ import division' is
-  in effect or not.  The result of '%' has the same sign as the first
-  argument, not the second.  Floor division is not currently
-  implemented.
+* The '+' ,'-', '*', '/', '//' and '**' binary operators are supported.  For
+  MPFR version >= 2.4.0, the '%' operation is also supported.  The '/' operator
+  implements true division, regardless of whether ``from __future__ import
+  division`` is in effect or not.  The result of '%' has the same sign as the
+  first argument, not the second.
+
+* For the above operators, mixed-type operations involving a :class:`BigFloat`
+  and an integer or float are permitted. These behave as though the non
+  :class:`BigFloat` operand is first converted to a :class:`BigFloat` with no
+  loss of accuracy.
 
 * The '+' and '-' unary operators and built-in :func:`abs` function
   are supported.  Note that these all round to the current context; in
@@ -476,6 +476,7 @@ Arithmetic functions
 .. autofunction:: sub
 .. autofunction:: mul
 .. autofunction:: div
+.. autofunction:: floordiv
 .. autofunction:: pow
 .. autofunction:: mod
 

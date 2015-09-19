@@ -245,7 +245,7 @@ class BigFloatTests(unittest.TestCase):
     def test_arithmetic_functions(self):
         # test add, mul, div, sub, pow, mod
         test_precisions = [2, 10, 23, 24, 52, 53, 54, 100]
-        fns = [add, sub, mul, div, pow]
+        fns = [add, sub, mul, div, pow, floordiv]
         # mod function only exists for MPFR version >= 2.4.0
         if (MPFR_VERSION_MAJOR, MPFR_VERSION_MINOR) >= (2, 4):
             fns.append(mod)
@@ -341,13 +341,13 @@ class BigFloatTests(unittest.TestCase):
 
     def test_binary_operations(self):
         # check that BigFloats can be combined with themselves,
-        # and with integers and floats, using the 6 standard
-        # arithmetic operators:  +, -, *, /, **, %
+        # and with integers and floats, using the standard
+        # arithmetic operators:  +, -, *, /, **, %, //
 
         x = BigFloat('17.29')
         other_values = [2, 3, 1.234, BigFloat('0.678'), False]
         test_precisions = [2, 20, 53, 2000]
-        operations = [operator.add, operator.mul,
+        operations = [operator.add, operator.mul, operator.floordiv,
                       operator.sub, operator.pow, operator.truediv]
         # operator.div only defined for Python 2
         if sys.version_info < (3,):

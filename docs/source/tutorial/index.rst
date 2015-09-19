@@ -146,10 +146,9 @@ prettier, but doesn't supply enough information to recover that
 Arithmetic on :class:`BigFloat` instances
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-All the usual arithmetic operations, with the exception of floor
-division, apply to :class:`BigFloat` instances, and those instances can be
-freely mixed with integers and floats (but not strings!) in those
-operations:
+All the usual arithmetic operations apply to :class:`BigFloat` instances, and
+those instances can be freely mixed with integers and floats (but not strings!)
+in those operations:
 
    >>> BigFloat(1234)/3
    BigFloat.exact('411.33333333333331', precision=53)
