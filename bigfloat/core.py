@@ -1130,13 +1130,74 @@ def _quotient_exponent(x, y):
     return extra + mpfr.mpfr_get_exp(x) - mpfr.mpfr_get_exp(y)
 
 
+def _mpfr_pmod(rop, x, y, rnd):
+    """
+    Given two MPRF numbers x and y, compute
+    x - floor(x / y) * y, rounded if necessary using the given
+    rounding mode.  The result is placed in 'rop'.
+
+    This is the 'remainder' operation, with sign convention
+    compatible with Python's % operator (where x % y has
+    the same sign as y).
+    """
+    # There are various cases:
+    #
+    # 0. If either argument is a NaN, the result is NaN.
+    #
+    # 1. If x is infinite or y is zero, the result is NaN.
+    #
+    # 2. If y is infinite, return 0 with the sign of y if x is zero, x if x has
+    #    the same sign as y, and infinity with the sign of y if it has the
+    #    opposite sign.
+    #
+    # 3. If none of the above cases apply then both x and y are finite,
+    #    and y is nonzero.  If x and y have the same sign, simply
+    #    return the result of fmod(x, y).
+    #
+    # 4. Now both x and y are finite, y is nonzero, and x and y have
+    #    differing signs.  Compute r = fmod(x, y) with sufficient precision
+    #    to get an exact result.  If r == 0, return 0 with the sign of y
+    #    (which will be the opposite of the sign of x).  If r != 0,
+    #    return r + y, rounded appropriately.
+
+    if not mpfr.mpfr_number_p(x) or mpfr.mpfr_nan_p(y) or mpfr.mpfr_zero_p(y):
+        return mpfr.mpfr_fmod(rop, x, y, rnd)
+    elif mpfr.mpfr_inf_p(y):
+        x_negative = mpfr.mpfr_signbit(x)
+        y_negative = mpfr.mpfr_signbit(y)
+        if mpfr.mpfr_zero_p(x):
+            mpfr.mpfr_set_zero(rop, -y_negative)
+            return 0
+        elif x_negative == y_negative:
+            return mpfr.mpfr_set(rop, x, rnd)
+        else:
+            mpfr.mpfr_set_inf(rop, -y_negative)
+            return 0
+
+    x_negative = mpfr.mpfr_signbit(x)
+    y_negative = mpfr.mpfr_signbit(y)
+    if x_negative == y_negative:
+        return mpfr.mpfr_fmod(rop, x, y, rnd)
+    else:
+        p = max(mpfr.mpfr_get_prec(x), mpfr.mpfr_get_prec(y))
+        z = mpfr.Mpfr_t.__new__(BigFloat)
+        mpfr.mpfr_init2(z, p)
+        # Doesn't matter what rounding mode we use here; the result
+        # should be exact.
+        ternary = mpfr.mpfr_fmod(z, x, y, rnd)
+        assert ternary == 0
+        if mpfr.mpfr_zero_p(z):
+            mpfr.mpfr_set_zero(rop, -y_negative)
+            return 0
+        else:
+            return mpfr.mpfr_add(rop, y, z, rnd)
+
+
 def _mpfr_floordiv(rop, x, y, rnd):
     """
-    Given two positive finite MPFR numbers x and y,
-    compute floor(x / y), rounded if necessary
-    using the given rounding mode, and putting the
-    result in 'rop'.
-
+    Given two MPFR numbers x and y, compute floor(x / y),
+    rounded if necessary using the given rounding mode.
+    The result is placed in 'rop'.
     """
     # Algorithm notes
     # ---------------
@@ -1238,6 +1299,22 @@ def floordiv(x, y, context=None):
     return _apply_function_in_current_context(
         BigFloat,
         _mpfr_floordiv,
+        (
+            BigFloat._implicit_convert(x),
+            BigFloat._implicit_convert(y),
+        ),
+        context,
+    )
+
+
+def pmod(x, y, context=None):
+    """
+    Return the remainder of x divided by y, with sign matching that of y.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        _mpfr_pmod,
         (
             BigFloat._implicit_convert(x),
             BigFloat._implicit_convert(y),
@@ -2527,7 +2604,7 @@ def frac(x, context=None):
     )
 
 
-def mod(x, y, context=None):
+def fmod(x, y, context=None):
     """
     Return ``x`` reduced modulo ``y``.
 
@@ -2666,6 +2743,7 @@ BigFloat.__floordiv__ = _binop(floordiv)
 if _sys.version_info < (3,):
     BigFloat.__div__ = _binop(div)
 BigFloat.__pow__ = _binop(pow)
+BigFloat.__mod__ = _binop(fmod)
 
 # and their reverse operations
 BigFloat.__radd__ = _rbinop(add)
@@ -2676,10 +2754,7 @@ BigFloat.__rfloordiv__ = _rbinop(floordiv)
 if _sys.version_info < (3,):
     BigFloat.__rdiv__ = _rbinop(div)
 BigFloat.__rpow__ = _rbinop(pow)
-
-if (mpfr.MPFR_VERSION_MAJOR, mpfr.MPFR_VERSION_MINOR) >= (2, 4):
-    BigFloat.__mod__ = _binop(mod)
-    BigFloat.__rmod__ = _rbinop(mod)
+BigFloat.__rmod__ = _rbinop(fmod)
 
 # comparisons
 BigFloat.__eq__ = _binop(equal)

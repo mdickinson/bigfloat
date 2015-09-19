@@ -101,7 +101,7 @@ Whether installing ``bigfloat`` from source or from the Python Package Index,
 you will need to have both the GMP and MPFR libraries already installed on your
 system, along with the include files for those libraries.  See the `MPFR
 homepage <http://www.mpfr.org>`_ and the `GMP homepage <http://gmplib.org>`_
-for more information about these libraries.  Currently, MPFR version 2.3.0 or
+for more information about these libraries.  Currently, MPFR version 3.0.0 or
 later is required.
 
 On Ubuntu, prerequisites can be installed with::

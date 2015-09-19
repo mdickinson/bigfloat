@@ -56,7 +56,7 @@ zero, and NaNs.
 
       In contrast to ``abs(self)``, ``self.copy_abs()`` makes no use of the
       context, and the result has the same precision as the original.
-      
+
    .. method:: copy_neg(self)
 
       Return a copy of *self* with the opposite sign bit.
@@ -443,12 +443,12 @@ Rounding modes
 .. data:: ROUND_TOWARD_POSITIVE
 
    The number to be rounded is mapped to the nearest representable value
-   greater than or equal to the original number. 
+   greater than or equal to the original number.
 
 .. data:: ROUND_TOWARD_NEGATIVE
 
    The number to be rounded is mapped to the nearest representable value
-   less than or equal to the original number. 
+   less than or equal to the original number.
 
 
 .. _standard functions:
@@ -478,7 +478,7 @@ Arithmetic functions
 .. autofunction:: div
 .. autofunction:: floordiv
 .. autofunction:: pow
-.. autofunction:: mod
+.. autofunction:: fmod
 
 .. autofunction:: remainder
 
@@ -619,7 +619,7 @@ comparison operators.
 .. autofunction:: greaterequal
 .. autofunction:: less
 .. autofunction:: lessequal
-.. autofunction:: equal 
+.. autofunction:: equal
 .. autofunction:: notequal
 
 .. versionadded:: 0.4

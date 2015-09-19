@@ -63,8 +63,8 @@ from bigfloat import (
     set_flagstate, get_flagstate,
 
     # standard arithmetic functions
-    add, sub, mul, div, mod, pow,
-    sqrt, floordiv,
+    add, sub, mul, div, fmod, pow,
+    sqrt, floordiv, pmod,
 
     # Version information
     MPFR_VERSION_MAJOR, MPFR_VERSION_MINOR,
@@ -245,10 +245,7 @@ class BigFloatTests(unittest.TestCase):
     def test_arithmetic_functions(self):
         # test add, mul, div, sub, pow, mod
         test_precisions = [2, 10, 23, 24, 52, 53, 54, 100]
-        fns = [add, sub, mul, div, pow, floordiv]
-        # mod function only exists for MPFR version >= 2.4.0
-        if (MPFR_VERSION_MAJOR, MPFR_VERSION_MINOR) >= (2, 4):
-            fns.append(mod)
+        fns = [add, sub, mul, div, pow, floordiv, fmod]
 
         values = [2, 3, 1.234, BigFloat('0.678'), BigFloat('nan'),
                   float('0.0'), float('inf'), True]
@@ -359,14 +356,13 @@ class BigFloatTests(unittest.TestCase):
         other_values = [2, 3, 1.234, BigFloat('0.678'), False]
         test_precisions = [2, 20, 53, 2000]
         operations = [operator.add, operator.mul, operator.floordiv,
-                      operator.sub, operator.pow, operator.truediv]
+                      operator.sub, operator.pow, operator.truediv,
+                      operator.mod]
         # operator.div only defined for Python 2
         if sys.version_info < (3,):
             operations.append(operator.div)
 
-        # % operator only works for MPFR version >= 2.4.
-        if (MPFR_VERSION_MAJOR, MPFR_VERSION_MINOR) >= (2, 4):
-            operations.append(operator.mod)
+        operations.append(operator.mod)
 
         for value in other_values:
             for p in test_precisions:
@@ -2113,6 +2109,89 @@ pos 0.ffffffffffffffffffffffffp-1022 -> 1p-1022               Inexact
 pos 1p-1022 -> 1p-1022
 pos 1p+1024 -> inf Inexact Overflow
 
+""".split('\n'))
+
+
+ABCTests.test_pmod = process_lines("""\
+context double_precision
+context RoundTiesToEven
+
+# Check treatment of signs in normal cases.
+pmod 0x5p0 0x3p0 -> 0x2p0
+pmod -0x5p0 0x3p0 -> 0x1p0
+pmod 0x5p0 -0x3p0 -> -0x1p0
+pmod -0x5p0 -0x3p0 -> -0x2p0
+
+# A result of zero should have the same sign
+# as the second argument.
+pmod 0x2p0 0x1p0 -> 0x0p0
+pmod -0x2p0 0x1p0 -> 0x0p0
+pmod 0x2p0 -0x1p0 -> -0x0p0
+pmod -0x2p0 -0x1p0 -> -0x0p0
+
+# Finite input cases where the result may not be exact.
+pmod 0x1p-100 0x1p0 -> 0x1p-100
+pmod -0x1p-100 0x1p0 -> 0x1p0         Inexact
+pmod 0x1p-100 -0x1p0 -> -0x1p0        Inexact
+pmod -0x1p-100 -0x1p0 -> -0x1p-100
+
+# NaN inputs
+pmod nan nan -> nan                   NanFlag
+pmod -inf nan -> nan                  NanFlag
+pmod -0x1p0 nan -> nan                NanFlag
+pmod -0x0p0 nan -> nan                NanFlag
+pmod 0x0p0 nan -> nan                 NanFlag
+pmod 0x1p0 nan -> nan                 NanFlag
+pmod nan inf -> nan                   NanFlag
+pmod nan -inf -> nan                  NanFlag
+pmod nan -0x1p0 -> nan                NanFlag
+pmod nan -0x0p0 -> nan                NanFlag
+pmod nan 0x0p0 -> nan                 NanFlag
+pmod nan 0x1p0 -> nan                 NanFlag
+pmod nan inf -> nan                   NanFlag
+
+# Other invalid cases: x infinite, y zero.
+pmod inf -inf -> nan                  NanFlag
+pmod inf -0x1p0 -> nan                NanFlag
+pmod inf -0x0p0 -> nan                NanFlag
+pmod inf 0x0p0 -> nan                 NanFlag
+pmod inf 0x1p0 -> nan                 NanFlag
+pmod inf inf -> nan                   NanFlag
+pmod -inf -inf -> nan                 NanFlag
+pmod -inf -0x1p0 -> nan               NanFlag
+pmod -inf -0x0p0 -> nan               NanFlag
+pmod -inf 0x0p0 -> nan                NanFlag
+pmod -inf 0x1p0 -> nan                NanFlag
+pmod -inf inf -> nan                  NanFlag
+pmod -inf 0x0p0 -> nan                NanFlag
+pmod -0x1p0 0x0p0 -> nan              NanFlag
+pmod -0x0p0 0x0p0 -> nan              NanFlag
+pmod 0x0p0 0x0p0 -> nan               NanFlag
+pmod 0x1p0 0x0p0 -> nan               NanFlag
+pmod inf 0x0p0 -> nan                 NanFlag
+pmod -inf -0x0p0 -> nan               NanFlag
+pmod -0x1p0 -0x0p0 -> nan             NanFlag
+pmod -0x0p0 -0x0p0 -> nan             NanFlag
+pmod 0x0p0 -0x0p0 -> nan              NanFlag
+pmod 0x1p0 -0x0p0 -> nan              NanFlag
+pmod inf -0x0p0 -> nan                NanFlag
+
+# x finite, y infinite.
+pmod -0x1p0 inf -> inf
+pmod -0x0p0 inf -> 0x0p0
+pmod 0x0p0 inf -> 0x0p0
+pmod 0x1p0 inf -> 0x1p0
+
+pmod -0x1p0 -inf -> -0x1p0
+pmod -0x0p0 -inf -> -0x0p0
+pmod 0x0p0 -inf -> -0x0p0
+pmod 0x1p0 -inf -> -inf
+
+# x zero, y finite but nonzero: sign of x is irrelevant.
+pmod 0x0p0 0x5p0 -> 0x0p0
+pmod -0x0p0 0x5p0 -> 0x0p0
+pmod 0x0p0 -0x5p0 -> -0x0p0
+pmod -0x0p0 -0x5p0 -> -0x0p0
 """.split('\n'))
 
 
