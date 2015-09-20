@@ -1,4 +1,4 @@
-# Copyright 2009--2014 Mark Dickinson.
+# Copyright 2009--2015 Mark Dickinson.
 #
 # This file is part of the bigfloat module.
 #
