@@ -56,7 +56,7 @@ zero, and NaNs.
 
       In contrast to ``abs(self)``, ``self.copy_abs()`` makes no use of the
       context, and the result has the same precision as the original.
-      
+
    .. method:: copy_neg(self)
 
       Return a copy of *self* with the opposite sign bit.
@@ -103,23 +103,23 @@ Special methods
 """""""""""""""
 
 The :class:`BigFloat` type has a full complement of special methods.
-Here are some brief notes on those methods, indicating some possible
+Here are some brief notes on those methods, indicating possible
 deviations from expected behaviour.
 
 * The repr of a :class:`BigFloat` instance ``x`` is independent of the
   current context, and has the property that ``eval(repr(x))``
   recovers ``x`` exactly.
 
-* The '+' ,'-', '*', '/' and '**' binary operators are supported, and
-  mixed-type operations involving a :class:`BigFloat` and an integer
-  or float are permitted.  For MPFR version >= 2.4.0, the '%' is also
-  supported.  Mixed-type operations behave as though the non
-  :class:`BigFloat` operand is first converted to a :class:`BigFloat`
-  with no loss of accuracy.  The '/' operator implements true
-  division, regardless of whether 'from __future__ import division' is
-  in effect or not.  The result of '%' has the same sign as the first
-  argument, not the second.  Floor division is not currently
-  implemented.
+* The '+' ,'-', '*', '/', '//', '%' and '**' binary operators are supported.
+  The '/' operator implements true division, regardless of whether ``from
+  __future__ import division`` is in effect or not.  The result of '%' has the
+  same sign as the second argument, so follows the existing Python semantics
+  for '%' on Python floats.
+
+* For the above operators, mixed-type operations involving a :class:`BigFloat`
+  and an integer or float are permitted. These behave as though the non
+  :class:`BigFloat` operand is first converted to a :class:`BigFloat` with no
+  loss of accuracy.
 
 * The '+' and '-' unary operators and built-in :func:`abs` function
   are supported.  Note that these all round to the current context; in
@@ -443,12 +443,12 @@ Rounding modes
 .. data:: ROUND_TOWARD_POSITIVE
 
    The number to be rounded is mapped to the nearest representable value
-   greater than or equal to the original number. 
+   greater than or equal to the original number.
 
 .. data:: ROUND_TOWARD_NEGATIVE
 
    The number to be rounded is mapped to the nearest representable value
-   less than or equal to the original number. 
+   less than or equal to the original number.
 
 
 .. _standard functions:
@@ -477,6 +477,8 @@ Arithmetic functions
 .. autofunction:: mul
 .. autofunction:: div
 .. autofunction:: pow
+.. autofunction:: fmod
+.. autofunction:: floordiv
 .. autofunction:: mod
 
 .. autofunction:: remainder
@@ -618,7 +620,7 @@ comparison operators.
 .. autofunction:: greaterequal
 .. autofunction:: less
 .. autofunction:: lessequal
-.. autofunction:: equal 
+.. autofunction:: equal
 .. autofunction:: notequal
 
 .. versionadded:: 0.4

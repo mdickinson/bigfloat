@@ -15,6 +15,10 @@ New Features
 - Add support for ``round``, ``math.floor``, ``math.ceil``, ``math.trunc`` on
   Python 3.
 
+- Add support for ``divmod`` and the ``//`` operator. (#69)
+
+- New ``floordiv`` and ``mod`` functions.  The new ``mod`` replaces the old
+  ``mod`` function, which has been renamed to ``fmod``. (#69)
 
 Changes
 -------
@@ -23,6 +27,11 @@ Changes
   than 'Infinity' and 'NaN', for consistency with the float type, and
   for consistency with the newly-introduced string formatting.
 
+- The 'mod' function now follows Python sign conventions; the old
+  'mod' function has been renamed to 'fmod'.  The '%' operator
+  now also follows Python sign conventions. (#69)
+
+- MPFR version 3.0.0 or later is required.
 
 Bugfixes
 --------

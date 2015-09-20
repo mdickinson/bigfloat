@@ -51,6 +51,8 @@ from bigfloat.formatting import (
     rounding_mode_from_specifier,
 )
 
+from bigfloat.mpfr_supplemental import mpfr_floordiv, mpfr_mod
+
 
 # Alternative names for some builtins that get overwritten by functions created
 # in this module.
@@ -1109,25 +1111,6 @@ def div(x, y, context=None):
     )
 
 
-def _quotient_exponent(x, y):
-    """
-    Given two positive finite MPFR instances x and y,
-    find the exponent of x / y; that is, the unique
-    integer e such that 2**(e-1) <= x / y < 2**e.
-
-    """
-    assert mpfr.mpfr_regular_p(x)
-    assert mpfr.mpfr_regular_p(y)
-
-    # Make copy of x with the exponent of y.
-    x2 = mpfr.Mpfr_t()
-    mpfr.mpfr_init2(x2, mpfr.mpfr_get_prec(x))
-    mpfr.mpfr_set(x2, x, mpfr.MPFR_RNDN)
-    mpfr.mpfr_set_exp(x2, mpfr.mpfr_get_exp(y))
-
-    # Compare x2 and y, disregarding the sign.
-    extra = mpfr.mpfr_cmpabs(x2, y) >= 0
-    return extra + mpfr.mpfr_get_exp(x) - mpfr.mpfr_get_exp(y)
 
 
 _NEAREST_ROUNDING_ATTRIBUTES = (mpfr.MPFR_RNDN,)
@@ -1184,171 +1167,50 @@ def _reround(rop, x, t, rnd):
     return ternary
 
 
-def _mpfr_floordiv(rop, x, y, rnd):
-    """
-    Given two positive finite MPFR numbers x and y,
-    compute floor(x / y), rounded if necessary
-    using the given rounding mode, and putting the
-    result in 'rop'.
-
-    """
-    # Algorithm notes
-    # ---------------
-    # A simple algorithm is to compute floor(x / y) exactly, and then round to
-    # the nearest representable value using the given rounding mode.  This
-    # requires computing x / y to a precision sufficient to ensure that floor(x
-    # / y) is exactly representable.  If abs(x / y) < 2**r, then abs(floor(x /
-    # y)) <= 2**r, and so r bits of precision is enough.  However, for large
-    # quotients this is impractical, and we need some other method.
-    #
-    # In order to do correct rounding, we need to be able to identify when
-    # floor(x / y) is *exactly* equal to a given result z representable in the
-    # target format.  That's equivalent to determining when z lies in the
-    # interval [x / y, x / y + 1), and if x / y is very large that could mean
-    # computing the quotient to many many bits of precision: z >= x / y + 1 iff
-    # y * z >= x + y.
-    #
-    # The last expression is problematic because when x is much larger than y,
-    # x + y takes many bits to represent.  But since y * z should have
-    # relatively few bits, we should be able to take advantage of this: y * z
-    # >= x + y if and only if y * z - x >= y.  Now if y*z and x are both
-    # representable with 's' bits of precision (say), and y * z - x > 0, then y
-    # * z - x >= ulp_s(max(y*z, x)), so if ulp_s(max(y*z, x)) >= y then y * z -
-    # x > 0 is all we need.  The lemmas below develop this idea rigorously.
-    #
-    # Lemma 1. If x and y are finite numbers representable with p bits of
-    # precision and x != y then |x - y| >= max(|x|, |y|) 2**-p.
-    #
-    # Proof. If x and y have different signs or either is zero, then |x - y|
-    # >= max(|x|, |y|) and we're done.  So without loss of generality we may
-    # assume that x > y > 0, and then it's enough to show that x - y > x *
-    # 2**-p.  Write x = m * 2**e for integers m and e with 2**(p-1) < m <=
-    # 2**p, then y <= (m-1)*2**e, so x - y >= 2**e = x / m >= x * 2**-p.
-    #
-    # Lemma 2. Suppose that x, y and z are finite numbers representable with p,
-    # q and r bits of precision respectively, that y is nonzero, and that x / y
-    # != z.  Then
-    #
-    #    |x / y - z| >= max(|x / y|, |z|) 2**-max(p, q + r).
-    #
-    # Proof. Let s = max(p, q+r), then both x and yz are exactly representable
-    # with s bits of precision.  By Lemma 1, |x - yz| >= max(|x|, |yz|) 2**-s.
-    # Dividing through by |y| gives |x / y - z| >= max(|x / y|, |z|) 2**-s.
-    #
-    # Lemma 3. Suppose that x, y and z are finite numbers representable
-    # with p, q and r bits of precision respectively, that y is nonzero, and
-    # that |x / y| >= 2**max(p, q + r). Then z < x / y if and only if z <
-    # floor(x / y).
-    #
-    # Proof. It's clear that z < floor(x / y) implies z < x / y. To show the
-    # converse, if z < x / y then Lemma 2 implies that x / y - z >= 1, hence
-    # that floor(x / y) > z.
-    #
-    # Corollary 4. Suppose that x and y are finite numbers representable with p
-    # and q bits of precision, respectively.  Choose a rounding mode R: any of
-    # the directed rounding modes or round-to-nearest, and a target precision r
-    # >= 1.  If |x / y| >= 2**max(p, q + r + 1), then rnd_{R,r}(x / y) ==
-    # rnd_{R,r}(floor(x / y)), and rnd_R(x / y) is less than, equal to, or
-    # greater that x / y if and only if rnd_R(floor(x / y)) is less than, equal
-    # to, or greater than x / y respectively.
-    #
-    # Proof.
-
-    # Theorem.  Suppose that x and y are nonzero finite binary floats
-    # representable with p and q bits of precision, respectively.  Choose a
-    # rounding mode R and a target precision r, and write rnd for the
-    # corresponding rounding operation from Q to precision-r binary floats.
-    #
-    # If R is a round-to-nearest rounding mode, and either
-    #
-    # (1) p <= q + r and |x / y| >= 2^(q + r), or
-    # (2) p > q + r and bin(x) - bin(y) >= p
-    #
-    # then
-    #
-    #    rnd(floor(x / y)) == rnd(x / y)
-    #
-    # If R is a directed rounding mode, and either
-    # (1) p < q + r and |x / y| >= 2^(q + r - 1), or
-    # (2) p >= q + r and bin(x) - bin(y) >= p
-    #
-    # then again
-    #
-    #    rnd(floor(x / y)) == rnd(x / y).
-    #
-    # Here's a weaker but simpler result that follows from the above.
-    #
-    # Corollary 1. With x, y, p, q, R, r and rnd as above, if
-    #
-    #     |x / y| >= 2^max(q + r, p)
-    #
-    # then
-    #
-    #     rnd(floor(x / y)) == rnd(x / y).
-    #
-    # Proof. Note that |x / y| >= 2^p implies bin(x) - bin(y) >= p,
-    # so it's enough that |x / y| >= 2^max(p, q + r) in the case of
-    # a round-to-nearest mode, and that |x / y| >= 2^max(p, q + r - 1)
-    # in the case of a directed rounding mode.
-    #
-    # Or an alternative simplification.
-    #
-    # Corollary 2. With x, y, p, q, R, r and rnd as above, if
-    #
-    #     bin(x) - bin(y) >= max(p, q + r + 1)
-    #
-    # then
-    #
-    #     rnd(floor(x / y)) == rnd(x / y)
-    #
-    # Proof. If bin(x) - bin(y) >= q + r + 1 then |x / y| > 2^(q + r).
-
-    # In special cases, it's safe to defer to mpfr_div: the result in
-    # these cases is always 0, infinity, or nan.
-    if not mpfr.mpfr_regular_p(x) or not mpfr.mpfr_regular_p(y):
-        return mpfr.mpfr_div(rop, x, y, rnd)
-
-    e = _quotient_exponent(x, y)
-
-    p = mpfr.mpfr_get_prec(x)
-    q = mpfr.mpfr_get_prec(y)
-    r = mpfr.mpfr_get_prec(rop)
-
-    # We need to be able to compute to r + 1 bits of precision, and x / y >=
-    # 2 ** (e - 1).
-    if e - 1 >= max(p, q + r + 1):
-        return mpfr.mpfr_div(rop, x, y, rnd)
-
-    # Slow version: compute to sufficient bits to get integer precision.  Given
-    # that 2**(e-1) <= x / y < 2**e, need >= e bits of precision.
-    z_prec = max(e, 2)
-    z = mpfr.Mpfr_t()
-    mpfr.mpfr_init2(z, z_prec)
-
-    # Compute the floor exactly.
-    with _saved_flags():
-        mpfr.mpfr_div(z, x, y, mpfr.MPFR_RNDD)
-        err = mpfr.mpfr_floor(z, z)
-        assert err in (0, -2)
-
-    # ... and round to the given rounding mode.
-    return mpfr.mpfr_set(rop, z, rnd)
-
-
 def floordiv(x, y, context=None):
     """
-    Return floor(x / y).
+    Return the floor of ``x`` divided by ``y``.
+
+    The result is a ``BigFloat`` instance, rounded to the
+    context if necessary.  Special cases match those of the
+    ``div`` function.
 
     """
     return _apply_function_in_current_context(
         BigFloat,
-        _mpfr_floordiv,
+        mpfr_floordiv,
         (
             BigFloat._implicit_convert(x),
             BigFloat._implicit_convert(y),
         ),
         context,
     )
+
+
+def mod(x, y, context=None):
+    """
+    Return the remainder of x divided by y, with sign matching that of y.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr_mod,
+        (
+            BigFloat._implicit_convert(x),
+            BigFloat._implicit_convert(y),
+        ),
+        context,
+    )
+
+
+def divmod(x, y, context=None):
+    """
+    Return the pair (floordiv(x, y, context), mod(x, y, context)).
+
+    Semantics for negative inputs match those of Python's divmod function.
+
+    """
+    return floordiv(x, y, context=context), mod(x, y, context=context)
 
 
 def sqrt(x, context=None):
@@ -2632,7 +2494,7 @@ def frac(x, context=None):
     )
 
 
-def mod(x, y, context=None):
+def fmod(x, y, context=None):
     """
     Return ``x`` reduced modulo ``y``.
 
@@ -2767,22 +2629,24 @@ BigFloat.__add__ = _binop(add)
 BigFloat.__sub__ = _binop(sub)
 BigFloat.__mul__ = _binop(mul)
 BigFloat.__truediv__ = _binop(div)
+BigFloat.__floordiv__ = _binop(floordiv)
 if _sys.version_info < (3,):
     BigFloat.__div__ = _binop(div)
 BigFloat.__pow__ = _binop(pow)
+BigFloat.__mod__ = _binop(mod)
+BigFloat.__divmod__ = _binop(divmod)
 
 # and their reverse operations
 BigFloat.__radd__ = _rbinop(add)
 BigFloat.__rsub__ = _rbinop(sub)
 BigFloat.__rmul__ = _rbinop(mul)
 BigFloat.__rtruediv__ = _rbinop(div)
+BigFloat.__rfloordiv__ = _rbinop(floordiv)
 if _sys.version_info < (3,):
     BigFloat.__rdiv__ = _rbinop(div)
 BigFloat.__rpow__ = _rbinop(pow)
-
-if (mpfr.MPFR_VERSION_MAJOR, mpfr.MPFR_VERSION_MINOR) >= (2, 4):
-    BigFloat.__mod__ = _binop(mod)
-    BigFloat.__rmod__ = _rbinop(mod)
+BigFloat.__rmod__ = _rbinop(mod)
+BigFloat.__rdivmod__ = _rbinop(divmod)
 
 # comparisons
 BigFloat.__eq__ = _binop(equal)

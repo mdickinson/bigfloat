@@ -22,6 +22,8 @@ import doctest
 import fractions
 import math
 import operator
+import random
+import struct
 import sys
 import types
 if sys.version_info < (2, 7):
@@ -63,8 +65,8 @@ from bigfloat import (
     set_flagstate, get_flagstate,
 
     # standard arithmetic functions
-    add, sub, mul, div, mod, pow,
-    sqrt, floordiv,
+    add, sub, mul, div, fmod, pow,
+    sqrt, floordiv, mod,
 
     # Version information
     MPFR_VERSION_MAJOR, MPFR_VERSION_MINOR,
@@ -245,10 +247,7 @@ class BigFloatTests(unittest.TestCase):
     def test_arithmetic_functions(self):
         # test add, mul, div, sub, pow, mod
         test_precisions = [2, 10, 23, 24, 52, 53, 54, 100]
-        fns = [add, sub, mul, div, pow]
-        # mod function only exists for MPFR version >= 2.4.0
-        if (MPFR_VERSION_MAJOR, MPFR_VERSION_MINOR) >= (2, 4):
-            fns.append(mod)
+        fns = [add, sub, mul, div, pow, floordiv, fmod]
 
         values = [2, 3, 1.234, BigFloat('0.678'), BigFloat('nan'),
                   float('0.0'), float('inf'), True]
@@ -335,21 +334,43 @@ class BigFloatTests(unittest.TestCase):
                 for n in range(512, 1025):
                     test_n(754, rnd, rnd2)
 
+    def test_mod(self):
+        # Compare with Python's % operation.
+        for _ in range(10000):
+            x = struct.unpack(
+                '<d', struct.pack('<Q', random.randrange(2**64)))[0]
+            y = struct.unpack(
+                '<d', struct.pack('<Q', random.randrange(2**64)))[0]
+
+            bigfloat_result = mod(x, y)
+            python_result = x % y
+            self.assertIdenticalBigFloat(bigfloat_result,
+                                         BigFloat(python_result))
+
     def test_floordiv(self):
         x = BigFloat(2.3)
         y = BigFloat(1.2)
         self.assertIdenticalBigFloat(floordiv(x, y), BigFloat(1))
 
         # Check some random floats; compare with Python's operation.
-        import random
-        import struct
-
         test_pairs = [
             ('-0x1.5921f71f3a8b7p-407', '0x1.4c71c92d27a31p-460'),
             ('-0x1.884ea5a94b5f5p+513', '0x1.c058519564476p+460'),
             ('-0x1.b71ef34af0215p-459', '-0x1.d7c7b08970e2dp-514'),
             ('-0x1.55b19f5f1eaf4p+888', '-0x1.eab0f46fc89fcp+834'),
             ('0x1.c655a7928d80ap-148', '0x1.ed6b2d073dbaap-202'),
+            ('0x1.80574cc232b58p+407', '0x1.8017ad6a5cd65p+247'),
+            # Cases where the fast method doesn't quite apply
+            ('0x1.29dbe528a1eddp+158', '0x1.ab3bd461baacfp+52'),
+            ('0x1.f0cd027b645e8p+157', '0x1.afc4d2171de7fp+52'),
+            ('0x1.49c34cd7726e3p+158', '0x1.b16193d9ac917p+52'),
+            ('0x1.499cd0115b703p+158', '0x1.ecb8a19525c13p+52'),
+            ('0x1.c042a3dd22594p+157', '0x1.9d26c3340d073p+52'),
+            ('0x1.085e2c60727e6p+158', '0x1.4ab6dab81c08bp+52'),
+            ('0x1.085e2c60727e6p+158', '0x1.945a8d6633e67p+52'),
+            ('0x1.bfed7fed4e317p+158', '0x1.e677da37e992bp+52'),
+            ('0x1.bfed7fed4e317p+158', '0x1.fbb37fe2fe157p+52'),
+            ('0x1.d551fa1318722p+157', '0x1.993e3b11333cbp+52'),
         ]
 
         with double_precision:
@@ -359,7 +380,7 @@ class BigFloatTests(unittest.TestCase):
                 y = float.fromhex(yhex)
                 x_frac = fractions.Fraction(*x.as_integer_ratio())
                 y_frac = fractions.Fraction(*y.as_integer_ratio())
-                expected_result = float(x_frac // y_frac)
+                expected_result = BigFloat(x_frac // y_frac)
                 actual_result = floordiv(x, y)
                 self.assertEqual(actual_result, expected_result)
 
@@ -378,29 +399,33 @@ class BigFloatTests(unittest.TestCase):
                 try:
                     x_frac = fractions.Fraction(*x.as_integer_ratio())
                     y_frac = fractions.Fraction(*y.as_integer_ratio())
-                    expected_result = float(x_frac // y_frac)
+                    # Would like to simply use float(x_frac // y_frac), but the
+                    # float-to-int conversion is not correctly rounded on Python 2.6.
+                    expected_result = BigFloat(x_frac // y_frac)
                 except OverflowError:
                     expected_result = float('inf') if x_frac / y_frac > 0 else float('-inf')
 
-                self.assertEqual(actual_result, expected_result)
+                self.assertEqual(
+                    actual_result, expected_result,
+                    msg="failure for x = {0!r}, y = {1!r}".format(x, y)
+                )
 
     def test_binary_operations(self):
         # check that BigFloats can be combined with themselves,
-        # and with integers and floats, using the 6 standard
-        # arithmetic operators:  +, -, *, /, **, %
+        # and with integers and floats, using the standard
+        # arithmetic operators:  +, -, *, /, **, %, //
 
         x = BigFloat('17.29')
         other_values = [2, 3, 1.234, BigFloat('0.678'), False]
         test_precisions = [2, 20, 53, 2000]
-        operations = [operator.add, operator.mul,
-                      operator.sub, operator.pow, operator.truediv]
+        operations = [operator.add, operator.mul, operator.floordiv,
+                      operator.sub, operator.pow, operator.truediv,
+                      operator.mod]
         # operator.div only defined for Python 2
         if sys.version_info < (3,):
             operations.append(operator.div)
 
-        # % operator only works for MPFR version >= 2.4.
-        if (MPFR_VERSION_MAJOR, MPFR_VERSION_MINOR) >= (2, 4):
-            operations.append(operator.mod)
+        operations.append(operator.mod)
 
         for value in other_values:
             for p in test_precisions:
@@ -804,6 +829,22 @@ class BigFloatTests(unittest.TestCase):
             BigFloat([1, 2, 3])
         with self.assertRaises(TypeError):
             BigFloat(1j)
+
+    def test_divmod(self):
+        x = BigFloat.exact(1729)
+        y = BigFloat.exact(53)
+
+        q, r = divmod(x, y)
+        self.assertIsInstance(q, BigFloat)
+        self.assertIsInstance(r, BigFloat)
+        self.assertEqual(q, BigFloat.exact(1729 // 53))
+        self.assertEqual(r, BigFloat.exact(1729 % 53))
+
+        q, r = divmod(-x, y)
+        self.assertIsInstance(q, BigFloat)
+        self.assertIsInstance(r, BigFloat)
+        self.assertEqual(q, BigFloat.exact(-1729 // 53))
+        self.assertEqual(r, BigFloat.exact(-1729 % 53))
 
     def test_exact_context_independent(self):
         with Context(emin=-1, emax=1):
@@ -2147,6 +2188,89 @@ pos 0.ffffffffffffffffffffffffp-1022 -> 1p-1022               Inexact
 pos 1p-1022 -> 1p-1022
 pos 1p+1024 -> inf Inexact Overflow
 
+""".split('\n'))
+
+
+ABCTests.test_mod = process_lines("""\
+context double_precision
+context RoundTiesToEven
+
+# Check treatment of signs in normal cases.
+mod 0x5p0 0x3p0 -> 0x2p0
+mod -0x5p0 0x3p0 -> 0x1p0
+mod 0x5p0 -0x3p0 -> -0x1p0
+mod -0x5p0 -0x3p0 -> -0x2p0
+
+# A result of zero should have the same sign
+# as the second argument.
+mod 0x2p0 0x1p0 -> 0x0p0
+mod -0x2p0 0x1p0 -> 0x0p0
+mod 0x2p0 -0x1p0 -> -0x0p0
+mod -0x2p0 -0x1p0 -> -0x0p0
+
+# Finite input cases where the result may not be exact.
+mod 0x1p-100 0x1p0 -> 0x1p-100
+mod -0x1p-100 0x1p0 -> 0x1p0         Inexact
+mod 0x1p-100 -0x1p0 -> -0x1p0        Inexact
+mod -0x1p-100 -0x1p0 -> -0x1p-100
+
+# NaN inputs
+mod nan nan -> nan                   NanFlag
+mod -inf nan -> nan                  NanFlag
+mod -0x1p0 nan -> nan                NanFlag
+mod -0x0p0 nan -> nan                NanFlag
+mod 0x0p0 nan -> nan                 NanFlag
+mod 0x1p0 nan -> nan                 NanFlag
+mod nan inf -> nan                   NanFlag
+mod nan -inf -> nan                  NanFlag
+mod nan -0x1p0 -> nan                NanFlag
+mod nan -0x0p0 -> nan                NanFlag
+mod nan 0x0p0 -> nan                 NanFlag
+mod nan 0x1p0 -> nan                 NanFlag
+mod nan inf -> nan                   NanFlag
+
+# Other invalid cases: x infinite, y zero.
+mod inf -inf -> nan                  NanFlag
+mod inf -0x1p0 -> nan                NanFlag
+mod inf -0x0p0 -> nan                NanFlag
+mod inf 0x0p0 -> nan                 NanFlag
+mod inf 0x1p0 -> nan                 NanFlag
+mod inf inf -> nan                   NanFlag
+mod -inf -inf -> nan                 NanFlag
+mod -inf -0x1p0 -> nan               NanFlag
+mod -inf -0x0p0 -> nan               NanFlag
+mod -inf 0x0p0 -> nan                NanFlag
+mod -inf 0x1p0 -> nan                NanFlag
+mod -inf inf -> nan                  NanFlag
+mod -inf 0x0p0 -> nan                NanFlag
+mod -0x1p0 0x0p0 -> nan              NanFlag
+mod -0x0p0 0x0p0 -> nan              NanFlag
+mod 0x0p0 0x0p0 -> nan               NanFlag
+mod 0x1p0 0x0p0 -> nan               NanFlag
+mod inf 0x0p0 -> nan                 NanFlag
+mod -inf -0x0p0 -> nan               NanFlag
+mod -0x1p0 -0x0p0 -> nan             NanFlag
+mod -0x0p0 -0x0p0 -> nan             NanFlag
+mod 0x0p0 -0x0p0 -> nan              NanFlag
+mod 0x1p0 -0x0p0 -> nan              NanFlag
+mod inf -0x0p0 -> nan                NanFlag
+
+# x finite, y infinite.
+mod -0x1p0 inf -> inf
+mod -0x0p0 inf -> 0x0p0
+mod 0x0p0 inf -> 0x0p0
+mod 0x1p0 inf -> 0x1p0
+
+mod -0x1p0 -inf -> -0x1p0
+mod -0x0p0 -inf -> -0x0p0
+mod 0x0p0 -inf -> -0x0p0
+mod 0x1p0 -inf -> -inf
+
+# x zero, y finite but nonzero: sign of x is irrelevant.
+mod 0x0p0 0x5p0 -> 0x0p0
+mod -0x0p0 0x5p0 -> 0x0p0
+mod 0x0p0 -0x5p0 -> -0x0p0
+mod -0x0p0 -0x5p0 -> -0x0p0
 """.split('\n'))
 
 
