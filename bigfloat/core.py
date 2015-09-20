@@ -51,6 +51,8 @@ from bigfloat.formatting import (
     rounding_mode_from_specifier,
 )
 
+from bigfloat.mpfr_supplemental import mpfr_floordiv, mpfr_mod
+
 
 # Alternative names for some builtins that get overwritten by functions created
 # in this module.
@@ -1107,6 +1109,52 @@ def div(x, y, context=None):
         ),
         context,
     )
+
+
+def floordiv(x, y, context=None):
+    """
+    Return the floor of ``x`` divided by ``y``.
+
+    The result is a ``BigFloat`` instance, rounded to the
+    context if necessary.  Special cases match those of the
+    ``div`` function.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr_floordiv,
+        (
+            BigFloat._implicit_convert(x),
+            BigFloat._implicit_convert(y),
+        ),
+        context,
+    )
+
+
+def mod(x, y, context=None):
+    """
+    Return the remainder of x divided by y, with sign matching that of y.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr_mod,
+        (
+            BigFloat._implicit_convert(x),
+            BigFloat._implicit_convert(y),
+        ),
+        context,
+    )
+
+
+def divmod(x, y, context=None):
+    """
+    Return the pair (floordiv(x, y, context), mod(x, y, context)).
+
+    Semantics for negative inputs match those of Python's divmod function.
+
+    """
+    return floordiv(x, y, context=context), mod(x, y, context=context)
 
 
 def sqrt(x, context=None):
@@ -2390,7 +2438,7 @@ def frac(x, context=None):
     )
 
 
-def mod(x, y, context=None):
+def fmod(x, y, context=None):
     """
     Return ``x`` reduced modulo ``y``.
 
@@ -2525,22 +2573,24 @@ BigFloat.__add__ = _binop(add)
 BigFloat.__sub__ = _binop(sub)
 BigFloat.__mul__ = _binop(mul)
 BigFloat.__truediv__ = _binop(div)
+BigFloat.__floordiv__ = _binop(floordiv)
 if _sys.version_info < (3,):
     BigFloat.__div__ = _binop(div)
 BigFloat.__pow__ = _binop(pow)
+BigFloat.__mod__ = _binop(mod)
+BigFloat.__divmod__ = _binop(divmod)
 
 # and their reverse operations
 BigFloat.__radd__ = _rbinop(add)
 BigFloat.__rsub__ = _rbinop(sub)
 BigFloat.__rmul__ = _rbinop(mul)
 BigFloat.__rtruediv__ = _rbinop(div)
+BigFloat.__rfloordiv__ = _rbinop(floordiv)
 if _sys.version_info < (3,):
     BigFloat.__rdiv__ = _rbinop(div)
 BigFloat.__rpow__ = _rbinop(pow)
-
-if (mpfr.MPFR_VERSION_MAJOR, mpfr.MPFR_VERSION_MINOR) >= (2, 4):
-    BigFloat.__mod__ = _binop(mod)
-    BigFloat.__rmod__ = _rbinop(mod)
+BigFloat.__rmod__ = _rbinop(mod)
+BigFloat.__rdivmod__ = _rbinop(divmod)
 
 # comparisons
 BigFloat.__eq__ = _binop(equal)

@@ -22,6 +22,8 @@ import doctest
 import fractions
 import math
 import operator
+import random
+import struct
 import sys
 import types
 if sys.version_info < (2, 7):
@@ -63,8 +65,8 @@ from bigfloat import (
     set_flagstate, get_flagstate,
 
     # standard arithmetic functions
-    add, sub, mul, div, mod, pow,
-    sqrt,
+    add, sub, mul, div, fmod, pow,
+    sqrt, floordiv, mod,
 
     # Version information
     MPFR_VERSION_MAJOR, MPFR_VERSION_MINOR,
@@ -245,10 +247,7 @@ class BigFloatTests(unittest.TestCase):
     def test_arithmetic_functions(self):
         # test add, mul, div, sub, pow, mod
         test_precisions = [2, 10, 23, 24, 52, 53, 54, 100]
-        fns = [add, sub, mul, div, pow]
-        # mod function only exists for MPFR version >= 2.4.0
-        if (MPFR_VERSION_MAJOR, MPFR_VERSION_MINOR) >= (2, 4):
-            fns.append(mod)
+        fns = [add, sub, mul, div, pow, floordiv, fmod]
 
         values = [2, 3, 1.234, BigFloat('0.678'), BigFloat('nan'),
                   float('0.0'), float('inf'), True]
@@ -284,23 +283,98 @@ class BigFloatTests(unittest.TestCase):
                         self.assertLess(y3, 1)
                         self.assertLess(1, x3)
 
+    def test_mod(self):
+        # Compare with Python's % operation.
+        for _ in range(10000):
+            x = struct.unpack(
+                '<d', struct.pack('<Q', random.randrange(2**64)))[0]
+            y = struct.unpack(
+                '<d', struct.pack('<Q', random.randrange(2**64)))[0]
+
+            bigfloat_result = mod(x, y)
+            python_result = x % y
+            self.assertIdenticalBigFloat(bigfloat_result,
+                                         BigFloat(python_result))
+
+    def test_floordiv(self):
+        x = BigFloat(2.3)
+        y = BigFloat(1.2)
+        self.assertIdenticalBigFloat(floordiv(x, y), BigFloat(1))
+
+        # Check some random floats; compare with Python's operation.
+        test_pairs = [
+            ('-0x1.5921f71f3a8b7p-407', '0x1.4c71c92d27a31p-460'),
+            ('-0x1.884ea5a94b5f5p+513', '0x1.c058519564476p+460'),
+            ('-0x1.b71ef34af0215p-459', '-0x1.d7c7b08970e2dp-514'),
+            ('-0x1.55b19f5f1eaf4p+888', '-0x1.eab0f46fc89fcp+834'),
+            ('0x1.c655a7928d80ap-148', '0x1.ed6b2d073dbaap-202'),
+            ('0x1.80574cc232b58p+407', '0x1.8017ad6a5cd65p+247'),
+            # Cases where the fast method doesn't quite apply
+            ('0x1.29dbe528a1eddp+158', '0x1.ab3bd461baacfp+52'),
+            ('0x1.f0cd027b645e8p+157', '0x1.afc4d2171de7fp+52'),
+            ('0x1.49c34cd7726e3p+158', '0x1.b16193d9ac917p+52'),
+            ('0x1.499cd0115b703p+158', '0x1.ecb8a19525c13p+52'),
+            ('0x1.c042a3dd22594p+157', '0x1.9d26c3340d073p+52'),
+            ('0x1.085e2c60727e6p+158', '0x1.4ab6dab81c08bp+52'),
+            ('0x1.085e2c60727e6p+158', '0x1.945a8d6633e67p+52'),
+            ('0x1.bfed7fed4e317p+158', '0x1.e677da37e992bp+52'),
+            ('0x1.bfed7fed4e317p+158', '0x1.fbb37fe2fe157p+52'),
+            ('0x1.d551fa1318722p+157', '0x1.993e3b11333cbp+52'),
+        ]
+
+        with double_precision:
+            # Some troublesome values.
+            for xhex, yhex in test_pairs:
+                x = float.fromhex(xhex)
+                y = float.fromhex(yhex)
+                x_frac = fractions.Fraction(*x.as_integer_ratio())
+                y_frac = fractions.Fraction(*y.as_integer_ratio())
+                expected_result = BigFloat(x_frac // y_frac)
+                actual_result = floordiv(x, y)
+                self.assertEqual(actual_result, expected_result)
+
+            # Check a selection of random values.
+            for _ in range(10000):
+                x = struct.unpack(
+                    '<d', struct.pack('<Q', random.randrange(2**64)))[0]
+                y = struct.unpack(
+                    '<d', struct.pack('<Q', random.randrange(2**64)))[0]
+                if math.isnan(x) or math.isinf(x) or x == 0.0:
+                    continue
+                if math.isnan(y) or math.isinf(y) or y == 0.0:
+                    continue
+
+                actual_result = floordiv(x, y)
+                try:
+                    x_frac = fractions.Fraction(*x.as_integer_ratio())
+                    y_frac = fractions.Fraction(*y.as_integer_ratio())
+                    # Would like to simply use float(x_frac // y_frac), but the
+                    # float-to-int conversion is not correctly rounded on Python 2.6.
+                    expected_result = BigFloat(x_frac // y_frac)
+                except OverflowError:
+                    expected_result = float('inf') if x_frac / y_frac > 0 else float('-inf')
+
+                self.assertEqual(
+                    actual_result, expected_result,
+                    msg="failure for x = {0!r}, y = {1!r}".format(x, y)
+                )
+
     def test_binary_operations(self):
         # check that BigFloats can be combined with themselves,
-        # and with integers and floats, using the 6 standard
-        # arithmetic operators:  +, -, *, /, **, %
+        # and with integers and floats, using the standard
+        # arithmetic operators:  +, -, *, /, **, %, //
 
         x = BigFloat('17.29')
         other_values = [2, 3, 1.234, BigFloat('0.678'), False]
         test_precisions = [2, 20, 53, 2000]
-        operations = [operator.add, operator.mul,
-                      operator.sub, operator.pow, operator.truediv]
+        operations = [operator.add, operator.mul, operator.floordiv,
+                      operator.sub, operator.pow, operator.truediv,
+                      operator.mod]
         # operator.div only defined for Python 2
         if sys.version_info < (3,):
             operations.append(operator.div)
 
-        # % operator only works for MPFR version >= 2.4.
-        if (MPFR_VERSION_MAJOR, MPFR_VERSION_MINOR) >= (2, 4):
-            operations.append(operator.mod)
+        operations.append(operator.mod)
 
         for value in other_values:
             for p in test_precisions:
@@ -704,6 +778,22 @@ class BigFloatTests(unittest.TestCase):
             BigFloat([1, 2, 3])
         with self.assertRaises(TypeError):
             BigFloat(1j)
+
+    def test_divmod(self):
+        x = BigFloat.exact(1729)
+        y = BigFloat.exact(53)
+
+        q, r = divmod(x, y)
+        self.assertIsInstance(q, BigFloat)
+        self.assertIsInstance(r, BigFloat)
+        self.assertEqual(q, BigFloat.exact(1729 // 53))
+        self.assertEqual(r, BigFloat.exact(1729 % 53))
+
+        q, r = divmod(-x, y)
+        self.assertIsInstance(q, BigFloat)
+        self.assertIsInstance(r, BigFloat)
+        self.assertEqual(q, BigFloat.exact(-1729 // 53))
+        self.assertEqual(r, BigFloat.exact(-1729 % 53))
 
     def test_exact_context_independent(self):
         with Context(emin=-1, emax=1):
@@ -2049,6 +2139,254 @@ pos 1p+1024 -> inf Inexact Overflow
 
 """.split('\n'))
 
+
+ABCTests.test_mod = process_lines("""\
+context double_precision
+context RoundTiesToEven
+
+# Check treatment of signs in normal cases.
+mod 0x5p0 0x3p0 -> 0x2p0
+mod -0x5p0 0x3p0 -> 0x1p0
+mod 0x5p0 -0x3p0 -> -0x1p0
+mod -0x5p0 -0x3p0 -> -0x2p0
+
+# A result of zero should have the same sign
+# as the second argument.
+mod 0x2p0 0x1p0 -> 0x0p0
+mod -0x2p0 0x1p0 -> 0x0p0
+mod 0x2p0 -0x1p0 -> -0x0p0
+mod -0x2p0 -0x1p0 -> -0x0p0
+
+# Finite input cases where the result may not be exact.
+mod 0x1p-100 0x1p0 -> 0x1p-100
+mod -0x1p-100 0x1p0 -> 0x1p0         Inexact
+mod 0x1p-100 -0x1p0 -> -0x1p0        Inexact
+mod -0x1p-100 -0x1p0 -> -0x1p-100
+
+# NaN inputs
+mod nan nan -> nan                   NanFlag
+mod -inf nan -> nan                  NanFlag
+mod -0x1p0 nan -> nan                NanFlag
+mod -0x0p0 nan -> nan                NanFlag
+mod 0x0p0 nan -> nan                 NanFlag
+mod 0x1p0 nan -> nan                 NanFlag
+mod nan inf -> nan                   NanFlag
+mod nan -inf -> nan                  NanFlag
+mod nan -0x1p0 -> nan                NanFlag
+mod nan -0x0p0 -> nan                NanFlag
+mod nan 0x0p0 -> nan                 NanFlag
+mod nan 0x1p0 -> nan                 NanFlag
+mod nan inf -> nan                   NanFlag
+
+# Other invalid cases: x infinite, y zero.
+mod inf -inf -> nan                  NanFlag
+mod inf -0x1p0 -> nan                NanFlag
+mod inf -0x0p0 -> nan                NanFlag
+mod inf 0x0p0 -> nan                 NanFlag
+mod inf 0x1p0 -> nan                 NanFlag
+mod inf inf -> nan                   NanFlag
+mod -inf -inf -> nan                 NanFlag
+mod -inf -0x1p0 -> nan               NanFlag
+mod -inf -0x0p0 -> nan               NanFlag
+mod -inf 0x0p0 -> nan                NanFlag
+mod -inf 0x1p0 -> nan                NanFlag
+mod -inf inf -> nan                  NanFlag
+mod -inf 0x0p0 -> nan                NanFlag
+mod -0x1p0 0x0p0 -> nan              NanFlag
+mod -0x0p0 0x0p0 -> nan              NanFlag
+mod 0x0p0 0x0p0 -> nan               NanFlag
+mod 0x1p0 0x0p0 -> nan               NanFlag
+mod inf 0x0p0 -> nan                 NanFlag
+mod -inf -0x0p0 -> nan               NanFlag
+mod -0x1p0 -0x0p0 -> nan             NanFlag
+mod -0x0p0 -0x0p0 -> nan             NanFlag
+mod 0x0p0 -0x0p0 -> nan              NanFlag
+mod 0x1p0 -0x0p0 -> nan              NanFlag
+mod inf -0x0p0 -> nan                NanFlag
+
+# x finite, y infinite.
+mod -0x1p0 inf -> inf
+mod -0x0p0 inf -> 0x0p0
+mod 0x0p0 inf -> 0x0p0
+mod 0x1p0 inf -> 0x1p0
+
+mod -0x1p0 -inf -> -0x1p0
+mod -0x0p0 -inf -> -0x0p0
+mod 0x0p0 -inf -> -0x0p0
+mod 0x1p0 -inf -> -inf
+
+# x zero, y finite but nonzero: sign of x is irrelevant.
+mod 0x0p0 0x5p0 -> 0x0p0
+mod -0x0p0 0x5p0 -> 0x0p0
+mod 0x0p0 -0x5p0 -> -0x0p0
+mod -0x0p0 -0x5p0 -> -0x0p0
+""".split('\n'))
+
+
+ABCTests.test_floordiv = process_lines("""\
+context double_precision
+context RoundTiesToEven
+
+# Simple cases.
+floordiv 0x2p0 0x1p0 -> 0x2p0
+floordiv 0x1p0 0x2p0 -> 0x0p0
+
+# Negative operands.
+floordiv -0x2p0 0x1p0 -> -0x2p0
+floordiv -0x1p0 0x2p0 -> -0x1p0
+
+floordiv 0x2p0 -0x1p0 -> -0x2p0
+floordiv 0x1p0 -0x2p0 -> -0x1p0
+
+# Zeros.
+floordiv 0x0p0 0x1.88p0 -> 0x0p0
+floordiv -0x0p0 0x1.88p0 -> -0x0p0
+floordiv 0x0p0 -0x1.88p0 -> -0x0p0
+floordiv -0x0p0 -0x1.88p0 -> 0x0p0
+
+floordiv 0x1.88p0 0x0p0 -> inf ZeroDivision
+floordiv -0x1.88p0 0x0p0 -> -inf ZeroDivision
+floordiv 0x1.88p0 -0x0p0 -> -inf ZeroDivision
+floordiv -0x1.88p0 -0x0p0 -> inf ZeroDivision
+
+floordiv 0x0p0 0x0p0 -> nan NanFlag
+floordiv -0x0p0 0x0p0 -> nan NanFlag
+floordiv 0x0p0 -0x0p0 -> nan NanFlag
+floordiv -0x0p0 -0x0p0 -> nan NanFlag
+
+# Infinities.
+floordiv 0x0p0 inf -> 0x0p0
+floordiv -0x0p0 inf -> -0x0p0
+floordiv 0x0p0 -inf -> -0x0p0
+floordiv -0x0p0 -inf -> 0x0p0
+
+floordiv 0x1.34ap-23 inf -> 0x0p0
+floordiv -0x1.34ap-23 inf -> -0x0p0
+floordiv 0x1.34ap-23 -inf -> -0x0p0
+floordiv -0x1.34ap-23 -inf -> 0x0p0
+
+floordiv inf inf -> nan NanFlag
+floordiv -inf inf -> nan NanFlag
+floordiv inf -inf -> nan NanFlag
+floordiv -inf -inf -> nan NanFlag
+
+floordiv inf 0x1.adep55 -> inf
+floordiv -inf 0x1.adep55 -> -inf
+floordiv inf -0x1.adep55 -> -inf
+floordiv -inf -0x1.adep55 -> inf
+
+floordiv inf 0x0p0 -> inf
+floordiv -inf 0x0p0 -> -inf
+floordiv inf -0x0p0 -> -inf
+floordiv -inf -0x0p0 -> inf
+
+# NaNs
+floordiv nan 0x0p0 -> nan NanFlag
+floordiv nan 0x1p0 -> nan NanFlag
+floordiv nan inf -> nan NanFlag
+floordiv nan nan -> nan NanFlag
+floordiv inf nan -> nan NanFlag
+floordiv 0x1p0 nan -> nan NanFlag
+floordiv 0x0p0 nan -> nan NanFlag
+
+# A few randomly-generated cases.
+floordiv 0x1.b2a98bbcc49b4p+98 0x1.3d74b2d390501p+48 -> 0x1.5e843fc46ffa8p+50
+floordiv -0x1.b2a98bbcc49b4p+98 -0x1.3d74b2d390501p+48 -> 0x1.5e843fc46ffa8p+50
+floordiv -0x1.b2a98bbcc49b4p+98 0x1.3d74b2d390501p+48 -> -0x1.5e843fc46ffacp+50
+floordiv 0x1.b2a98bbcc49b4p+98 -0x1.3d74b2d390501p+48 -> -0x1.5e843fc46ffacp+50
+
+# Randomly-generated near-halfway cases.
+floordiv 0x1.7455b4855c470p+158 0x1.9f63221b65037p+52 -> 0x1.caef27bbd32c3p+105 Inexact
+floordiv -0x1.7455b4855c470p+158 0x1.9f63221b65037p+52 -> -0x1.caef27bbd32c4p+105 Inexact
+floordiv 0x1.3e80b2f3da4e3p+158 0x1.55d84f1af57e3p+52 -> 0x1.dd0a000b852e5p+105 Inexact
+floordiv -0x1.3e80b2f3da4e3p+158 0x1.55d84f1af57e3p+52 -> -0x1.dd0a000b852e6p+105 Inexact
+floordiv 0x1.1ef2d934ebab9p+158 0x1.b1f7b86b3147fp+52 -> 0x1.528b96ac455bfp+105 Inexact
+floordiv -0x1.1ef2d934ebab9p+158 0x1.b1f7b86b3147fp+52 -> -0x1.528b96ac455c0p+105 Inexact
+floordiv 0x1.d9e46ba382852p+158 0x1.e12e2c5c55f27p+52 -> 0x1.f83ebede8104bp+105 Inexact
+floordiv -0x1.d9e46ba382852p+158 0x1.e12e2c5c55f27p+52 -> -0x1.f83ebede8104cp+105 Inexact
+floordiv 0x1.0a29a5b5b8f7dp+158 0x1.2c53d755c382dp+52 -> 0x1.c5c170a956bd2p+105 Inexact
+floordiv -0x1.0a29a5b5b8f7dp+158 0x1.2c53d755c382dp+52 -> -0x1.c5c170a956bd2p+105 Inexact
+floordiv 0x1.236ba96f8838bp+158 0x1.e2e23e8730f95p+52 -> 0x1.34fe01ad9e1dep+105 Inexact
+floordiv -0x1.236ba96f8838bp+158 0x1.e2e23e8730f95p+52 -> -0x1.34fe01ad9e1dep+105 Inexact
+floordiv 0x1.1ff3215dc95f4p+158 0x1.ec809f7a6c20bp+52 -> 0x1.2b596bfcd1cd1p+105 Inexact
+floordiv -0x1.1ff3215dc95f4p+158 0x1.ec809f7a6c20bp+52 -> -0x1.2b596bfcd1cd2p+105 Inexact
+floordiv 0x1.b55d8ec0da9fep+158 0x1.f6d8adea89b9fp+52 -> 0x1.bd53bacf4e02fp+105 Inexact
+floordiv -0x1.b55d8ec0da9fep+158 0x1.f6d8adea89b9fp+52 -> -0x1.bd53bacf4e030p+105 Inexact
+floordiv 0x1.2852761e5852bp+158 0x1.7ddb08bf86a6fp+52 -> 0x1.8d509db211a47p+105 Inexact
+floordiv -0x1.2852761e5852bp+158 0x1.7ddb08bf86a6fp+52 -> -0x1.8d509db211a48p+105 Inexact
+floordiv 0x1.1c97fd65f4e7cp+158 0x1.a6ba81f4da293p+52 -> 0x1.58b1a7e0e65cdp+105 Inexact
+floordiv -0x1.1c97fd65f4e7cp+158 0x1.a6ba81f4da293p+52 -> -0x1.58b1a7e0e65cep+105 Inexact
+
+floordiv 0x1.8ae6742f94fcap+158 0x1.af61efd069439p+52 -> 0x1.d4b323e4872fcp+105 Inexact
+floordiv -0x1.8ae6742f94fcap+158 0x1.af61efd069439p+52 -> -0x1.d4b323e4872fcp+105 Inexact
+floordiv 0x1.50371bfb1ded8p+158 0x1.64df147fa2c0bp+52 -> 0x1.e25d6618d002ep+105 Inexact
+floordiv -0x1.50371bfb1ded8p+158 0x1.64df147fa2c0bp+52 -> -0x1.e25d6618d002fp+105 Inexact
+floordiv 0x1.29ad82f921e61p+158 0x1.ee88b9d5af47fp+52 -> 0x1.3430ee7ff9a40p+105 Inexact
+floordiv -0x1.29ad82f921e61p+158 0x1.ee88b9d5af47fp+52 -> -0x1.3430ee7ff9a41p+105 Inexact
+floordiv 0x1.341e592b2ef12p+158 0x1.c5715b0058be3p+52 -> 0x1.5be8a10c7f71ap+105 Inexact
+floordiv -0x1.341e592b2ef12p+158 0x1.c5715b0058be3p+52 -> -0x1.5be8a10c7f71bp+105 Inexact
+floordiv 0x1.281ad0d0b6e5ap+158 0x1.84ad50291a943p+52 -> 0x1.860e39fb7ea4ap+105 Inexact
+floordiv -0x1.281ad0d0b6e5ap+158 0x1.84ad50291a943p+52 -> -0x1.860e39fb7ea4bp+105 Inexact
+floordiv 0x1.1016dc07e1acep+158 0x1.70c44c2b976c1p+52 -> 0x1.79c5994d7f360p+105 Inexact
+floordiv -0x1.1016dc07e1acep+158 0x1.70c44c2b976c1p+52 -> -0x1.79c5994d7f360p+105 Inexact
+floordiv 0x1.c348cf5e24425p+158 0x1.d34d5e92de493p+52 -> 0x1.ee73382469332p+105 Inexact
+floordiv -0x1.c348cf5e24425p+158 0x1.d34d5e92de493p+52 -> -0x1.ee73382469333p+105 Inexact
+floordiv 0x1.bcfea94be48e6p+158 0x1.dde69c1267a85p+52 -> 0x1.dcbefc6ebc8dap+105 Inexact
+floordiv -0x1.bcfea94be48e6p+158 0x1.dde69c1267a85p+52 -> -0x1.dcbefc6ebc8dap+105 Inexact
+
+# Some cases where Python's // on floats gets the wrong result.
+floordiv 0x1.0e31636b07d9dp-898 0x1.c68968514f16bp-954 -> 0x1.3059e434dd2bep+55 Inexact
+floordiv 0x1.2bb44bbf6a807p-537 0x1.94a4d2cd73882p-589 -> 0x1.7b3809b6af846p+51
+
+# Overflow and underflow.  (The latter shouldn't be possible unless
+# emin >= 0, which we currently don't check.)
+floordiv 0x1p1000 0x1p-1000 -> Infinity Inexact Overflow
+floordiv 0x1p512 0x1p-512 -> Infinity Inexact Overflow
+floordiv 0x1p511 0x1p-512 -> 0x1p1023
+floordiv 0x1p-1000 0x1p1000 -> 0x0p0
+
+# An extreme case where the floor of the quotient is exactly
+# representable but the quotient is not.
+floordiv 0x1.ff2e8e6fb6a62p+157 0x1.ff973c8000001p+52 -> 0x1.ff973c7ffffffp+104
+floordiv -0x1.ff2e8e6fb6a62p+157 0x1.ff973c8000001p+52 -> -0x1.ff973c7ffffffp+104 Inexact
+# ... and where neither are.
+floordiv 0x1.ff2e8e6fb6a62p+158 0x1.ff973c8000001p+52 -> 0x1.ff973c7ffffffp+105 Inexact
+floordiv -0x1.ff2e8e6fb6a62p+158 0x1.ff973c8000001p+52 -> -0x1.ff973c7ffffffp+105 Inexact
+
+#### Halfway cases: exact quotient is within 1 of a halfway case.
+# Exact quotient is 0x1.b6cb791cacbf37ffffffffffffb6de167b388b7fc8b3666a53bb....p+105
+# floordiv result is 1 smaller than halfway case, rounds down (towards zero)
+floordiv 0x1.800000000003bp+158 0x1.c0104a4a58bd7p+52 -> 0x1.b6cb791cacbf3p+105 Inexact
+# floordiv result *is* halfway case, rounds down (away from zero)
+floordiv -0x1.800000000003bp+158 0x1.c0104a4a58bd7p+52 -> -0x1.b6cb791cacbf4p+105 Inexact
+
+# Exact quotient is 0x1.98aa85ad41b278000000000000441c6b9ce0480bae415da0f245....p+105
+# floordiv result *is* halfway case, rounds up (away from zero)
+floordiv 0x1.8000000000021p+158 0x1.e118cf408df51p+52 -> 0x1.98aa85ad41b28p+105 Inexact
+# floordiv result one smaller than halfway case; rounds down (away from zero)
+floordiv -0x1.8000000000021p+158 0x1.e118cf408df51p+52 -> -0x1.98aa85ad41b28p+105 Inexact
+
+
+#### Check that the rounding mode is being respected.
+floordiv 0x1p53 0x0.fffffffffffff8p0 -> 0x1p53 Inexact
+floordiv 0x1p53 0x0.fffffffffffff0p0 -> 0x20000000000002p0
+floordiv 0x1p53 0x0.ffffffffffffe8p0 -> 0x20000000000004p0 Inexact
+
+context RoundTowardPositive
+floordiv 0x1p53 0x0.fffffffffffff8p0 -> 0x20000000000002p0 Inexact
+floordiv 0x1p53 0x0.fffffffffffff0p0 -> 0x20000000000002p0
+floordiv 0x1p53 0x0.ffffffffffffe8p0 -> 0x20000000000004p0 Inexact
+floordiv 0x1.ff2e8e6fb6a62p+157 0x1.ff973c8000001p+52 -> 0x1.ff973c7ffffffp+104
+floordiv -0x1.ff2e8e6fb6a62p+157 0x1.ff973c8000001p+52 -> -0x1.ff973c7ffffffp+104 Inexact
+
+context RoundTowardNegative
+floordiv 0x1p53 0x0.fffffffffffff8p0 -> 0x20000000000000p0 Inexact
+floordiv 0x1p53 0x0.fffffffffffff0p0 -> 0x20000000000002p0
+floordiv 0x1p53 0x0.ffffffffffffe8p0 -> 0x20000000000002p0 Inexact
+floordiv 0x1.ff2e8e6fb6a62p+157 0x1.ff973c8000001p+52 -> 0x1.ff973c7ffffffp+104
+floordiv -0x1.ff2e8e6fb6a62p+157 0x1.ff973c8000001p+52 -> -0x1.ff973c8000000p+104 Inexact
+
+""".split('\n'))
 
 ABCTests.test_various = process_lines("""\
 # The following tests are not supposed to be exhaustive tests of the behaviour

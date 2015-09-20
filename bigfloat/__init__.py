@@ -69,7 +69,7 @@ __all__ = [
 
     # 5.5 Basic arithmetic functions
     'add', 'sub', 'mul', 'sqr', 'div', 'sqrt', 'rec_sqrt', 'cbrt', 'root',
-    'pow', 'neg', 'abs', 'dim',
+    'pow', 'neg', 'abs', 'dim', 'floordiv', 'mod',
 
     # 5.6 Comparison functions
     'cmp', 'cmpabs', 'is_nan', 'is_inf', 'is_finite', 'is_zero', 'is_regular',
@@ -93,7 +93,7 @@ __all__ = [
 
     # 5.10 Integer and Remainder Related Functions
     'ceil', 'floor', 'round', 'trunc',
-    'frac', 'mod', 'remainder', 'is_integer',
+    'frac', 'fmod', 'remainder', 'is_integer',
 
     # 5.12 Miscellaneous Functions
     'min', 'max',
@@ -140,6 +140,9 @@ from bigfloat.core import (
     # 5.5 Basic Arithmetic Functions
     add, sub, mul, sqr, div, sqrt, rec_sqrt, cbrt, root, pow, neg, abs, dim,
 
+    # Additional arithmetic functions (not implemented directly by MPFR)
+    floordiv, mod,
+
     # 5.6 Comparison Functions
     cmp, cmpabs, is_nan, is_inf, is_finite, is_zero, is_regular, sgn,
     greater, greaterequal, less, lessequal, equal, notequal, lessgreater,
@@ -162,7 +165,7 @@ from bigfloat.core import (
 
     # 5.10 Integer and Remainder Related Functions
     ceil, floor, round, trunc,
-    frac, mod, remainder, is_integer,
+    frac, fmod, remainder, is_integer,
 
     # 5.12 Miscellaneous Functions
     min, max,
