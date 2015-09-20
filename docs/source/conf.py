@@ -99,7 +99,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'bigfloat'
-copyright = '2014, Mark Dickinson'
+copyright = '2009--2015 Mark Dickinson'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
