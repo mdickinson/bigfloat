@@ -1149,7 +1149,7 @@ def mod(x, y, context=None):
 
 def divmod(x, y, context=None):
     """
-    Return the pair (floordiv(x, y, context), mod(x, y, context).
+    Return the pair (floordiv(x, y, context), mod(x, y, context)).
 
     Semantics for negative inputs match those of Python's divmod function.
 
