@@ -179,7 +179,7 @@ with suggestions, complaints, bug reports, etc.
 License
 -------
 
-The bigfloat package is copyright (C) 2009–-2014 Mark Dickinson
+The bigfloat package is copyright (C) 2009--2015 Mark Dickinson
 
 The bigfloat package is free software: you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
