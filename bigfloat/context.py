@@ -39,7 +39,8 @@ EMIN_MAX = min(mpfr.MPFR_EMAX_DEFAULT, mpfr.mpfr_get_emin_max())
 
 
 class Context(object):
-    """Information about output format and rounding mode.
+    """
+    Information about output format and rounding mode.
 
     A context provides information about the output format for a
     particular operation (target precision, minimum and maximum
