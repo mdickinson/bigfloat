@@ -172,11 +172,11 @@ class Context(object):
 
 # DefaultContext is the context that the module always starts with.
 DefaultContext = Context(
-    precision=53,
     rounding=ROUND_TIES_TO_EVEN,
-    emax=EMAX_MAX,
-    emin=EMIN_MIN,
-    subnormalize=False,
+    precision=113,
+    emax=16384,
+    emin=-16493,
+    subnormalize=True,
 )
 
 # EmptyContext is useful for situations where a context is
