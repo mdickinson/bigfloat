@@ -60,7 +60,8 @@ class Context(object):
     'rounding' is the rounding mode.
 
     Note that exponent values are relative to a significand scaled to have
-    absolute value in the range [0.5, 1.0).
+    absolute value in the range [0.5, 1.0), and that ``emin`` takes
+    the subnormal range into account when ``subnormalize`` is ``True``.
     """
     # Contexts are supposed to be immutable.  We make the attributes
     # of a Context private, and provide properties to access them in
