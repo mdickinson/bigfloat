@@ -39,6 +39,28 @@ EMIN_MAX = min(mpfr.MPFR_EMAX_DEFAULT, mpfr.mpfr_get_emin_max())
 
 
 class Context(object):
+    """Information about output format and rounding mode.
+
+    A context provides information about the output format for a
+    particular operation (target precision, minimum and maximum
+    exponents, and whether to use gradual underflow), and the
+    rounding mode used to round the true result to that format.
+
+    Attributes
+    ----------
+    'precision' is the precision in bits (for example, 53 for
+    standard IEEE double precision).
+    'subnormalize' is True for formats that have gradual underflow
+    and False otherwise.
+    'emin' is the minimum exponent; for example, -1073 for IEEE 754
+    double precision
+    'emax' is the maximum exponent; for example, 1024 for IEEE 754
+    double precision.
+    'rounding' is the rounding mode.
+
+    Note that exponent values are relative to a significand scaled to have
+    absolute value in the range [0.5, 1.0).
+    """
     # Contexts are supposed to be immutable.  We make the attributes
     # of a Context private, and provide properties to access them in
     # order to discourage users from trying to set the attributes
@@ -149,15 +171,25 @@ class Context(object):
 # some useful contexts
 
 # DefaultContext is the context that the module always starts with.
-DefaultContext = Context(precision=53,
-                         rounding=ROUND_TIES_TO_EVEN,
-                         emax=EMAX_MAX,
-                         emin=EMIN_MIN,
-                         subnormalize=False)
+DefaultContext = Context(
+    precision=53,
+    rounding=ROUND_TIES_TO_EVEN,
+    emax=EMAX_MAX,
+    emin=EMIN_MIN,
+    subnormalize=False,
+)
 
 # EmptyContext is useful for situations where a context is
 # required, but no change to the current context is desirable
 EmptyContext = Context()
+
+# WideExponentContext has the largest exponent range allowed
+# by MPFR; precision and rounding mode are not specified.
+WideExponentContext = Context(
+    emax=EMAX_MAX,
+    emin=EMIN_MIN,
+    subnormalize=False,
+)
 
 # thread local variables:
 #   __bigfloat_context__: current context
@@ -237,7 +269,6 @@ def extra_precision(prec):
     BigFloat.exact('0.88622692545275801364912', precision=73)
 
     """
-
     c = getcontext()
     return Context(precision=c.precision + prec)
 

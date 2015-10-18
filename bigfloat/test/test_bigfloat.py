@@ -47,12 +47,12 @@ from bigfloat import (
     EMIN_MIN, EMAX_MAX,
 
     # context constants...
-    DefaultContext,
     half_precision, single_precision,
     double_precision, quadruple_precision,
     RoundTiesToEven, RoundTowardZero,
     RoundTowardPositive, RoundTowardNegative,
     RoundAwayFromZero,
+    ROUND_TIES_TO_EVEN,
 
     # ... and functions
     IEEEContext, precision,
@@ -67,9 +67,6 @@ from bigfloat import (
     # standard arithmetic functions
     add, sub, mul, div, fmod, pow,
     sqrt, floordiv, mod,
-
-    # Version information
-    MPFR_VERSION_MAJOR, MPFR_VERSION_MINOR,
 
     # 5.5 Basic Arithmetic Functions
     root,
@@ -105,6 +102,16 @@ if sys.version_info < (3,):
     long_integer_type = long  # noqa
 else:
     long_integer_type = int
+
+
+# Context at the start of each test method.
+DefaultTestContext = Context(
+    precision=53,
+    rounding=ROUND_TIES_TO_EVEN,
+    emax=EMAX_MAX,
+    emin=EMIN_MIN,
+    subnormalize=False,
+)
 
 
 def diffBigFloat(x, y, match_precisions=True):
@@ -186,7 +193,7 @@ class PoorObject(object):
 
 class BigFloatTests(unittest.TestCase):
     def setUp(self):
-        setcontext(DefaultContext)
+        setcontext(DefaultTestContext)
 
     def test_version(self):
         self.assertIsInstance(__version__, str)
@@ -1901,7 +1908,7 @@ class FlagTests(unittest.TestCase):
 
 class ABCTests(unittest.TestCase):
     def setUp(self):
-        setcontext(DefaultContext)
+        setcontext(DefaultTestContext)
 
 
 def mpfr_set_str2(rop, s, base, rnd):

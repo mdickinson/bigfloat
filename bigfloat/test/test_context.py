@@ -25,7 +25,6 @@ from bigfloat.context import (
     setcontext,
     getcontext,
     Context,
-    DefaultContext,
 
     _temporary_exponent_bounds,
 )
@@ -48,9 +47,6 @@ all_rounding_modes = [
 
 
 class ContextTests(unittest.TestCase):
-    def setUp(self):
-        setcontext(DefaultContext)
-
     def test__temporary_exponent_bounds(self):
         # Failed calls to _temporary_exponent_bounds shouldn't affect emin or
         # emax.
@@ -84,7 +80,13 @@ class ContextTests(unittest.TestCase):
         self.assertEqual(mpfr.mpfr_get_emax(), original_emax)
 
     def test_attributes(self):
-        c = DefaultContext
+        c = Context(
+            emin=-999,
+            emax=999,
+            precision=100,
+            subnormalize=True,
+            rounding=ROUND_TIES_TO_EVEN,
+        )
         self.assertIsInstance(c.precision, int)
         self.assertIsInstance(c.emax, int)
         self.assertIsInstance(c.emin, int)
@@ -98,8 +100,8 @@ class ContextTests(unittest.TestCase):
     def test_hashable(self):
         # create equal but non-identical contexts
         c1 = Context(emin=-999, emax=999, precision=100,
-                     subnormalize=True, rounding=mpfr.MPFR_RNDU)
-        c2 = (Context(emax=999, emin=-999, rounding=mpfr.MPFR_RNDU) +
+                     subnormalize=True, rounding=ROUND_TOWARD_POSITIVE)
+        c2 = (Context(emax=999, emin=-999, rounding=ROUND_TOWARD_POSITIVE) +
               Context(precision=100, subnormalize=True))
         self.assertEqual(hash(c1), hash(c2))
         self.assertEqual(c1, c2)
@@ -108,18 +110,18 @@ class ContextTests(unittest.TestCase):
 
         # distinct contexts
         d1 = Context(emin=-999, emax=999, precision=100,
-                     subnormalize=True, rounding=mpfr.MPFR_RNDU)
+                     subnormalize=True, rounding=ROUND_TOWARD_POSITIVE)
         d2 = Context(emin=-999, emax=999, precision=101,
-                     subnormalize=True, rounding=mpfr.MPFR_RNDU)
+                     subnormalize=True, rounding=ROUND_TOWARD_POSITIVE)
         self.assertIs(d1 != d2, True)
         self.assertIs(d1 == d2, False)
 
     def test_with(self):
         # check use of contexts in with statements
         c = Context(emin=-123, emax=456, precision=1729,
-                    subnormalize=True, rounding=mpfr.MPFR_RNDU)
+                    subnormalize=True, rounding=ROUND_TOWARD_POSITIVE)
         d = Context(emin=0, emax=10585, precision=20,
-                    subnormalize=False, rounding=mpfr.MPFR_RNDD)
+                    subnormalize=False, rounding=ROUND_TOWARD_NEGATIVE)
 
         with c:
             # check nested with
