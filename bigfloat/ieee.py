@@ -15,8 +15,8 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with the bigfloat package.  If not, see <http://www.gnu.org/licenses/>.
 
-from bigfloat.core import log2
-from bigfloat.context import Context, DefaultContext
+from bigfloat.core import _bit_length
+from bigfloat.context import Context
 
 
 def IEEEContext(bitwidth):
@@ -37,11 +37,17 @@ def IEEEContext(bitwidth):
         if not (bitwidth >= 128 and bitwidth % 32 == 0):
             raise ValueError("nonstandard bitwidth: bitwidth should be "
                              "16, 32, 64, 128, or k*32 for some k >= 4")
-
-        with DefaultContext + Context(emin=-1, subnormalize=True):
-            # log2(bitwidth), rounded to the nearest quarter
-            l = log2(bitwidth)
-        precision = 13 + bitwidth - int(4 * l)
+        # The formula for the precision involves rounding 4*log2(width) to the
+        # nearest integer. We have:
+        #
+        #   round(4*log2(width)) == round(log2(width**8)/2)
+        #                        == floor((log2(width**8) + 1)/2)
+        #                        == (width**8).bit_length() // 2
+        #
+        # (Note that 8*log2(width) can never be an odd integer, so we
+        # don't care which way half-way cases round in the 'round'
+        # operation.)
+        precision = bitwidth - _bit_length(bitwidth ** 8) // 2 + 13
 
     emax = 1 << bitwidth - precision - 1
     return Context(

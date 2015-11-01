@@ -23,14 +23,18 @@ else:
 
 from bigfloat import (
     BigFloat,
-    DefaultContext,
+    double_precision,
+    RoundTiesToEven,
     setcontext,
 )
 
 
+DefaultTestContext = double_precision + RoundTiesToEven
+
+
 class TestFormatting(unittest.TestCase):
     def setUp(self):
-        setcontext(DefaultContext)
+        setcontext(DefaultTestContext)
 
     def test_format(self):
         # Fixed precision formatting.

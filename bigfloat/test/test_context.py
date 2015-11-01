@@ -21,15 +21,19 @@ if sys.version_info < (2, 7):
 else:
     import unittest
 
+import mpfr
 from bigfloat.context import (
-    setcontext,
     getcontext,
     Context,
     DefaultContext,
-
+    RoundAwayFromZero,
+    RoundTiesToEven,
+    RoundTowardNegative,
+    RoundTowardPositive,
+    RoundTowardZero,
     _temporary_exponent_bounds,
 )
-import mpfr
+from bigfloat.ieee import quadruple_precision
 from bigfloat.rounding_mode import (
     ROUND_TIES_TO_EVEN,
     ROUND_TOWARD_ZERO,
@@ -48,9 +52,6 @@ all_rounding_modes = [
 
 
 class ContextTests(unittest.TestCase):
-    def setUp(self):
-        setcontext(DefaultContext)
-
     def test__temporary_exponent_bounds(self):
         # Failed calls to _temporary_exponent_bounds shouldn't affect emin or
         # emax.
@@ -84,7 +85,13 @@ class ContextTests(unittest.TestCase):
         self.assertEqual(mpfr.mpfr_get_emax(), original_emax)
 
     def test_attributes(self):
-        c = DefaultContext
+        c = Context(
+            emin=-999,
+            emax=999,
+            precision=100,
+            subnormalize=True,
+            rounding=ROUND_TIES_TO_EVEN,
+        )
         self.assertIsInstance(c.precision, int)
         self.assertIsInstance(c.emax, int)
         self.assertIsInstance(c.emin, int)
@@ -95,11 +102,80 @@ class ContextTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             Context(rounding=-1)
 
+    def test_default_context(self):
+        self.assertEqual(
+            DefaultContext,
+            quadruple_precision + RoundTiesToEven,
+        )
+
+    def test_rounding_contexts(self):
+        with RoundTiesToEven:
+            self.assertEqual(getcontext().rounding, ROUND_TIES_TO_EVEN)
+        with RoundTowardPositive:
+            self.assertEqual(getcontext().rounding, ROUND_TOWARD_POSITIVE)
+        with RoundTowardNegative:
+            self.assertEqual(getcontext().rounding, ROUND_TOWARD_NEGATIVE)
+        with RoundTiesToEven:
+            self.assertEqual(getcontext().rounding, ROUND_TIES_TO_EVEN)
+        with RoundAwayFromZero:
+            self.assertEqual(getcontext().rounding, ROUND_AWAY_FROM_ZERO)
+
+        # Rounding contexts should not affect existing settings for
+        # precision, exponents, etc.
+        original_contexts = [
+            Context(
+                precision=234,
+                emin=-9999,
+                emax=9999,
+                subnormalize=True,
+                rounding=ROUND_TOWARD_NEGATIVE,
+            ),
+            Context(
+                precision=5,
+                emin=-10,
+                emax=10,
+                subnormalize=False,
+                rounding=ROUND_AWAY_FROM_ZERO,
+            ),
+        ]
+        rounding_contexts = [
+            RoundTiesToEven,
+            RoundTowardPositive,
+            RoundTowardNegative,
+            RoundTowardZero,
+            RoundAwayFromZero,
+        ]
+
+        for original_context in original_contexts:
+            for rounding_context in rounding_contexts:
+                with original_context:
+                    with rounding_context:
+                        self.assertEqual(
+                            getcontext().precision,
+                            original_context.precision,
+                        )
+                        self.assertEqual(
+                            getcontext().emin,
+                            original_context.emin,
+                        )
+                        self.assertEqual(
+                            getcontext().emax,
+                            original_context.emax,
+                        )
+                        self.assertEqual(
+                            getcontext().subnormalize,
+                            original_context.subnormalize,
+                        )
+                        self.assertEqual(
+                            getcontext().rounding,
+                            rounding_context.rounding,
+                        )
+
     def test_hashable(self):
         # create equal but non-identical contexts
         c1 = Context(emin=-999, emax=999, precision=100,
-                     subnormalize=True, rounding=mpfr.MPFR_RNDU)
-        c2 = (Context(emax=999, emin=-999, rounding=mpfr.MPFR_RNDU) +
+                     subnormalize=True, rounding=ROUND_TOWARD_POSITIVE)
+        c2 = (Context(emax=999, emin=-999, rounding=ROUND_TOWARD_POSITIVE) +
               Context(precision=100, subnormalize=True))
         self.assertEqual(hash(c1), hash(c2))
         self.assertEqual(c1, c2)
@@ -108,18 +184,18 @@ class ContextTests(unittest.TestCase):
 
         # distinct contexts
         d1 = Context(emin=-999, emax=999, precision=100,
-                     subnormalize=True, rounding=mpfr.MPFR_RNDU)
+                     subnormalize=True, rounding=ROUND_TOWARD_POSITIVE)
         d2 = Context(emin=-999, emax=999, precision=101,
-                     subnormalize=True, rounding=mpfr.MPFR_RNDU)
+                     subnormalize=True, rounding=ROUND_TOWARD_POSITIVE)
         self.assertIs(d1 != d2, True)
         self.assertIs(d1 == d2, False)
 
     def test_with(self):
         # check use of contexts in with statements
         c = Context(emin=-123, emax=456, precision=1729,
-                    subnormalize=True, rounding=mpfr.MPFR_RNDU)
+                    subnormalize=True, rounding=ROUND_TOWARD_POSITIVE)
         d = Context(emin=0, emax=10585, precision=20,
-                    subnormalize=False, rounding=mpfr.MPFR_RNDD)
+                    subnormalize=False, rounding=ROUND_TOWARD_NEGATIVE)
 
         with c:
             # check nested with

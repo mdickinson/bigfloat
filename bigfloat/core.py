@@ -36,9 +36,10 @@ from bigfloat.rounding_mode import (
 
 from bigfloat.context import (
     Context,
-    DefaultContext,
     EmptyContext,
+    WideExponentContext,
 
+    RoundTiesToEven,
     RoundTowardPositive,
     RoundTowardNegative,
 
@@ -312,7 +313,6 @@ class BigFloat(mpfr.Mpfr_t):
 
         This constructor makes no use of the current context.
         """
-
         # figure out precision to use
         if isinstance(value, six.string_types):
             if precision is None:
@@ -333,10 +333,15 @@ class BigFloat(mpfr.Mpfr_t):
                 raise TypeError("Can't convert argument %s of type %s "
                                 "to BigFloat" % (value, type(value)))
 
-        # use Default context, with given precision
+        # Use unlimited exponents, with given precision.
         with _saved_flags():
             set_flagstate(set())  # clear all flags
-            with DefaultContext + Context(precision=precision):
+            context = (
+                WideExponentContext +
+                Context(precision=precision) +
+                RoundTiesToEven
+            )
+            with context:
                 result = BigFloat(value)
             if test_flag(Overflow):
                 raise ValueError("value too large to represent as a BigFloat")
