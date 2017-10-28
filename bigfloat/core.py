@@ -883,7 +883,7 @@ Underflow = 'Underflow'
 NanFlag = 'NanFlag'
 ZeroDivision = 'ZeroDivision'
 
-_all_flags = set([Inexact, Overflow, Underflow, NanFlag, ZeroDivision])
+_all_flags = {Inexact, Overflow, Underflow, NanFlag, ZeroDivision}
 
 _flag_translate = {
     'underflow': Underflow,

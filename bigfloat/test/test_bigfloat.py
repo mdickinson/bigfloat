@@ -1889,18 +1889,18 @@ class FlagTests(unittest.TestCase):
     def test_overflow(self):
         set_flagstate(set())  # clear flags
         exp(BigFloat(1e308))
-        self.assertEqual(get_flagstate(), set([Inexact, Overflow]))
+        self.assertEqual(get_flagstate(), {Inexact, Overflow})
 
     def test_divide_by_zero(self):
         # Clear all flags.
         set_flagstate(set())
         self.assertEqual(get_flagstate(), set())
         BigFloat(2) / BigFloat(0)
-        self.assertEqual(get_flagstate(), set([ZeroDivision]))
+        self.assertEqual(get_flagstate(), {ZeroDivision})
         # Flag should be sticky, so after a simple exact operation, it
         # should still be set.
         BigFloat(1) * BigFloat(3)
-        self.assertEqual(get_flagstate(), set([ZeroDivision]))
+        self.assertEqual(get_flagstate(), {ZeroDivision})
 
 
 class ABCTests(unittest.TestCase):
