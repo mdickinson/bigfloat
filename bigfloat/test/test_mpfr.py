@@ -1127,7 +1127,7 @@ class TestMpfr(unittest.TestCase):
             self.assertEqual(
                 actual_output,
                 expected_output,
-                msg='{0}'.format(fn),
+                msg='{}'.format(fn),
             )
 
     def test_lgamma(self):
@@ -1333,8 +1333,8 @@ class TestMpfr(unittest.TestCase):
                 actual_output,
                 expected_output,
                 msg=(
-                    "Unexpected result for {0}({1}): expected {2}, "
-                    "got {3}.".format(
+                    "Unexpected result for {}({}): expected {}, "
+                    "got {}.".format(
                         fn.__name__, input, expected_output, actual_output,
                     ),
                 ),
@@ -1361,8 +1361,8 @@ class TestMpfr(unittest.TestCase):
                 actual_output,
                 expected_output,
                 msg=(
-                    "Unexpected result for {0}({1}): expected {2}, "
-                    "got {3}.".format(
+                    "Unexpected result for {}({}): expected {}, "
+                    "got {}.".format(
                         fn.__name__, input, expected_output, actual_output,
                     ),
                 ),

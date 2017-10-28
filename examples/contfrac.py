@@ -115,4 +115,4 @@ print("{0:4s} {1:15s}".format("====", "==============="))
 for b, n in sorted(marks_results.items()):
     print("{0:4d} {1:15d}".format(b, n))
 results_match = marks_results == pauls_results
-print("Results match Paul Zimmerman's: {0}".format(results_match))
+print("Results match Paul Zimmerman's: {}".format(results_match))

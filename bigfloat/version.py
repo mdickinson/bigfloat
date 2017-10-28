@@ -21,14 +21,14 @@ patch = 0
 prerelease = 'dev'
 
 if prerelease:
-    __version__ = "{0}.{1}.{2}-{3}".format(major, minor, patch, prerelease)
+    __version__ = "{}.{}.{}-{}".format(major, minor, patch, prerelease)
 else:
-    __version__ = "{0}.{1}.{2}".format(major, minor, patch)
+    __version__ = "{}.{}.{}".format(major, minor, patch)
 
 # Release and version for Sphinx purposes.
 
 # The short X.Y version.
-version = "{0}.{1}".format(major, minor)
+version = "{}.{}".format(major, minor)
 
 # The full version, including patchlevel and alpha/beta/rc tags.
 release = __version__
