@@ -16,11 +16,7 @@
 # along with the bigfloat package.  If not, see <http://www.gnu.org/licenses/>.
 
 import contextlib
-import sys
-if sys.version_info < (2, 7):
-    import unittest2 as unittest
-else:
-    import unittest
+import unittest
 
 from mpfr import (
     _LONG_MIN, _LONG_MAX,
