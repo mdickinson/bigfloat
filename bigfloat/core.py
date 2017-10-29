@@ -432,7 +432,7 @@ class BigFloat(mpfr.Mpfr_t):
             # minimum field width ourselves in post-processing, along with PEP
             # 3101-style filling and padding.
             if spec['precision'] is not None:
-                prec = '.{0}'.format(spec['precision'])
+                prec = '.{}'.format(spec['precision'])
             else:
                 prec = ''
             mpfr_format_template = "%{alternate}{prec}R{rounding}{type}"
@@ -883,7 +883,7 @@ Underflow = 'Underflow'
 NanFlag = 'NanFlag'
 ZeroDivision = 'ZeroDivision'
 
-_all_flags = set([Inexact, Overflow, Underflow, NanFlag, ZeroDivision])
+_all_flags = {Inexact, Overflow, Underflow, NanFlag, ZeroDivision}
 
 _flag_translate = {
     'underflow': Underflow,

@@ -30,7 +30,7 @@ subnormals.
 Features
 --------
 
-- Supports Python 2 (version 2.6 or later) and Python 3 (version 3.2 or later).
+- Supports Python 2 (version 2.7) and Python 3 (version 3.4 or later).
 
 - Exactly reproducible correctly-rounded results across platforms;
   precisely-defined semantics compatible with the IEEE 754-2008 standard.
@@ -93,8 +93,8 @@ Development sources can be checked out from the project's `GitHub page
 Prerequisites
 ^^^^^^^^^^^^^
 
-The :mod:`bigfloat` package works with Python 2 (version 2.6 or later) or
-Python 3 (version 3.2 or later).  It uses a single codebase for both Python
+The :mod:`bigfloat` package works with Python 2 (version 2.7) or
+Python 3 (version 3.4 or later).  It uses a single codebase for both Python
 dialects, so the same source works on both dialects of Python.
 
 Whether installing ``bigfloat`` from source or from the Python Package Index,

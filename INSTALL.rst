@@ -1,8 +1,8 @@
 Prerequisites
 -------------
 
-This package requires Python 2.6 or later.  The `MPFR <mpfr library_>`_ and
-`GMP <gmp library_>`_ libraries will need to be already installed on your
+This package requires Python 2.7 or 3.4 or later.  The `MPFR <mpfr library_>`_
+and `GMP <gmp library_>`_ libraries will need to be already installed on your
 system, along with any necessary development headers for both of those
 libraries.  On Linux, look for a package named something like ``libmpfr-dev``
 or ``mpfr-devel``, along with similarly named packages for GMP.
@@ -48,11 +48,6 @@ named something like ``bigfloat-0.4.0``.
 
       $ python -m unittest discover bigfloat
 
-    Note that test discovery requires Python >= 2.7.  If you're on Python 2.6,
-    you can use the `unittest2`_ package instead.  For example::
-
-      $ unit2-2.6 discover bigfloat
-
 (3) To check that everything's working, compute the square root of 2 to 1000
     bits of precision::
 
@@ -68,4 +63,3 @@ created can now be deleted.
 
 .. _gmp library: http://gmplib.org
 .. _mpfr library: http://www.mpfr.org
-.. _unittest2: http://pypi.python.org/pypi/unittest2

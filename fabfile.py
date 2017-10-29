@@ -4,9 +4,6 @@ from fabric.api import local, lcd
 PYTHON = "python"
 COVERAGE = "coverage"
 
-# Unittest 2 runner for Python 2.6.
-UNIT2 = "unit2-2.6"
-
 # Paths for mpfr and gmp libraries and include files.
 LIBRARY_PATH = "/opt/local/lib"
 INCLUDE_PATH = "/opt/local/include"
@@ -55,10 +52,7 @@ def clean():
 
 
 def run_tests(python=PYTHON):
-    if python == "python2.6":
-        unittest = UNIT2
-    else:
-        unittest = "{python} -m unittest".format(python=python)
+    unittest = "{python} -m unittest".format(python=python)
     local("{unittest} discover -v .".format(unittest=unittest))
 
 
@@ -94,9 +88,8 @@ def docs(python=PYTHON):
 
 
 def test_all():
-    """Run tests on Python versions 2.6 through 3.4."""
-    test(python="python2.6")
+    """Run tests on Python versions 2.7 and 3.4 through 3.6."""
     test(python="python2.7")
-    test(python="python3.2")
-    test(python="python3.3")
     test(python="python3.4")
+    test(python="python3.5")
+    test(python="python3.6")
