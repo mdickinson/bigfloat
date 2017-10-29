@@ -25,7 +25,7 @@ idea::
 Features
 --------
 
-- Supports Python 2 (version 2.7) and Python 3 (version 3.2 or later).
+- Supports Python 2 (version 2.7) and Python 3 (version 3.4 or later).
 
 - Exactly reproducible correctly-rounded results across platforms;
   precisely-defined semantics compatible with the IEEE 754-2008 standard.
