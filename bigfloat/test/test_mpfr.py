@@ -376,7 +376,7 @@ class TestMpfr(unittest.TestCase):
         with self.assertRaises(ValueError):
             Mpfr(MPFR_PREC_MIN - 1)
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises((ValueError, OverflowError)):
             Mpfr(MPFR_PREC_MAX + 1)
 
     def test_constructor(self):
