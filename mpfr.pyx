@@ -25,16 +25,18 @@ import sys
 cdef extern from "limits.h":
     cdef long LONG_MAX
     cdef long LONG_MIN
+    cdef unsigned long ULONG_MAX
 
 
 ###############################################################################
 # Various constants exported to Python
 ###############################################################################
 
-# Make LONG_MAX and LONG_MIN available to Python.  These are the limits of
+# Make integer limits available to Python.  These are the limits of
 # values accepted by functions like e.g., mpfr_set_si.
 _LONG_MAX = LONG_MAX
 _LONG_MIN = LONG_MIN
+_ULONG_MAX = ULONG_MAX
 
 # Make precision limits available to Python
 MPFR_PREC_MIN = cmpfr.MPFR_PREC_MIN
@@ -357,12 +359,27 @@ def mpfr_set(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     check_rounding_mode(rnd)
     return cmpfr.mpfr_set(&rop._value, &op._value, rnd)
 
+def mpfr_set_ui(Mpfr_t rop not None, unsigned long int op,
+                cmpfr.mpfr_rnd_t rnd):
+    """
+    Set the value of rop from a nonnegative integer, rounded in direction rnd.
+
+    Set the value of rop from op, rounded toward the given direction rnd. op
+    should be an integer that's within the range of a C unsigned long. Note
+    that the input 0 is converted to +0, regardless of the rounding mode.
+
+    """
+    check_initialized(rop)
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_set_ui(&rop._value, op, rnd)
+
 def mpfr_set_si(Mpfr_t rop not None, long int op, cmpfr.mpfr_rnd_t rnd):
     """
-    Set the value of rop from a Python int, rounded in the direction rnd.
+    Set the value of rop from an integer, rounded in the direction rnd.
 
-    Set the value of rop from op, rounded toward the given direction rnd. Note
-    that the input 0 is converted to +0, regardless of the rounding mode.
+    Set the value of rop from op, rounded toward the given direction rnd. op
+    should be an integer that's within the range of a C long. Note that the
+    input 0 is converted to +0, regardless of the rounding mode.
 
     """
     check_initialized(rop)
@@ -388,13 +405,28 @@ def mpfr_set_d(Mpfr_t rop not None, double op, cmpfr.mpfr_rnd_t rnd):
     check_rounding_mode(rnd)
     return cmpfr.mpfr_set_d(&rop._value, op, rnd)
 
+def mpfr_set_ui_2exp(Mpfr_t rop not None, unsigned long int op,
+                     cmpfr.mpfr_exp_t e, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to op multiplied by a power of 2.
+
+    Set the value of rop from op multiplied by two to the power e, rounded
+    toward the given direction rnd. op must be within the range of a C
+    unsigned long. Note that the input 0 is converted to +0.
+
+    """
+    check_initialized(rop)
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_set_ui_2exp(&rop._value, op, e, rnd)
+
 def mpfr_set_si_2exp(Mpfr_t rop not None, long int op,
                      cmpfr.mpfr_exp_t e, cmpfr.mpfr_rnd_t rnd):
     """
     Set rop to op multiplied by a power of 2.
 
     Set the value of rop from op multiplied by two to the power e, rounded
-    toward the given direction rnd. Note that the input 0 is converted to +0.
+    toward the given direction rnd. op must be within the range of a C long.
+    Note that the input 0 is converted to +0.
 
     """
     check_initialized(rop)
@@ -576,11 +608,11 @@ def mpfr_get_d(Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
 
 def mpfr_get_si(Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     """
-    Convert op to a Python int.
+    Convert op to an integer that's within the range of a C long.
 
-    Convert op to a Python int after rounding it with respect to rnd. If op is
+    Convert op to an integer after rounding it with respect to rnd. If op is
     NaN, 0 is returned and the erange flag is set. If op is too big for a
-    Python int, the function returns the maximum or the minimum representable
+    C long, the function returns the maximum or the minimum representable
     int, depending on the direction of the overflow; the erange flag is set
     too.
 
@@ -588,6 +620,21 @@ def mpfr_get_si(Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_get_si(&op._value, rnd)
+
+def mpfr_get_ui(Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Convert op to an integer that's within the range of a C unsigned long.
+
+    Convert op to an integer after rounding it with respect to rnd. If op is
+    NaN, 0 is returned and the erange flag is set. If op is too big for a
+    C unsigned long, the function returns the maximum or the minimum
+    representable int, depending on the direction of the overflow; the erange
+    flag is set too.
+
+    """
+    check_initialized(op)
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_get_ui(&op._value, rnd)
 
 def mpfr_get_d_2exp(Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     """
@@ -2796,31 +2843,31 @@ def mpfr_erangeflag_p():
 
 
 
-# Functions that are documented in the MPFR 3.0.1 documentation, but aren't
+# Functions that are documented in the MPFR 4.0.1 documentation, but aren't
 # (currently) wrapped:
 #
 #
 # 5.2 Assignment functions
 # ------------------------
 #
-#   mpfr_set_ui
 #   mpfr_set_uj
 #   mpfr_set_sj
 #   mpfr_set_flt
 #   mpfr_set_ld
+#   mpfr_set_float128
 #   mpfr_set_decimal64
 #   mpfr_set_z
 #   mpfr_set_q
 #   mpfr_set_f
-#     -- these types not (currently) readily available in Python.  Only
-#        mpfr_set, mpfr_set_si and mpfr_set_d are wrapped.
 #
-#   mpfr_set_ui_2exp
+#     -- these functions relate to types not (currently) readily available in
+#        Python.
+#
 #   mpfr_set_uj_2exp
 #   mpfr_set_sj_2exp
 #   mpfr_set_z_2exp
+#
 #     -- these functions again concern types not readily available in Python.
-#        Only mpfr_set_si_2exp is wrapped.
 #
 #
 # 5.3 Combined initialization and assignment functions
@@ -2835,7 +2882,6 @@ def mpfr_erangeflag_p():
 #  mpfr_get_flt
 #  mpfr_get_ld
 #  mpfr_get_decimal64
-#  mpfr_get_ui
 #  mpfr_get_sj
 #  mpfr_get_uj
 #  mpfr_get_ld_2exp

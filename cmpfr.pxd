@@ -79,8 +79,12 @@ cdef extern from "mpfr.h":
     ###########################################################################
 
     int mpfr_set(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_set_ui(mpfr_ptr rop, unsigned long int op, mpfr_rnd_t rnd)
     int mpfr_set_si(mpfr_ptr rop, long int op, mpfr_rnd_t rnd)
     int mpfr_set_d(mpfr_ptr rop, double op, mpfr_rnd_t rnd)
+    int mpfr_set_ui_2exp(
+        mpfr_ptr rop, unsigned long int op, mpfr_exp_t e, mpfr_rnd_t rnd
+    )
     int mpfr_set_si_2exp(
         mpfr_ptr rop, long int op, mpfr_exp_t e, mpfr_rnd_t rnd
     )
@@ -102,6 +106,7 @@ cdef extern from "mpfr.h":
 
     double mpfr_get_d(mpfr_ptr op, mpfr_rnd_t rnd)
     long int mpfr_get_si(mpfr_ptr op, mpfr_rnd_t rnd)
+    unsigned long int mpfr_get_ui(mpfr_ptr op, mpfr_rnd_t rnd)
     double mpfr_get_d_2exp(long int *exp, mpfr_ptr op, mpfr_rnd_t rnd)
     char * mpfr_get_str(
         char *str, mpfr_exp_t *expptr, int b,

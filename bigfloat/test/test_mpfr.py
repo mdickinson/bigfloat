@@ -19,7 +19,7 @@ import contextlib
 import unittest
 
 from mpfr import (
-    _LONG_MIN, _LONG_MAX,
+    _LONG_MIN, _LONG_MAX, _ULONG_MAX,
 
     MPFR_RNDN, MPFR_RNDZ, MPFR_RNDU, MPFR_RNDD, MPFR_RNDA,
     MPFR_PREC_MIN, MPFR_PREC_MAX,
@@ -43,8 +43,10 @@ from mpfr import (
 
     # 5.2 Assignment Functions
     mpfr_set,
+    mpfr_set_ui,
     mpfr_set_si,
     mpfr_set_d,
+    mpfr_set_ui_2exp,
     mpfr_set_si_2exp,
     mpfr_set_str,
     mpfr_strtofr,
@@ -56,6 +58,7 @@ from mpfr import (
     # 5.4 Conversion Functions
     mpfr_get_d,
     mpfr_get_si,
+    mpfr_get_ui,
     mpfr_get_d_2exp,
     mpfr_get_str,
     mpfr_fits_slong_p,
@@ -69,7 +72,7 @@ from mpfr import (
     mpfr_sqrt,
     mpfr_rec_sqrt,
     mpfr_cbrt,
-    mpfr_root,
+    mpfr_root,  # this is deprecated!
     mpfr_pow,
     mpfr_neg,
     mpfr_abs,
@@ -401,6 +404,14 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_si_2exp(x, 11, 5, MPFR_RNDN)
         self.assertEqual(mpfr_get_si(x, MPFR_RNDN), 352)
 
+    def test_set_ui_2exp(self):
+        x = Mpfr(64)
+        mpfr_set_ui_2exp(x, 11, 5, MPFR_RNDN)
+        self.assertEqual(mpfr_get_si(x, MPFR_RNDN), 352)
+        with self.assertRaises(OverflowError):
+            mpfr_set_ui_2exp(x, -1, 5, MPFR_RNDN)
+        self.assertIs(mpfr_erangeflag_p(), False)
+
     def test_swap(self):
         x = Mpfr(17)
         y = Mpfr(23)
@@ -430,10 +441,8 @@ class TestMpfr(unittest.TestCase):
         # Check roundtrip.
         mpfr_set_si(x, 2367, MPFR_RNDN)
         self.assertEqual(mpfr_get_si(x, MPFR_RNDN), 2367)
-
-        # Check set_si from long
-        mpfr_set_si(x, 5789, MPFR_RNDN)
-        self.assertEqual(mpfr_get_si(x, MPFR_RNDN), 5789)
+        mpfr_set_si(x, -2367, MPFR_RNDN)
+        self.assertEqual(mpfr_get_si(x, MPFR_RNDN), -2367)
 
         # Check set_si from out-of-range arguments.
         with self.assertRaises(OverflowError):
@@ -463,6 +472,50 @@ class TestMpfr(unittest.TestCase):
 
         mpfr_set_d(x, -1e100, MPFR_RNDN)
         self.assertEqual(mpfr_get_si(x, MPFR_RNDN), _LONG_MIN)
+        self.assertIs(mpfr_erangeflag_p(), True)
+        mpfr_clear_erangeflag()
+
+    def test_get_ui_and_set_ui(self):
+        x = Mpfr(64)
+        # Check roundtrip.
+        mpfr_set_ui(x, 2367, MPFR_RNDN)
+        self.assertEqual(mpfr_get_ui(x, MPFR_RNDN), 2367)
+        mpfr_set_ui(x, 5789, MPFR_RNDN)
+        self.assertEqual(mpfr_get_ui(x, MPFR_RNDN), 5789)
+
+        # Check set_ui from out-of-range arguments.
+        with self.assertRaises(OverflowError):
+            mpfr_set_ui(x, _ULONG_MAX + 1, MPFR_RNDN)
+
+        with self.assertRaises(OverflowError):
+            mpfr_set_ui(x, -1, MPFR_RNDN)
+
+        # None of the above should have set the erange flag.
+        self.assertIs(mpfr_erangeflag_p(), False)
+
+        # Check get_ui with out-of-range values.
+        mpfr_set_inf(x, 0)
+        self.assertEqual(mpfr_get_ui(x, MPFR_RNDN), _ULONG_MAX)
+        self.assertIs(mpfr_erangeflag_p(), True)
+        mpfr_clear_erangeflag()
+
+        mpfr_set_inf(x, -1)
+        self.assertEqual(mpfr_get_ui(x, MPFR_RNDN), 0)
+        self.assertIs(mpfr_erangeflag_p(), True)
+        mpfr_clear_erangeflag()
+
+        mpfr_set_d(x, 1e100, MPFR_RNDN)
+        self.assertEqual(mpfr_get_ui(x, MPFR_RNDN), _ULONG_MAX)
+        self.assertIs(mpfr_erangeflag_p(), True)
+        mpfr_clear_erangeflag()
+
+        mpfr_set_d(x, -1e100, MPFR_RNDN)
+        self.assertEqual(mpfr_get_ui(x, MPFR_RNDN), 0)
+        self.assertIs(mpfr_erangeflag_p(), True)
+        mpfr_clear_erangeflag()
+
+        mpfr_set_si(x, -1, MPFR_RNDN)
+        self.assertEqual(mpfr_get_ui(x, MPFR_RNDN), 0)
         self.assertIs(mpfr_erangeflag_p(), True)
         mpfr_clear_erangeflag()
 
