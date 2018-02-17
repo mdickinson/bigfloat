@@ -113,6 +113,7 @@ cdef extern from "mpfr.h":
         size_t n, mpfr_ptr op, mpfr_rnd_t rnd
     )
     void mpfr_free_str(char *str)
+    int mpfr_fits_ulong_p(mpfr_ptr x, mpfr_rnd_t rnd)
     int mpfr_fits_slong_p(mpfr_ptr x, mpfr_rnd_t rnd)
 
 

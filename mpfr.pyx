@@ -719,12 +719,24 @@ def mpfr_get_str(int b, size_t n, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     else:
         return digits.decode('ascii'), exp
 
+def mpfr_fits_ulong_p(Mpfr_t x not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Return True if op would fit into a C unsigned long int.
+
+    Return True if op would fit into a C unsigned long int when rounded to an
+    integer in the direction rnd.
+
+    """
+    check_initialized(x)
+    check_rounding_mode(rnd)
+    return bool(cmpfr.mpfr_fits_ulong_p(&x._value, rnd))
+
 def mpfr_fits_slong_p(Mpfr_t x not None, cmpfr.mpfr_rnd_t rnd):
     """
-    Return True if op would fit into a Python int.
+    Return True if op would fit into a C long int.
 
-    Return True if op would fit into a Python int when rounded to an integer
-    in the direction rnd.
+    Return True if op would fit into a C long int when rounded to an integer in
+    the direction rnd.
 
     """
     check_initialized(x)
@@ -2873,7 +2885,7 @@ def mpfr_erangeflag_p():
 # 5.3 Combined initialization and assignment functions
 # ----------------------------------------------------
 #
-# None of these functions are currently wrapped.
+# None of these functions is currently wrapped.
 #
 #
 # 5.4 Conversion functions
@@ -2881,12 +2893,14 @@ def mpfr_erangeflag_p():
 #
 #  mpfr_get_flt
 #  mpfr_get_ld
+#  mpfr_get_float128
 #  mpfr_get_decimal64
 #  mpfr_get_sj
 #  mpfr_get_uj
 #  mpfr_get_ld_2exp
 #  mpfr_get_z_2exp
 #  mpfr_get_z
+#  mpfr_get_q
 #  mpfr_get_f
 #    -- these concern types not readily available in Python.  Only mpfr_get_d
 #       and mpfr_get_si are wrapped.
@@ -2895,7 +2909,6 @@ def mpfr_erangeflag_p():
 #  (which has a slightly different signature to MPFRs mpfr_get_str).  There's
 #  no need to wrap mpfr_free_str separately.
 #
-#  mpfr_fits_ulong_p
 #  mpfr_fits_uint_p
 #  mpfr_fits_sint_p
 #  mpfr_fits_ushort_p

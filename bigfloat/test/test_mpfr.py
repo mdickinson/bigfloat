@@ -61,6 +61,7 @@ from mpfr import (
     mpfr_get_ui,
     mpfr_get_d_2exp,
     mpfr_get_str,
+    mpfr_fits_ulong_p,
     mpfr_fits_slong_p,
 
     # 5.5 Basic Arithmetic Functions
@@ -432,9 +433,30 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_si(x, _LONG_MIN, MPFR_RNDN)
         self.assertIs(mpfr_fits_slong_p(x, MPFR_RNDN), True)
 
-        x = Mpfr(28)
-        mpfr_set_si(x, _LONG_MAX, MPFR_RNDN)
+        x = Mpfr(64)
+        mpfr_set_str(x, str(_LONG_MAX+1), 10, MPFR_RNDN)
         self.assertIs(mpfr_fits_slong_p(x, MPFR_RNDN), False)
+
+        x = Mpfr(64)
+        mpfr_set_str(x, str(_LONG_MIN-1), 10, MPFR_RNDN)
+        self.assertIs(mpfr_fits_slong_p(x, MPFR_RNDN), False)
+
+    def test_fits_ulong_p(self):
+        x = Mpfr(64)
+        mpfr_set_ui(x, _ULONG_MAX, MPFR_RNDN)
+        self.assertIs(mpfr_fits_ulong_p(x, MPFR_RNDN), True)
+
+        x = Mpfr(64)
+        mpfr_set_ui(x, 0, MPFR_RNDN)
+        self.assertIs(mpfr_fits_ulong_p(x, MPFR_RNDN), True)
+
+        x = Mpfr(64)
+        mpfr_set_str(x, str(_ULONG_MAX+1), 10, MPFR_RNDN)
+        self.assertIs(mpfr_fits_ulong_p(x, MPFR_RNDN), False)
+
+        x = Mpfr(64)
+        mpfr_set_str(x, str(-1), 10, MPFR_RNDN)
+        self.assertIs(mpfr_fits_ulong_p(x, MPFR_RNDN), False)
 
     def test_get_si_and_set_si(self):
         x = Mpfr(64)
