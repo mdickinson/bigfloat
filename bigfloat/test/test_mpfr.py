@@ -22,6 +22,7 @@ from mpfr import (
     _LONG_MIN, _LONG_MAX,
 
     MPFR_RNDN, MPFR_RNDZ, MPFR_RNDU, MPFR_RNDD, MPFR_RNDA,
+    MPFR_PREC_MIN, MPFR_PREC_MAX,
 
     # Base extension type
     Mpfr_t,
@@ -373,7 +374,10 @@ class TestMpfr(unittest.TestCase):
             Mpfr(10, 11)
 
         with self.assertRaises(ValueError):
-            Mpfr(1)
+            Mpfr(MPFR_PREC_MIN - 1)
+
+        with self.assertRaises(ValueError):
+            Mpfr(MPFR_PREC_MAX + 1)
 
     def test_constructor(self):
         x = Mpfr(10)
