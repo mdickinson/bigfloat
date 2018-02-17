@@ -352,11 +352,14 @@ class BigFloatTests(unittest.TestCase):
                 try:
                     x_frac = fractions.Fraction(*x.as_integer_ratio())
                     y_frac = fractions.Fraction(*y.as_integer_ratio())
-                    # Would like to simply use float(x_frac // y_frac), but the
-                    # float-to-int conversion is not correctly rounded on Python 2.6.
-                    expected_result = BigFloat(x_frac // y_frac)
+                    # float-to-int conversion is correctly rounded on Python >=
+                    # 2.7.
+                    expected_result = float(x_frac // y_frac)
                 except OverflowError:
-                    expected_result = float('inf') if x_frac / y_frac > 0 else float('-inf')
+                    if x_frac / y_frac > 0:
+                        expected_result = float('inf')
+                    else:
+                        expected_result = float('-inf')
 
                 self.assertEqual(
                     actual_result, expected_result,
@@ -1951,27 +1954,27 @@ def _fromhex_exact(value):
 def process_lines(lines):
     def test_fn(self):
 
-        for l in lines:
+        for line in lines:
             # any portion of the line after '#' is a comment; leading
             # and trailing whitespace are ignored
-            comment_pos = l.find('#')
+            comment_pos = line.find('#')
             if comment_pos != -1:
-                l = l[:comment_pos]
-            l = l.strip()
-            if not l:
+                line = line[:comment_pos]
+            line = line.strip()
+            if not line:
                 continue
 
             # now we've got a line that should be processed; possibly
             # a directive
-            if l.startswith('context '):
-                context = getattr(bigfloat, l[8:])
+            if line.startswith('context '):
+                context = getattr(bigfloat, line[8:])
                 setcontext(context)
                 continue
 
             # not a directive, so it takes the form lhs -> rhs, where
             # the lhs is a function name followed by arguments, and
             # the rhs is an expected result followed by expected flags
-            lhs_pieces, rhs_pieces = map(str.split, l.split('->'))
+            lhs_pieces, rhs_pieces = map(str.split, line.split('->'))
             fn = getattr(bigfloat, lhs_pieces[0])
             args = [_fromhex_exact(arg) for arg in lhs_pieces[1:]]
             expected_result = _fromhex_exact(rhs_pieces[0])
@@ -1988,10 +1991,11 @@ def process_lines(lines):
             diff = diffBigFloat(actual_result, expected_result,
                                 match_precisions=False)
             if diff is not None:
-                self.fail("{}: {}".format(diff, l))
-            self.assertEqual(actual_flags, expected_flags, msg=l)
+                self.fail("{}: {}".format(diff, line))
+            self.assertEqual(actual_flags, expected_flags, msg=line)
 
     return test_fn
+
 
 ABCTests.test_next_up = process_lines("""\
 context double_precision
@@ -2527,6 +2531,7 @@ def load_tests(loader, tests, ignore):
     """ Add bigfloat.core doctests to test suite. """
     tests.addTests(doctest.DocTestSuite(bigfloat.core))
     return tests
+
 
 if __name__ == '__main__':
     unittest.main()

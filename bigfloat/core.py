@@ -870,6 +870,7 @@ class BigFloat(mpfr.Mpfr_t):
             raise TypeError("Unable to convert argument %s of type %s "
                             "to BigFloat" % (arg, type(arg)))
 
+
 ###############################################################################
 # Flags
 #

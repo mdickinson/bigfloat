@@ -15,7 +15,9 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with the bigfloat package.  If not, see <http://www.gnu.org/licenses/>.
 
-import contextlib as _contextlib
+import contextlib
+import threading
+
 
 import mpfr
 
@@ -170,6 +172,7 @@ class Context(object):
     def __exit__(self, *args):
         _popcontext()
 
+
 # some useful contexts
 
 # DefaultContext is the context that the module always starts with.
@@ -193,11 +196,10 @@ WideExponentContext = Context(
     subnormalize=False,
 )
 
+
 # thread local variables:
 #   __bigfloat_context__: current context
 #   __context_stack__: context stack, used by with statement
-
-import threading
 
 local = threading.local()
 local.__bigfloat_context__ = DefaultContext
@@ -232,6 +234,7 @@ def _pushcontext(context, _local=local):
 
 def _popcontext(_local=local):
     setcontext(_local.__context_stack__.pop())
+
 
 del threading, local
 
@@ -275,7 +278,7 @@ def extra_precision(prec):
     return Context(precision=c.precision + prec)
 
 
-@_contextlib.contextmanager
+@contextlib.contextmanager
 def _temporary_exponent_bounds(emin, emax):
     old_emin = mpfr.mpfr_get_emin()
     mpfr.mpfr_set_emin(emin)
