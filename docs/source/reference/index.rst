@@ -496,6 +496,7 @@ Arithmetic functions
 .. autofunction:: rec_sqrt
 .. autofunction:: cbrt
 .. autofunction:: root
+.. autofunction:: rootn
 .. autofunction:: hypot
 
 

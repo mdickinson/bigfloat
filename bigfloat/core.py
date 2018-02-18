@@ -1258,7 +1258,7 @@ def root(x, k, context=None):
     This behaviour does not follow that of the IEEE 754 rootn function.
     for signed zeros. See rootn for a variant which does.
 
-    This function is only implemented for nonnegative k.
+    This function is deprecated! Use rootn instead.
 
     """
     if k < 0:
