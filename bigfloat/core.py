@@ -20,8 +20,9 @@
 # Python wrapper for MPFR library
 
 
-import sys as _sys
-import contextlib as _contextlib
+import contextlib
+import sys
+import warnings
 
 import six
 
@@ -63,11 +64,11 @@ _builtin_abs = abs
 _builtin_pow = pow
 
 
-if _sys.version_info < (3,):
+if sys.version_info < (3,):
     long_integer_type = long  # noqa
-    if _sys.maxsize == 2**31 - 1:
+    if sys.maxsize == 2**31 - 1:
         _PyHASH_MODULUS = 2**31 - 1
-    elif _sys.maxsize == 2**63 - 1:
+    elif sys.maxsize == 2**63 - 1:
         _PyHASH_MODULUS = 2**61 - 1
     else:
         raise ValueError("Unexpected value for sys.maxsize.")
@@ -86,9 +87,9 @@ if _sys.version_info < (3,):
 
 else:
     long_integer_type = int
-    _PyHASH_MODULUS = _sys.hash_info.modulus
-    _PyHASH_INF = _sys.hash_info.inf
-    _PyHASH_NAN = _sys.hash_info.nan
+    _PyHASH_MODULUS = sys.hash_info.modulus
+    _PyHASH_INF = sys.hash_info.inf
+    _PyHASH_NAN = sys.hash_info.nan
 
     _bit_length = int.bit_length
 
@@ -116,7 +117,7 @@ def _mpfr_get_str2(base, ndigits, op, rounding_mode):
 ###############################################################################
 # Context manager to give an easy way to change emin and emax temporarily.
 
-DBL_PRECISION = _sys.float_info.mant_dig
+DBL_PRECISION = sys.float_info.mant_dig
 
 # Dealing with exponent limits
 # ----------------------------
@@ -723,7 +724,7 @@ class BigFloat(mpfr.Mpfr_t):
 
         return negative, digits, -precision
 
-    if _sys.version_info < (3,):
+    if sys.version_info < (3,):
         def __hash__(self):
             # if self is exactly representable as a float, then its hash
             # should match that of the float.  Note that this covers the
@@ -951,7 +952,7 @@ def set_flagstate(flagset):
         clear_flag(f)
 
 
-@_contextlib.contextmanager
+@contextlib.contextmanager
 def _saved_flags():
     """Save current flags for the duration of a with block.  Restore
     those original flags after the block completes."""
@@ -1254,16 +1255,49 @@ def root(x, k, context=None):
     For k even and x negative (including -Inf), return NaN.
 
     The kth root of -0 is defined to be -0, whatever the parity of k.
+    This behaviour does not follow that of the IEEE 754 rootn function.
+    for signed zeros. See rootn for a variant which does.
 
     This function is only implemented for nonnegative k.
 
     """
     if k < 0:
+        # mpfr_root issues a DeprecationWarning, but we won't see
+        # it in this path
+        warnings.warn(
+            "root is deprecated. Use rootn instead.",
+            category=DeprecationWarning,
+        )
         raise ValueError("root function not implemented for negative k")
 
     return _apply_function_in_current_context(
         BigFloat,
         mpfr.mpfr_root,
+        (BigFloat._implicit_convert(x), k),
+        context,
+    )
+
+
+def rootn(x, k, context=None):
+    """
+    Return the kth root of x, for a nonnegative integer k.
+
+    For k = 0, return a NaN.
+
+    For k odd and x negative (including -Inf), return a negative number.
+    For k even and x negative (including -Inf), return a NaN.
+
+    The kth root of -0 is defined to be -0 for k odd and +0 for k even.
+
+    This function is only implemented for nonnegative k.
+
+    """
+    if k < 0:
+        raise ValueError("rootn function not implemented for negative k")
+
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_rootn_ui,
         (BigFloat._implicit_convert(x), k),
         context,
     )
@@ -2616,7 +2650,7 @@ BigFloat.__sub__ = _binop(sub)
 BigFloat.__mul__ = _binop(mul)
 BigFloat.__truediv__ = _binop(div)
 BigFloat.__floordiv__ = _binop(floordiv)
-if _sys.version_info < (3,):
+if sys.version_info < (3,):
     BigFloat.__div__ = _binop(div)
 BigFloat.__pow__ = _binop(pow)
 BigFloat.__mod__ = _binop(mod)
@@ -2628,7 +2662,7 @@ BigFloat.__rsub__ = _rbinop(sub)
 BigFloat.__rmul__ = _rbinop(mul)
 BigFloat.__rtruediv__ = _rbinop(div)
 BigFloat.__rfloordiv__ = _rbinop(floordiv)
-if _sys.version_info < (3,):
+if sys.version_info < (3,):
     BigFloat.__rdiv__ = _rbinop(div)
 BigFloat.__rpow__ = _rbinop(pow)
 BigFloat.__rmod__ = _rbinop(mod)

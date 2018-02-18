@@ -17,6 +17,7 @@
 
 import contextlib
 import unittest
+import warnings
 
 from mpfr import (
     _LONG_MIN, _LONG_MAX, _ULONG_MAX,
@@ -74,7 +75,8 @@ from mpfr import (
     mpfr_sqrt,
     mpfr_rec_sqrt,
     mpfr_cbrt,
-    mpfr_root,  # this is deprecated!
+    mpfr_rootn_ui,
+    mpfr_root,
     mpfr_pow,
     mpfr_neg,
     mpfr_abs,
@@ -682,8 +684,32 @@ class TestMpfr(unittest.TestCase):
         x = Mpfr(53)
         y = Mpfr(53)
         mpfr_set_si(x, -(23 ** 5), MPFR_RNDN)
-        mpfr_root(y, x, 5, MPFR_RNDN)
+
+        with self.assertIssuesDeprecationWarning():
+            mpfr_root(y, x, 5, MPFR_RNDN)
         self.assertEqual(mpfr_get_d(y, MPFR_RNDN), -23.0)
+
+        # Check behaviour of zeros (which differs from that
+        # of rootn_ui).
+        mpfr_set_d(x, -0.0, MPFR_RNDN)
+        with self.assertIssuesDeprecationWarning():
+            mpfr_root(y, x, 2, MPFR_RNDN)
+        self.assertEqual(mpfr_get_d(y, MPFR_RNDN), 0.0)
+        self.assertTrue(mpfr_signbit(y))
+
+    def test_rootn_ui(self):
+        x = Mpfr(53)
+        y = Mpfr(53)
+        mpfr_set_si(x, -(23 ** 5), MPFR_RNDN)
+        mpfr_rootn_ui(y, x, 5, MPFR_RNDN)
+        self.assertEqual(mpfr_get_d(y, MPFR_RNDN), -23.0)
+
+        # Check behaviour of zeros (which differs from that
+        # of rootn_ui).
+        mpfr_set_d(x, -0.0, MPFR_RNDN)
+        mpfr_rootn_ui(y, x, 2, MPFR_RNDN)
+        self.assertEqual(mpfr_get_d(y, MPFR_RNDN), 0.0)
+        self.assertFalse(mpfr_signbit(y))
 
     def test_pow(self):
         x = Mpfr(30)
@@ -2200,6 +2226,17 @@ class TestMpfr(unittest.TestCase):
         # Regression test for badly-defined LONG_MAX and LONG_MIN.
         self.assertGreaterEqual(_LONG_MAX, 2**31-1)
         self.assertLessEqual(_LONG_MIN, -2**31)
+
+    # Testcase assertions.
+
+    @contextlib.contextmanager
+    def assertIssuesDeprecationWarning(self):
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            yield
+            self.assertEqual(len(w), 1)
+            self.assertTrue(issubclass(w[-1].category, DeprecationWarning))
+            self.assertIn("deprecated", str(w[-1].message))
 
 
 if __name__ == '__main__':

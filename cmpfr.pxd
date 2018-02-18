@@ -130,6 +130,9 @@ cdef extern from "mpfr.h":
     int mpfr_sqrt(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_rec_sqrt(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_cbrt(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_rootn_ui(
+        mpfr_ptr top, mpfr_ptr op, unsigned long int k, mpfr_rnd_t rnd
+    )
     int mpfr_root(
         mpfr_ptr top, mpfr_ptr op, unsigned long int k, mpfr_rnd_t rnd
     )

@@ -72,7 +72,7 @@ __all__ = [
 
     # 5.5 Basic arithmetic functions
     'add', 'sub', 'mul', 'sqr', 'div', 'sqrt', 'rec_sqrt', 'cbrt', 'root',
-    'pow', 'neg', 'abs', 'dim', 'floordiv', 'mod',
+    'rootn', 'pow', 'neg', 'abs', 'dim', 'floordiv', 'mod',
 
     # 5.6 Comparison functions
     'cmp', 'cmpabs', 'is_nan', 'is_inf', 'is_finite', 'is_zero', 'is_regular',
@@ -144,7 +144,8 @@ from bigfloat.core import (
     frexp,
 
     # 5.5 Basic Arithmetic Functions
-    add, sub, mul, sqr, div, sqrt, rec_sqrt, cbrt, root, pow, neg, abs, dim,
+    add, sub, mul, sqr, div, sqrt, rec_sqrt, cbrt, root, rootn,
+    pow, neg, abs, dim,
 
     # Additional arithmetic functions (not implemented directly by MPFR)
     floordiv, mod,

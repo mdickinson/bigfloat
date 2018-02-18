@@ -18,6 +18,7 @@
 import six
 
 # Standard library imports
+import contextlib
 import doctest
 import fractions
 import math
@@ -27,6 +28,7 @@ import struct
 import sys
 import types
 import unittest
+import warnings
 
 import bigfloat.core
 
@@ -69,7 +71,7 @@ from bigfloat import (
     frexp,
 
     # 5.5 Basic Arithmetic Functions
-    root,
+    root, rootn,
 
     # 5.6 Comparison Functions
     cmp, cmpabs, is_nan, is_inf, is_finite, is_zero, is_regular, sgn,
@@ -1791,15 +1793,40 @@ class BigFloatTests(unittest.TestCase):
 
     # 5.5 Basic Arithmetic Functions
     def test_root(self):
-        self.assertEqual(root(BigFloat(23), 1), BigFloat(23))
-        self.assertEqual(root(BigFloat(49), 2), BigFloat(7))
-        self.assertEqual(root(BigFloat(27), 3), BigFloat(3))
-        self.assertEqual(root(BigFloat(-27), 3), BigFloat(-3))
-        self.assertEqual(root(BigFloat(16), 4), BigFloat(2))
+        def quiet_root(x, n):
+            with self.assertIssuesDeprecationWarning():
+                return root(x, n)
+
+        self.assertEqual(quiet_root(BigFloat(23), 1), BigFloat(23))
+        self.assertEqual(quiet_root(BigFloat(49), 2), BigFloat(7))
+        self.assertEqual(quiet_root(BigFloat(27), 3), BigFloat(3))
+        self.assertEqual(quiet_root(BigFloat(-27), 3), BigFloat(-3))
+        self.assertEqual(quiet_root(BigFloat(16), 4), BigFloat(2))
         with self.assertRaises(ValueError):
-            root(BigFloat(23), -1)
-        self.assertTrue(is_nan(root(BigFloat(2), 0)))
-        self.assertTrue(is_nan(root(BigFloat(-2), 2)))
+            quiet_root(BigFloat(23), -1)
+        self.assertTrue(is_nan(quiet_root(BigFloat(2), 0)))
+        self.assertTrue(is_nan(quiet_root(BigFloat(-2), 2)))
+
+        self.assertIsNegativeZero(quiet_root(-BigFloat(0), 2))
+        self.assertIsPositiveZero(quiet_root(BigFloat(0), 2))
+        self.assertIsNegativeZero(quiet_root(-BigFloat(0), 3))
+        self.assertIsPositiveZero(quiet_root(BigFloat(0), 3))
+
+    def test_rootn(self):
+        self.assertEqual(rootn(BigFloat(23), 1), BigFloat(23))
+        self.assertEqual(rootn(BigFloat(49), 2), BigFloat(7))
+        self.assertEqual(rootn(BigFloat(27), 3), BigFloat(3))
+        self.assertEqual(rootn(BigFloat(-27), 3), BigFloat(-3))
+        self.assertEqual(rootn(BigFloat(16), 4), BigFloat(2))
+        with self.assertRaises(ValueError):
+            rootn(BigFloat(23), -1)
+        self.assertTrue(is_nan(rootn(BigFloat(2), 0)))
+        self.assertTrue(is_nan(rootn(BigFloat(-2), 2)))
+
+        self.assertIsPositiveZero(rootn(-BigFloat(0), 2))
+        self.assertIsPositiveZero(rootn(BigFloat(0), 2))
+        self.assertIsNegativeZero(rootn(-BigFloat(0), 3))
+        self.assertIsPositiveZero(rootn(BigFloat(0), 3))
 
     # 5.6 Comparison Functions
     def test_cmp(self):
@@ -1884,6 +1911,27 @@ class BigFloatTests(unittest.TestCase):
         self.assertEqual(copysign(5, 7), 5)
         self.assertEqual(copysign(-5, 7), 5)
         self.assertEqual(copysign(-5, -7), -5)
+
+    # Testcase helper assertions
+
+    @contextlib.contextmanager
+    def assertIssuesDeprecationWarning(self):
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            try:
+                yield
+            finally:
+                self.assertEqual(len(w), 1)
+                self.assertTrue(issubclass(w[-1].category, DeprecationWarning))
+                self.assertIn("deprecated", str(w[-1].message))
+
+    def assertIsPositiveZero(self, x):
+        self.assertEqual(x, 0)
+        self.assertFalse(is_negative(x))
+
+    def assertIsNegativeZero(self, x):
+        self.assertEqual(x, 0)
+        self.assertTrue(is_negative(x))
 
 
 class IEEEContextTests(unittest.TestCase):

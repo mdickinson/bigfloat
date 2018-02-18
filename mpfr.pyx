@@ -21,6 +21,7 @@
 cimport cmpfr
 
 import sys
+import warnings
 
 cdef extern from "limits.h":
     cdef long LONG_MAX
@@ -838,7 +839,8 @@ def mpfr_sqrt(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     check_rounding_mode(rnd)
     return cmpfr.mpfr_sqrt(&rop._value, &op._value, rnd)
 
-def mpfr_rec_sqrt(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
+def mpfr_rec_sqrt(Mpfr_t rop not None, Mpfr_t op not None,
+                  cmpfr.mpfr_rnd_t rnd):
     """
     Set rop to the reciprocal square root of op, rounded in the direction rnd.
 
@@ -863,16 +865,44 @@ def mpfr_cbrt(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     check_rounding_mode(rnd)
     return cmpfr.mpfr_cbrt(&rop._value, &op._value, rnd)
 
+def mpfr_rootn_ui(Mpfr_t rop not None, Mpfr_t op not None,
+                  unsigned long int k, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the kth root of op rounded in the direction rnd.
+
+    For k = 0, set rop to NaN. For k odd (resp. even) and op negative
+    (including -Inf), set rop to a negative number (resp. NaN). If op is zero,
+    set rop to zero with the sign obtained by the usual limit rules, i.e., the
+    same sign as op if k is odd, and positive if k is even.
+
+    This function agrees with the rootn function of the IEEE 754-2008
+    standard.
+
+    """
+    check_initialized(rop)
+    check_initialized(op)
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_rootn_ui(&rop._value, &op._value, k, rnd)
+
 def mpfr_root(Mpfr_t rop not None, Mpfr_t op not None,
               unsigned long int k, cmpfr.mpfr_rnd_t rnd):
-    """
-    Set rop to the kth root of op, rounding in the direction rnd.
 
-    For k odd (resp. even) and op negative (including −Inf), set rop to a
-    negative number (resp. NaN). The kth root of −0 is defined to be −0,
-    whatever the parity of k.
+    """Set rop to the kth root of op, rounding in the direction rnd.
+
+    This function is the same as mpfr_rootn_ui except when op is -0 and k is
+    even: the result is -0 instead of +0 (the reason was to be consistent with
+    mpfr_sqrt). Said otherwise, if op is zero, set rop to op.
+
+    This function predates the IEEE 754-2008 standard and behaves differently
+    from its rootn function. It is marked as deprecated and will be removed
+    in a future release.
 
     """
+    warnings.warn(
+        "mpfr_root is deprecated. Use mpfr_rootn_ui instead.",
+        category=DeprecationWarning,
+    )
+
     check_initialized(rop)
     check_initialized(op)
     check_rounding_mode(rnd)
