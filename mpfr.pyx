@@ -2339,6 +2339,38 @@ def mpfr_fmod(Mpfr_t r not None, Mpfr_t x not None,
     check_rounding_mode(rnd)
     return cmpfr.mpfr_fmod(&r._value, &x._value, &y._value, rnd)
 
+def mpfr_fmodquo(Mpfr_t r not None, Mpfr_t x not None,
+                 Mpfr_t y not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set r to the value of x - n * y, rounded according to the direction rnd,
+    where n is the integer quotient of x divided by y, rounded toward zero.
+
+    Also return the low bits of the quotient.
+
+    Special values are handled as described in Section F.9.7.1 of the ISO C99
+    standard: If x is infinite or y is zero, r is NaN. If y is infinite and x
+    is finite, r is x rounded to the precision of r. If r is zero, it has the
+    sign of x.
+
+    Returns a pair (ternary, quotient) where ternary is the ternary value
+    corresponding to r, and q gives the low significant bits from the quotient
+    n (more precisely the number of bits in a C long minus one), with the
+    sign of x divided by y (except if those low bits are all zero, in which
+    case zero is returned). Note that x may be so large in magnitude relative
+    to y that an exact representation of the quotient is not practical.
+
+    """
+    cdef long int quotient
+
+    check_initialized(r)
+    check_initialized(x)
+    check_initialized(y)
+    check_rounding_mode(rnd)
+    ternary = cmpfr.mpfr_fmodquo(
+        &r._value, &quotient, &x._value, &y._value, rnd
+    )
+    return ternary, quotient
+
 def mpfr_remainder(Mpfr_t r not None, Mpfr_t x not None,
                    Mpfr_t y not None, cmpfr.mpfr_rnd_t rnd):
     """
@@ -2364,21 +2396,20 @@ def mpfr_remainder(Mpfr_t r not None, Mpfr_t x not None,
 def mpfr_remquo(Mpfr_t r not None, Mpfr_t x not None,
                 Mpfr_t y not None, cmpfr.mpfr_rnd_t rnd):
     """
-    Set r to x reduced modulo y, rounded in the direction rnd.  Also return
-    low bits of quotient.
-
     Set r to the value of x - n * y, rounded according to the direction rnd,
     where n is the integer quotient of x divided by y, rounded to the nearest
     integer (ties rounded to even).
 
+    Also return the low bits of the quotient.
+
     Special values are handled as described in Section F.9.7.1 of the ISO C99
     standard: If x is infinite or y is zero, r is NaN. If y is infinite and x
     is finite, r is x rounded to the precision of r. If r is zero, it has the
-    sign of x. The return value is the ternary value corresponding to r.
+    sign of x.
 
     Returns a pair (ternary, quotient) where ternary is the ternary value
     corresponding to r, and q gives the low significant bits from the quotient
-    n (more precisely the number of bits in a long minus one), with the
+    n (more precisely the number of bits in a C long minus one), with the
     sign of x divided by y (except if those low bits are all zero, in which
     case zero is returned). Note that x may be so large in magnitude relative
     to y that an exact representation of the quotient is not practical.

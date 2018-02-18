@@ -289,6 +289,9 @@ cdef extern from "mpfr.h":
     int mpfr_modf(mpfr_ptr iop, mpfr_ptr fop, mpfr_ptr op, mpfr_rnd_t rnd)
 
     int mpfr_fmod(mpfr_ptr r, mpfr_ptr x, mpfr_ptr y, mpfr_rnd_t rnd)
+    int mpfr_fmodquo(
+        mpfr_ptr r, long int *q, mpfr_ptr x, mpfr_ptr y, mpfr_rnd_t rnd
+    )
     int mpfr_remainder(mpfr_ptr r, mpfr_ptr x, mpfr_ptr y, mpfr_rnd_t rnd)
     int mpfr_remquo(
         mpfr_ptr r, long int *q, mpfr_ptr x, mpfr_ptr y, mpfr_rnd_t rnd

@@ -194,6 +194,7 @@ from mpfr import (
     mpfr_modf,
 
     mpfr_fmod,
+    mpfr_fmodquo,
     mpfr_remainder,
     mpfr_remquo,
     mpfr_integer_p,
@@ -1614,6 +1615,21 @@ class TestMpfr(unittest.TestCase):
             mpfr_get_d(r, MPFR_RNDN),
             2.7168146928204138,
         )
+
+    def test_fmodquo(self):
+        r = Mpfr(53)
+        x = Mpfr(53)
+        y = Mpfr(53)
+        mpfr_set_d(x, 9.0, MPFR_RNDN)
+        mpfr_set_d(y, 3.1415926535897931, MPFR_RNDN)
+        ternary, quotient = mpfr_fmodquo(r, x, y, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(r, MPFR_RNDN),
+            2.7168146928204138,
+        )
+        # Result should be exact.
+        self.assertEqual(ternary, 0)
+        self.assertEqual(quotient, 2)
 
     def test_remainder(self):
         r = Mpfr(53)
