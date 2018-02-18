@@ -1037,6 +1037,42 @@ def pos(x, context=None):
 
 
 ###############################################################################
+# 5.4 Conversion Functions
+###############################################################################
+
+def frexp(x, context=None):
+    """
+    Separate x into its significand and exponent.
+
+    Return a pair (significand, exponent) such that significand * 2**exponent
+    is equal to x (rounded to the current context), and
+    0.5 <= abs(significand) < 1. If x is zero then the returned significand
+    is a zero of the same sign and the exponent is zero. If x is NaN or
+    infinity then the significand has the same value, and the exponent
+    is undefined.
+
+    """
+    exponents = []
+
+    def mpfr_frexp_partial(rop, x, rnd):
+        # Wrapper around mpfr_frexp that lets us call it
+        significand, exponent = mpfr.mpfr_frexp(rop, x, rnd)
+        exponents.append(exponent)
+        return significand
+
+    significand = _apply_function_in_current_context(
+        BigFloat,
+        mpfr_frexp_partial,
+        (
+            BigFloat._implicit_convert(x),
+        ),
+        context,
+    )
+    exponent, = exponents
+    return significand, exponent
+
+
+###############################################################################
 # 5.5 Basic Arithmetic Functions
 ###############################################################################
 

@@ -60,6 +60,7 @@ from mpfr import (
     mpfr_get_si,
     mpfr_get_ui,
     mpfr_get_d_2exp,
+    mpfr_frexp,
     mpfr_get_str,
     mpfr_fits_ulong_p,
     mpfr_fits_slong_p,
@@ -2061,6 +2062,15 @@ class TestMpfr(unittest.TestCase):
         y, exp = mpfr_get_d_2exp(x, MPFR_RNDN)
         self.assertEqual(exp, 2)
         self.assertEqual(y, 0.7853981633974483)
+
+    def test_frexp(self):
+        x = Mpfr(53)
+        sig = Mpfr(53)
+        mpfr_set_d(x, 3.141592653589793, MPFR_RNDN)
+        ternary, exp = mpfr_frexp(sig, x, MPFR_RNDN)
+        self.assertEqual(ternary, 0)
+        self.assertEqual(exp, 2)
+        self.assertEqual(mpfr_get_d(sig, MPFR_RNDN), 0.7853981633974483)
 
     def test_get_str(self):
         x = Mpfr(20)

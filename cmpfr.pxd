@@ -108,6 +108,7 @@ cdef extern from "mpfr.h":
     long int mpfr_get_si(mpfr_ptr op, mpfr_rnd_t rnd)
     unsigned long int mpfr_get_ui(mpfr_ptr op, mpfr_rnd_t rnd)
     double mpfr_get_d_2exp(long int *exp, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_frexp(mpfr_exp_t *exp, mpfr_ptr y, mpfr_ptr x, mpfr_rnd_t rnd)
     char * mpfr_get_str(
         char *str, mpfr_exp_t *expptr, int b,
         size_t n, mpfr_ptr op, mpfr_rnd_t rnd

@@ -65,6 +65,9 @@ from bigfloat import (
     add, sub, mul, div, fmod, pow,
     sqrt, floordiv, mod,
 
+    # 5.4 Conversion Functions
+    frexp,
+
     # 5.5 Basic Arithmetic Functions
     root,
 
@@ -1775,6 +1778,16 @@ class BigFloatTests(unittest.TestCase):
             x._format_to_fixed_precision(3),
             (False, '1000', -3),
         )
+
+    # 5.4 Conversion Functions
+    def test_frexp(self):
+        x = BigFloat(float.fromhex('0x1.921fb54442d18p+1'))
+        significand, exponent = frexp(x)
+        self.assertIsInstance(exponent, int)
+        self.assertEqual(exponent, 2)
+
+        expected_significand = BigFloat(float.fromhex('0x1.921fb54442d18p-1'))
+        self.assertEqual(significand, expected_significand)
 
     # 5.5 Basic Arithmetic Functions
     def test_root(self):

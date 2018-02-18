@@ -513,6 +513,8 @@ Exponential and logarithmic functions
 .. autofunction:: expm1
 .. autofunction:: log1p
 
+.. autofunction:: frexp
+
 
 Trigonometric functions
 """""""""""""""""""""""

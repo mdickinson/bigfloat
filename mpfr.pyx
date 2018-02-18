@@ -654,8 +654,27 @@ def mpfr_get_d_2exp(Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
 
     check_initialized(op)
     check_rounding_mode(rnd)
-    d =  cmpfr.mpfr_get_d_2exp(&exp, &op._value, rnd)
+    d = cmpfr.mpfr_get_d_2exp(&exp, &op._value, rnd)
     return d, exp
+
+def mpfr_frexp(Mpfr_t y not None, Mpfr_t x not None, cmpfr.mpfr_rnd_t rnd):
+    """Decompose 'x' in the form 2**e * y.
+
+    Find exp and y such that 0.5<=abs(y)<1 and y times 2 raised to exp equals x
+    rounded to the precision of y, using the given rounding mode. If x is zero,
+    then y is set to a zero of the same sign and exp is set to 0. If x is NaN
+    or an infinity, then y is set to the same value and exp is undefined.
+
+    Sets y and returns a pair (ternary, exp) where ternary is the usual
+    ternary return value indicating in which direction rounding occurred.
+    """
+    cdef cmpfr.mpfr_exp_t exp
+
+    check_initialized(y)
+    check_initialized(x)
+    check_rounding_mode(rnd)
+    ternary = cmpfr.mpfr_frexp(&exp, &y._value, &x._value, rnd)
+    return ternary, exp
 
 def mpfr_get_str(int b, size_t n, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     """
@@ -2915,7 +2934,6 @@ def mpfr_erangeflag_p():
 #  mpfr_fits_sshort_p
 #  mpfr_fits_uintmax_p
 #  mpfr_fits_intmax_p
-#    -- only mpfr_fits_slong_p is wrapped from this section.
 #
 #
 # 5.5 Basic Arithmetic Functions

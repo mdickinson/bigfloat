@@ -67,6 +67,9 @@ __all__ = [
     # 5.2 Assignment Functions
     'pos',
 
+    # 5.4 Conversion functions
+    'frexp',
+
     # 5.5 Basic arithmetic functions
     'add', 'sub', 'mul', 'sqr', 'div', 'sqrt', 'rec_sqrt', 'cbrt', 'root',
     'pow', 'neg', 'abs', 'dim', 'floordiv', 'mod',
@@ -136,6 +139,9 @@ from bigfloat.core import (
 
     # 5.2 Assignment Functions
     pos,
+
+    # 5.4 Conversion Functions
+    frexp,
 
     # 5.5 Basic Arithmetic Functions
     add, sub, mul, sqr, div, sqrt, rec_sqrt, cbrt, root, pow, neg, abs, dim,
