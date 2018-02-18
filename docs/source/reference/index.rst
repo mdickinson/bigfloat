@@ -603,6 +603,7 @@ Miscellaneous functions
 .. autofunction:: ceil
 .. autofunction:: floor
 .. autofunction:: round
+.. autofunction:: roundeven
 .. autofunction:: trunc
 
 

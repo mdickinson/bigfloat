@@ -2141,6 +2141,22 @@ def mpfr_round(Mpfr_t rop not None, Mpfr_t op not None):
     check_initialized(op)
     return cmpfr.mpfr_round(&rop._value, &op._value)
 
+def mpfr_roundeven(Mpfr_t rop not None, Mpfr_t op not None):
+    """
+    Set rop to op rounded to the nearest representable integer, rounding
+    halfway cases with the even-rounding rule.
+
+    The returned value is zero when the result is exact, positive when it is
+    greater than the original value of op, and negative when it is
+    smaller. More precisely, the returned value is 0 when op is an integer
+    representable in rop, 1 or −1 when op is an integer that is not
+    representable in rop, 2 or −2 when op is not an integer.
+
+    """
+    check_initialized(rop)
+    check_initialized(op)
+    return cmpfr.mpfr_roundeven(&rop._value, &op._value)
+
 def mpfr_trunc(Mpfr_t rop not None, Mpfr_t op not None):
     """
     Set rop to op rounded to the next representable integer toward zero.
@@ -2156,7 +2172,8 @@ def mpfr_trunc(Mpfr_t rop not None, Mpfr_t op not None):
     check_initialized(op)
     return cmpfr.mpfr_trunc(&rop._value, &op._value)
 
-def mpfr_rint_ceil(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
+def mpfr_rint_ceil(Mpfr_t rop not None, Mpfr_t op not None,
+                   cmpfr.mpfr_rnd_t rnd):
     """
     Set rop to op rounded to the next higher or equal integer.
 
@@ -2175,7 +2192,8 @@ def mpfr_rint_ceil(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd
     check_rounding_mode(rnd)
     return cmpfr.mpfr_rint_ceil(&rop._value, &op._value, rnd)
 
-def mpfr_rint_floor(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
+def mpfr_rint_floor(Mpfr_t rop not None, Mpfr_t op not None,
+                    cmpfr.mpfr_rnd_t rnd):
     """
     Set rop to op rounded to the next lower or equal integer.
 
@@ -2194,7 +2212,8 @@ def mpfr_rint_floor(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rn
     check_rounding_mode(rnd)
     return cmpfr.mpfr_rint_floor(&rop._value, &op._value, rnd)
 
-def mpfr_rint_round(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
+def mpfr_rint_round(Mpfr_t rop not None, Mpfr_t op not None,
+                    cmpfr.mpfr_rnd_t rnd):
     """
     Set rop to op rounded to the nearest integer, rounding halfway cases
     away from zero.
@@ -2219,7 +2238,29 @@ def mpfr_rint_round(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rn
     check_rounding_mode(rnd)
     return cmpfr.mpfr_rint_round(&rop._value, &op._value, rnd)
 
-def mpfr_rint_trunc(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
+def mpfr_rint_roundeven(Mpfr_t rop not None, Mpfr_t op not None,
+                    cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to op rounded to the nearest integer, rounding halfway cases
+    to the nearest even integer.
+
+    If the result is not representable, it is rounded in the direction rnd. The
+    returned value is the ternary value associated with the considered
+    round-to-integer function (regarded in the same way as any other
+    mathematical function).
+
+    Unlike mpfr_roundeven, this function does perform a double rounding: first
+    op is rounded to the next integer toward zero, then this integer (if not
+    representable) is rounded in the given direction rnd.
+
+    """
+    check_initialized(rop)
+    check_initialized(op)
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_rint_roundeven(&rop._value, &op._value, rnd)
+
+def mpfr_rint_trunc(Mpfr_t rop not None, Mpfr_t op not None,
+                    cmpfr.mpfr_rnd_t rnd):
     """
     Set rop to op rounded to the next integer toward zero.
 
@@ -3090,8 +3131,12 @@ def mpfr_erangeflag_p():
 #  doesn't make a lot of sense to bypass Python's file handling
 #  mechanisms to read and write directly to a file.
 #
-#  mpfr_out_str
-#  mpfr_inp_str
+#    mpfr_out_str
+#    mpfr_inp_str
+#    mpfr_fpif_export
+#    mpfr_fpif_import
+#
+#  mpfr_dump is not currently implemented.
 #
 #
 #  5.9 Formatted Output Functions

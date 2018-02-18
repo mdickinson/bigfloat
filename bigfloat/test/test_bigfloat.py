@@ -2550,14 +2550,31 @@ ceil 0.1p0 -> 1p0
 ceil 0.dp0 -> 1p0
 ceil 1p0 -> 1p0
 
+round -1.8p0 -> -2p0
 round -1p0 -> -1p0
+round -0.8p0 -> -1p0
 round -0.dp0 -> -1p0
 round -0.1p0 -> -0p0
 round -0p0 -> -0p0
 round 0p0 -> 0p0
 round 0.1p0 -> 0p0
+round 0.8p0 -> 1p0
 round 0.dp0 -> 1p0
 round 1p0 -> 1p0
+round 1.8p0 -> 2p0
+
+roundeven -1.8p0 -> -2p0
+roundeven -1p0 -> -1p0
+roundeven -0.8p0 -> -0p0
+roundeven -0.dp0 -> -1p0
+roundeven -0.1p0 -> -0p0
+roundeven -0p0 -> -0p0
+roundeven 0p0 -> 0p0
+roundeven 0.1p0 -> 0p0
+roundeven 0.8p0 -> 0p0
+roundeven 0.dp0 -> 1p0
+roundeven 1p0 -> 1p0
+roundeven 1.8p0 -> 2p0
 
 trunc -1p0 -> -1p0
 trunc -0.dp0 -> -0p0

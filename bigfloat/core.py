@@ -2554,6 +2554,28 @@ def round(x, context=None):
     )
 
 
+def roundeven(x, context=None):
+    """
+    Return the nearest integer to x, rounding halfway cases with the
+    even-rounding rule.
+
+    If the result is not exactly representable, it will be rounded according to
+    the current context.
+
+    .. note::
+
+       This function corresponds to the MPFR function ``mpfr_rint_roundeven``,
+       not to ``mpfr_roundeven``.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_rint_roundeven,
+        (BigFloat._implicit_convert(x),),
+        context,
+    )
+
+
 def trunc(x, context=None):
     """
     Return the next integer towards zero.

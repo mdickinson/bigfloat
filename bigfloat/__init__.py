@@ -96,7 +96,7 @@ __all__ = [
     'const_log2', 'const_pi', 'const_euler', 'const_catalan',
 
     # 5.10 Integer and Remainder Related Functions
-    'ceil', 'floor', 'round', 'trunc',
+    'ceil', 'floor', 'round', 'roundeven', 'trunc',
     'frac', 'fmod', 'remainder', 'is_integer',
 
     # 5.12 Miscellaneous Functions
@@ -173,7 +173,7 @@ from bigfloat.core import (
     const_log2, const_pi, const_euler, const_catalan,
 
     # 5.10 Integer and Remainder Related Functions
-    ceil, floor, round, trunc,
+    ceil, floor, round, roundeven, trunc,
     frac, fmod, remainder, is_integer,
 
     # 5.12 Miscellaneous Functions

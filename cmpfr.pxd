@@ -276,11 +276,13 @@ cdef extern from "mpfr.h":
     int mpfr_ceil(mpfr_ptr rop, mpfr_ptr op)
     int mpfr_floor(mpfr_ptr rop, mpfr_ptr op)
     int mpfr_round(mpfr_ptr rop, mpfr_ptr op)
+    int mpfr_roundeven(mpfr_ptr rop, mpfr_ptr op)
     int mpfr_trunc(mpfr_ptr rop, mpfr_ptr op)
 
     int mpfr_rint_ceil(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_rint_floor(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_rint_round(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_rint_roundeven(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_rint_trunc(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
 
     int mpfr_frac(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
