@@ -227,8 +227,10 @@ from mpfr import (
     MPFR_VERSION_NUM,
     mpfr_get_patches,
     mpfr_buildopt_tls_p,
+    mpfr_buildopt_float128_p,
     mpfr_buildopt_decimal_p,
     mpfr_buildopt_gmpinternals_p,
+    mpfr_buildopt_sharedcache_p,
     mpfr_buildopt_tune_case,
 
     # 5.13 Exception Related Functions
@@ -1914,11 +1916,17 @@ class TestMpfr(unittest.TestCase):
     def test_buildopt_tls_p(self):
         self.assertIsInstance(mpfr_buildopt_tls_p(), bool)
 
+    def test_buildopt_float128_p(self):
+        self.assertIsInstance(mpfr_buildopt_float128_p(), bool)
+
     def test_buildopt_decimal_p(self):
         self.assertIsInstance(mpfr_buildopt_decimal_p(), bool)
 
     def test_buildopt_gmpinternals_p(self):
         self.assertIsInstance(mpfr_buildopt_gmpinternals_p(), bool)
+
+    def test_buildopt_sharedcache_p(self):
+        self.assertIsInstance(mpfr_buildopt_sharedcache_p(), bool)
 
     def test_buildopt_tune_case(self):
         self.assertIsInstance(mpfr_buildopt_tune_case(), str)

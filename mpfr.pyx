@@ -2743,6 +2743,15 @@ def mpfr_buildopt_tls_p():
     """
     return bool(cmpfr.mpfr_buildopt_tls_p())
 
+def mpfr_buildopt_float128_p():
+    """
+    Return True if MPFR was compiled with '__float128' support (that is, MPFR
+    was built with the --enable-float128 configure option), return False
+    otherwise.
+
+    """
+    return bool(cmpfr.mpfr_buildopt_float128_p())
+
 def mpfr_buildopt_decimal_p():
     """
     Return True if MPFR was compiled with decimal float support (that is, MPFR
@@ -2760,6 +2769,17 @@ def mpfr_buildopt_gmpinternals_p():
 
     """
     return bool(cmpfr.mpfr_buildopt_gmpinternals_p())
+
+def mpfr_buildopt_sharedcache_p():
+    """
+    Return True if MPFR was compiled so that all threads share the same cache
+    for one MPFR constant, like mpfr_const_pi or mpfr_const_log2 (that is, MPFR
+    was built with the ‘--enable-shared-cache’ configure option), return False
+    otherwise. If the return value is True, MPFR applications may need to
+    be compiled with the ‘-pthread’ option.
+
+    """
+    return bool(cmpfr.mpfr_buildopt_sharedcache_p())
 
 def mpfr_buildopt_tune_case():
     """
