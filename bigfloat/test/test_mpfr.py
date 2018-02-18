@@ -250,12 +250,14 @@ from mpfr import (
 
     mpfr_clear_underflow,
     mpfr_clear_overflow,
+    mpfr_clear_divby0,
     mpfr_clear_nanflag,
     mpfr_clear_inexflag,
     mpfr_clear_erangeflag,
 
     mpfr_set_underflow,
     mpfr_set_overflow,
+    mpfr_set_divby0,
     mpfr_set_nanflag,
     mpfr_set_inexflag,
     mpfr_set_erangeflag,
@@ -264,6 +266,7 @@ from mpfr import (
 
     mpfr_underflow_p,
     mpfr_overflow_p,
+    mpfr_divby0_p,
     mpfr_nanflag_p,
     mpfr_inexflag_p,
     mpfr_erangeflag_p,
@@ -2306,15 +2309,20 @@ class TestMpfr(unittest.TestCase):
 
     def test_flags(self):
         # Exercise flag getting and setting methods.
+        mpfr_set_underflow()
+        self.assertIs(mpfr_underflow_p(), True)
+        mpfr_clear_underflow()
+        self.assertIs(mpfr_underflow_p(), False)
+
         mpfr_set_overflow()
         self.assertIs(mpfr_overflow_p(), True)
         mpfr_clear_overflow()
         self.assertIs(mpfr_overflow_p(), False)
 
-        mpfr_set_underflow()
-        self.assertIs(mpfr_underflow_p(), True)
-        mpfr_clear_underflow()
-        self.assertIs(mpfr_underflow_p(), False)
+        mpfr_set_divby0()
+        self.assertIs(mpfr_divby0_p(), True)
+        mpfr_clear_divby0()
+        self.assertIs(mpfr_divby0_p(), False)
 
         mpfr_set_nanflag()
         self.assertIs(mpfr_nanflag_p(), True)
