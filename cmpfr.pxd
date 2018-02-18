@@ -60,6 +60,10 @@ cdef extern from "mpfr.h":
     mpfr_exp_t MPFR_EMIN_DEFAULT
     mpfr_exp_t MPFR_EMAX_DEFAULT
 
+    # Free cache policy
+    ctypedef enum mpfr_free_cache_t:
+        MPFR_FREE_LOCAL_CACHE = 1
+        MPFR_FREE_GLOBAL_CACHE = 2
 
     ###########################################################################
     # 5.1 Initialization Functions
@@ -171,9 +175,13 @@ cdef extern from "mpfr.h":
     int mpfr_log2(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_log10(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
 
+    int mpfr_log1p(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+
     int mpfr_exp(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_exp2(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_exp10(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+
+    int mpfr_expm1(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
 
     int mpfr_cos(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_sin(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
@@ -207,14 +215,14 @@ cdef extern from "mpfr.h":
 
     int mpfr_fac_ui(mpfr_ptr rop, unsigned long int op, mpfr_rnd_t rnd)
 
-    int mpfr_log1p(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
-    int mpfr_expm1(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_eint(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_li2(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_gamma(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_gamma_inc(mpfr_ptr rop, mpfr_ptr op, mpfr_ptr op2, mpfr_rnd_t rnd)
     int mpfr_lngamma(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_lgamma(mpfr_ptr rop, int *signp, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_digamma(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_beta(mpfr_ptr rop, mpfr_ptr op1, mpfr_ptr op2, mpfr_rnd_t rnd)
     int mpfr_zeta(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_zeta_ui(mpfr_ptr rop, unsigned long int op, mpfr_rnd_t rnd)
     int mpfr_erf(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
@@ -232,6 +240,14 @@ cdef extern from "mpfr.h":
     int mpfr_fms(
         mpfr_ptr rop, mpfr_ptr op1, mpfr_ptr op2, mpfr_ptr op3, mpfr_rnd_t rnd
     )
+    int mpfr_fmma(
+        mpfr_ptr rop, mpfr_ptr op1, mpfr_ptr op2, mpfr_ptr op3, mpfr_ptr op4,
+        mpfr_rnd_t rnd
+    )
+    int mpfr_fmms(
+        mpfr_ptr rop, mpfr_ptr op1, mpfr_ptr op2, mpfr_ptr op3, mpfr_ptr op4,
+        mpfr_rnd_t rnd
+    )
     int mpfr_agm(mpfr_ptr rop, mpfr_ptr op1, mpfr_ptr op2, mpfr_rnd_t rnd)
     int mpfr_hypot(mpfr_ptr rop, mpfr_ptr x, mpfr_ptr y, mpfr_rnd_t rnd)
 
@@ -241,7 +257,10 @@ cdef extern from "mpfr.h":
     int mpfr_const_pi(mpfr_ptr rop, mpfr_rnd_t rnd)
     int mpfr_const_euler(mpfr_ptr rop, mpfr_rnd_t rnd)
     int mpfr_const_catalan(mpfr_ptr rop, mpfr_rnd_t rnd)
+
     void mpfr_free_cache()
+    void mpfr_free_cache2(mpfr_free_cache_t way)
+    void mpfr_free_pool()
 
     ###########################################################################
     # 5.9 Formatted Output Functions

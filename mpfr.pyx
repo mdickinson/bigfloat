@@ -54,6 +54,9 @@ MPFR_RNDA =  cmpfr.MPFR_RNDA
 MPFR_EMAX_DEFAULT = cmpfr.MPFR_EMAX_DEFAULT
 MPFR_EMIN_DEFAULT = cmpfr.MPFR_EMIN_DEFAULT
 
+# Free cache policy (for mpfr_free_cache2)
+MPFR_FREE_LOCAL_CACHE = cmpfr.MPFR_FREE_LOCAL_CACHE
+MPFR_FREE_GLOBAL_CACHE = cmpfr.MPFR_FREE_GLOBAL_CACHE
 
 ###############################################################################
 # Helper functions, not exposed to Python
@@ -1205,6 +1208,16 @@ def mpfr_log10(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     check_rounding_mode(rnd)
     return cmpfr.mpfr_log10(&rop._value, &op._value, rnd)
 
+def mpfr_log1p(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the logarithm of one plus op, rounded in the direction rnd.
+
+    """
+    check_initialized(rop)
+    check_initialized(op)
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_log1p(&rop._value, &op._value, rnd)
+
 def mpfr_exp(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     """
     Set rop to the exponential of op, rounded in the direction rnd.
@@ -1234,6 +1247,17 @@ def mpfr_exp10(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_exp10(&rop._value, &op._value, rnd)
+
+def mpfr_expm1(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the exponential of op followed by a subtraction by one, rounded
+    in the direction rnd.
+
+    """
+    check_initialized(rop)
+    check_initialized(op)
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_expm1(&rop._value, &op._value, rnd)
 
 def mpfr_cos(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     """
@@ -1535,27 +1559,6 @@ def mpfr_fac_ui(Mpfr_t rop not None, unsigned long int op, cmpfr.mpfr_rnd_t rnd)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_fac_ui(&rop._value, op, rnd)
 
-def mpfr_log1p(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
-    """
-    Set rop to the logarithm of one plus op, rounded in the direction rnd.
-
-    """
-    check_initialized(rop)
-    check_initialized(op)
-    check_rounding_mode(rnd)
-    return cmpfr.mpfr_log1p(&rop._value, &op._value, rnd)
-
-def mpfr_expm1(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
-    """
-    Set rop to the exponential of op followed by a subtraction by one, rounded
-    in the direction rnd.
-
-    """
-    check_initialized(rop)
-    check_initialized(op)
-    check_rounding_mode(rnd)
-    return cmpfr.mpfr_expm1(&rop._value, &op._value, rnd)
-
 def mpfr_eint(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     """
     Set rop to the exponential integral of op, rounded in the direction
@@ -1599,7 +1602,24 @@ def mpfr_gamma(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     check_rounding_mode(rnd)
     return cmpfr.mpfr_gamma(&rop._value, &op._value, rnd)
 
-def mpfr_lngamma(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
+def mpfr_gamma_inc(Mpfr_t rop not None, Mpfr_t op not None,
+                   Mpfr_t op2 not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the value of the incomplete Gamma function on op and op2,
+    rounded in the direction rnd. (In the literature, mpfr_gamma_inc is
+    called the upper incomplete Gamma function or the complementary incomplete
+    Gamma function.) When op2 is zero and op is a negative integer, rop is
+    set to NaN.
+
+    """
+    check_initialized(rop)
+    check_initialized(op)
+    check_initialized(op2)
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_gamma_inc(&rop._value, &op._value, &op2._value, rnd)
+
+def mpfr_lngamma(Mpfr_t rop not None, Mpfr_t op not None,
+                 cmpfr.mpfr_rnd_t rnd):
     """
     Set rop to the value of the logarithm of the Gamma function on op, rounded
     in the direction rnd.
@@ -1648,6 +1668,18 @@ def mpfr_digamma(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     check_initialized(op)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_digamma(&rop._value, &op._value, rnd)
+
+def mpfr_beta(Mpfr_t rop not None, Mpfr_t op1 not None,
+              Mpfr_t op2 not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the value of the Beta function at arguments op1 and op2.
+
+    """
+    check_initialized(rop)
+    check_initialized(op1)
+    check_initialized(op2)
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_beta(&rop._value, &op1._value, &op2._value, rnd)
 
 def mpfr_zeta(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     """
@@ -1810,6 +1842,46 @@ def mpfr_fms(Mpfr_t rop not None,
         &rop._value, &op1._value, &op2._value, &op3._value, rnd
     )
 
+def mpfr_fmma(Mpfr_t rop not None,
+              Mpfr_t op1 not None,
+              Mpfr_t op2 not None,
+              Mpfr_t op3 not None,
+              Mpfr_t op4 not None,
+              cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to (op1 times op2) + (op3 times op4) rounded in the direction rnd.
+
+    """
+    check_initialized(rop)
+    check_initialized(op1)
+    check_initialized(op2)
+    check_initialized(op3)
+    check_initialized(op4)
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_fmma(
+        &rop._value, &op1._value, &op2._value, &op3._value, &op4._value, rnd
+    )
+
+def mpfr_fmms(Mpfr_t rop not None,
+              Mpfr_t op1 not None,
+              Mpfr_t op2 not None,
+              Mpfr_t op3 not None,
+              Mpfr_t op4 not None,
+              cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to (op1 times op2) - (op3 times op4) rounded in the direction rnd.
+
+    """
+    check_initialized(rop)
+    check_initialized(op1)
+    check_initialized(op2)
+    check_initialized(op3)
+    check_initialized(op4)
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_fmms(
+        &rop._value, &op1._value, &op2._value, &op3._value, &op4._value, rnd
+    )
+
 def mpfr_agm(Mpfr_t rop not None,
              Mpfr_t op1 not None,
              Mpfr_t op2 not None,
@@ -1929,6 +2001,29 @@ def mpfr_free_cache():
 
     """
     cmpfr.mpfr_free_cache()
+
+def mpfr_free_cache2(way):
+    """
+    Free various caches and pools used by MPFR internally, as specified by
+    'way', which is a set of flags.
+
+    - those local to the current thread if MPFR_FREE_LOCAL_CACHE is set
+    - those shared by all threads if MPFR_FREE_GLOBAL_CACHE is set.
+
+    Note: mpfr_free_cache2(MPFR_FREE_LOCAL_CACHE|MPFR_FREE_GLOBAL_CACHE)
+    is currently equivalent to mpfr_free_cache().
+
+    """
+    cmpfr.mpfr_free_cache2(way)
+
+def mpfr_free_pool():
+
+    """
+    Free the pools used by MPFR internally. The pools are automatically
+    freed after the thread-local caches are freed (via mpfr_free_cache).
+
+    """
+    cmpfr.mpfr_free_pool()
 
 
 ###########################################################################

@@ -78,7 +78,7 @@ if sys.version_info < (3,):
     _bit_length_correction = {
         '0': 4, '1': 3, '2': 2, '3': 2, '4': 1, '5': 1, '6': 1, '7': 1,
         '8': 0, '9': 0, 'a': 0, 'b': 0, 'c': 0, 'd': 0, 'e': 0, 'f': 0,
-        }
+    }
 
     def _bit_length(n):
         """Bit length of an integer"""
@@ -415,11 +415,11 @@ class BigFloat(mpfr.Mpfr_t):
                 sign, body = '', formatted
 
             if body not in ('inf', 'nan'):
-                before = body[:-digits_after-1]
+                before = body[:-digits_after - 1]
                 after = body[-digits_after:]
                 assert before.isdigit()
                 assert after.isdigit()
-                assert body[-digits_after-1] == '.'
+                assert body[-digits_after - 1] == '.'
 
                 # Move two digits from after to before, strip leading zeros,
                 # and reconsistute.
@@ -2067,6 +2067,28 @@ def gamma(x, context=None):
     )
 
 
+def gamma_inc(x, y, context=None):
+    """
+    Return the value of the incomplete Gamma function of x and y.
+
+    In the literature, mpfr_gamma_inc is called the upper incomplete
+    Gamma function or the complementary incomplete Gamma function.
+
+    For positive y, it's defined as the integral from y to infinity
+    of t**(x-1) exp(-t) with respect to t.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_gamma_inc,
+        (
+            BigFloat._implicit_convert(x),
+            BigFloat._implicit_convert(y),
+        ),
+        context,
+    )
+
+
 def lngamma(x, context=None):
     """
     Return the value of the logarithm of the Gamma function of x.
@@ -2102,6 +2124,22 @@ def digamma(x, context=None):
         BigFloat,
         mpfr.mpfr_digamma,
         (BigFloat._implicit_convert(x),),
+        context,
+    )
+
+
+def beta(x, y, context=None):
+    """
+    Return the value of the Beta function at arguments x and y.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_beta,
+        (
+            BigFloat._implicit_convert(x),
+            BigFloat._implicit_convert(y),
+        ),
         context,
     )
 
@@ -2272,6 +2310,44 @@ def fms(x, y, z, context=None):
             BigFloat._implicit_convert(x),
             BigFloat._implicit_convert(y),
             BigFloat._implicit_convert(z),
+        ),
+        context,
+    )
+
+
+def fmma(x, y, z, w, context=None):
+    """
+    Return (x * y) + (z * w), with a single rounding according to the current
+    context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_fmma,
+        (
+            BigFloat._implicit_convert(x),
+            BigFloat._implicit_convert(y),
+            BigFloat._implicit_convert(z),
+            BigFloat._implicit_convert(w),
+        ),
+        context,
+    )
+
+
+def fmms(x, y, z, w, context=None):
+    """
+    Return (x * y) - (z * w), with a single rounding according to the current
+    context.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_fmms,
+        (
+            BigFloat._implicit_convert(x),
+            BigFloat._implicit_convert(y),
+            BigFloat._implicit_convert(z),
+            BigFloat._implicit_convert(w),
         ),
         context,
     )

@@ -112,7 +112,7 @@ class Context(object):
             rounding=(other.rounding
                       if other.rounding is not None
                       else self.rounding),
-            )
+        )
 
     def __eq__(self, other):
         return (
@@ -121,7 +121,7 @@ class Context(object):
             self.emax == other.emax and
             self.subnormalize == other.subnormalize and
             self.rounding == other.rounding
-            )
+        )
 
     def __ne__(self, other):
         return not (self == other)

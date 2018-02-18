@@ -25,6 +25,8 @@ from mpfr import (
     MPFR_RNDN, MPFR_RNDZ, MPFR_RNDU, MPFR_RNDD, MPFR_RNDA,
     MPFR_PREC_MIN, MPFR_PREC_MAX,
 
+    MPFR_FREE_LOCAL_CACHE, MPFR_FREE_GLOBAL_CACHE,
+
     # Base extension type
     Mpfr_t,
 
@@ -104,9 +106,13 @@ from mpfr import (
     mpfr_log2,
     mpfr_log10,
 
+    mpfr_log1p,
+
     mpfr_exp,
     mpfr_exp2,
     mpfr_exp10,
+
+    mpfr_expm1,
 
     mpfr_cos,
     mpfr_sin,
@@ -134,14 +140,14 @@ from mpfr import (
 
     mpfr_fac_ui,
 
-    mpfr_log1p,
-    mpfr_expm1,
     mpfr_eint,
     mpfr_li2,
     mpfr_gamma,
+    mpfr_gamma_inc,
     mpfr_lngamma,
     mpfr_lgamma,
     mpfr_digamma,
+    mpfr_beta,
     mpfr_zeta,
     mpfr_zeta_ui,
     mpfr_erf,
@@ -155,6 +161,8 @@ from mpfr import (
 
     mpfr_fma,
     mpfr_fms,
+    mpfr_fmma,
+    mpfr_fmms,
     mpfr_agm,
     mpfr_hypot,
 
@@ -165,6 +173,8 @@ from mpfr import (
     mpfr_const_euler,
     mpfr_const_catalan,
     mpfr_free_cache,
+    mpfr_free_cache2,
+    mpfr_free_pool,
 
     # 5.10 Integer and Remainder Related Functions
     mpfr_rint,
@@ -437,11 +447,11 @@ class TestMpfr(unittest.TestCase):
         self.assertIs(mpfr_fits_slong_p(x, MPFR_RNDN), True)
 
         x = Mpfr(64)
-        mpfr_set_str(x, str(_LONG_MAX+1), 10, MPFR_RNDN)
+        mpfr_set_str(x, str(_LONG_MAX + 1), 10, MPFR_RNDN)
         self.assertIs(mpfr_fits_slong_p(x, MPFR_RNDN), False)
 
         x = Mpfr(64)
-        mpfr_set_str(x, str(_LONG_MIN-1), 10, MPFR_RNDN)
+        mpfr_set_str(x, str(_LONG_MIN - 1), 10, MPFR_RNDN)
         self.assertIs(mpfr_fits_slong_p(x, MPFR_RNDN), False)
 
     def test_fits_ulong_p(self):
@@ -454,7 +464,7 @@ class TestMpfr(unittest.TestCase):
         self.assertIs(mpfr_fits_ulong_p(x, MPFR_RNDN), True)
 
         x = Mpfr(64)
-        mpfr_set_str(x, str(_ULONG_MAX+1), 10, MPFR_RNDN)
+        mpfr_set_str(x, str(_ULONG_MAX + 1), 10, MPFR_RNDN)
         self.assertIs(mpfr_fits_ulong_p(x, MPFR_RNDN), False)
 
         x = Mpfr(64)
@@ -1221,8 +1231,8 @@ class TestMpfr(unittest.TestCase):
             (mpfr_j1, 2.625, 0.46377974664560533),
             (mpfr_y0, 2.625, 0.47649455655720157),
             (mpfr_y1, 2.625, 0.19848583551020473),
-            (mpfr_ai, 2.625,  0.012735929874768289),
-            ]
+            (mpfr_ai, 2.625, 0.012735929874768289),
+        ]
 
         rop = Mpfr(53)
         op = Mpfr(53)
@@ -1235,6 +1245,15 @@ class TestMpfr(unittest.TestCase):
                 expected_output,
                 msg='{}'.format(fn),
             )
+
+    def test_gamma_inc(self):
+        rop = Mpfr(53)
+        op1 = Mpfr(53)
+        op2 = Mpfr(53)
+        mpfr_set_d(op1, 2.625, MPFR_RNDN)
+        mpfr_set_d(op2, 1.7, MPFR_RNDN)
+        mpfr_gamma_inc(rop, op1, op2, MPFR_RNDN)
+        self.assertEqual(mpfr_get_d(rop, MPFR_RNDN), 0.9776184124046272)
 
     def test_lgamma(self):
         x = Mpfr(53)
@@ -1257,6 +1276,15 @@ class TestMpfr(unittest.TestCase):
             mpfr_get_d(y, MPFR_RNDN),
             1.2655121234846454,  # log(2 * sqrt(pi))
         )
+
+    def test_beta(self):
+        rop = Mpfr(53)
+        op1 = Mpfr(53)
+        op2 = Mpfr(53)
+        mpfr_set_d(op1, 2.625, MPFR_RNDN)
+        mpfr_set_d(op2, 1.7, MPFR_RNDN)
+        mpfr_beta(rop, op1, op2, MPFR_RNDN)
+        self.assertEqual(mpfr_get_d(rop, MPFR_RNDN), 0.14456544347079234)
 
     def test_zeta_ui(self):
         x = Mpfr(53)
@@ -1346,6 +1374,38 @@ class TestMpfr(unittest.TestCase):
             24.0,
         )
 
+    def test_fmma(self):
+        op1 = Mpfr(53)
+        op2 = Mpfr(53)
+        op3 = Mpfr(53)
+        op4 = Mpfr(53)
+        rop = Mpfr(53)
+        mpfr_set_d(op1, 5.0, MPFR_RNDN)
+        mpfr_set_d(op2, 7.0, MPFR_RNDN)
+        mpfr_set_d(op3, 11.0, MPFR_RNDN)
+        mpfr_set_d(op4, 13.0, MPFR_RNDN)
+        mpfr_fmma(rop, op1, op2, op3, op4, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(rop, MPFR_RNDN),
+            178.0,
+        )
+
+    def test_fmms(self):
+        op1 = Mpfr(53)
+        op2 = Mpfr(53)
+        op3 = Mpfr(53)
+        op4 = Mpfr(53)
+        rop = Mpfr(53)
+        mpfr_set_d(op1, 5.0, MPFR_RNDN)
+        mpfr_set_d(op2, 7.0, MPFR_RNDN)
+        mpfr_set_d(op3, 11.0, MPFR_RNDN)
+        mpfr_set_d(op4, 13.0, MPFR_RNDN)
+        mpfr_fmms(rop, op1, op2, op3, op4, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(rop, MPFR_RNDN),
+            -108.0,
+        )
+
     def test_agm(self):
         x = Mpfr(53)
         y = Mpfr(53)
@@ -1406,6 +1466,17 @@ class TestMpfr(unittest.TestCase):
         # It's awkward to test this; we settle for checking that the function
         # has been exported and is callable.
         mpfr_free_cache()
+
+    def test_free_cache2(self):
+        # Just check that we can call without raising.
+        mpfr_free_cache2(MPFR_FREE_LOCAL_CACHE)
+        mpfr_free_cache2(MPFR_FREE_GLOBAL_CACHE)
+        mpfr_free_cache2(MPFR_FREE_LOCAL_CACHE | MPFR_FREE_GLOBAL_CACHE)
+
+    def test_free_pool(self):
+        # It's awkward to test this; we settle for checking that the function
+        # has been exported and is callable.
+        mpfr_free_pool()
 
     # 5.10 Integer and Remainder Related Functions
     def test_rint(self):
@@ -2224,7 +2295,7 @@ class TestMpfr(unittest.TestCase):
 
     def test_limits(self):
         # Regression test for badly-defined LONG_MAX and LONG_MIN.
-        self.assertGreaterEqual(_LONG_MAX, 2**31-1)
+        self.assertGreaterEqual(_LONG_MAX, 2**31 - 1)
         self.assertLessEqual(_LONG_MIN, -2**31)
 
     # Testcase assertions.
