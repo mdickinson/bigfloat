@@ -33,6 +33,11 @@ Changes
 
 - MPFR version 3.0.0 or later is required.
 
+- Support for Python 3.7 and 3.8 added.
+
+- Support for Python 3.4 has been dropped. Python 2.7, and Python 3.5 or later
+  are still supported.
+
 Bugfixes
 --------
 
