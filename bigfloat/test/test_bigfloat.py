@@ -174,7 +174,7 @@ dummy_ops = [
 ]
 if sys.version_info < (3,):
     dummy_ops.extend(["div", "rdiv"])
-if sys.version_info >= (3, 5):
+if sys.version_info >= (3,):
     dummy_ops.extend(["matmul", "rmatmul"])
 
 for op in dummy_ops:
@@ -419,7 +419,7 @@ class BigFloatTests(unittest.TestCase):
         self.assertEqual(bf ** other, "rpow")
         if sys.version_info < (3,):
             self.assertEqual(operator.div(bf, other), "rdiv")
-        if sys.version_info >= (3, 5):
+        if sys.version_info >= (3,):
             self.assertEqual(operator.matmul(bf, other), "rmatmul")
 
         # Bitwise: &, ^, |, <<, >>
@@ -447,7 +447,7 @@ class BigFloatTests(unittest.TestCase):
             binary_ops.extend(
                 [operator.gt, operator.lt, operator.ge, operator.le])
 
-        if sys.version_info >= (3, 5):
+        if sys.version_info >= (3,):
             binary_ops.append(operator.matmul)
 
         bf = BigFloat(123)

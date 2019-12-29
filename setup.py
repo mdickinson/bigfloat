@@ -46,7 +46,7 @@ idea::
 Features
 --------
 
-- Supports Python 2 (version 2.7) and Python 3 (version 3.4 or later).
+- Supports Python 2 (version 2.7) and Python 3 (version 3.5 or later).
 
 - Exactly reproducible correctly-rounded results across platforms;
   precisely-defined semantics compatible with the IEEE 754-2008 standard.
@@ -238,9 +238,10 @@ Operating System :: OS Independent
 Programming Language :: Python :: 2
 Programming Language :: Python :: 2.7
 Programming Language :: Python :: 3
-Programming Language :: Python :: 3.4
 Programming Language :: Python :: 3.5
 Programming Language :: Python :: 3.6
+Programming Language :: Python :: 3.7
+Programming Language :: Python :: 3.8
 Programming Language :: Python :: Implementation :: CPython
 Topic :: Scientific/Engineering :: Mathematics
 """.splitlines()

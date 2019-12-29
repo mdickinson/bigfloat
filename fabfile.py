@@ -88,8 +88,9 @@ def docs(python=PYTHON):
 
 
 def test_all():
-    """Run tests on Python versions 2.7 and 3.4 through 3.6."""
+    """Run tests on Python versions 2.7 and 3.5 through 3.8."""
     test(python="python2.7")
-    test(python="python3.4")
     test(python="python3.5")
     test(python="python3.6")
+    test(python="python3.7")
+    test(python="python3.8")
