@@ -263,6 +263,7 @@ setup(
     version=version_info['release'],
     description=DESCRIPTION,
     long_description=LONG_DESCRIPTION,
+    long_description_content_type='text/x-rst',
     install_requires=["six"],
     author='Mark Dickinson',
     author_email='dickinsm@gmail.com',
