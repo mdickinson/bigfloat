@@ -1,19 +1,23 @@
-Changes since bigfloat 0.3.0
-============================
+What's new in bigfloat 0.4.0?
+=============================
+
+This minor release adds a number of small features, changes the default
+context to match IEEE 754 quadruple precision (binary128), and fixes support
+for recent Python versions.
 
 New Features
 ------------
 
-- Wrap mpfr_buildopt_gmpinternals_p and mpfr_buildopt_tune_case.
+- Wrap mpfr_buildopt_gmpinternals_p and mpfr_buildopt_tune_case. (#54)
 
 - Add bigfloat.__version__ (#46).
 
-- Add bigfloat.notequal.
+- Add bigfloat.notequal. (#47)
 
 - Add format support. (#58).
 
 - Add support for ``round``, ``math.floor``, ``math.ceil``, ``math.trunc`` on
-  Python 3.
+  Python 3. (#64)
 
 - Add support for ``divmod`` and the ``//`` operator. (#69)
 
@@ -22,6 +26,9 @@ New Features
 
 Changes
 -------
+
+- The default context now matches IEEE 754 quadruple precision instead
+  of double precision. (#72)
 
 - Infinities and NaNs are now represented as 'inf' and 'nan' rather
   than 'Infinity' and 'NaN', for consistency with the float type, and
@@ -33,16 +40,28 @@ Changes
 
 - MPFR version 3.0.0 or later is required.
 
-- Support for Python 3.7 and 3.8 added. (#81)
+- Support for Python 3.7 and 3.8 added.
 
-- Support for Python 3.4 has been dropped. Python 2.7, and Python 3.5 or later
-  are still supported. (#81)
+- Support for Python versions earlier than 3.5 or 2.7 has been dropped.
+  (#75, 81).
 
 Bugfixes
 --------
 
 - The ``root`` function was accidentally wrapping ``cbrt`` (#60).
   Now fixed (#62).
+
+- Fix a test failure with Mpfr 4.0, that was due a change in the value
+  of ``MPFR_PREC_MIN``. (#77)
+
+Documentation
+-------------
+
+- Installation documentation cleaned up. (#68)
+
+- Add ``cmp`` to list of shadowed builtins in ``README.rst``. (#63)
+
+- Fix (outdated) uses of strings for rounding modes. (#57)
 
 
 What's new in bigfloat 0.3.0?
