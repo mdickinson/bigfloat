@@ -16,7 +16,7 @@
 # along with the bigfloat package.  If not, see <http://www.gnu.org/licenses/>.
 
 major = 0
-minor = 4
+minor = 5
 patch = 0
 prerelease = 'dev'
 
