@@ -23,9 +23,9 @@ The main type of interest is the :class:`BigFloat` class.  The
 a string:
 
    >>> BigFloat(123)
-   BigFloat.exact('123.00000000000000', precision=53)
-   >>> BigFloat(-4.56)
-   BigFloat.exact('-4.5599999999999996', precision=53)
+   BigFloat.exact('123.000000000000000000000000000000000', precision=113)
+   >>> BigFloat("-4.56")
+   BigFloat.exact('-4.55999999999999999999999999999999966', precision=113)
 
 Each :class:`BigFloat` instance has both a *value* and a *precision*.
 The precision gives the number of bits used to store the significand
@@ -41,7 +41,8 @@ representable.  Just like Python floats, the printed form of a
 stored value, for the benefit of human readers.
 
 The precision of a newly-constructed :class:`BigFloat` instance is
-dictated by the *current precision*, which defaults to ``53``.  This
+dictated by the *current precision*, which defaults to ``113`` (the precision
+of the IEEE 754 "binary128" format, a.k.a. quadruple precision).  This
 setting can be overridden by supplying the ``context`` keyword
 argument to the constructor:
 
@@ -54,9 +55,9 @@ defaults to :data:`RoundTiesToEven`; again, this can be overridden with
 the ``context`` keyword argument:
 
    >>> BigFloat('3.14')
-   BigFloat.exact('3.1400000000000001', precision=53)
+   BigFloat.exact('3.14000000000000000000000000000000011', precision=113)
    >>> BigFloat('3.14', context=RoundTowardZero)
-   BigFloat.exact('3.1399999999999997', precision=53)
+   BigFloat.exact('3.13999999999999999999999999999999972', precision=113)
    >>> BigFloat('3.14', context=RoundTowardPositive + precision(24))
    BigFloat.exact('3.14000010', precision=24)
 
@@ -97,12 +98,13 @@ object that corresponds to the IEEE 754 binary128 interchange format::
    >>> BigFloat('1.1', quadruple_precision)
    BigFloat.exact('1.10000000000000000000000000000000008', precision=113)
 
-The current settings for precision and rounding mode given by the :ref:`current
-context <current context>`, accessible via the :func:`getcontext` function:
+The current settings for precision and rounding mode are given by the
+:ref:`current context <current context>`, accessible via the :func:`getcontext`
+function:
 
    >>> getcontext()
-   Context(precision=53, emax=1073741823, emin=-1073741823, subnormalize=False,
-   rounding='RoundTiesToEven')
+   Context(precision=113, emax=16384, emin=-16493, subnormalize=True,
+   rounding=ROUND_TIES_TO_EVEN)
 
 There's also a :func:`setcontext` function for changing the current
 context; however, the preferred method for making temporary changes to
@@ -138,9 +140,9 @@ terms of :meth:`BigFloat.exact`.  The :class:`str` of a :class:`BigFloat` looks
 prettier, but doesn't supply enough information to recover that
 :class:`BigFloat` exactly if you don't know the precision:
 
-   >>> print BigFloat('1e1000', precision(20))
+   >>> print(BigFloat('1e1000', precision(20)))
    9.9999988e+999
-   >>> print BigFloat('1e1000', precision(21))
+   >>> print(BigFloat('1e1000', precision(21)))
    9.9999988e+999
 
 Arithmetic on :class:`BigFloat` instances
@@ -151,9 +153,9 @@ those instances can be freely mixed with integers and floats (but not strings!)
 in those operations:
 
    >>> BigFloat(1234)/3
-   BigFloat.exact('411.33333333333331', precision=53)
+   BigFloat.exact('411.333333333333333333333333333333317', precision=113)
    >>> BigFloat('1e1233')**0.5
-   BigFloat.exact('3.1622776601683794e+616', precision=53)
+   BigFloat.exact('3.16227766016837933199889354443271851e+616', precision=113)
 
 As with the :class:`BigFloat` constructor, the precision for the result is
 taken from the current context, as is the rounding mode used to round
@@ -176,7 +178,7 @@ representable as a :class:`BigFloat`.
    BigFloat.exact('323447650962475799134464776910021681085720319890462540093389
    5331391691459636928060001.0', precision=281)
    >>> +BigFloat.exact(7**100)
-   BigFloat.exact('3.2344765096247579e+84', precision=53)
+   BigFloat.exact('3.23447650962475799134464776910021692e+84', precision=113)
 
    This makes the unary plus operator useful as a way to round a
    result produced in a different context to the current context.
@@ -186,9 +188,9 @@ corresponding function.  For example, the :func:`div` function
 corresponds to usual (true) division:
 
    >>> 355/BigFloat(113)
-   BigFloat.exact('3.1415929203539825', precision=53)
+   BigFloat.exact('3.14159292035398230088495575221238935', precision=113)
    >>> div(355, 113)
-   BigFloat.exact('3.1415929203539825', precision=53)
+   BigFloat.exact('3.14159292035398230088495575221238935', precision=113)
 
 This is useful for a couple of reasons: one reason is that it makes it
 possible to use ``div(x, y)`` in contexts where a :class:`BigFloat` result is
@@ -209,9 +211,9 @@ difference in the results of the following:
    >>> y = 10**16.   # 10.**16 is exactly representable as a float
    >>> x - y
    0.0
-   >>> BigFloat(x) - BigFloat(y)
+   >>> BigFloat(x, double_precision) - BigFloat(y, double_precision)
    BigFloat.exact('0', precision=53)
-   >>> sub(x, y)
+   >>> sub(x, y, double_precision)
    BigFloat.exact('1.0000000000000000', precision=53)
 
 For the first subtraction, the integer is first converted to a float,
@@ -247,20 +249,20 @@ operations above:
 
 Here are some examples::
 
-    >>> sqrt(1729, context=RoundTowardZero)
-    BigFloat.exact('41.581245772583578', precision=53)
-    >>> sqrt(1729, context=RoundTowardPositive)
-    BigFloat.exact('41.581245772583586', precision=53)
-    >>> atanh(0.5, context=precision(20))
-    BigFloat.exact('0.54930592', precision=20)
-    >>> const_catalan(precision(1000))
-    BigFloat.exact('0.9159655941772190150546035149323841107741493742816721342664
-    9811962176301977625476947935651292611510624857442261919619957903589880332585
-    9059431594737481158406995332028773319460519038727478164087865909024706484152
-    1630002287276409423882599577415088163974702524820115607076448838078733704899
-    00864775113226027', precision=1000)
-    >>> 4*exp(-const_pi()/2/agm(1, 1e-100))
-    BigFloat.exact('9.9999999999998517e-101', precision=53)
+   >>> sqrt(1729, context=RoundTowardZero)
+   BigFloat.exact('41.5812457725835818902802091854716460', precision=113)
+   >>> sqrt(1729, context=RoundTowardPositive)
+   BigFloat.exact('41.5812457725835818902802091854716521', precision=113)
+   >>> atanh(0.5, context=precision(20))
+   BigFloat.exact('0.54930592', precision=20)
+   >>> const_catalan(precision(1000))
+   BigFloat.exact('0.9159655941772190150546035149323841107741493742816721342664
+   9811962176301977625476947935651292611510624857442261919619957903589880332585
+   9059431594737481158406995332028773319460519038727478164087865909024706484152
+   1630002287276409423882599577415088163974702524820115607076448838078733704899
+   00864775113226027', precision=1000)
+   >>> 4*exp(-const_pi()/2/agm(1, 1e-100))
+   BigFloat.exact('9.9999999999998517e-101', precision=53)
 
 For a full list of the supported functions, see the :ref:`standard functions`
 section of the :ref:`api reference`.
@@ -282,7 +284,7 @@ the thousandth harmonic number:
    ...         lower_bound = sum(div(1, n) for n in range(1, 1001))
    ...     with RoundTowardPositive:  # upper bound
    ...         upper_bound = sum(div(1, n) for n in range(1, 1001))
-   ... 
+   ...
    >>> lower_bound
    BigFloat.exact('7.4854708605503449126565182015873', precision=100)
    >>> upper_bound
@@ -297,7 +299,7 @@ the nth harmonic number [#harmonic]_:
    >>> n = 1000
    >>> with precision(100):
    ...     approx = log(n) + const_euler() + div(1, 2*n) - 1/(12*sqr(n))
-   ... 
+   ...
    >>> approx
    BigFloat.exact('7.4854708605503365793271531207983', precision=100)
 
@@ -306,9 +308,9 @@ Let's check it:
 
    >>> error = approx - lower_bound
    >>> error
-   BigFloat.exact('-8.3333293650807890e-15', precision=53)
+   BigFloat.exact('-8.33332936508078900174283813097652403e-15', precision=113)
    >>> -1/(120*pow(n, 4))
-   BigFloat.exact('-8.3333333333333336e-15', precision=53)
+   BigFloat.exact('-8.33333333333333333333333333333333391e-15', precision=113)
 
 A more permanent change to the context can be effected using the
 :func:`setcontext` function, which takes a single argument of type
@@ -350,25 +352,26 @@ set and test these flags:
 
    >>> set_flagstate(set())  # clear all flags
    >>> get_flagstate()
-   set([])
+   set()
    >>> exp(10**100)
-   BigFloat.exact('inf', precision=53)
+   BigFloat.exact('inf', precision=113)
    >>> get_flagstate()
-   set(['Overflow', 'Inexact'])
+   {'Overflow', 'Inexact'}
 
 These flags show that overflow occurred, and that the given result
 (infinity) was inexact.  The flags are sticky: none of the standard
 operations ever clears a flag:
 
+
    >>> sqrt(2)
-   BigFloat.exact('1.4142135623730951', precision=53)
+   BigFloat.exact('1.41421356237309504880168872420969798', precision=113)
    >>> get_flagstate()  # overflow flag still set from the exp call
-   set(['Overflow', 'Inexact'])
+   {'Overflow', 'Inexact'}
    >>> set_flagstate(set())  # clear all flags
    >>> sqrt(2)
-   BigFloat.exact('1.4142135623730951', precision=53)
-   >>> get_flagstate()   # sqrt only sets the inexact flag
-   set(['Inexact'])
+   BigFloat.exact('1.41421356237309504880168872420969798', precision=113)
+   >>> get_flagstate()  # sqrt only sets the inexact flag
+   {'Inexact'}
 
 The functions :func:`clear_flag`, :func:`set_flag` and
 :func:`test_flag` allow clearing, setting and testing of individual
