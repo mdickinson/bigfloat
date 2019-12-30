@@ -28,7 +28,7 @@ Changes
 -------
 
 - The default context now matches IEEE 754 quadruple precision instead
-  of double precision. (#72)
+  of double precision. (#72, #89, #87)
 
 - Infinities and NaNs are now represented as 'inf' and 'nan' rather
   than 'Infinity' and 'NaN', for consistency with the float type, and
@@ -51,6 +51,10 @@ Bugfixes
 
 - Fix a test failure with Mpfr 4.0, that was due a change in the value
   of ``MPFR_PREC_MIN``. (#77)
+
+- Fix initialization of the context on background threads. (#91)
+
+- Fix unit tests that changed the context and didn't reset their changes. (#92)
 
 Documentation
 -------------
