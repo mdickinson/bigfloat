@@ -214,9 +214,8 @@ def getcontext(_local=local):
     try:
         return _local.__bigfloat_context__
     except AttributeError:
-        _local.__bigfloat_context__ = DefaultContext
-        _local.__context_stack__ = []
-        return _local.__bigfloat_context__
+        context = _local.__bigfloat_context__ = DefaultContext
+        return context
 
 
 def setcontext(context, _local=local):
@@ -233,11 +232,18 @@ def setcontext(context, _local=local):
 
 
 def _pushcontext(context, _local=local):
-    _local.__context_stack__.append(getcontext())
+    try:
+        context_stack = _local.__context_stack__
+    except AttributeError:
+        context_stack = _local.__context_stack__ = []
+    context_stack.append(getcontext())
     setcontext(context)
 
 
 def _popcontext(_local=local):
+    # It's safe to assume that __context_stack__ is already initialised and
+    # non-empty here, since any _popcontext call will have been preceded by a
+    # corresponding _pushcontext call.
     setcontext(_local.__context_stack__.pop())
 
 
