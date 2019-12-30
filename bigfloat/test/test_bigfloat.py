@@ -54,7 +54,8 @@ from bigfloat import (
     # ... and functions
     IEEEContext, precision,
 
-    # set current context
+    # get and set current context
+    getcontext,
     setcontext,
 
     # flags
@@ -190,7 +191,12 @@ class PoorObject(object):
 
 class BigFloatTests(unittest.TestCase):
     def setUp(self):
+        self._original_context = getcontext()
         setcontext(DefaultTestContext)
+
+    def tearDown(self):
+        setcontext(self._original_context)
+        del self._original_context
 
     def test_version(self):
         self.assertIsInstance(__version__, str)
@@ -1908,7 +1914,12 @@ class FlagTests(unittest.TestCase):
 
 class ABCTests(unittest.TestCase):
     def setUp(self):
+        self._original_context = getcontext()
         setcontext(DefaultTestContext)
+
+    def tearDown(self):
+        setcontext(self._original_context)
+        del self._original_context
 
 
 def mpfr_set_str2(rop, s, base, rnd):
