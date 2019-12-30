@@ -197,21 +197,26 @@ WideExponentContext = Context(
 )
 
 
-# thread local variables:
+# thread-local variables:
 #   __bigfloat_context__: current context
 #   __context_stack__: context stack, used by with statement
 
 local = threading.local()
-local.__bigfloat_context__ = DefaultContext
-local.__context_stack__ = []
 
 
 def getcontext(_local=local):
     """
     Return the current context.
 
+    Also initialises the context the first time it's called in each thread.
+
     """
-    return _local.__bigfloat_context__
+    try:
+        return _local.__bigfloat_context__
+    except AttributeError:
+        _local.__bigfloat_context__ = DefaultContext
+        _local.__context_stack__ = []
+        return _local.__bigfloat_context__
 
 
 def setcontext(context, _local=local):
@@ -236,6 +241,7 @@ def _popcontext(_local=local):
     setcontext(_local.__context_stack__.pop())
 
 
+# Don't contaminate the namespace.
 del threading, local
 
 
