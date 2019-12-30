@@ -261,8 +261,8 @@ Here are some examples::
    9059431594737481158406995332028773319460519038727478164087865909024706484152
    1630002287276409423882599577415088163974702524820115607076448838078733704899
    00864775113226027', precision=1000)
-   >>> 4*exp(-const_pi()/2/agm(1, 1e-100))
-   BigFloat.exact('9.9999999999998517e-101', precision=53)
+   >>> 4*exp(-const_pi()/2/agm(1, pow(10, -100)))
+   BigFloat.exact('1.00000000000000000000000000000000730e-100', precision=113)
 
 For a full list of the supported functions, see the :ref:`standard functions`
 section of the :ref:`api reference`.
