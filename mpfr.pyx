@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# cython: embedsignature = True
+# cython: language_level=3, embedsignature=True
 
 # Copyright 2009--2019 Mark Dickinson.
 #
