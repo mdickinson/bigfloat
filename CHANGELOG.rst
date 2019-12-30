@@ -5,6 +5,8 @@ This minor release adds a number of small features, changes the default
 context to match IEEE 754 quadruple precision (binary128), and fixes support
 for recent Python versions.
 
+Thanks to Hugo van Kemenade for contributions to this release.
+
 New Features
 ------------
 
