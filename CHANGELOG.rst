@@ -1,6 +1,8 @@
 What's new in bigfloat 0.4.0?
 =============================
 
+Release date: 2019-12-30
+
 This minor release adds a number of small features, changes the default
 context to match IEEE 754 quadruple precision (binary128), and fixes support
 for recent Python versions.
