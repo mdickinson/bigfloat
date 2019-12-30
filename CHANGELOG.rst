@@ -58,7 +58,8 @@ Bugfixes
 
 - Fix initialization of the context on background threads. (#91)
 
-- Fix unit tests that changed the context and didn't reset their changes. (#92)
+- Fix unit tests that changed the context and didn't reset their changes.
+  (#92, #98)
 
 Build
 -----
