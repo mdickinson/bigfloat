@@ -60,6 +60,11 @@ Bugfixes
 
 - Fix unit tests that changed the context and didn't reset their changes. (#92)
 
+Build
+-----
+
+- Use ``language_level=3`` in the Cython code. (#96)
+
 Documentation
 -------------
 
