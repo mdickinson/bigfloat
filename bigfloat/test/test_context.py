@@ -15,13 +15,17 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with the bigfloat package.  If not, see <http://www.gnu.org/licenses/>.
 
+import threading
 import unittest
+
+from six.moves import queue
 
 import mpfr
 from bigfloat.context import (
     getcontext,
     Context,
     DefaultContext,
+    precision,
     RoundAwayFromZero,
     RoundTiesToEven,
     RoundTowardNegative,
@@ -224,6 +228,72 @@ class ContextTests(unittest.TestCase):
             self.assertEqual(getcontext().emax, c.emax)
             self.assertEqual(getcontext().subnormalize, c.subnormalize)
             self.assertEqual(getcontext().rounding, c.rounding)
+
+    def test_context_initialised_in_background_thread(self):
+        # Regression test for mdickinson/bigfloat#78.
+
+        # Timeout for blocking waits, so that a badly written test or
+        # an unexpected failure mode doesn't cause the whole test suite
+        # to block.
+        SAFETY_TIMEOUT = 10.0
+
+        def target(result_queue, precision_changed, continue_event):
+            # Change the context in a background thread. Put computed
+            # precisions on a results queue for testing in the main thread.
+            # We use events to pause execution of the background thread
+            # so that we can effectively test that the main thread is
+            # unaffected at that point.
+            try:
+                result_queue.put(("PREC", getcontext().precision))
+                with precision(20):
+                    result_queue.put(("PREC", getcontext().precision))
+                    precision_changed.set()
+                    if not continue_event.wait(timeout=SAFETY_TIMEOUT):
+                        raise RuntimeError("continue_event not received")
+
+                result_queue.put(("PREC", getcontext().precision))
+            except BaseException as e:
+                result_queue.put(("EXC", str(e)))
+            result_queue.put(("DONE",))
+
+        result_queue = queue.Queue()
+        precision_changed = threading.Event()
+        continue_event = threading.Event()
+
+        default_precision = DefaultContext.precision
+
+        self.assertEqual(getcontext().precision, default_precision)
+
+        thread = threading.Thread(
+            target=target,
+            args=(result_queue, precision_changed, continue_event),
+        )
+        thread.start()
+        try:
+            precision_changed.wait(timeout=SAFETY_TIMEOUT)
+            # At this point, the precision in the background thread has
+            # been changed, but our precision should be unaltered.
+            self.assertEqual(getcontext().precision, default_precision)
+            continue_event.set()
+        finally:
+            thread.join()
+
+        # Collect messages from the background thread.
+        messages = []
+        while True:
+            message = result_queue.get(timeout=SAFETY_TIMEOUT)
+            if message[0] == "DONE":
+                break
+            messages.append(message)
+
+        self.assertEqual(
+            messages,
+            [
+                ("PREC", DefaultContext.precision),
+                ("PREC", 20),
+                ("PREC", DefaultContext.precision),
+            ],
+        )
 
 
 if __name__ == '__main__':
