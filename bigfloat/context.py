@@ -1,4 +1,4 @@
-# Copyright 2009--2015 Mark Dickinson.
+# Copyright 2009--2019 Mark Dickinson.
 #
 # This file is part of the bigfloat package.
 #
@@ -197,21 +197,25 @@ WideExponentContext = Context(
 )
 
 
-# thread local variables:
+# thread-local variables:
 #   __bigfloat_context__: current context
 #   __context_stack__: context stack, used by with statement
 
 local = threading.local()
-local.__bigfloat_context__ = DefaultContext
-local.__context_stack__ = []
 
 
 def getcontext(_local=local):
     """
     Return the current context.
 
+    Also initialises the context the first time it's called in each thread.
+
     """
-    return _local.__bigfloat_context__
+    try:
+        return _local.__bigfloat_context__
+    except AttributeError:
+        context = _local.__bigfloat_context__ = DefaultContext
+        return context
 
 
 def setcontext(context, _local=local):
@@ -228,14 +232,22 @@ def setcontext(context, _local=local):
 
 
 def _pushcontext(context, _local=local):
-    _local.__context_stack__.append(getcontext())
+    try:
+        context_stack = _local.__context_stack__
+    except AttributeError:
+        context_stack = _local.__context_stack__ = []
+    context_stack.append(getcontext())
     setcontext(context)
 
 
 def _popcontext(_local=local):
+    # It's safe to assume that __context_stack__ is already initialised and
+    # non-empty here, since any _popcontext call will have been preceded by a
+    # corresponding _pushcontext call.
     setcontext(_local.__context_stack__.pop())
 
 
+# Don't contaminate the namespace.
 del threading, local
 
 

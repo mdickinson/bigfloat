@@ -30,7 +30,7 @@ subnormals.
 Features
 --------
 
-- Supports Python 2 (version 2.7) and Python 3 (version 3.4 or later).
+- Supports Python 2 (version 2.7) and Python 3 (version 3.5 or later).
 
 - Exactly reproducible correctly-rounded results across platforms;
   precisely-defined semantics compatible with the IEEE 754-2008 standard.
@@ -55,7 +55,7 @@ Here's a quick tour::
    BigFloat.exact('1.4142135623730950488016887242092', precision=100)
    >>> with precision(100):     # another way to get the same result
    ...     sqrt(2)
-   ... 
+   ...
    BigFloat.exact('1.4142135623730950488016887242092', precision=100)
    >>> my_context = precision(100) + RoundTowardPositive
    >>> my_context
@@ -64,7 +64,7 @@ Here's a quick tour::
    BigFloat.exact('1.4142135623730950488016887242108', precision=100)
    >>> with RoundTowardNegative: # a lower bound for zeta(2)
    ...     sum(1/sqr(n) for n in range(1, 10000))
-   ... 
+   ...
    BigFloat.exact('1.6448340618469506', precision=53)
    >>> zeta(2) # actual value, for comparison
    BigFloat.exact('1.6449340668482264', precision=53)
@@ -94,7 +94,7 @@ Prerequisites
 ^^^^^^^^^^^^^
 
 The :mod:`bigfloat` package works with Python 2 (version 2.7) or
-Python 3 (version 3.4 or later).  It uses a single codebase for both Python
+Python 3 (version 3.5 or later).  It uses a single codebase for both Python
 dialects, so the same source works on both dialects of Python.
 
 Whether installing ``bigfloat`` from source or from the Python Package Index,

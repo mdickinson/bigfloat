@@ -1,7 +1,7 @@
 Prerequisites
 -------------
 
-This package requires Python 2.7 or 3.4 or later.  The `MPFR <mpfr library_>`_
+This package requires Python 2.7 or 3.5 or later.  The `MPFR <mpfr library_>`_
 and `GMP <gmp library_>`_ libraries will need to be already installed on your
 system, along with any necessary development headers for both of those
 libraries.  On Linux, look for a package named something like ``libmpfr-dev``

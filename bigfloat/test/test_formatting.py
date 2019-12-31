@@ -1,4 +1,4 @@
-# Copyright 2009--2015 Mark Dickinson.
+# Copyright 2009--2019 Mark Dickinson.
 #
 # This file is part of the bigfloat package.
 #
@@ -21,6 +21,7 @@ from bigfloat import (
     BigFloat,
     double_precision,
     RoundTiesToEven,
+    getcontext,
     setcontext,
 )
 
@@ -30,7 +31,12 @@ DefaultTestContext = double_precision + RoundTiesToEven
 
 class TestFormatting(unittest.TestCase):
     def setUp(self):
+        self._original_context = getcontext()
         setcontext(DefaultTestContext)
+
+    def tearDown(self):
+        setcontext(self._original_context)
+        del self._original_context
 
     def test_format(self):
         # Fixed precision formatting.

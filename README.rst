@@ -25,7 +25,7 @@ idea::
 Features
 --------
 
-- Supports Python 2 (version 2.7) and Python 3 (version 3.4 or later).
+- Supports Python 2 (version 2.7) and Python 3 (version 3.5 or later).
 
 - Exactly reproducible correctly-rounded results across platforms;
   precisely-defined semantics compatible with the IEEE 754-2008 standard.
@@ -63,9 +63,9 @@ actually need.
 The main class is the ``BigFloat`` class::
 
     >>> BigFloat(1)  # can be constructed from an integer, float or string
-    BigFloat.exact('1.0000000000000000', precision=53)
+    BigFloat.exact('1.00000000000000000000000000000000000', precision=113)
     >>> BigFloat('3.14159') ** 2 / 6.0  # can combine with ints and floats
-    BigFloat.exact('1.6449312880166664', precision=53)
+    BigFloat.exact('1.64493128801666666666666666666666670', precision=113)
     >>> BigFloat('0.1', precision(200)) # high-precision value from string
     BigFloat.exact('0.1000000000000000000000000000000000000000000000000000
     0000000002', precision=200)
@@ -76,8 +76,8 @@ context is represented by a ``Context`` instance, and can be retrieved
 by calling ``getcontext``::
 
     >>> getcontext()
-    Context(precision=53, emax=1073741823, emin=-1073741823,
-            subnormalize=False, rounding=ROUND_TIES_TO_EVEN)
+    Context(precision=113, emax=16384, emin=-16493,
+            subnormalize=True, rounding=ROUND_TIES_TO_EVEN)
 
 The ``precision(200)`` argument passed to the ``BigFloat`` constructor
 above is also an example of a ``Context``::
@@ -109,11 +109,11 @@ bounds for π, accurate to 53 significant bits::
     >>> with RoundTowardPositive:
     ...     const_pi()
     ...
-    BigFloat.exact('3.1415926535897936', precision=53)
+    BigFloat.exact('3.14159265358979323846264338327950318', precision=113)
     >>> with RoundTowardNegative:
     ...     const_pi()
     ...
-    BigFloat.exact('3.1415926535897931', precision=53)
+    BigFloat.exact('3.14159265358979323846264338327950280', precision=113)
 
 And as you'd expect, ``with`` statements like those above can be
 nested.  ``Context`` objects can also be combined using addition::
@@ -158,7 +158,7 @@ with suggestions, complaints, bug reports, etc.
 License
 -------
 
-The bigfloat package is copyright (C) 2009--2015 Mark Dickinson
+The bigfloat package is copyright (C) 2009--2019 Mark Dickinson
 
 The bigfloat package is free software: you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by

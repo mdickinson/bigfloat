@@ -1,6 +1,6 @@
 # -*- coding: UTF-8
 
-# Copyright 2009--2015 Mark Dickinson.
+# Copyright 2009--2019 Mark Dickinson.
 #
 # This file is part of the bigfloat package.
 #
@@ -1017,16 +1017,17 @@ def pos(x, context=None):
     temporary increase in precision, back to the current context.  For
     example::
 
-        >>> from bigfloat import precision
-        >>> pow(3, 20) + 1.234 - pow(3, 20)  # inaccurate due to precision loss
-        BigFloat.exact('1.2340002059936523', precision=53)
-        >>> with precision(100):  # compute result with extra precision
-        ...     x = pow(3, 20) + 1.234 - pow(3, 20)
+        >>> from bigfloat import pos, pow, precision
+        >>> pow(3, 60) + 1.234 - pow(3, 60)  # inaccurate due to precision loss
+        BigFloat.exact('1.23400115966796875000000000000000000', precision=113)
+        >>> with precision(200):  # compute result with extra precision
+        ...     x = pow(3, 60) + 1.234 - pow(3, 60)
         ...
         >>> x
-        BigFloat.exact('1.2339999999999999857891452847980', precision=100)
+        BigFloat.exact('1.2339999999999999857891452847979962825775146484375000000000000', precision=200)
         >>> pos(x)  # round back to original precision
-        BigFloat.exact('1.2340000000000000', precision=53)
+        BigFloat.exact('1.23399999999999998578914528479799628', precision=113)
+
 
     """
     return _apply_function_in_current_context(
@@ -1840,23 +1841,23 @@ def atan2(y, x, context=None):
         >>> inf = BigFloat('inf')
 
         >>> print(atan2(+0.0, -0.0))     # pi
-        3.1415926535897931
+        3.14159265358979323846264338327950280
         >>> print(atan2(+0.0, +0.0))     # 0
         0
         >>> print(atan2(+0.0, negative)) # pi
-        3.1415926535897931
+        3.14159265358979323846264338327950280
         >>> print(atan2(+0.0, positive)) # 0
         0
         >>> print(atan2(positive, 0.0))  # pi / 2
-        1.5707963267948966
+        1.57079632679489661923132169163975140
         >>> print(atan2(inf, -inf))      # 3*pi / 4
-        2.3561944901923448
+        2.35619449019234492884698253745962710
         >>> print(atan2(inf, inf))       # pi / 4
-        0.78539816339744828
+        0.785398163397448309615660845819875699
         >>> print(atan2(inf, finite))    # pi / 2
-        1.5707963267948966
+        1.57079632679489661923132169163975140
         >>> print(atan2(positive, -inf)) # pi
-        3.1415926535897931
+        3.14159265358979323846264338327950280
         >>> print(atan2(positive, +inf)) # 0
         0
 
@@ -2479,8 +2480,8 @@ def ceil(x, context=None):
     the current context.  Note that the rounding step means that it's possible
     for the result to be smaller than ``x``.  For example::
 
-        >>> x = 2**100 + 1
-        >>> ceil(2**100 + 1) >= x
+        >>> x = 2**1000 + 1
+        >>> ceil(2**1000 + 1) >= x
         False
 
     One way to be sure of getting a result that's greater than or equal to
