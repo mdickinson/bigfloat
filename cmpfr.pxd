@@ -262,6 +262,11 @@ cdef extern from "mpfr.h":
     void mpfr_free_cache2(mpfr_free_cache_t way)
     void mpfr_free_pool()
 
+    int mpfr_sum(
+        mpfr_ptr rop, const mpfr_ptr tab[], unsigned long int n,
+        mpfr_rnd_t rnd
+    )
+
     ###########################################################################
     # 5.9 Formatted Output Functions
     ###########################################################################

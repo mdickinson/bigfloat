@@ -2468,6 +2468,34 @@ def const_catalan(context=None):
     )
 
 
+def sum(elements, context=None):
+    """
+    Return the sum of the given elements.
+
+    Returns the sum of the iterable elements, with precision and rounding
+    mode taken from the current context.
+
+    If no elements are given (the iterable is empty), the result is a
+    (positive) zero. If the iterable contains just one element, the result
+    is equivalent to applying :func:`pos` to that element.
+
+    If the exact sum is zero and there is at least one element in the
+    iterable, the sign is determined as follows:
+
+    - If all inputs have the same sign, the result has the same sign as the
+      inputs.
+    - Otherwise, the result is +0, except with rounding mode
+      ``RoundTowardNegative``, when it's -0.
+
+    """
+    return _apply_function_in_current_context(
+        BigFloat,
+        mpfr.mpfr_sum,
+        ([BigFloat._implicit_convert(x) for x in elements],),
+        context,
+    )
+
+
 ###############################################################################
 # 5.10 Integer and Remainder Related Functions
 ###############################################################################

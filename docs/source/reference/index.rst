@@ -501,6 +501,8 @@ Arithmetic functions
 .. autofunction:: rootn
 .. autofunction:: hypot
 
+.. autofunction:: sum
+
 
 Exponential and logarithmic functions
 """""""""""""""""""""""""""""""""""""

@@ -94,6 +94,7 @@ __all__ = [
     'hypot',
     'ai',
     'const_log2', 'const_pi', 'const_euler', 'const_catalan',
+    'sum',
 
     # 5.10 Integer and Remainder Related Functions
     'ceil', 'floor', 'round', 'roundeven', 'trunc',
@@ -171,6 +172,7 @@ from bigfloat.core import (
     hypot,
     ai,
     const_log2, const_pi, const_euler, const_catalan,
+    sum,
 
     # 5.10 Integer and Remainder Related Functions
     ceil, floor, round, roundeven, trunc,

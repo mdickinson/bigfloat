@@ -10,8 +10,9 @@ Start by importing the contents of the package with:
 You should be a little bit careful here: this import brings a fairly large
 number of functions into the current namespace, some of which shadow existing
 Python builtins, namely :func:`abs`, :func:`max`, :func:`min`, :func:`pow`,
-:func:`round`, and (on Python 2 only) :func:`cmp`.  In normal usage you'll
-probably only want to import the classes and functions that you actually need.
+:func:`round`, :func:`sum`, and (on Python 2 only) :func:`cmp`.  In normal
+usage you'll probably only want to import the classes and functions that you
+actually need.
 
 
 :class:`BigFloat` construction

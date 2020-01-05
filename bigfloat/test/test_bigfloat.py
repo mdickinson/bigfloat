@@ -86,6 +86,7 @@ from bigfloat import (
     j0, j1, jn,
     y0, y1, yn,
     const_log2, const_pi, const_euler, const_catalan,
+    sum,
 
     # 5.10 Integer and Remainder Related Functions
     is_integer,
@@ -1243,6 +1244,45 @@ class BigFloatTests(unittest.TestCase):
                 const_catalan(),
                 BigFloat.exact('0.91596559417721902', precision=53),
             )
+
+    def test_sum(self):
+        with double_precision:
+            inputs = [1.0/n**2 for n in range(1, 1000)]
+            bf_sum = sum(inputs)
+            self.assertIsInstance(bf_sum, BigFloat)
+            self.assertEqual(bf_sum, math.fsum(inputs))
+
+        # Check the documented behaviours.
+
+        # Check sign of zero when summing zeros.
+        pz, nz = BigFloat("0.0"), BigFloat("-0.0")
+
+        for rounding_mode in all_rounding_modes:
+            with rounding_mode:
+                self.assertFalse(is_negative(sum([])))
+                self.assertFalse(is_negative(sum([pz])))
+                self.assertFalse(is_negative(sum([pz, pz])))
+                self.assertFalse(is_negative(sum([pz, pz, pz])))
+
+                self.assertTrue(is_negative(sum([nz])))
+                self.assertTrue(is_negative(sum([nz, nz])))
+                self.assertTrue(is_negative(sum([nz, nz, nz])))
+
+                if rounding_mode == RoundTowardNegative:
+                    self.assertTrue(is_negative(sum([pz, nz])))
+                else:
+                    self.assertFalse(is_negative(sum([pz, nz])))
+
+        # Check sign of a zero result from non-zero summands.
+        args = [10, -10]
+        for rounding_mode in all_rounding_modes:
+            with rounding_mode:
+                bf_sum = sum(args)
+                self.assertEqual(bf_sum, 0.0)
+                if rounding_mode == RoundTowardNegative:
+                    self.assertTrue(is_negative(bf_sum))
+                else:
+                    self.assertFalse(is_negative(bf_sum))
 
     def test_copy(self):
         x = BigFloat.exact(
