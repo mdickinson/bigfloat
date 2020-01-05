@@ -54,9 +54,20 @@ MPFR_RNDA =  cmpfr.MPFR_RNDA
 MPFR_EMAX_DEFAULT = cmpfr.MPFR_EMAX_DEFAULT
 MPFR_EMIN_DEFAULT = cmpfr.MPFR_EMIN_DEFAULT
 
+# Version macros
+MPFR_VERSION = cmpfr.MPFR_VERSION
+MPFR_VERSION_MAJOR = cmpfr.MPFR_VERSION_MAJOR
+MPFR_VERSION_MINOR = cmpfr.MPFR_VERSION_MINOR
+MPFR_VERSION_PATCHLEVEL = cmpfr.MPFR_VERSION_PATCHLEVEL
+if sys.version_info < (3,):
+    MPFR_VERSION_STRING = cmpfr.MPFR_VERSION_STRING
+else:
+    MPFR_VERSION_STRING = cmpfr.MPFR_VERSION_STRING.decode('ascii')
+
 # Free cache policy (for mpfr_free_cache2)
-MPFR_FREE_LOCAL_CACHE = cmpfr.MPFR_FREE_LOCAL_CACHE
-MPFR_FREE_GLOBAL_CACHE = cmpfr.MPFR_FREE_GLOBAL_CACHE
+if MPFR_VERSION_MAJOR >= 4:
+    MPFR_FREE_LOCAL_CACHE = cmpfr.MPFR_FREE_LOCAL_CACHE
+    MPFR_FREE_GLOBAL_CACHE = cmpfr.MPFR_FREE_GLOBAL_CACHE
 
 ###############################################################################
 # Helper functions, not exposed to Python
@@ -868,24 +879,25 @@ def mpfr_cbrt(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     check_rounding_mode(rnd)
     return cmpfr.mpfr_cbrt(&rop._value, &op._value, rnd)
 
-def mpfr_rootn_ui(Mpfr_t rop not None, Mpfr_t op not None,
-                  unsigned long int k, cmpfr.mpfr_rnd_t rnd):
-    """
-    Set rop to the kth root of op rounded in the direction rnd.
+if MPFR_VERSION_MAJOR >= 4:
+    def mpfr_rootn_ui(Mpfr_t rop not None, Mpfr_t op not None,
+                    unsigned long int k, cmpfr.mpfr_rnd_t rnd):
+        """
+        Set rop to the kth root of op rounded in the direction rnd.
 
-    For k = 0, set rop to NaN. For k odd (resp. even) and op negative
-    (including -Inf), set rop to a negative number (resp. NaN). If op is zero,
-    set rop to zero with the sign obtained by the usual limit rules, i.e., the
-    same sign as op if k is odd, and positive if k is even.
+        For k = 0, set rop to NaN. For k odd (resp. even) and op negative
+        (including -Inf), set rop to a negative number (resp. NaN). If op is zero,
+        set rop to zero with the sign obtained by the usual limit rules, i.e., the
+        same sign as op if k is odd, and positive if k is even.
 
-    This function agrees with the rootn function of the IEEE 754-2008
-    standard.
+        This function agrees with the rootn function of the IEEE 754-2008
+        standard.
 
-    """
-    check_initialized(rop)
-    check_initialized(op)
-    check_rounding_mode(rnd)
-    return cmpfr.mpfr_rootn_ui(&rop._value, &op._value, k, rnd)
+        """
+        check_initialized(rop)
+        check_initialized(op)
+        check_rounding_mode(rnd)
+        return cmpfr.mpfr_rootn_ui(&rop._value, &op._value, k, rnd)
 
 def mpfr_root(Mpfr_t rop not None, Mpfr_t op not None,
               unsigned long int k, cmpfr.mpfr_rnd_t rnd):
@@ -1602,21 +1614,22 @@ def mpfr_gamma(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     check_rounding_mode(rnd)
     return cmpfr.mpfr_gamma(&rop._value, &op._value, rnd)
 
-def mpfr_gamma_inc(Mpfr_t rop not None, Mpfr_t op not None,
-                   Mpfr_t op2 not None, cmpfr.mpfr_rnd_t rnd):
-    """
-    Set rop to the value of the incomplete Gamma function on op and op2,
-    rounded in the direction rnd. (In the literature, mpfr_gamma_inc is
-    called the upper incomplete Gamma function or the complementary incomplete
-    Gamma function.) When op2 is zero and op is a negative integer, rop is
-    set to NaN.
+if MPFR_VERSION_MAJOR >= 4:
+    def mpfr_gamma_inc(Mpfr_t rop not None, Mpfr_t op not None,
+                    Mpfr_t op2 not None, cmpfr.mpfr_rnd_t rnd):
+        """
+        Set rop to the value of the incomplete Gamma function on op and op2,
+        rounded in the direction rnd. (In the literature, mpfr_gamma_inc is
+        called the upper incomplete Gamma function or the complementary incomplete
+        Gamma function.) When op2 is zero and op is a negative integer, rop is
+        set to NaN.
 
-    """
-    check_initialized(rop)
-    check_initialized(op)
-    check_initialized(op2)
-    check_rounding_mode(rnd)
-    return cmpfr.mpfr_gamma_inc(&rop._value, &op._value, &op2._value, rnd)
+        """
+        check_initialized(rop)
+        check_initialized(op)
+        check_initialized(op2)
+        check_rounding_mode(rnd)
+        return cmpfr.mpfr_gamma_inc(&rop._value, &op._value, &op2._value, rnd)
 
 def mpfr_lngamma(Mpfr_t rop not None, Mpfr_t op not None,
                  cmpfr.mpfr_rnd_t rnd):
@@ -1669,17 +1682,18 @@ def mpfr_digamma(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     check_rounding_mode(rnd)
     return cmpfr.mpfr_digamma(&rop._value, &op._value, rnd)
 
-def mpfr_beta(Mpfr_t rop not None, Mpfr_t op1 not None,
-              Mpfr_t op2 not None, cmpfr.mpfr_rnd_t rnd):
-    """
-    Set rop to the value of the Beta function at arguments op1 and op2.
+if MPFR_VERSION_MAJOR >= 4:
+    def mpfr_beta(Mpfr_t rop not None, Mpfr_t op1 not None,
+                Mpfr_t op2 not None, cmpfr.mpfr_rnd_t rnd):
+        """
+        Set rop to the value of the Beta function at arguments op1 and op2.
 
-    """
-    check_initialized(rop)
-    check_initialized(op1)
-    check_initialized(op2)
-    check_rounding_mode(rnd)
-    return cmpfr.mpfr_beta(&rop._value, &op1._value, &op2._value, rnd)
+        """
+        check_initialized(rop)
+        check_initialized(op1)
+        check_initialized(op2)
+        check_rounding_mode(rnd)
+        return cmpfr.mpfr_beta(&rop._value, &op1._value, &op2._value, rnd)
 
 def mpfr_zeta(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     """
@@ -1842,45 +1856,47 @@ def mpfr_fms(Mpfr_t rop not None,
         &rop._value, &op1._value, &op2._value, &op3._value, rnd
     )
 
-def mpfr_fmma(Mpfr_t rop not None,
-              Mpfr_t op1 not None,
-              Mpfr_t op2 not None,
-              Mpfr_t op3 not None,
-              Mpfr_t op4 not None,
-              cmpfr.mpfr_rnd_t rnd):
-    """
-    Set rop to (op1 times op2) + (op3 times op4) rounded in the direction rnd.
+if MPFR_VERSION_MAJOR >= 4:
+    def mpfr_fmma(Mpfr_t rop not None,
+                Mpfr_t op1 not None,
+                Mpfr_t op2 not None,
+                Mpfr_t op3 not None,
+                Mpfr_t op4 not None,
+                cmpfr.mpfr_rnd_t rnd):
+        """
+        Set rop to (op1 times op2) + (op3 times op4) rounded in the direction rnd.
 
-    """
-    check_initialized(rop)
-    check_initialized(op1)
-    check_initialized(op2)
-    check_initialized(op3)
-    check_initialized(op4)
-    check_rounding_mode(rnd)
-    return cmpfr.mpfr_fmma(
-        &rop._value, &op1._value, &op2._value, &op3._value, &op4._value, rnd
-    )
+        """
+        check_initialized(rop)
+        check_initialized(op1)
+        check_initialized(op2)
+        check_initialized(op3)
+        check_initialized(op4)
+        check_rounding_mode(rnd)
+        return cmpfr.mpfr_fmma(
+            &rop._value, &op1._value, &op2._value, &op3._value, &op4._value, rnd
+        )
 
-def mpfr_fmms(Mpfr_t rop not None,
-              Mpfr_t op1 not None,
-              Mpfr_t op2 not None,
-              Mpfr_t op3 not None,
-              Mpfr_t op4 not None,
-              cmpfr.mpfr_rnd_t rnd):
-    """
-    Set rop to (op1 times op2) - (op3 times op4) rounded in the direction rnd.
+if MPFR_VERSION_MAJOR >= 4:
+    def mpfr_fmms(Mpfr_t rop not None,
+                Mpfr_t op1 not None,
+                Mpfr_t op2 not None,
+                Mpfr_t op3 not None,
+                Mpfr_t op4 not None,
+                cmpfr.mpfr_rnd_t rnd):
+        """
+        Set rop to (op1 times op2) - (op3 times op4) rounded in the direction rnd.
 
-    """
-    check_initialized(rop)
-    check_initialized(op1)
-    check_initialized(op2)
-    check_initialized(op3)
-    check_initialized(op4)
-    check_rounding_mode(rnd)
-    return cmpfr.mpfr_fmms(
-        &rop._value, &op1._value, &op2._value, &op3._value, &op4._value, rnd
-    )
+        """
+        check_initialized(rop)
+        check_initialized(op1)
+        check_initialized(op2)
+        check_initialized(op3)
+        check_initialized(op4)
+        check_rounding_mode(rnd)
+        return cmpfr.mpfr_fmms(
+            &rop._value, &op1._value, &op2._value, &op3._value, &op4._value, rnd
+        )
 
 def mpfr_agm(Mpfr_t rop not None,
              Mpfr_t op1 not None,
@@ -2002,19 +2018,20 @@ def mpfr_free_cache():
     """
     cmpfr.mpfr_free_cache()
 
-def mpfr_free_cache2(way):
-    """
-    Free various caches and pools used by MPFR internally, as specified by
-    'way', which is a set of flags.
+if MPFR_VERSION_MAJOR >= 4:
+    def mpfr_free_cache2(way):
+        """
+        Free various caches and pools used by MPFR internally, as specified by
+        'way', which is a set of flags.
 
-    - those local to the current thread if MPFR_FREE_LOCAL_CACHE is set
-    - those shared by all threads if MPFR_FREE_GLOBAL_CACHE is set.
+        - those local to the current thread if MPFR_FREE_LOCAL_CACHE is set
+        - those shared by all threads if MPFR_FREE_GLOBAL_CACHE is set.
 
-    Note: mpfr_free_cache2(MPFR_FREE_LOCAL_CACHE|MPFR_FREE_GLOBAL_CACHE)
-    is currently equivalent to mpfr_free_cache().
+        Note: mpfr_free_cache2(MPFR_FREE_LOCAL_CACHE|MPFR_FREE_GLOBAL_CACHE)
+        is currently equivalent to mpfr_free_cache().
 
-    """
-    cmpfr.mpfr_free_cache2(way)
+        """
+        cmpfr.mpfr_free_cache2(way)
 
 def mpfr_free_pool():
 
@@ -2141,21 +2158,22 @@ def mpfr_round(Mpfr_t rop not None, Mpfr_t op not None):
     check_initialized(op)
     return cmpfr.mpfr_round(&rop._value, &op._value)
 
-def mpfr_roundeven(Mpfr_t rop not None, Mpfr_t op not None):
-    """
-    Set rop to op rounded to the nearest representable integer, rounding
-    halfway cases with the even-rounding rule.
+if MPFR_VERSION_MAJOR >= 4:
+    def mpfr_roundeven(Mpfr_t rop not None, Mpfr_t op not None):
+        """
+        Set rop to op rounded to the nearest representable integer, rounding
+        halfway cases with the even-rounding rule.
 
-    The returned value is zero when the result is exact, positive when it is
-    greater than the original value of op, and negative when it is
-    smaller. More precisely, the returned value is 0 when op is an integer
-    representable in rop, 1 or −1 when op is an integer that is not
-    representable in rop, 2 or −2 when op is not an integer.
+        The returned value is zero when the result is exact, positive when it is
+        greater than the original value of op, and negative when it is
+        smaller. More precisely, the returned value is 0 when op is an integer
+        representable in rop, 1 or −1 when op is an integer that is not
+        representable in rop, 2 or −2 when op is not an integer.
 
-    """
-    check_initialized(rop)
-    check_initialized(op)
-    return cmpfr.mpfr_roundeven(&rop._value, &op._value)
+        """
+        check_initialized(rop)
+        check_initialized(op)
+        return cmpfr.mpfr_roundeven(&rop._value, &op._value)
 
 def mpfr_trunc(Mpfr_t rop not None, Mpfr_t op not None):
     """
@@ -2238,26 +2256,27 @@ def mpfr_rint_round(Mpfr_t rop not None, Mpfr_t op not None,
     check_rounding_mode(rnd)
     return cmpfr.mpfr_rint_round(&rop._value, &op._value, rnd)
 
-def mpfr_rint_roundeven(Mpfr_t rop not None, Mpfr_t op not None,
-                    cmpfr.mpfr_rnd_t rnd):
-    """
-    Set rop to op rounded to the nearest integer, rounding halfway cases
-    to the nearest even integer.
+if MPFR_VERSION_MAJOR >= 4:
+    def mpfr_rint_roundeven(Mpfr_t rop not None, Mpfr_t op not None,
+                        cmpfr.mpfr_rnd_t rnd):
+        """
+        Set rop to op rounded to the nearest integer, rounding halfway cases
+        to the nearest even integer.
 
-    If the result is not representable, it is rounded in the direction rnd. The
-    returned value is the ternary value associated with the considered
-    round-to-integer function (regarded in the same way as any other
-    mathematical function).
+        If the result is not representable, it is rounded in the direction rnd. The
+        returned value is the ternary value associated with the considered
+        round-to-integer function (regarded in the same way as any other
+        mathematical function).
 
-    Unlike mpfr_roundeven, this function does perform a double rounding: first
-    op is rounded to the next integer toward zero, then this integer (if not
-    representable) is rounded in the given direction rnd.
+        Unlike mpfr_roundeven, this function does perform a double rounding: first
+        op is rounded to the next integer toward zero, then this integer (if not
+        representable) is rounded in the given direction rnd.
 
-    """
-    check_initialized(rop)
-    check_initialized(op)
-    check_rounding_mode(rnd)
-    return cmpfr.mpfr_rint_roundeven(&rop._value, &op._value, rnd)
+        """
+        check_initialized(rop)
+        check_initialized(op)
+        check_rounding_mode(rnd)
+        return cmpfr.mpfr_rint_roundeven(&rop._value, &op._value, rnd)
 
 def mpfr_rint_trunc(Mpfr_t rop not None, Mpfr_t op not None,
                     cmpfr.mpfr_rnd_t rnd):
@@ -2339,37 +2358,38 @@ def mpfr_fmod(Mpfr_t r not None, Mpfr_t x not None,
     check_rounding_mode(rnd)
     return cmpfr.mpfr_fmod(&r._value, &x._value, &y._value, rnd)
 
-def mpfr_fmodquo(Mpfr_t r not None, Mpfr_t x not None,
-                 Mpfr_t y not None, cmpfr.mpfr_rnd_t rnd):
-    """
-    Set r to the value of x - n * y, rounded according to the direction rnd,
-    where n is the integer quotient of x divided by y, rounded toward zero.
+if MPFR_VERSION_MAJOR >= 4:
+    def mpfr_fmodquo(Mpfr_t r not None, Mpfr_t x not None,
+                    Mpfr_t y not None, cmpfr.mpfr_rnd_t rnd):
+        """
+        Set r to the value of x - n * y, rounded according to the direction rnd,
+        where n is the integer quotient of x divided by y, rounded toward zero.
 
-    Also return the low bits of the quotient.
+        Also return the low bits of the quotient.
 
-    Special values are handled as described in Section F.9.7.1 of the ISO C99
-    standard: If x is infinite or y is zero, r is NaN. If y is infinite and x
-    is finite, r is x rounded to the precision of r. If r is zero, it has the
-    sign of x.
+        Special values are handled as described in Section F.9.7.1 of the ISO C99
+        standard: If x is infinite or y is zero, r is NaN. If y is infinite and x
+        is finite, r is x rounded to the precision of r. If r is zero, it has the
+        sign of x.
 
-    Returns a pair (ternary, quotient) where ternary is the ternary value
-    corresponding to r, and q gives the low significant bits from the quotient
-    n (more precisely the number of bits in a C long minus one), with the
-    sign of x divided by y (except if those low bits are all zero, in which
-    case zero is returned). Note that x may be so large in magnitude relative
-    to y that an exact representation of the quotient is not practical.
+        Returns a pair (ternary, quotient) where ternary is the ternary value
+        corresponding to r, and q gives the low significant bits from the quotient
+        n (more precisely the number of bits in a C long minus one), with the
+        sign of x divided by y (except if those low bits are all zero, in which
+        case zero is returned). Note that x may be so large in magnitude relative
+        to y that an exact representation of the quotient is not practical.
 
-    """
-    cdef long int quotient
+        """
+        cdef long int quotient
 
-    check_initialized(r)
-    check_initialized(x)
-    check_initialized(y)
-    check_rounding_mode(rnd)
-    ternary = cmpfr.mpfr_fmodquo(
-        &r._value, &quotient, &x._value, &y._value, rnd
-    )
-    return ternary, quotient
+        check_initialized(r)
+        check_initialized(x)
+        check_initialized(y)
+        check_rounding_mode(rnd)
+        ternary = cmpfr.mpfr_fmodquo(
+            &r._value, &quotient, &x._value, &y._value, rnd
+        )
+        return ternary, quotient
 
 def mpfr_remainder(Mpfr_t r not None, Mpfr_t x not None,
                    Mpfr_t y not None, cmpfr.mpfr_rnd_t rnd):
@@ -2697,16 +2717,6 @@ def mpfr_get_version():
     else:
         return version.decode('ascii')
 
-
-MPFR_VERSION = cmpfr.MPFR_VERSION
-MPFR_VERSION_MAJOR = cmpfr.MPFR_VERSION_MAJOR
-MPFR_VERSION_MINOR = cmpfr.MPFR_VERSION_MINOR
-MPFR_VERSION_PATCHLEVEL = cmpfr.MPFR_VERSION_PATCHLEVEL
-if sys.version_info < (3,):
-    MPFR_VERSION_STRING = cmpfr.MPFR_VERSION_STRING
-else:
-    MPFR_VERSION_STRING = cmpfr.MPFR_VERSION_STRING.decode('ascii')
-
 def MPFR_VERSION_NUM(int major, int minor, int patchlevel):
     """
     Create an integer in the same format as used by MPFR_VERSION from the given
@@ -2743,14 +2753,15 @@ def mpfr_buildopt_tls_p():
     """
     return bool(cmpfr.mpfr_buildopt_tls_p())
 
-def mpfr_buildopt_float128_p():
-    """
-    Return True if MPFR was compiled with '__float128' support (that is, MPFR
-    was built with the --enable-float128 configure option), return False
-    otherwise.
+if MPFR_VERSION_MAJOR >= 4:
+    def mpfr_buildopt_float128_p():
+        """
+        Return True if MPFR was compiled with '__float128' support (that is, MPFR
+        was built with the --enable-float128 configure option), return False
+        otherwise.
 
-    """
-    return bool(cmpfr.mpfr_buildopt_float128_p())
+        """
+        return bool(cmpfr.mpfr_buildopt_float128_p())
 
 def mpfr_buildopt_decimal_p():
     """
@@ -2770,16 +2781,17 @@ def mpfr_buildopt_gmpinternals_p():
     """
     return bool(cmpfr.mpfr_buildopt_gmpinternals_p())
 
-def mpfr_buildopt_sharedcache_p():
-    """
-    Return True if MPFR was compiled so that all threads share the same cache
-    for one MPFR constant, like mpfr_const_pi or mpfr_const_log2 (that is, MPFR
-    was built with the ‘--enable-shared-cache’ configure option), return False
-    otherwise. If the return value is True, MPFR applications may need to
-    be compiled with the ‘-pthread’ option.
+if MPFR_VERSION_MAJOR >= 4:
+    def mpfr_buildopt_sharedcache_p():
+        """
+        Return True if MPFR was compiled so that all threads share the same cache
+        for one MPFR constant, like mpfr_const_pi or mpfr_const_log2 (that is, MPFR
+        was built with the ‘--enable-shared-cache’ configure option), return False
+        otherwise. If the return value is True, MPFR applications may need to
+        be compiled with the ‘-pthread’ option.
 
-    """
-    return bool(cmpfr.mpfr_buildopt_sharedcache_p())
+        """
+        return bool(cmpfr.mpfr_buildopt_sharedcache_p())
 
 def mpfr_buildopt_tune_case():
     """
