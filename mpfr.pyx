@@ -18,6 +18,8 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with the bigfloat package.  If not, see <http://www.gnu.org/licenses/>.
 
+cimport libc.stdlib
+
 cimport cmpfr
 
 import sys
@@ -2025,6 +2027,48 @@ def mpfr_free_pool():
     """
     cmpfr.mpfr_free_pool()
 
+def mpfr_sum(Mpfr_t rop not None, tab, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the sum of the elements of tab, rounded in the direction rnd.
+
+    Set rop to the sum of all elements of tab, correctly rounded in the
+    direction rnd. If tab is empty, then the result is +0, and if tab contains
+    a single element, then the function is equivalent to mpfr_set. For the
+    special exact cases, the result is the same as the one obtained with a
+    succession of additions (mpfr_add) in infinite precision. In particular, if
+    the result is an exact zero and tab is not empty:
+
+    - if all the inputs have the same sign (i.e., all +0 or all -0), then the
+      result has the same sign as the inputs;
+
+    - otherwise, either because all inputs are zeros with at least a +0 and a
+      -0, or because some inputs are non-zero (but they globally cancel), the
+      result is +0, except for the MPFR_RNDD rounding mode, where it is -0.
+
+    """
+    cdef unsigned int i, n
+    cdef Mpfr_t elt
+
+    check_initialized(rop)
+    check_rounding_mode(rnd)
+
+    n = len(tab)
+
+    cdef cmpfr.mpfr_ptr *pointers = <cmpfr.mpfr_ptr *> libc.stdlib.malloc(
+        n * sizeof(cmpfr.mpfr_ptr))
+    if not pointers:
+        raise MemoryError
+
+    try:
+        for i in range(n):
+            elt = tab[i]
+            if elt is None:
+                raise TypeError("Cannot convert None to mpfr.Mpfr_t")
+            check_initialized(elt)
+            pointers[i] = &elt._value
+        return cmpfr.mpfr_sum(&rop._value, pointers, n, rnd)
+    finally:
+        libc.stdlib.free(pointers)
 
 ###########################################################################
 # 5.9 Formatted Output Functions
@@ -3172,7 +3216,8 @@ def mpfr_erangeflag_p():
 #
 # The following are not yet implemented.
 #
-#  mpfr_sum
+#  mpfr_log_ui
+#  mpfr_mp_memory_cleanup
 #
 #
 #  5.8 Input and Output Functions

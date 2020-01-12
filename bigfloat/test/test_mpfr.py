@@ -176,6 +176,8 @@ from mpfr import (
     mpfr_free_cache2,
     mpfr_free_pool,
 
+    mpfr_sum,
+
     # 5.10 Integer and Remainder Related Functions
     mpfr_rint,
     mpfr_ceil,
@@ -1485,6 +1487,38 @@ class TestMpfr(unittest.TestCase):
         # It's awkward to test this; we settle for checking that the function
         # has been exported and is callable.
         mpfr_free_pool()
+
+    def test_sum(self):
+        x = Mpfr(53)
+        one = Mpfr(53)
+        mpfr_set_d(one, 1.0, MPFR_RNDN)
+        two = Mpfr(53)
+        mpfr_set_d(two, 2.0, MPFR_RNDN)
+        uninitialized = Mpfr_t()
+
+        # Sum of an empty list.
+        mpfr_sum(x, [], MPFR_RNDN)
+        self.assertEqual(mpfr_get_d(x, MPFR_RNDN), 0.0)
+
+        # Sum of a single element.
+        mpfr_sum(x, [one], MPFR_RNDN)
+        self.assertEqual(mpfr_get_d(x, MPFR_RNDN), 1.0)
+
+        # Sum of multiple elements.
+        mpfr_sum(x, [one, two, one, two], MPFR_RNDN)
+        self.assertEqual(mpfr_get_d(x, MPFR_RNDN), 6.0)
+
+        # Failure case: None in list.
+        with self.assertRaises(TypeError):
+            mpfr_sum(x, [one, None], MPFR_RNDN)
+
+        # Failure case: elements not convertible to Mpfr_t in list.
+        with self.assertRaises(TypeError):
+            mpfr_sum(x, [one, 2.0], MPFR_RNDN)
+
+        # Failure case: uninitialised elements.
+        with self.assertRaises(ValueError):
+            mpfr_sum(x, [one, uninitialized], MPFR_RNDN)
 
     # 5.10 Integer and Remainder Related Functions
     def test_rint(self):

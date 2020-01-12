@@ -462,5 +462,5 @@ is used by :func:`mpfr.mpfr_get_str`, but is not exposed to Python.
 +------------------------+------------------------+
 | mpfr_mp_memory_cleanup | not implemented        |
 +------------------------+------------------------+
-| mpfr_sum               | not implemented        |
+| mpfr_sum               | wrapped                |
 +------------------------+------------------------+
