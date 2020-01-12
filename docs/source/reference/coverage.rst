@@ -336,7 +336,7 @@ is used by :func:`mpfr.mpfr_get_str`, but is not exposed to Python.
 +------------------------+------------------------+
 | mpfr_log               | wrapped                |
 +------------------------+------------------------+
-| mpfr_log_ui            | not implemented        |
+| mpfr_log_ui            | wrapped                |
 +------------------------+------------------------+
 | mpfr_log2              | wrapped                |
 +------------------------+------------------------+

@@ -1190,6 +1190,15 @@ def mpfr_log(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     check_rounding_mode(rnd)
     return cmpfr.mpfr_log(&rop._value, &op._value, rnd)
 
+def mpfr_log_ui(Mpfr_t rop not None, unsigned long op, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to the natural logarithm of op, rounded in the direction rnd.
+
+    """
+    check_initialized(rop)
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_log_ui(&rop._value, op, rnd)
+
 def mpfr_log2(Mpfr_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     """
     Set rop to the base-two logarithm of op, rounded in the direction rnd.
@@ -3227,10 +3236,7 @@ def mpfr_erangeflag_p():
 # 5.7 Special Functions
 # ---------------------
 #
-# The following are not yet implemented.
-#
-#  mpfr_log_ui
-#  mpfr_mp_memory_cleanup
+# All functions in this section are wrapped.
 #
 #
 #  5.8 Input and Output Functions

@@ -103,6 +103,7 @@ from mpfr import (
 
     # 5.7 Special Functions
     mpfr_log,
+    mpfr_log_ui,
     mpfr_log2,
     mpfr_log10,
 
@@ -908,6 +909,14 @@ class TestMpfr(unittest.TestCase):
         self.assertEqual(
             mpfr_get_d(y, MPFR_RNDN),
             1.9878743481543455,
+        )
+
+    def test_log_ui(self):
+        y = Mpfr(53)
+        mpfr_log_ui(y, 5, MPFR_RNDN)
+        self.assertEqual(
+            mpfr_get_d(y, MPFR_RNDN),
+            1.6094379124341003,
         )
 
     def test_log2(self):
