@@ -261,6 +261,7 @@ cdef extern from "mpfr.h":
     void mpfr_free_cache()
     void mpfr_free_cache2(mpfr_free_cache_t way)
     void mpfr_free_pool()
+    int mpfr_mp_memory_cleanup()
 
     int mpfr_sum(
         mpfr_ptr rop, const mpfr_ptr tab[], unsigned long int n,

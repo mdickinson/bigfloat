@@ -175,6 +175,7 @@ from mpfr import (
     mpfr_free_cache,
     mpfr_free_cache2,
     mpfr_free_pool,
+    mpfr_mp_memory_cleanup,
 
     mpfr_sum,
 
@@ -1487,6 +1488,9 @@ class TestMpfr(unittest.TestCase):
         # It's awkward to test this; we settle for checking that the function
         # has been exported and is callable.
         mpfr_free_pool()
+
+    def test_mp_memory_cleanup(self):
+        mpfr_mp_memory_cleanup()
 
     def test_sum(self):
         x = Mpfr(53)

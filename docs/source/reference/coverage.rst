@@ -460,7 +460,7 @@ is used by :func:`mpfr.mpfr_get_str`, but is not exposed to Python.
 +------------------------+------------------------+
 | mpfr_free_pool         | wrapped                |
 +------------------------+------------------------+
-| mpfr_mp_memory_cleanup | not implemented        |
+| mpfr_mp_memory_cleanup | wrapped                |
 +------------------------+------------------------+
 | mpfr_sum               | wrapped                |
 +------------------------+------------------------+

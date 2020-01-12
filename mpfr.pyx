@@ -2027,6 +2027,19 @@ def mpfr_free_pool():
     """
     cmpfr.mpfr_free_pool()
 
+def mpfr_mp_memory_cleanup():
+    """
+    This function should be called before calling mp_set_memory_functions. See
+    the MPFR documentation on Memory Handling for more information. MemoryError
+    is raised in case of error. Errors are currently not possible, but checking
+    the return value is recommended for future compatibility.
+    """
+    cdef int rc
+    rc = cmpfr.mpfr_mp_memory_cleanup()
+    if rc:
+        raise MemoryError(
+            "mpfr_mp_memory_cleanup returned nonzero value {}".format(rc))
+
 def mpfr_sum(Mpfr_t rop not None, tab, cmpfr.mpfr_rnd_t rnd):
     """
     Set rop to the sum of the elements of tab, rounded in the direction rnd.
