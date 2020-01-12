@@ -4,7 +4,7 @@ __pycache__/
 
 # Cython output.
 mpfr.c
-mpfr.so
+mpfr*.so
 
 # Build output (covers docs and extension build)
 build/
