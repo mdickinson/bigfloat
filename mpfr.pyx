@@ -3216,7 +3216,8 @@ def mpfr_erangeflag_p():
 #
 # The following are not yet implemented.
 #
-#  mpfr_sum
+#  mpfr_log_ui
+#  mpfr_mp_memory_cleanup
 #
 #
 #  5.8 Input and Output Functions
