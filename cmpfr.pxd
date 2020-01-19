@@ -25,6 +25,7 @@ cdef extern from "mpfr.h":
     # MPFR type declarations
     ctypedef int mpfr_prec_t
     ctypedef int mpfr_sign_t
+    ctypedef unsigned int mpfr_flags_t
     ctypedef cgmp.mp_exp_t mpfr_exp_t
 
     ctypedef struct __mpfr_struct:
@@ -53,6 +54,11 @@ cdef extern from "mpfr.h":
         MPFR_RNDF
         MPFR_RNDNA = -1
 
+    # Free cache policy
+    ctypedef enum mpfr_free_cache_t:
+        MPFR_FREE_LOCAL_CACHE = 1
+        MPFR_FREE_GLOBAL_CACHE = 2
+
     # Limits
     mpfr_prec_t MPFR_PREC_MIN
     mpfr_prec_t MPFR_PREC_MAX
@@ -60,10 +66,15 @@ cdef extern from "mpfr.h":
     mpfr_exp_t MPFR_EMIN_DEFAULT
     mpfr_exp_t MPFR_EMAX_DEFAULT
 
-    # Free cache policy
-    ctypedef enum mpfr_free_cache_t:
-        MPFR_FREE_LOCAL_CACHE = 1
-        MPFR_FREE_GLOBAL_CACHE = 2
+    # Flags
+    mpfr_flags_t MPFR_FLAGS_UNDERFLOW
+    mpfr_flags_t MPFR_FLAGS_OVERFLOW
+    mpfr_flags_t MPFR_FLAGS_NAN
+    mpfr_flags_t MPFR_FLAGS_INEXACT
+    mpfr_flags_t MPFR_FLAGS_ERANGE
+    mpfr_flags_t MPFR_FLAGS_DIVBY0
+    mpfr_flags_t MPFR_FLAGS_ALL
+
 
     ###########################################################################
     # 5.1 Initialization Functions
@@ -86,11 +97,15 @@ cdef extern from "mpfr.h":
     int mpfr_set_ui(mpfr_ptr rop, unsigned long int op, mpfr_rnd_t rnd)
     int mpfr_set_si(mpfr_ptr rop, long int op, mpfr_rnd_t rnd)
     int mpfr_set_d(mpfr_ptr rop, double op, mpfr_rnd_t rnd)
+    int mpfr_set_z(mpfr_ptr rop, cgmp.mpz_ptr op, mpfr_rnd_t rnd)
     int mpfr_set_ui_2exp(
         mpfr_ptr rop, unsigned long int op, mpfr_exp_t e, mpfr_rnd_t rnd
     )
     int mpfr_set_si_2exp(
         mpfr_ptr rop, long int op, mpfr_exp_t e, mpfr_rnd_t rnd
+    )
+    int mpfr_set_z_2exp(
+        mpfr_ptr rop, cgmp.mpz_ptr op, mpfr_exp_t e, mpfr_rnd_t rnd
     )
     int mpfr_set_str(
         mpfr_ptr rop, const char *s, int base, mpfr_rnd_t rnd
@@ -113,6 +128,9 @@ cdef extern from "mpfr.h":
     unsigned long int mpfr_get_ui(mpfr_ptr op, mpfr_rnd_t rnd)
     double mpfr_get_d_2exp(long int *exp, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_frexp(mpfr_exp_t *exp, mpfr_ptr y, mpfr_ptr x, mpfr_rnd_t rnd)
+    mpfr_exp_t mpfr_get_z_2exp(cgmp.mpz_ptr rop, mpfr_ptr op)
+    int mpfr_get_z(cgmp.mpz_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+
     char * mpfr_get_str(
         char *str, mpfr_exp_t *expptr, int b,
         size_t n, mpfr_ptr op, mpfr_rnd_t rnd
@@ -389,3 +407,9 @@ cdef extern from "mpfr.h":
     int mpfr_nanflag_p()
     int mpfr_inexflag_p()
     int mpfr_erangeflag_p()
+
+    void mpfr_flags_clear(mpfr_flags_t mask)
+    void mpfr_flags_set(mpfr_flags_t mask)
+    mpfr_flags_t mpfr_flags_test(mpfr_flags_t mask)
+    mpfr_flags_t mpfr_flags_save()
+    void mpfr_flags_restore(mpfr_flags_t flags, mpfr_flags_t mask)

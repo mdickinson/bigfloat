@@ -20,6 +20,9 @@
 
 cimport libc.stdlib
 
+from libc.string cimport strlen
+
+cimport cgmp
 cimport cmpfr
 
 import sys
@@ -29,6 +32,102 @@ cdef extern from "limits.h":
     cdef long LONG_MAX
     cdef long LONG_MIN
     cdef unsigned long ULONG_MAX
+
+###############################################################################
+# Mpz_t type and functions
+###############################################################################
+
+ctypedef void (*free_func) (void *, size_t)
+
+
+cdef class Mpz_t:
+    """
+    GMP integer object.
+
+    Mpz_t() creates a new, initialized GMP integer object with value 0.
+    """
+    cdef cgmp.__mpz_struct _value
+
+    def __cinit__(self):
+        cgmp.mpz_init(&self._value)
+
+    def __dealloc__(self):
+        cgmp.mpz_clear(&self._value)
+
+
+def mpz_set_str(Mpz_t rop not None, object s, int base):
+    """
+    Set rop from a string.
+
+    Set the value of rop from s, a string in base base.
+    White space is allowed in the string, and is simply ignored.
+
+    The base may vary from 2 to 62, or if base is 0, then the leading
+    characters are used: 0x and 0X for hexadecimal, 0b and 0B for binary, 0 for
+    octal, or decimal otherwise.
+
+    For bases up to 36, case is ignored; upper-case and lower-case letters have
+    the same value. For bases 37 to 62, upper-case letter represent the usual
+    10..35 while lower-case letter represent 36..61.
+
+    Raises ValueError if the string is not a valid number in the given base.
+
+    """
+    cdef bytes bytes_s
+    cdef int err
+
+    if not (2 <= base <= 62 or base == 0):
+        raise ValueError("base must satisfy 2 <= base <= 62 or base == 0")
+
+    bytes_s = s.encode('ascii')
+    err = cgmp.mpz_set_str(&rop._value, bytes_s, base)
+    if err:
+        raise ValueError("Not a valid number for base {}: {}".format(
+            base, s))
+
+
+def mpz_get_str(int base, Mpz_t op not None):
+    """
+    Convert to a string of digits in a given base.
+
+    Convert op to a string of digits in base base. The base argument may vary
+    from 2 to 62 or from -2 to -36.
+
+    For base in the range 2..36, digits and lower-case letters are used; for
+    -2..-36, digits and upper-case letters are used; for 37..62, digits,
+    upper-case letters, and lower-case letters (in that significance order) are
+    used.
+
+    """
+    cdef bytes digits
+    cdef char *c_digits
+    cdef free_func freefunc
+    cdef size_t c_digits_len
+
+    if not (2 <= base <= 62 or -36 <= base <= -2):
+        raise ValueError(
+            "Base must satisfy 2 <= base <= 62 or -2 >= base >= -36.")
+
+    # Get the appropriate function for freeing the allocated memory.
+    cgmp.mp_get_memory_functions (NULL, NULL, &freefunc);
+
+    c_digits = cgmp.mpz_get_str(NULL, base, &op._value)
+    if c_digits == NULL:
+        raise RuntimeError("Error during string conversion.")
+    c_digits_alloc = strlen(c_digits) + 1
+
+    # It's possible for the conversion from c_digits to digits to raise, so use
+    # a try-finally block to ensure that c_digits always gets freed.
+    try:
+        digits = bytes(c_digits)
+    finally:
+        freefunc(c_digits, c_digits_alloc)
+
+    # Return a plain string on Python 2, and a Unicode string on Python 3.
+    if sys.version_info < (3,):
+        return digits
+    else:
+        return digits.decode('ascii')
 
 
 ###############################################################################
@@ -52,13 +151,23 @@ MPFR_RNDU =  cmpfr.MPFR_RNDU
 MPFR_RNDD =  cmpfr.MPFR_RNDD
 MPFR_RNDA =  cmpfr.MPFR_RNDA
 
+# Free cache policy (for mpfr_free_cache2)
+MPFR_FREE_LOCAL_CACHE = cmpfr.MPFR_FREE_LOCAL_CACHE
+MPFR_FREE_GLOBAL_CACHE = cmpfr.MPFR_FREE_GLOBAL_CACHE
+
 # Default values for Emax and Emin
 MPFR_EMAX_DEFAULT = cmpfr.MPFR_EMAX_DEFAULT
 MPFR_EMIN_DEFAULT = cmpfr.MPFR_EMIN_DEFAULT
 
-# Free cache policy (for mpfr_free_cache2)
-MPFR_FREE_LOCAL_CACHE = cmpfr.MPFR_FREE_LOCAL_CACHE
-MPFR_FREE_GLOBAL_CACHE = cmpfr.MPFR_FREE_GLOBAL_CACHE
+# Make flag values available to Python
+MPFR_FLAGS_UNDERFLOW = cmpfr.MPFR_FLAGS_UNDERFLOW
+MPFR_FLAGS_OVERFLOW = cmpfr.MPFR_FLAGS_OVERFLOW
+MPFR_FLAGS_NAN = cmpfr.MPFR_FLAGS_NAN
+MPFR_FLAGS_INEXACT = cmpfr.MPFR_FLAGS_INEXACT
+MPFR_FLAGS_ERANGE = cmpfr.MPFR_FLAGS_ERANGE
+MPFR_FLAGS_DIVBY0 = cmpfr.MPFR_FLAGS_DIVBY0
+MPFR_FLAGS_ALL = cmpfr.MPFR_FLAGS_ALL
+
 
 ###############################################################################
 # Helper functions, not exposed to Python
@@ -411,6 +520,18 @@ def mpfr_set_d(Mpfr_t rop not None, double op, cmpfr.mpfr_rnd_t rnd):
     check_rounding_mode(rnd)
     return cmpfr.mpfr_set_d(&rop._value, op, rnd)
 
+def mpfr_set_z(Mpfr_t rop not None, Mpz_t op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set the value of rop from a GMP integer op, rounded in the direction rnd.
+
+    Set the value of rop from op, rounded toward the given direction rnd. Note
+    that the input 0 is converted to +0, regardless of the rounding mode.
+
+    """
+    check_initialized(rop)
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_set_z(&rop._value, &op._value, rnd)
+
 def mpfr_set_ui_2exp(Mpfr_t rop not None, unsigned long int op,
                      cmpfr.mpfr_exp_t e, cmpfr.mpfr_rnd_t rnd):
     """
@@ -438,6 +559,19 @@ def mpfr_set_si_2exp(Mpfr_t rop not None, long int op,
     check_initialized(rop)
     check_rounding_mode(rnd)
     return cmpfr.mpfr_set_si_2exp(&rop._value, op, e, rnd)
+
+def mpfr_set_z_2exp(Mpfr_t rop not None, Mpz_t op not None,
+                    cmpfr.mpfr_exp_t e, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to op multiplied by a power of 2.
+
+    Set the value of rop from op multiplied by two to the power e, rounded
+    toward the given direction rnd. Note that the input 0 is converted to +0.
+
+    """
+    check_initialized(rop)
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_set_z_2exp(&rop._value, &op._value, e, rnd)
 
 def mpfr_set_str(Mpfr_t rop not None, object s, int base, cmpfr.mpfr_rnd_t rnd):
     """
@@ -681,6 +815,44 @@ def mpfr_frexp(Mpfr_t y not None, Mpfr_t x not None, cmpfr.mpfr_rnd_t rnd):
     check_rounding_mode(rnd)
     ternary = cmpfr.mpfr_frexp(&exp, &y._value, &x._value, rnd)
     return ternary, exp
+
+def mpfr_get_z_2exp(Mpz_t rop not None, Mpfr_t op not None):
+    """
+    Decompose as a product of an integer and a power of two.
+
+    Put the scaled significand of op (regarded as an integer, with the
+    precision of op) into rop, and return the exponent exp (which may be
+    outside the current exponent range) such that op exactly equals rop times 2
+    raised to the power exp. If op is zero, the minimal exponent emin is
+    returned. If op is NaN or an infinity, the erange flag is set, rop is set
+    to 0, and the the minimal exponent emin is returned. The returned exponent
+    may be less than the minimal exponent emin of MPFR numbers in the current
+    exponent range; in case the exponent is not representable in the mpfr_exp_t
+    type, the erange flag is set and the minimal value of the mpfr_exp_t type
+    is returned.
+    """
+    cdef cmpfr.mpfr_exp_t exp
+
+    check_initialized(op)
+
+    exponent = cmpfr.mpfr_get_z_2exp(&rop._value, &op._value)
+    return exponent
+
+def mpfr_get_z(Mpz_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Convert to a GMP integer.
+
+    Convert op to a mpz_t, after rounding it with respect to rnd. If op is NaN
+    or an infinity, the erange flag is set, rop is set to 0, and 0 is returned.
+    Otherwise the return value is zero when rop is equal to op (i.e., when op
+    is an integer), positive when it is greater than op, and negative when it
+    is smaller than op; moreover, if rop differs from op, i.e., if op is not an
+    integer, the inexact flag is set.
+
+    """
+    check_initialized(op)
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_get_z(&rop._value, &op._value, rnd)
 
 def mpfr_get_str(int b, size_t n, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     """
@@ -3155,6 +3327,42 @@ def mpfr_erangeflag_p():
     """
     return bool(cmpfr.mpfr_erangeflag_p())
 
+def mpfr_flags_clear(cmpfr.mpfr_flags_t mask):
+    """
+    Clear (lower) the group of flags specified by mask.
+
+    """
+    cmpfr.mpfr_flags_clear(mask)
+
+def mpfr_flags_set(cmpfr.mpfr_flags_t mask):
+    """
+    Set (raise) the group of flags specified by mask.
+
+    """
+    cmpfr.mpfr_flags_set(mask)
+
+def mpfr_flags_test(cmpfr.mpfr_flags_t mask):
+    """
+    Return the flags specified by mask.
+
+    """
+    return cmpfr.mpfr_flags_test(mask)
+
+def mpfr_flags_save():
+    """
+    Return all the flags. This is equivalent to mpfr_flags_test(MPFR_FLAGS_ALL)
+
+    """
+    return cmpfr.mpfr_flags_save()
+
+def mpfr_flags_restore(cmpfr.mpfr_flags_t flags, cmpfr.mpfr_flags_t mask):
+    """
+    Set the current flag state from an integer.
+
+    Restore the flags specified by mask to their state represented in flags.
+
+    """
+    cmpfr.mpfr_flags_restore(flags, mask)
 
 
 # Functions that are documented in the MPFR 4.0.1 documentation, but aren't

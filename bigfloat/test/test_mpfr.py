@@ -22,13 +22,36 @@ import warnings
 from mpfr import (
     _LONG_MIN, _LONG_MAX, _ULONG_MAX,
 
-    MPFR_RNDN, MPFR_RNDZ, MPFR_RNDU, MPFR_RNDD, MPFR_RNDA,
+    # Rounding modes
+    MPFR_RNDN,
+    MPFR_RNDZ,
+    MPFR_RNDU,
+    MPFR_RNDD,
+    MPFR_RNDA,
+
+    # Precision limits
     MPFR_PREC_MIN, MPFR_PREC_MAX,
 
-    MPFR_FREE_LOCAL_CACHE, MPFR_FREE_GLOBAL_CACHE,
+    # Free cache policy (for mpfr_free_cache2)
+    MPFR_FREE_LOCAL_CACHE,
+    MPFR_FREE_GLOBAL_CACHE,
 
-    # Base extension type
+    # Flag constants
+    MPFR_FLAGS_UNDERFLOW,
+    MPFR_FLAGS_OVERFLOW,
+    MPFR_FLAGS_NAN,
+    MPFR_FLAGS_INEXACT,
+    MPFR_FLAGS_ERANGE,
+    MPFR_FLAGS_DIVBY0,
+    MPFR_FLAGS_ALL,
+
+    # Base extension types
+    Mpz_t,
     Mpfr_t,
+
+    # MPZ functions
+    mpz_set_str,
+    mpz_get_str,
 
     mpfr_initialized_p,
 
@@ -49,8 +72,10 @@ from mpfr import (
     mpfr_set_ui,
     mpfr_set_si,
     mpfr_set_d,
+    mpfr_set_z,
     mpfr_set_ui_2exp,
     mpfr_set_si_2exp,
+    mpfr_set_z_2exp,
     mpfr_set_str,
     mpfr_strtofr,
     mpfr_set_nan,
@@ -64,6 +89,9 @@ from mpfr import (
     mpfr_get_ui,
     mpfr_get_d_2exp,
     mpfr_frexp,
+    mpfr_get_z_2exp,
+    mpfr_get_z,
+
     mpfr_get_str,
     mpfr_fits_ulong_p,
     mpfr_fits_slong_p,
@@ -265,6 +293,7 @@ from mpfr import (
     mpfr_set_nanflag,
     mpfr_set_inexflag,
     mpfr_set_erangeflag,
+    mpfr_set_divby0,
 
     mpfr_clear_flags,
 
@@ -274,6 +303,12 @@ from mpfr import (
     mpfr_nanflag_p,
     mpfr_inexflag_p,
     mpfr_erangeflag_p,
+
+    mpfr_flags_clear,
+    mpfr_flags_set,
+    mpfr_flags_test,
+    mpfr_flags_save,
+    mpfr_flags_restore,
 )
 
 
@@ -306,9 +341,45 @@ def Mpfr(precision):
     return self
 
 
+# Functions for creating special values
+def posinf(precision=53):
+    x = Mpfr(precision)
+    mpfr_set_inf(x, 0)
+    return x
+
+
+def neginf(precision=53):
+    x = Mpfr(precision)
+    mpfr_set_inf(x, -1)
+    return x
+
+
+def nan(precision=53):
+    x = Mpfr(precision)
+    mpfr_set_nan(x)
+    return x
+
+
+def poszero(precision=53):
+    x = Mpfr(precision)
+    mpfr_set_zero(x, 0)
+    return x
+
+
+def negzero(precision=53):
+    x = Mpfr(precision)
+    mpfr_set_zero(x, -1)
+    return x
+
+
 class TestMpfr(unittest.TestCase):
     def setUp(self):
+        # Make sure each test gets a fresh set of flags.
+        self._flag_state = mpfr_flags_save()
         mpfr_clear_flags()
+
+    def tearDown(self):
+        mpfr_flags_restore(self._flag_state, MPFR_FLAGS_ALL)
 
     def test_initialized_p(self):
         x = Mpfr_t()
@@ -425,6 +496,14 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_d(x, 1.2345, MPFR_RNDN)
         self.assertEqual(mpfr_get_d(x, MPFR_RNDN), 1.2345)
 
+    def test_set_z(self):
+        z = Mpz_t()
+        mpz_set_str(z, "123", 10)
+
+        x = Mpfr(53)
+        mpfr_set_z(x, z, MPFR_RNDN)
+        self.assertEqual(mpfr_get_d(x, MPFR_RNDN), 123.0)
+
     def test_set_si_2exp(self):
         x = Mpfr(64)
         mpfr_set_si_2exp(x, 11, 5, MPFR_RNDN)
@@ -437,6 +516,14 @@ class TestMpfr(unittest.TestCase):
         with self.assertRaises(OverflowError):
             mpfr_set_ui_2exp(x, -1, 5, MPFR_RNDN)
         self.assertIs(mpfr_erangeflag_p(), False)
+
+    def test_set_z_2exp(self):
+        z = Mpz_t()
+        mpz_set_str(z, "11", 10)
+
+        x = Mpfr(64)
+        mpfr_set_z_2exp(x, z, 5, MPFR_RNDN)
+        self.assertEqual(mpfr_get_si(x, MPFR_RNDN), 352)
 
     def test_swap(self):
         x = Mpfr(17)
@@ -2170,6 +2257,95 @@ class TestMpfr(unittest.TestCase):
             self.assertEqual(actual_ternary_out, ternary_out)
             self.assertEqual(actual_flags, set(flags.split()))
 
+    def test_flags_clear(self):
+        mpfr_set_underflow()
+        mpfr_set_inexflag()
+
+        self.assertTrue(mpfr_underflow_p())
+        self.assertTrue(mpfr_inexflag_p())
+
+        mpfr_flags_clear(MPFR_FLAGS_INEXACT)
+        self.assertTrue(mpfr_underflow_p())
+        self.assertFalse(mpfr_inexflag_p())
+
+        mpfr_flags_clear(MPFR_FLAGS_ALL)
+        self.assertFalse(mpfr_underflow_p())
+        self.assertFalse(mpfr_inexflag_p())
+
+    def test_flags_set(self):
+        self.assertFalse(mpfr_overflow_p())
+        self.assertFalse(mpfr_erangeflag_p())
+
+        mpfr_flags_set(MPFR_FLAGS_OVERFLOW)
+        self.assertTrue(mpfr_overflow_p())
+        self.assertFalse(mpfr_erangeflag_p())
+
+        mpfr_flags_set(MPFR_FLAGS_ALL)
+        self.assertTrue(mpfr_overflow_p())
+        self.assertTrue(mpfr_erangeflag_p())
+
+    def test_flags_test(self):
+        mpfr_set_divby0()
+        mpfr_set_nanflag()
+
+        self.assertEqual(mpfr_flags_test(MPFR_FLAGS_DIVBY0), MPFR_FLAGS_DIVBY0)
+        self.assertEqual(
+            mpfr_flags_test(MPFR_FLAGS_ALL),
+            MPFR_FLAGS_DIVBY0 | MPFR_FLAGS_NAN,
+        )
+        self.assertEqual(
+            mpfr_flags_test(MPFR_FLAGS_NAN | MPFR_FLAGS_UNDERFLOW),
+            MPFR_FLAGS_NAN,
+        )
+
+    def test_flags_save(self):
+        mpfr_set_overflow()
+        mpfr_set_erangeflag()
+        self.assertEqual(
+            mpfr_flags_save(),
+            MPFR_FLAGS_OVERFLOW | MPFR_FLAGS_ERANGE,
+        )
+
+    def test_flags_restore(self):
+        mpfr_set_nanflag()
+        mpfr_flags_restore(
+            MPFR_FLAGS_OVERFLOW | MPFR_FLAGS_UNDERFLOW,
+            MPFR_FLAGS_OVERFLOW | MPFR_FLAGS_DIVBY0,
+        )
+
+        self.assertEqual(
+            mpfr_flags_save(),
+            MPFR_FLAGS_OVERFLOW | MPFR_FLAGS_NAN,
+        )
+
+    def test_flag_macros(self):
+        individual_flags = [
+            MPFR_FLAGS_UNDERFLOW,
+            MPFR_FLAGS_OVERFLOW,
+            MPFR_FLAGS_NAN,
+            MPFR_FLAGS_INEXACT,
+            MPFR_FLAGS_ERANGE,
+            MPFR_FLAGS_DIVBY0,
+        ]
+
+        # Check each flag is a power of 2.
+        for flag in individual_flags:
+            self.assertIsInstance(flag, int)
+            self.assertGreater(flag, 0)
+            self.assertEqual(flag & (flag - 1), 0)
+
+        # Check all flags are distinct.
+        self.assertEqual(
+            len(individual_flags),
+            len(set(individual_flags)),
+        )
+
+        # Check MPFR_FLAGS_ALL comprises all the flags.
+        acc = 0
+        for flag in individual_flags:
+            acc |= flag
+        self.assertEqual(acc, MPFR_FLAGS_ALL)
+
     def test_set_d(self):
         x = Mpfr(30)
         mpfr_set_d(x, 0.1, MPFR_RNDN)
@@ -2256,6 +2432,65 @@ class TestMpfr(unittest.TestCase):
         self.assertEqual(ternary, 0)
         self.assertEqual(exp, 2)
         self.assertEqual(mpfr_get_d(sig, MPFR_RNDN), 0.7853981633974483)
+
+    def test_get_z_2exp(self):
+        x = Mpfr(53)
+        y = Mpfr(53)
+
+        # Finite nonzero.
+        mpfr_set_d(x, 3.141592653589793, MPFR_RNDN)
+        z = Mpz_t()
+        exp = mpfr_get_z_2exp(z, x)
+
+        self.assertEqual(exp, -51)
+        self.assertEqual(mpz_get_str(10, z), "7074237752028440")
+
+        # Infinities and NaNs
+        for special in [posinf(), neginf(), nan()]:
+            mpfr_clear_flags()
+
+            exp = mpfr_get_z_2exp(z, special)
+
+            self.assertEqual(mpfr_flags_save(), MPFR_FLAGS_ERANGE)
+            self.assertEqual(exp, mpfr_get_emin())
+            self.assertEqual(mpz_get_str(10, z), "0")
+
+        # Zeros
+        for zero in [poszero(), negzero()]:
+            mpfr_clear_flags()
+
+            exp = mpfr_get_z_2exp(z, zero)
+
+            self.assertEqual(mpfr_flags_save(), 0)
+            self.assertEqual(exp, mpfr_get_emin())
+            self.assertEqual(mpz_get_str(10, z), "0")
+
+    def test_get_z(self):
+        x = Mpfr(20)
+        mpfr_const_pi(x, MPFR_RNDN)
+
+        z = Mpz_t()
+        rv = mpfr_get_z(z, x, MPFR_RNDD)
+        self.assertEqual(mpz_get_str(10, z), "3")
+        self.assertLess(rv, 0)
+
+        rv = mpfr_get_z(z, x, MPFR_RNDU)
+        self.assertEqual(mpz_get_str(10, z), "4")
+        self.assertGreater(rv, 0)
+
+        mpfr_set_d(x, 123.0, MPFR_RNDN)
+        rv = mpfr_get_z(z, x, MPFR_RNDU)
+        self.assertEqual(mpz_get_str(10, z), "123")
+        self.assertEqual(rv, 0)
+
+        for x in [posinf(), neginf(), nan()]:
+            mpfr_clear_flags()
+
+            rv = mpfr_get_z(z, x, MPFR_RNDN)
+
+            self.assertEqual(mpfr_flags_save(), MPFR_FLAGS_ERANGE)
+            self.assertEqual(rv, 0)
+            self.assertEqual(mpz_get_str(10, z), "0")
 
     def test_get_str(self):
         x = Mpfr(20)
