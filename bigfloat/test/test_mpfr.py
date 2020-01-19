@@ -38,6 +38,7 @@ from mpfr import (
     Mpfr_t,
 
     # MPZ functions
+    mpz_set_str,
     mpz_get_str,
 
     mpfr_initialized_p,
@@ -60,6 +61,7 @@ from mpfr import (
     mpfr_set_d,
     mpfr_set_z,
     mpfr_set_si_2exp,
+    mpfr_set_z_2exp,
     mpfr_set_str,
     mpfr_strtofr,
     mpfr_set_nan,
@@ -72,6 +74,7 @@ from mpfr import (
     mpfr_get_si,
     mpfr_get_d_2exp,
     mpfr_get_z_2exp,
+    mpfr_get_z,
 
     mpfr_get_str,
     mpfr_fits_slong_p,
@@ -455,9 +458,25 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_d(x, 1.2345, MPFR_RNDN)
         self.assertEqual(mpfr_get_d(x, MPFR_RNDN), 1.2345)
 
+    def test_set_z(self):
+        z = Mpz_t()
+        mpz_set_str(z, "123", 10)
+
+        x = Mpfr(53)
+        mpfr_set_z(x, z, MPFR_RNDN)
+        self.assertEqual(mpfr_get_d(x, MPFR_RNDN), 123.0)
+
     def test_set_si_2exp(self):
         x = Mpfr(64)
         mpfr_set_si_2exp(x, 11, 5, MPFR_RNDN)
+        self.assertEqual(mpfr_get_si(x, MPFR_RNDN), 352)
+
+    def test_set_z_2exp(self):
+        z = Mpz_t()
+        mpz_set_str(z, "11", 10)
+
+        x = Mpfr(64)
+        mpfr_set_z_2exp(x, z, 5, MPFR_RNDN)
         self.assertEqual(mpfr_get_si(x, MPFR_RNDN), 352)
 
     def test_swap(self):

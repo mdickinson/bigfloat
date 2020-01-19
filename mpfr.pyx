@@ -521,6 +521,19 @@ def mpfr_set_si_2exp(Mpfr_t rop not None, long int op,
     check_rounding_mode(rnd)
     return cmpfr.mpfr_set_si_2exp(&rop._value, op, e, rnd)
 
+def mpfr_set_z_2exp(Mpfr_t rop not None, Mpz_t op not None,
+                    cmpfr.mpfr_exp_t e, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set rop to op multiplied by a power of 2.
+
+    Set the value of rop from op multiplied by two to the power e, rounded
+    toward the given direction rnd. Note that the input 0 is converted to +0.
+
+    """
+    check_initialized(rop)
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_set_z_2exp(&rop._value, &op._value, e, rnd)
+
 def mpfr_set_str(Mpfr_t rop not None, object s, int base, cmpfr.mpfr_rnd_t rnd):
     """
     Set rop from a string s.
@@ -751,6 +764,22 @@ def mpfr_get_z_2exp(Mpz_t rop not None, Mpfr_t op not None):
 
     exponent = cmpfr.mpfr_get_z_2exp(&rop._value, &op._value)
     return exponent
+
+def mpfr_get_z(Mpz_t rop not None, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Convert to a GMP integer.
+
+    Convert op to a mpz_t, after rounding it with respect to rnd. If op is NaN
+    or an infinity, the erange flag is set, rop is set to 0, and 0 is returned.
+    Otherwise the return value is zero when rop is equal to op (i.e., when op
+    is an integer), positive when it is greater than op, and negative when it
+    is smaller than op; moreover, if rop differs from op, i.e., if op is not an
+    integer, the inexact flag is set.
+
+    """
+    check_initialized(op)
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_get_z(&rop._value, &op._value, rnd)
 
 def mpfr_get_str(int b, size_t n, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     """

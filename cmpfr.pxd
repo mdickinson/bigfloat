@@ -95,6 +95,9 @@ cdef extern from "mpfr.h":
     int mpfr_set_si_2exp(
         mpfr_ptr rop, long int op, mpfr_exp_t e, mpfr_rnd_t rnd
     )
+    int mpfr_set_z_2exp(
+        mpfr_ptr rop, cgmp.mpz_ptr op, mpfr_exp_t e, mpfr_rnd_t rnd
+    )
     int mpfr_set_str(
         mpfr_ptr rop, const char *s, int base, mpfr_rnd_t rnd
     )
@@ -115,6 +118,7 @@ cdef extern from "mpfr.h":
     long int mpfr_get_si(mpfr_ptr op, mpfr_rnd_t rnd)
     double mpfr_get_d_2exp(long int *exp, mpfr_ptr op, mpfr_rnd_t rnd)
     mpfr_exp_t mpfr_get_z_2exp(cgmp.mpz_ptr rop, mpfr_ptr op)
+    int mpfr_get_z(cgmp.mpz_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
 
     char * mpfr_get_str(
         char *str, mpfr_exp_t *expptr, int b,
