@@ -18,6 +18,8 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with the bigfloat package.  If not, see <http://www.gnu.org/licenses/>.
 
+from libc.string cimport strlen
+
 cimport cgmp
 cimport cmpfr
 
@@ -28,8 +30,11 @@ cdef extern from "limits.h":
     cdef long LONG_MIN
 
 ###############################################################################
-# Mpz_t type
+# Mpz_t type and functions
 ###############################################################################
+
+ctypedef void (*free_func) (void *, size_t)
+
 
 cdef class Mpz_t:
     """
@@ -44,6 +49,81 @@ cdef class Mpz_t:
 
     def __dealloc__(self):
         cgmp.mpz_clear(&self._value)
+
+
+def mpz_set_str(Mpz_t rop not None, object s, int base):
+    """
+    Set rop from a string.
+
+    Set the value of rop from s, a string in base base.
+    White space is allowed in the string, and is simply ignored.
+
+    The base may vary from 2 to 62, or if base is 0, then the leading
+    characters are used: 0x and 0X for hexadecimal, 0b and 0B for binary, 0 for
+    octal, or decimal otherwise.
+
+    For bases up to 36, case is ignored; upper-case and lower-case letters have
+    the same value. For bases 37 to 62, upper-case letter represent the usual
+    10..35 while lower-case letter represent 36..61.
+
+    Raises ValueError if the string is not a valid number in the given base.
+
+    """
+    cdef bytes bytes_s
+    cdef int err
+
+    if not (2 <= base <= 62 or base == 0):
+        raise ValueError("base must satisfy 2 <= base <= 62 or base == 0")
+
+    bytes_s = s.encode('ascii')
+    err = cgmp.mpz_set_str(&rop._value, bytes_s, base)
+    if err:
+        raise ValueError("Not a valid number for base {}: {}".format(
+            base, s))
+
+
+def mpz_get_str(int base, Mpz_t op not None):
+    """
+    Convert to a string of digits in a given base.
+
+    Convert op to a string of digits in base base. The base argument may vary
+    from 2 to 62 or from -2 to -36.
+
+    For base in the range 2..36, digits and lower-case letters are used; for
+    -2..-36, digits and upper-case letters are used; for 37..62, digits,
+    upper-case letters, and lower-case letters (in that significance order) are
+    used.
+
+    """
+    cdef bytes digits
+    cdef char *c_digits
+    cdef free_func freefunc
+    cdef size_t c_digits_len
+
+    if not (2 <= base <= 62 or -36 <= base <= -2):
+        raise ValueError(
+            "Base must satisfy 2 <= base <= 62 or -2 >= base >= -36.")
+
+    # Get the appropriate function for freeing the allocated memory.
+    cgmp.mp_get_memory_functions (NULL, NULL, &freefunc);
+
+    c_digits = cgmp.mpz_get_str(NULL, base, &op._value)
+    if c_digits == NULL:
+        raise RuntimeError("Error during string conversion.")
+    c_digits_alloc = strlen(c_digits) + 1
+
+    # It's possible for the conversion from c_digits to digits to raise, so use
+    # a try-finally block to ensure that c_digits always gets freed.
+    try:
+        digits = bytes(c_digits)
+    finally:
+        freefunc(c_digits, c_digits_alloc)
+
+    # Return a plain string on Python 2, and a Unicode string on Python 3.
+    if sys.version_info < (3,):
+        return digits
+    else:
+        return digits.decode('ascii')
 
 
 ###############################################################################

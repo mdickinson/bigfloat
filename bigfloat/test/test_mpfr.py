@@ -37,6 +37,9 @@ from mpfr import (
     Mpz_t,
     Mpfr_t,
 
+    # MPZ functions
+    mpz_get_str,
+
     mpfr_initialized_p,
 
     # 5.1 Initialization Functions
@@ -2142,10 +2145,7 @@ class TestMpfr(unittest.TestCase):
         exp = mpfr_get_z_2exp(z, x)
 
         self.assertEqual(exp, -51)
-        # Indirect check of the integer value, until we have a way
-        # to convert Mpz_t objects to and from integers.
-        mpfr_set_z(y, z, MPFR_RNDN)
-        self.assertEqual(mpfr_get_d(y, MPFR_RNDN), 7074237752028440.0)
+        self.assertEqual(mpz_get_str(10, z), "7074237752028440")
 
         # Infinities and NaNs
         for special in [posinf(), neginf(), nan()]:
@@ -2155,8 +2155,7 @@ class TestMpfr(unittest.TestCase):
 
             self.assertEqual(mpfr_flags_save(), MPFR_FLAGS_ERANGE)
             self.assertEqual(exp, mpfr_get_emin())
-            mpfr_set_z(y, z, MPFR_RNDN)
-            self.assertEqual(mpfr_get_d(y, MPFR_RNDN), 0)
+            self.assertEqual(mpz_get_str(10, z), "0")
 
         # Zeros
         for zero in [poszero(), negzero()]:
@@ -2166,8 +2165,7 @@ class TestMpfr(unittest.TestCase):
 
             self.assertEqual(mpfr_flags_save(), 0)
             self.assertEqual(exp, mpfr_get_emin())
-            mpfr_set_z(y, z, MPFR_RNDN)
-            self.assertEqual(mpfr_get_d(y, MPFR_RNDN), 0)
+            self.assertEqual(mpz_get_str(10, z), "0")
 
     def test_get_str(self):
         x = Mpfr(20)
