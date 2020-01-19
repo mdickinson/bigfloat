@@ -40,7 +40,7 @@ cdef class Mpz_t:
     """
     GMP integer object.
 
-    Mpz_t() creates a new, initialized GMP integer object.
+    Mpz_t() creates a new, initialized GMP integer object with value 0.
     """
     cdef cgmp.__mpz_struct _value
 
