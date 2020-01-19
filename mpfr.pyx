@@ -3378,7 +3378,6 @@ def mpfr_flags_restore(cmpfr.mpfr_flags_t flags, cmpfr.mpfr_flags_t mask):
 #   mpfr_set_ld
 #   mpfr_set_float128
 #   mpfr_set_decimal64
-#   mpfr_set_z
 #   mpfr_set_q
 #   mpfr_set_f
 #
@@ -3387,7 +3386,6 @@ def mpfr_flags_restore(cmpfr.mpfr_flags_t flags, cmpfr.mpfr_flags_t mask):
 #
 #   mpfr_set_uj_2exp
 #   mpfr_set_sj_2exp
-#   mpfr_set_z_2exp
 #
 #     -- these functions again concern types not readily available in Python.
 #
@@ -3408,8 +3406,6 @@ def mpfr_flags_restore(cmpfr.mpfr_flags_t flags, cmpfr.mpfr_flags_t mask):
 #  mpfr_get_sj
 #  mpfr_get_uj
 #  mpfr_get_ld_2exp
-#  mpfr_get_z_2exp
-#  mpfr_get_z
 #  mpfr_get_q
 #  mpfr_get_f
 #    -- these concern types not readily available in Python.  Only mpfr_get_d

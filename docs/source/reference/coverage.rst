@@ -57,6 +57,8 @@ section of the MPFR documentation
 +--------------------+-----------------+
 | mpfr_set_decimal64 | not implemented |
 +--------------------+-----------------+
+| mpfr_set_z         | wrapped         |
++--------------------+-----------------+
 | mpfr_set_q         | not implemented |
 +--------------------+-----------------+
 | mpfr_set_f         | not implemented |
@@ -69,7 +71,7 @@ section of the MPFR documentation
 +--------------------+-----------------+
 | mpfr_set_sj_2exp   | not implemented |
 +--------------------+-----------------+
-| mpfr_set_z_2exp    | not implemented |
+| mpfr_set_z_2exp    | wrapped         |
 +--------------------+-----------------+
 | mpfr_set_str       | wrapped         |
 +--------------------+-----------------+
@@ -135,9 +137,9 @@ section of the MPFR documentation
 +---------------------+------------------------+
 | mpfr_frexp          | wrapped                |
 +---------------------+------------------------+
-| mpfr_get_z_2exp     | not implemented        |
+| mpfr_get_z_2exp     | wrapped                |
 +---------------------+------------------------+
-| mpfr_get_z          | not implemented        |
+| mpfr_get_z          | wrapped                |
 +---------------------+------------------------+
 | mpfr_get_q          | not implemented        |
 +---------------------+------------------------+
