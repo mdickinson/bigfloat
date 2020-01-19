@@ -18,6 +18,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with the bigfloat package.  If not, see <http://www.gnu.org/licenses/>.
 
+cimport cgmp
 cimport cmpfr
 
 import sys
@@ -25,6 +26,24 @@ import sys
 cdef extern from "limits.h":
     cdef long LONG_MAX
     cdef long LONG_MIN
+
+###############################################################################
+# Mpz_t type
+###############################################################################
+
+cdef class Mpz_t:
+    """
+    GMP integer object.
+
+    Mpz_t() creates a new, initialized GMP integer object.
+    """
+    cdef cgmp.__mpz_struct _value
+
+    def __cinit__(self):
+        cgmp.mpz_init(&self._value)
+
+    def __dealloc__(self):
+        cgmp.mpz_clear(&self._value)
 
 
 ###############################################################################
@@ -388,6 +407,18 @@ def mpfr_set_d(Mpfr_t rop not None, double op, cmpfr.mpfr_rnd_t rnd):
     check_rounding_mode(rnd)
     return cmpfr.mpfr_set_d(&rop._value, op, rnd)
 
+def mpfr_set_z(Mpfr_t rop not None, Mpz_t op not None, cmpfr.mpfr_rnd_t rnd):
+    """
+    Set the value of rop from a GMP integer op, rounded in the direction rnd.
+
+    Set the value of rop from op, rounded toward the given direction rnd. Note
+    that the input 0 is converted to +0, regardless of the rounding mode.
+
+    """
+    check_initialized(rop)
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_set_z(&rop._value, &op._value, rnd)
+
 def mpfr_set_si_2exp(Mpfr_t rop not None, long int op,
                      cmpfr.mpfr_exp_t e, cmpfr.mpfr_rnd_t rnd):
     """
@@ -609,6 +640,28 @@ def mpfr_get_d_2exp(Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     check_rounding_mode(rnd)
     d =  cmpfr.mpfr_get_d_2exp(&exp, &op._value, rnd)
     return d, exp
+
+def mpfr_get_z_2exp(Mpz_t rop not None, Mpfr_t op not None):
+    """
+    Decompose as a product of an integer and a power of two.
+
+    Put the scaled significand of op (regarded as an integer, with the
+    precision of op) into rop, and return the exponent exp (which may be
+    outside the current exponent range) such that op exactly equals rop times 2
+    raised to the power exp. If op is zero, the minimal exponent emin is
+    returned. If op is NaN or an infinity, the erange flag is set, rop is set
+    to 0, and the the minimal exponent emin is returned. The returned exponent
+    may be less than the minimal exponent emin of MPFR numbers in the current
+    exponent range; in case the exponent is not representable in the mpfr_exp_t
+    type, the erange flag is set and the minimal value of the mpfr_exp_t type
+    is returned.
+    """
+    cdef cmpfr.mpfr_exp_t exp
+
+    check_initialized(op)
+
+    exponent = cmpfr.mpfr_get_z_2exp(&rop._value, &op._value)
+    return exponent
 
 def mpfr_get_str(int b, size_t n, Mpfr_t op not None, cmpfr.mpfr_rnd_t rnd):
     """

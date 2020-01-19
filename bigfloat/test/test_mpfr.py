@@ -24,7 +24,8 @@ from mpfr import (
     MPFR_RNDN, MPFR_RNDZ, MPFR_RNDU, MPFR_RNDD, MPFR_RNDA,
     MPFR_PREC_MIN, MPFR_PREC_MAX,
 
-    # Base extension type
+    # Base extension types
+    Mpz_t,
     Mpfr_t,
 
     mpfr_initialized_p,
@@ -45,6 +46,7 @@ from mpfr import (
     mpfr_set,
     mpfr_set_si,
     mpfr_set_d,
+    mpfr_set_z,
     mpfr_set_si_2exp,
     mpfr_set_str,
     mpfr_strtofr,
@@ -57,6 +59,8 @@ from mpfr import (
     mpfr_get_d,
     mpfr_get_si,
     mpfr_get_d_2exp,
+    mpfr_get_z_2exp,
+
     mpfr_get_str,
     mpfr_fits_slong_p,
 
@@ -268,6 +272,17 @@ def temporary_emax(emax):
         yield
     finally:
         mpfr_set_emax(old_emax)
+
+
+# Context manager for temporarily clearining flag state.
+@contextlib.contextmanager
+def temporary_flags():
+    old_flags = mpfr_flags_save()
+    mpfr_clear_flags()
+    try:
+        yield
+    finally:
+        mpfr_flags_restore(old_flags)
 
 
 # Factory function for creating and initializing Mpfr_t instances.
@@ -1986,6 +2001,32 @@ class TestMpfr(unittest.TestCase):
         y, exp = mpfr_get_d_2exp(x, MPFR_RNDN)
         self.assertEqual(exp, 2)
         self.assertEqual(y, 0.7853981633974483)
+
+    def test_get_z_2exp(self):
+        x = Mpfr(53)
+        y = Mpfr(53)
+
+        # Finite nonzero.
+        mpfr_set_d(x, 3.141592653589793, MPFR_RNDN)
+        z = Mpz_t()
+        exp = mpfr_get_z_2exp(z, x)
+
+        self.assertEqual(exp, -51)
+        # Indirect check of the integer value, until we have a way
+        # to convert Mpz_t objects to and from integers.
+        mpfr_set_z(y, z, MPFR_RNDN)
+        self.assertEqual(mpfr_get_d(y, MPFR_RNDN), 7074237752028440.0)
+
+        # Infinities
+        mpfr_set_inf(x, 0)
+        exp = mpfr_get_z_2exp(z, x)
+        self.assertEqual(exp, mpfr_get_emin())
+
+        mpfr_set_z(y, z, MPFR_RNDN)
+        self.assertEqual(mpfr_get_d(y, MPFR_RNDN), 0)
+
+
+        import pdb; pdb.set_trace()
 
     def test_get_str(self):
         x = Mpfr(20)
