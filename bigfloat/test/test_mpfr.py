@@ -290,17 +290,6 @@ def temporary_emax(emax):
         mpfr_set_emax(old_emax)
 
 
-# Context manager for temporarily clearining flag state.
-@contextlib.contextmanager
-def temporary_flags():
-    old_flags = mpfr_flags_save()
-    mpfr_clear_flags()
-    try:
-        yield
-    finally:
-        mpfr_flags_restore(old_flags)
-
-
 # Factory function for creating and initializing Mpfr_t instances.
 def Mpfr(precision):
     self = Mpfr_t()
