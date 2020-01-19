@@ -70,6 +70,15 @@ MPFR_RNDA =  cmpfr.MPFR_RNDA
 MPFR_EMAX_DEFAULT = cmpfr.MPFR_EMAX_DEFAULT
 MPFR_EMIN_DEFAULT = cmpfr.MPFR_EMIN_DEFAULT
 
+# Make flag values available to Python
+MPFR_FLAGS_UNDERFLOW = cmpfr.MPFR_FLAGS_UNDERFLOW
+MPFR_FLAGS_OVERFLOW = cmpfr.MPFR_FLAGS_OVERFLOW
+MPFR_FLAGS_NAN = cmpfr.MPFR_FLAGS_NAN
+MPFR_FLAGS_INEXACT = cmpfr.MPFR_FLAGS_INEXACT
+MPFR_FLAGS_ERANGE = cmpfr.MPFR_FLAGS_ERANGE
+MPFR_FLAGS_DIVBY0 = cmpfr.MPFR_FLAGS_DIVBY0
+MPFR_FLAGS_ALL = cmpfr.MPFR_FLAGS_ALL
+
 
 ###############################################################################
 # Helper functions, not exposed to Python
@@ -2847,6 +2856,42 @@ def mpfr_erangeflag_p():
     """
     return bool(cmpfr.mpfr_erangeflag_p())
 
+def mpfr_flags_clear(cmpfr.mpfr_flags_t mask):
+    """
+    Clear (lower) the group of flags specified by mask.
+
+    """
+    cmpfr.mpfr_flags_clear(mask)
+
+def mpfr_flags_set(cmpfr.mpfr_flags_t mask):
+    """
+    Set (raise) the group of flags specified by mask.
+
+    """
+    cmpfr.mpfr_flags_set(mask)
+
+def mpfr_flags_test(cmpfr.mpfr_flags_t mask):
+    """
+    Return the flags specified by mask.
+
+    """
+    return cmpfr.mpfr_flags_test(mask)
+
+def mpfr_flags_save():
+    """
+    Return all the flags. This is equivalent to mpfr_flags_test(MPFR_FLAGS_ALL)
+
+    """
+    return cmpfr.mpfr_flags_save()
+
+def mpfr_flags_restore(cmpfr.mpfr_flags_t flags, cmpfr.mpfr_flags_t mask):
+    """
+    Set the current flag state from an integer.
+
+    Restore the flags specified by mask to their state represented in flags.
+
+    """
+    cmpfr.mpfr_flags_restore(flags, mask)
 
 
 # Functions that are documented in the MPFR 3.0.1 documentation, but aren't

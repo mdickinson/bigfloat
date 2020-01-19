@@ -25,6 +25,7 @@ cdef extern from "mpfr.h":
     # MPFR type declarations
     ctypedef int mpfr_prec_t
     ctypedef int mpfr_sign_t
+    ctypedef unsigned int mpfr_flags_t
     ctypedef cgmp.mp_exp_t mpfr_exp_t
 
     ctypedef struct __mpfr_struct:
@@ -59,6 +60,15 @@ cdef extern from "mpfr.h":
 
     mpfr_exp_t MPFR_EMIN_DEFAULT
     mpfr_exp_t MPFR_EMAX_DEFAULT
+
+    # Flags
+    mpfr_flags_t MPFR_FLAGS_UNDERFLOW
+    mpfr_flags_t MPFR_FLAGS_OVERFLOW
+    mpfr_flags_t MPFR_FLAGS_NAN
+    mpfr_flags_t MPFR_FLAGS_INEXACT
+    mpfr_flags_t MPFR_FLAGS_ERANGE
+    mpfr_flags_t MPFR_FLAGS_DIVBY0
+    mpfr_flags_t MPFR_FLAGS_ALL
 
 
     ###########################################################################
@@ -349,3 +359,9 @@ cdef extern from "mpfr.h":
     int mpfr_nanflag_p()
     int mpfr_inexflag_p()
     int mpfr_erangeflag_p()
+
+    void mpfr_flags_clear(mpfr_flags_t mask)
+    void mpfr_flags_set(mpfr_flags_t mask)
+    mpfr_flags_t mpfr_flags_test(mpfr_flags_t mask)
+    mpfr_flags_t mpfr_flags_save()
+    void mpfr_flags_restore(mpfr_flags_t flags, mpfr_flags_t mask)
