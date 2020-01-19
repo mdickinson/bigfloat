@@ -24,6 +24,15 @@ from mpfr import (
     MPFR_RNDN, MPFR_RNDZ, MPFR_RNDU, MPFR_RNDD, MPFR_RNDA,
     MPFR_PREC_MIN, MPFR_PREC_MAX,
 
+    # Flag constants
+    MPFR_FLAGS_UNDERFLOW,
+    MPFR_FLAGS_OVERFLOW,
+    MPFR_FLAGS_NAN,
+    MPFR_FLAGS_INEXACT,
+    MPFR_FLAGS_ERANGE,
+    MPFR_FLAGS_DIVBY0,
+    MPFR_FLAGS_ALL,
+
     # Base extension type
     Mpfr_t,
 
@@ -237,6 +246,7 @@ from mpfr import (
     mpfr_set_nanflag,
     mpfr_set_inexflag,
     mpfr_set_erangeflag,
+    mpfr_set_divby0,
 
     mpfr_clear_flags,
 
@@ -245,6 +255,12 @@ from mpfr import (
     mpfr_nanflag_p,
     mpfr_inexflag_p,
     mpfr_erangeflag_p,
+
+    mpfr_flags_clear,
+    mpfr_flags_set,
+    mpfr_flags_test,
+    mpfr_flags_save,
+    mpfr_flags_restore,
 )
 
 
@@ -279,7 +295,12 @@ def Mpfr(precision):
 
 class TestMpfr(unittest.TestCase):
     def setUp(self):
+        # Make sure each test gets a fresh set of flags.
+        self._flag_state = mpfr_flags_save()
         mpfr_clear_flags()
+
+    def tearDown(self):
+        mpfr_flags_restore(self._flag_state, MPFR_FLAGS_ALL)
 
     def test_initialized_p(self):
         x = Mpfr_t()
@@ -1908,6 +1929,95 @@ class TestMpfr(unittest.TestCase):
             self.assertEqual(actual_val_out, val_out)
             self.assertEqual(actual_ternary_out, ternary_out)
             self.assertEqual(actual_flags, set(flags.split()))
+
+    def test_flags_clear(self):
+        mpfr_set_underflow()
+        mpfr_set_inexflag()
+
+        self.assertTrue(mpfr_underflow_p())
+        self.assertTrue(mpfr_inexflag_p())
+
+        mpfr_flags_clear(MPFR_FLAGS_INEXACT)
+        self.assertTrue(mpfr_underflow_p())
+        self.assertFalse(mpfr_inexflag_p())
+
+        mpfr_flags_clear(MPFR_FLAGS_ALL)
+        self.assertFalse(mpfr_underflow_p())
+        self.assertFalse(mpfr_inexflag_p())
+
+    def test_flags_set(self):
+        self.assertFalse(mpfr_overflow_p())
+        self.assertFalse(mpfr_erangeflag_p())
+
+        mpfr_flags_set(MPFR_FLAGS_OVERFLOW)
+        self.assertTrue(mpfr_overflow_p())
+        self.assertFalse(mpfr_erangeflag_p())
+
+        mpfr_flags_set(MPFR_FLAGS_ALL)
+        self.assertTrue(mpfr_overflow_p())
+        self.assertTrue(mpfr_erangeflag_p())
+
+    def test_flags_test(self):
+        mpfr_set_divby0()
+        mpfr_set_nanflag()
+
+        self.assertEqual(mpfr_flags_test(MPFR_FLAGS_DIVBY0), MPFR_FLAGS_DIVBY0)
+        self.assertEqual(
+            mpfr_flags_test(MPFR_FLAGS_ALL),
+            MPFR_FLAGS_DIVBY0 | MPFR_FLAGS_NAN,
+        )
+        self.assertEqual(
+            mpfr_flags_test(MPFR_FLAGS_NAN | MPFR_FLAGS_UNDERFLOW),
+            MPFR_FLAGS_NAN,
+        )
+
+    def test_flags_save(self):
+        mpfr_set_overflow()
+        mpfr_set_erangeflag()
+        self.assertEqual(
+            mpfr_flags_save(),
+            MPFR_FLAGS_OVERFLOW | MPFR_FLAGS_ERANGE,
+        )
+
+    def test_flags_restore(self):
+        mpfr_set_nanflag()
+        mpfr_flags_restore(
+            MPFR_FLAGS_OVERFLOW | MPFR_FLAGS_UNDERFLOW,
+            MPFR_FLAGS_OVERFLOW | MPFR_FLAGS_DIVBY0,
+        )
+
+        self.assertEqual(
+            mpfr_flags_save(),
+            MPFR_FLAGS_OVERFLOW | MPFR_FLAGS_NAN,
+        )
+
+    def test_flag_macros(self):
+        individual_flags = [
+            MPFR_FLAGS_UNDERFLOW,
+            MPFR_FLAGS_OVERFLOW,
+            MPFR_FLAGS_NAN,
+            MPFR_FLAGS_INEXACT,
+            MPFR_FLAGS_ERANGE,
+            MPFR_FLAGS_DIVBY0,
+        ]
+
+        # Check each flag is a power of 2.
+        for flag in individual_flags:
+            self.assertIsInstance(flag, int)
+            self.assertGreater(flag, 0)
+            self.assertEqual(flag & (flag - 1), 0)
+
+        # Check all flags are distinct.
+        self.assertEqual(
+            len(individual_flags),
+            len(set(individual_flags)),
+        )
+
+        # Check MPFR_FLAGS_ALL comprises all the flags.
+        acc = 0
+        for flag in individual_flags:
+            acc |= flag
+        self.assertEqual(acc, MPFR_FLAGS_ALL)
 
     def test_set_d(self):
         x = Mpfr(30)
