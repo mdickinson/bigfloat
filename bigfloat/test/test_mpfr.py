@@ -308,6 +308,37 @@ def Mpfr(precision):
     return self
 
 
+# Functions for creating special values
+def posinf(precision=53):
+    x = Mpfr(precision)
+    mpfr_set_inf(x, 0)
+    return x
+
+
+def neginf(precision=53):
+    x = Mpfr(precision)
+    mpfr_set_inf(x, -1)
+    return x
+
+
+def nan(precision=53):
+    x = Mpfr(precision)
+    mpfr_set_nan(x)
+    return x
+
+
+def poszero(precision=53):
+    x = Mpfr(precision)
+    mpfr_set_zero(x, 0)
+    return x
+
+
+def negzero(precision=53):
+    x = Mpfr(precision)
+    mpfr_set_zero(x, -1)
+    return x
+
+
 class TestMpfr(unittest.TestCase):
     def setUp(self):
         # Make sure each test gets a fresh set of flags.
@@ -2127,16 +2158,27 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_z(y, z, MPFR_RNDN)
         self.assertEqual(mpfr_get_d(y, MPFR_RNDN), 7074237752028440.0)
 
-        # Infinities
-        mpfr_set_inf(x, 0)
-        exp = mpfr_get_z_2exp(z, x)
-        self.assertEqual(exp, mpfr_get_emin())
+        # Infinities and NaNs
+        for special in [posinf(), neginf(), nan()]:
+            mpfr_clear_flags()
 
-        mpfr_set_z(y, z, MPFR_RNDN)
-        self.assertEqual(mpfr_get_d(y, MPFR_RNDN), 0)
+            exp = mpfr_get_z_2exp(z, special)
 
+            self.assertEqual(mpfr_flags_save(), MPFR_FLAGS_ERANGE)
+            self.assertEqual(exp, mpfr_get_emin())
+            mpfr_set_z(y, z, MPFR_RNDN)
+            self.assertEqual(mpfr_get_d(y, MPFR_RNDN), 0)
 
-        import pdb; pdb.set_trace()
+        # Zeros
+        for zero in [poszero(), negzero()]:
+            mpfr_clear_flags()
+
+            exp = mpfr_get_z_2exp(z, zero)
+
+            self.assertEqual(mpfr_flags_save(), 0)
+            self.assertEqual(exp, mpfr_get_emin())
+            mpfr_set_z(y, z, MPFR_RNDN)
+            self.assertEqual(mpfr_get_d(y, MPFR_RNDN), 0)
 
     def test_get_str(self):
         x = Mpfr(20)
