@@ -41,6 +41,8 @@ class TestMpz(unittest.TestCase):
         test_values = [
             ("1001", 2, 9),
             ("1001", 3, 28),
+            ("123", 10, 123),
+            ("-123", 10, -123),
             ("abc", 16, 2748),
             ("ABC", 16, 2748),
             ("A", 37, 10),
@@ -51,6 +53,11 @@ class TestMpz(unittest.TestCase):
             ("011", 0, 9),
             ("0x12", 0, 18),
             ("0b101", 0, 5),
+            ("-0x12", 0, -18),
+            ("0X012", 0, 18),
+            ("0B00101", 0, 5),
+            ("-1 2 3 4 5 6", 0, -123456),
+            ("\n3\t45\n6\n\n\n7\t\n", 0, 34567),
         ]
 
         for s, base, expected in test_values:
@@ -63,14 +70,19 @@ class TestMpz(unittest.TestCase):
             with self.assertRaises(ValueError):
                 mpz_set_str(z, "101", base)
 
-    def test_set_str_return_value(self):
+    def test_set_str_bad_values(self):
         z = Mpz_t()
-        mpz_set_str(z, "13", 10)
-        self.assertEqual(int(mpz_get_str(10, z)), 13)
 
-        with self.assertRaises(ValueError):
-            mpz_set_str(z, "123 abc", 10)
-        self.assertEqual(int(mpz_get_str(10, z)), 13)
+        bad_values = [
+            ("123\nabc", 10),
+            ("12", 2),
+        ]
+
+        for value, base in bad_values:
+            mpz_set_str(z, str(-314159), 10)
+            with self.assertRaises(ValueError):
+                mpz_set_str(z, value, base)
+            self.assertEqual(int(mpz_get_str(10, z)), -314159)
 
     def test_get_str(self):
         z = Mpz_t()
