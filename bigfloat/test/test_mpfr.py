@@ -2186,6 +2186,33 @@ class TestMpfr(unittest.TestCase):
             self.assertEqual(exp, mpfr_get_emin())
             self.assertEqual(mpz_get_str(10, z), "0")
 
+    def test_get_z(self):
+        x = Mpfr(20)
+        mpfr_const_pi(x, MPFR_RNDN)
+
+        z = Mpz_t()
+        rv = mpfr_get_z(z, x, MPFR_RNDD)
+        self.assertEqual(mpz_get_str(10, z), "3")
+        self.assertLess(rv, 0)
+
+        rv = mpfr_get_z(z, x, MPFR_RNDU)
+        self.assertEqual(mpz_get_str(10, z), "4")
+        self.assertGreater(rv, 0)
+
+        mpfr_set_d(x, 123.0, MPFR_RNDN)
+        rv = mpfr_get_z(z, x, MPFR_RNDU)
+        self.assertEqual(mpz_get_str(10, z), "123")
+        self.assertEqual(rv, 0)
+
+        for x in [posinf(), neginf(), nan()]:
+            mpfr_clear_flags()
+
+            rv = mpfr_get_z(z, x, MPFR_RNDN)
+
+            self.assertEqual(mpfr_flags_save(), MPFR_FLAGS_ERANGE)
+            self.assertEqual(rv, 0)
+            self.assertEqual(mpz_get_str(10, z), "0")
+
     def test_get_str(self):
         x = Mpfr(20)
         mpfr_const_pi(x, MPFR_RNDN)
