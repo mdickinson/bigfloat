@@ -2280,6 +2280,9 @@ class TestMpfr(unittest.TestCase):
         self.assertFalse(mpfr_underflow_p())
         self.assertFalse(mpfr_inexflag_p())
 
+        with self.assertRaises(ValueError):
+            mpfr_flags_clear(255)
+
     def test_flags_set(self):
         self.assertFalse(mpfr_overflow_p())
         self.assertFalse(mpfr_erangeflag_p())
@@ -2291,6 +2294,9 @@ class TestMpfr(unittest.TestCase):
         mpfr_flags_set(MPFR_FLAGS_ALL)
         self.assertTrue(mpfr_overflow_p())
         self.assertTrue(mpfr_erangeflag_p())
+
+        with self.assertRaises(ValueError):
+            mpfr_flags_set(255)
 
     def test_flags_test(self):
         mpfr_set_divby0()
@@ -2305,6 +2311,9 @@ class TestMpfr(unittest.TestCase):
             mpfr_flags_test(MPFR_FLAGS_NAN | MPFR_FLAGS_UNDERFLOW),
             MPFR_FLAGS_NAN,
         )
+
+        with self.assertRaises(ValueError):
+            mpfr_flags_test(255)
 
     def test_flags_save(self):
         mpfr_set_overflow()
@@ -2325,6 +2334,11 @@ class TestMpfr(unittest.TestCase):
             mpfr_flags_save(),
             MPFR_FLAGS_OVERFLOW | MPFR_FLAGS_NAN,
         )
+
+        with self.assertRaises(ValueError):
+            mpfr_flags_restore(MPFR_FLAGS_ALL, 255)
+        with self.assertRaises(ValueError):
+            mpfr_flags_restore(255, MPFR_FLAGS_ALL)
 
     def test_flag_macros(self):
         individual_flags = [

@@ -285,6 +285,17 @@ cdef int check_not_initialized(Mpfr_t x) except -1:
         )
 
 
+cdef int check_flag_mask(cmpfr.mpfr_flags_t flags) except -1:
+    """
+    Check that the given flag mask is valid. Raise ValueError if not.
+
+    """
+    if flags & MPFR_FLAGS_ALL == flags:
+        return 0
+    else:
+        raise ValueError("flag mask {} contains invalid flags".format(flags))
+
+
 cdef decode_ternary_pair(int ternary_pair):
     """
     Decode an encoded pair of ternary values.
@@ -3363,6 +3374,7 @@ def mpfr_flags_clear(cmpfr.mpfr_flags_t mask):
     Clear (lower) the group of flags specified by mask.
 
     """
+    check_flag_mask(mask)
     cmpfr.mpfr_flags_clear(mask)
 
 def mpfr_flags_set(cmpfr.mpfr_flags_t mask):
@@ -3370,6 +3382,7 @@ def mpfr_flags_set(cmpfr.mpfr_flags_t mask):
     Set (raise) the group of flags specified by mask.
 
     """
+    check_flag_mask(mask)
     cmpfr.mpfr_flags_set(mask)
 
 def mpfr_flags_test(cmpfr.mpfr_flags_t mask):
@@ -3377,6 +3390,7 @@ def mpfr_flags_test(cmpfr.mpfr_flags_t mask):
     Return the flags specified by mask.
 
     """
+    check_flag_mask(mask)
     return cmpfr.mpfr_flags_test(mask)
 
 def mpfr_flags_save():
@@ -3393,6 +3407,8 @@ def mpfr_flags_restore(cmpfr.mpfr_flags_t flags, cmpfr.mpfr_flags_t mask):
     Restore the flags specified by mask to their state represented in flags.
 
     """
+    check_flag_mask(flags)
+    check_flag_mask(mask)
     cmpfr.mpfr_flags_restore(flags, mask)
 
 
