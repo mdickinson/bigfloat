@@ -794,14 +794,16 @@ class TestMpfr(unittest.TestCase):
         y = Mpfr(53)
         mpfr_set_si(x, -(23 ** 5), MPFR_RNDN)
 
-        with self.assertIssuesDeprecationWarning():
+        this_module = __name__.split(".")[-1]
+
+        with self.assertIssuesDeprecationWarning(filename=this_module):
             mpfr_root(y, x, 5, MPFR_RNDN)
         self.assertEqual(mpfr_get_d(y, MPFR_RNDN), -23.0)
 
         # Check behaviour of zeros (which differs from that
         # of rootn_ui).
         mpfr_set_d(x, -0.0, MPFR_RNDN)
-        with self.assertIssuesDeprecationWarning():
+        with self.assertIssuesDeprecationWarning(filename=this_module):
             mpfr_root(y, x, 2, MPFR_RNDN)
         self.assertEqual(mpfr_get_d(y, MPFR_RNDN), 0.0)
         self.assertTrue(mpfr_signbit(y))
@@ -2629,13 +2631,15 @@ class TestMpfr(unittest.TestCase):
     # Testcase assertions.
 
     @contextlib.contextmanager
-    def assertIssuesDeprecationWarning(self):
-        with warnings.catch_warnings(record=True) as w:
+    def assertIssuesDeprecationWarning(self, filename):
+        with warnings.catch_warnings(record=True) as ws:
             warnings.simplefilter("always")
             yield
-            self.assertEqual(len(w), 1)
-            self.assertTrue(issubclass(w[-1].category, DeprecationWarning))
-            self.assertIn("deprecated", str(w[-1].message))
+            self.assertEqual(len(ws), 1)
+            w = ws[-1]
+            self.assertTrue(issubclass(w.category, DeprecationWarning))
+            self.assertIn("deprecated", str(w.message))
+            self.assertIn(filename, w.filename)
 
 
 if __name__ == '__main__':

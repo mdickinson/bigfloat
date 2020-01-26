@@ -1085,6 +1085,20 @@ def mpfr_root(Mpfr_t rop not None, Mpfr_t op not None,
     check_rounding_mode(rnd)
     return cmpfr.mpfr_root(&rop._value, &op._value, k, rnd)
 
+def _mpfr_root_no_warn(Mpfr_t rop not None, Mpfr_t op not None,
+                       unsigned long int k, cmpfr.mpfr_rnd_t rnd):
+
+    """Set rop to the kth root of op, rounding in the direction rnd.
+
+    This is a private variant of mpfr_root that doesn't warn, for use
+    by the higher-level root function (which already warns).
+
+    """
+    check_initialized(rop)
+    check_initialized(op)
+    check_rounding_mode(rnd)
+    return cmpfr.mpfr_root(&rop._value, &op._value, k, rnd)
+
 def mpfr_pow(Mpfr_t rop not None, Mpfr_t op1 not None, Mpfr_t op2 not None,
              cmpfr.mpfr_rnd_t rnd):
     """

@@ -1839,8 +1839,11 @@ class BigFloatTests(unittest.TestCase):
 
     # 5.5 Basic Arithmetic Functions
     def test_root(self):
+
+        this_module = __name__.split(".")[-1]
+
         def quiet_root(x, n):
-            with self.assertIssuesDeprecationWarning():
+            with self.assertIssuesDeprecationWarning(filename=this_module):
                 return root(x, n)
 
         self.assertEqual(quiet_root(BigFloat(23), 1), BigFloat(23))
@@ -1961,15 +1964,19 @@ class BigFloatTests(unittest.TestCase):
     # Testcase helper assertions
 
     @contextlib.contextmanager
-    def assertIssuesDeprecationWarning(self):
-        with warnings.catch_warnings(record=True) as w:
+    def assertIssuesDeprecationWarning(self, filename=None):
+        with warnings.catch_warnings(record=True) as ws:
             warnings.simplefilter("always")
             try:
                 yield
             finally:
-                self.assertEqual(len(w), 1)
-                self.assertTrue(issubclass(w[-1].category, DeprecationWarning))
-                self.assertIn("deprecated", str(w[-1].message))
+                self.assertEqual(len(ws), 1)
+                w = ws[-1]
+                self.assertTrue(issubclass(w.category, DeprecationWarning))
+                self.assertIn("deprecated", str(w.message))
+                if filename is not None:
+                    self.assertIn(filename, w.filename)
+
 
     def assertIsPositiveZero(self, x):
         self.assertEqual(x, 0)

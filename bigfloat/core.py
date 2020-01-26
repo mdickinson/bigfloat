@@ -1262,18 +1262,20 @@ def root(x, k, context=None):
     This function is deprecated! Use rootn instead.
 
     """
+    warnings.warn(
+        "root is deprecated. Use rootn instead.",
+        category=DeprecationWarning,
+        stacklevel=2,
+    )
+
     if k < 0:
         # mpfr_root issues a DeprecationWarning, but we won't see
         # it in this path
-        warnings.warn(
-            "root is deprecated. Use rootn instead.",
-            category=DeprecationWarning,
-        )
         raise ValueError("root function not implemented for negative k")
 
     return _apply_function_in_current_context(
         BigFloat,
-        mpfr.mpfr_root,
+        mpfr._mpfr_root_no_warn,
         (BigFloat._implicit_convert(x), k),
         context,
     )
