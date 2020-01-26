@@ -1583,6 +1583,10 @@ class TestMpfr(unittest.TestCase):
         mpfr_free_cache2(MPFR_FREE_GLOBAL_CACHE)
         mpfr_free_cache2(MPFR_FREE_LOCAL_CACHE | MPFR_FREE_GLOBAL_CACHE)
 
+        invalid = (MPFR_FREE_GLOBAL_CACHE | MPFR_FREE_LOCAL_CACHE) + 1
+        with self.assertRaises(ValueError):
+            mpfr_free_cache2(invalid)
+
     def test_free_pool(self):
         # It's awkward to test this; we settle for checking that the function
         # has been exported and is callable.

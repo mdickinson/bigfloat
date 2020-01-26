@@ -155,6 +155,8 @@ MPFR_RNDF =  cmpfr.MPFR_RNDF
 # Free cache policy (for mpfr_free_cache2)
 MPFR_FREE_LOCAL_CACHE = cmpfr.MPFR_FREE_LOCAL_CACHE
 MPFR_FREE_GLOBAL_CACHE = cmpfr.MPFR_FREE_GLOBAL_CACHE
+cdef cmpfr.mpfr_free_cache_t MPFR_FREE_CACHE_ALL = (
+    MPFR_FREE_GLOBAL_CACHE | MPFR_FREE_LOCAL_CACHE)
 
 # Default values for Emax and Emin
 MPFR_EMAX_DEFAULT = cmpfr.MPFR_EMAX_DEFAULT
@@ -187,6 +189,19 @@ cdef int check_rounding_mode(cmpfr.mpfr_rnd_t rnd) except -1:
         return 0
     else:
         raise ValueError("invalid rounding mode {}".format(rnd))
+
+
+cdef int check_cache_flags(cmpfr.mpfr_free_cache_t flags) except -1:
+    """
+    Check that the given cache flags are valid.
+
+    Raise ValueError if not.
+
+    """
+    if flags & MPFR_FREE_CACHE_ALL == flags:
+        return 0
+    else:
+        raise ValueError("invalid flag mask {}".format(flags))
 
 
 cdef int check_base(int b, int allow_zero) except -1:
@@ -2200,7 +2215,7 @@ def mpfr_free_cache():
     """
     cmpfr.mpfr_free_cache()
 
-def mpfr_free_cache2(way):
+def mpfr_free_cache2(cmpfr.mpfr_free_cache_t way):
     """
     Free various caches and pools used by MPFR internally, as specified by
     'way', which is a set of flags.
@@ -2212,6 +2227,7 @@ def mpfr_free_cache2(way):
     is currently equivalent to mpfr_free_cache().
 
     """
+    check_cache_flags(way)
     cmpfr.mpfr_free_cache2(way)
 
 def mpfr_free_pool():
