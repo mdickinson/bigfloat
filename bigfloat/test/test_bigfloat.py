@@ -1977,7 +1977,6 @@ class BigFloatTests(unittest.TestCase):
                 if filename is not None:
                     self.assertIn(filename, w.filename)
 
-
     def assertIsPositiveZero(self, x):
         self.assertEqual(x, 0)
         self.assertFalse(is_negative(x))

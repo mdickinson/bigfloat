@@ -294,7 +294,6 @@ from mpfr import (
     mpfr_set_nanflag,
     mpfr_set_inexflag,
     mpfr_set_erangeflag,
-    mpfr_set_divby0,
 
     mpfr_clear_flags,
 
@@ -2457,7 +2456,6 @@ class TestMpfr(unittest.TestCase):
 
     def test_get_z_2exp(self):
         x = Mpfr(53)
-        y = Mpfr(53)
 
         # Finite nonzero.
         mpfr_set_d(x, 3.141592653589793, MPFR_RNDN)

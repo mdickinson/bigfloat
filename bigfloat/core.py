@@ -1018,16 +1018,15 @@ def pos(x, context=None):
     example::
 
         >>> from bigfloat import pos, pow, precision
-        >>> pow(3, 60) + 1.234 - pow(3, 60)  # inaccurate due to precision loss
-        BigFloat.exact('1.23400115966796875000000000000000000', precision=113)
+        >>> pow(3, 70) + 1.234 - pow(3, 70)  # inaccurate due to precision loss
+        BigFloat.exact('1.25000000000000000000000000000000000', precision=113)
         >>> with precision(200):  # compute result with extra precision
-        ...     x = pow(3, 60) + 1.234 - pow(3, 60)
+        ...     x = pow(3, 70) + 1.234 - pow(3, 70)
         ...
-        >>> x
-        BigFloat.exact('1.2339999999999999857891452847979962825775146484375000000000000', precision=200)
         >>> pos(x)  # round back to original precision
         BigFloat.exact('1.23399999999999998578914528479799628', precision=113)
-
+        >>> pos(x) == 1.234
+        True
 
     """
     return _apply_function_in_current_context(

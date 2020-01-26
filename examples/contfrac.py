@@ -70,6 +70,7 @@ def logn2(n, p):
             # otherwise, increase the precision and try again
             extra += 10
 
+
 marks_results = {}
 all_n = [n for n in range(3, 63) if n & (n-1)]
 for n in all_n:
