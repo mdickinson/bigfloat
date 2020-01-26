@@ -1269,8 +1269,6 @@ def root(x, k, context=None):
     )
 
     if k < 0:
-        # mpfr_root issues a DeprecationWarning, but we won't see
-        # it in this path
         raise ValueError("root function not implemented for negative k")
 
     return _apply_function_in_current_context(
