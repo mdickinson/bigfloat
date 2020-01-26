@@ -150,6 +150,7 @@ MPFR_RNDZ =  cmpfr.MPFR_RNDZ
 MPFR_RNDU =  cmpfr.MPFR_RNDU
 MPFR_RNDD =  cmpfr.MPFR_RNDD
 MPFR_RNDA =  cmpfr.MPFR_RNDA
+MPFR_RNDF =  cmpfr.MPFR_RNDF
 
 # Free cache policy (for mpfr_free_cache2)
 MPFR_FREE_LOCAL_CACHE = cmpfr.MPFR_FREE_LOCAL_CACHE
@@ -182,7 +183,7 @@ cdef int check_rounding_mode(cmpfr.mpfr_rnd_t rnd) except -1:
     Check that the given rounding mode is valid.  Raise ValueError if not.
 
     """
-    if MPFR_RNDN <= rnd <= MPFR_RNDA:
+    if MPFR_RNDN <= rnd <= MPFR_RNDF:
         return 0
     else:
         raise ValueError("invalid rounding mode {}".format(rnd))
@@ -2789,7 +2790,7 @@ def mpfr_min_prec(Mpfr_t x not None):
 def mpfr_print_rnd_mode(cmpfr.mpfr_rnd_t rnd):
     """
     Return a string ("MPFR_RNDD", "MPFR_RNDU", "MPFR_RNDN", "MPFR_RNDZ",
-    "MPFR_RNDA") corresponding to the rounding mode rnd.
+    "MPFR_RNDA", "MPFR_RNDF") corresponding to the rounding mode rnd.
 
     Raise a ValueError if rnd is an invalid rounding mode.
 

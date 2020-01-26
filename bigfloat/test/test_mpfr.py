@@ -28,6 +28,7 @@ from mpfr import (
     MPFR_RNDU,
     MPFR_RNDD,
     MPFR_RNDA,
+    MPFR_RNDF,
 
     # Precision limits
     MPFR_PREC_MIN, MPFR_PREC_MAX,
@@ -1888,6 +1889,7 @@ class TestMpfr(unittest.TestCase):
         self.assertEqual(mpfr_print_rnd_mode(MPFR_RNDU), 'MPFR_RNDU')
         self.assertEqual(mpfr_print_rnd_mode(MPFR_RNDZ), 'MPFR_RNDZ')
         self.assertEqual(mpfr_print_rnd_mode(MPFR_RNDA), 'MPFR_RNDA')
+        self.assertEqual(mpfr_print_rnd_mode(MPFR_RNDF), 'MPFR_RNDF')
         with self.assertRaises(ValueError):
             mpfr_print_rnd_mode(-1)
 
@@ -2562,6 +2564,7 @@ class TestMpfr(unittest.TestCase):
         self.assertIsInstance(MPFR_RNDU, int)
         self.assertIsInstance(MPFR_RNDD, int)
         self.assertIsInstance(MPFR_RNDA, int)
+        self.assertIsInstance(MPFR_RNDF, int)
 
     def test_exponent_bounds(self):
         # Just exercise the exponent bound functions.
