@@ -1079,8 +1079,8 @@ def mpfr_rootn_ui(Mpfr_t rop not None, Mpfr_t op not None,
 
 def mpfr_root(Mpfr_t rop not None, Mpfr_t op not None,
               unsigned long int k, cmpfr.mpfr_rnd_t rnd):
-
-    """Set rop to the kth root of op, rounding in the direction rnd.
+    """
+    Set rop to the kth root of op, rounding in the direction rnd.
 
     This function is the same as mpfr_rootn_ui except when op is -0 and k is
     even: the result is -0 instead of +0 (the reason was to be consistent with
@@ -2508,7 +2508,7 @@ def mpfr_rint_round(Mpfr_t rop not None, Mpfr_t op not None,
     return cmpfr.mpfr_rint_round(&rop._value, &op._value, rnd)
 
 def mpfr_rint_roundeven(Mpfr_t rop not None, Mpfr_t op not None,
-                    cmpfr.mpfr_rnd_t rnd):
+                        cmpfr.mpfr_rnd_t rnd):
     """
     Set rop to op rounded to the nearest integer, rounding halfway cases
     to the nearest even integer.
