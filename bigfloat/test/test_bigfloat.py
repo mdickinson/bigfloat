@@ -2095,7 +2095,9 @@ def process_lines(lines):
             # not a directive, so it takes the form lhs -> rhs, where
             # the lhs is a function name followed by arguments, and
             # the rhs is an expected result followed by expected flags
-            lhs_pieces, rhs_pieces = map(str.split, line.split('->'))
+            lhs, rhs = line.split("->")
+            lhs_pieces = lhs.split()
+            rhs_pieces = rhs.split()
             fn = getattr(bigfloat, lhs_pieces[0])
             args = [_fromhex_exact(arg) for arg in lhs_pieces[1:]]
             expected_result = _fromhex_exact(rhs_pieces[0])
