@@ -15,12 +15,11 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with the bigfloat package.  If not, see <http://www.gnu.org/licenses/>.
 
-import six
-
 # Standard library imports
 import contextlib
 import doctest
 import fractions
+import io
 import math
 import operator
 import random
@@ -29,6 +28,10 @@ import sys
 import types
 import unittest
 import warnings
+
+# 3rd party imports
+import pkg_resources
+import six
 
 import bigfloat.core
 
@@ -2092,7 +2095,9 @@ def process_lines(lines):
             # not a directive, so it takes the form lhs -> rhs, where
             # the lhs is a function name followed by arguments, and
             # the rhs is an expected result followed by expected flags
-            lhs_pieces, rhs_pieces = map(str.split, line.split('->'))
+            lhs, rhs = line.split("->")
+            lhs_pieces = lhs.split()
+            rhs_pieces = rhs.split()
             fn = getattr(bigfloat, lhs_pieces[0])
             args = [_fromhex_exact(arg) for arg in lhs_pieces[1:]]
             expected_result = _fromhex_exact(rhs_pieces[0])
@@ -2115,556 +2120,28 @@ def process_lines(lines):
     return test_fn
 
 
-ABCTests.test_next_up = process_lines("""\
-context double_precision
-
-next_up -inf -> -1.fffffffffffffp+1023
-next_up -1p-1074 -> -0
-next_up -0.8p-1075 -> -0
-next_up -0.4p-1075 -> -0
-next_up -0.000000000000000000000000001p-1075 -> -0
-next_up -1p-999999999 -> -0
-next_up -0 -> 1p-1074
-next_up 0 -> 1p-1074
-next_up 1p-999999999 -> 1p-1074
-next_up 0.8p-1074 -> 1p-1074
-next_up 0.ffffffffffffffffffffp-1074 -> 1p-1074
-next_up 1p-1074 -> 2p-1074
-next_up 1p-1023 -> 1.0000000000002p-1023
-next_up 1p-1022 -> 1.0000000000001p-1022
-next_up 1.ffffffffffffep+1023 -> 1.fffffffffffffp+1023
-next_up 1.ffffffffffffeffffp+1023 -> 1.fffffffffffffp+1023
-next_up 1.fffffffffffffp+1023 -> inf
-next_up inf -> inf
-
-next_up nan -> nan
-
-""".split('\n'))
-
-
-ABCTests.test_next_down = process_lines("""\
-context double_precision
-
-next_down -inf -> -inf
-next_down -1.fffffffffffffp+1023 -> -inf
-next_down -1.ffffffffffffeffffp+1023 -> -1.fffffffffffffp+1023
-next_down -1.ffffffffffffep+1023 -> -1.fffffffffffffp+1023
-next_down -1p-1022 -> -1.0000000000001p-1022
-next_down -1p-1023 -> -1.0000000000002p-1023
-next_down -1p-1074 -> -2p-1074
-next_down -0.ffffffffffffffffffffp-1074 -> -1p-1074
-next_down -0.8p-1074 -> -1p-1074
-next_down -1p-999999999 -> -1p-1074
-next_down -0 -> -1p-1074
-next_down 0 -> -1p-1074
-next_down 1p-999999999 -> 0
-next_down 0.000000000000000000000000001p-1075 -> 0
-next_down 0.4p-1075 -> 0
-next_down 0.8p-1075 -> 0
-next_down 1p-1074 -> 0
-next_down inf -> 1.fffffffffffffp+1023
-
-next_down nan -> nan
-
-""".split('\n'))
-
-
-ABCTests.test_pos = process_lines("""\
-context double_precision
-context RoundTiesToEven
-
-pos 0 -> 0
-pos -0 -> -0
-pos inf -> inf
-pos -inf -> -inf
-pos nan -> nan NanFlag
-
-# smallest representable positive value is 1p-1074
-# values in (0, 0.8p-1074] -> 0 Inexact Underflow
-
-# exactly representable with precision 53 and unbounded exponent,
-# but not exactly representable with precision 53 and bounded exponent
-pos 0.8p-1075 -> 0 Inexact Underflow
-pos 0.cp-1075 -> 0 Inexact Underflow
-pos 0.ffffffffffffp-1075 -> 0 Inexact Underflow
-
-# not exactly representable with precision 53 and unbounded exponent
-pos 0.ffffffffffffffffffffp-1075 -> 0 Inexact Underflow
-pos 1p-1075 -> 0 Inexact Underflow
-
-# values in (0.8p-1075, 1p-1074) -> 1p-1074 Inexact Underflow
-
-pos 1.00000000000000000001p-1075 -> 1p-1074 Inexact Underflow
-pos 1.000000001p-1075 -> 1p-1074 Inexact Underflow
-pos 1.8p-1075 -> 1p-1074 Inexact Underflow
-pos 0.ffffffffffff8p-1074 -> 1p-1074 Inexact Underflow
-pos 0.ffffffffffffffffffffp-1074 -> 1p-1074 Inexact Underflow
-
-# 1p-1074 exactly representable
-pos 1p-1074 -> 1p-1074 Underflow
-
-# values in (1p-1074, 1.8p-1074) -> 1p-1074 Inexact Underflow
-pos 1.7p-1074 -> 1p-1074 Inexact Underflow
-pos 1.7ffffffffffffp-1074 -> 1p-1074 Inexact Underflow
-pos 1.7ffffffffffff8p-1074 -> 1p-1074 Inexact Underflow
-
-# values in [1.8p-1074, 2p-1074) -> 2p-1074 Inexact Underflow
-pos 1.8p-1074 -> 2p-1074 Inexact Underflow
-pos 1.80000000000008p-1074 -> 2p-1074 Inexact Underflow
-pos 1.8000000000001p-1074 -> 2p-1074 Inexact Underflow
-pos 2p-1074 -> 2p-1074 Underflow
-
-# test round-half-to-even at some mid-range subnormal values
-pos 123456p-1074 -> 123456p-1074 Underflow
-pos 123456.7p-1074 -> 123456p-1074 Inexact Underflow
-pos 123456.7ffffffffffffp-1074 -> 123456p-1074 Inexact Underflow
-pos 123456.8p-1074 -> 123456p-1074 Inexact Underflow
-pos 123456.8000000000001p-1074 -> 123457p-1074 Inexact Underflow
-pos 123456.9p-1074 -> 123457p-1074 Inexact Underflow
-pos 123456.ap-1074 -> 123457p-1074 Inexact Underflow
-pos 123456.bp-1074 -> 123457p-1074 Inexact Underflow
-pos 123456.cp-1074 -> 123457p-1074 Inexact Underflow
-pos 123456.dp-1074 -> 123457p-1074 Inexact Underflow
-pos 123456.ep-1074 -> 123457p-1074 Inexact Underflow
-pos 123456.fp-1074 -> 123457p-1074 Inexact Underflow
-pos 123457.0p-1074 -> 123457p-1074 Underflow
-pos 123457.1p-1074 -> 123457p-1074 Inexact Underflow
-pos 123457.2p-1074 -> 123457p-1074 Inexact Underflow
-pos 123457.3p-1074 -> 123457p-1074 Inexact Underflow
-pos 123457.4p-1074 -> 123457p-1074 Inexact Underflow
-pos 123457.5p-1074 -> 123457p-1074 Inexact Underflow
-pos 123457.6p-1074 -> 123457p-1074 Inexact Underflow
-pos 123457.7p-1074 -> 123457p-1074 Inexact Underflow
-pos 123457.7fffffffp-1074 -> 123457p-1074 Inexact Underflow
-pos 123457.7fffffff8p-1074 -> 123457p-1074 Inexact Underflow
-pos 123457.8p-1074 -> 123458p-1074 Inexact Underflow
-pos 123457.800000008p-1074 -> 123458p-1074 Inexact Underflow
-pos 123457.80000001p-1074 -> 123458p-1074 Inexact Underflow
-pos 123457.9p-1074 -> 123458p-1074 Inexact Underflow
-
-# values near smallest representable normal value, 1p-1022
-pos 0.8p-1022 -> 0.8p-1022 Underflow
-
-# write e for 2**-53, t for 1p-1022, then:
-#
-#  (1-2e)t -> Underflow  # exactly representable
-#  ((1-2e)t, (1-e)t) -> (1-2e)t Inexact Underflow
-#  [(1-e)t, (1-e/2)t) -> t Inexact Underflow
-#  [(1-e/2)t, t) -> t Inexact  # no underflow!  after rounding at work
-
-pos 0.fffffffffffffp-1022 -> 0.fffffffffffffp-1022            Underflow
-pos 0.fffffffffffff00000000001p-1022 -> 0.fffffffffffffp-1022 Inexact Underflow
-pos 0.fffffffffffff4p-1022 -> 0.fffffffffffffp-1022           Inexact Underflow
-pos 0.fffffffffffff7ffffffffffp-1022 -> 0.fffffffffffffp-1022 Inexact Underflow
-pos 0.fffffffffffff8p-1022 -> 1p-1022                         Inexact Underflow
-pos 0.fffffffffffffbffffffffffp-1022 -> 1p-1022               Inexact Underflow
-pos 0.fffffffffffffcp-1022 -> 1p-1022                         Inexact
-pos 0.ffffffffffffffffffffffffp-1022 -> 1p-1022               Inexact
-pos 1p-1022 -> 1p-1022
-pos 1p+1024 -> inf Inexact Overflow
-
-""".split('\n'))
-
-
-ABCTests.test_mod = process_lines("""\
-context double_precision
-context RoundTiesToEven
-
-# Check treatment of signs in normal cases.
-mod 0x5p0 0x3p0 -> 0x2p0
-mod -0x5p0 0x3p0 -> 0x1p0
-mod 0x5p0 -0x3p0 -> -0x1p0
-mod -0x5p0 -0x3p0 -> -0x2p0
-
-# A result of zero should have the same sign
-# as the second argument.
-mod 0x2p0 0x1p0 -> 0x0p0
-mod -0x2p0 0x1p0 -> 0x0p0
-mod 0x2p0 -0x1p0 -> -0x0p0
-mod -0x2p0 -0x1p0 -> -0x0p0
-
-# Finite input cases where the result may not be exact.
-mod 0x1p-100 0x1p0 -> 0x1p-100
-mod -0x1p-100 0x1p0 -> 0x1p0         Inexact
-mod 0x1p-100 -0x1p0 -> -0x1p0        Inexact
-mod -0x1p-100 -0x1p0 -> -0x1p-100
-
-# NaN inputs
-mod nan nan -> nan                   NanFlag
-mod -inf nan -> nan                  NanFlag
-mod -0x1p0 nan -> nan                NanFlag
-mod -0x0p0 nan -> nan                NanFlag
-mod 0x0p0 nan -> nan                 NanFlag
-mod 0x1p0 nan -> nan                 NanFlag
-mod nan inf -> nan                   NanFlag
-mod nan -inf -> nan                  NanFlag
-mod nan -0x1p0 -> nan                NanFlag
-mod nan -0x0p0 -> nan                NanFlag
-mod nan 0x0p0 -> nan                 NanFlag
-mod nan 0x1p0 -> nan                 NanFlag
-mod nan inf -> nan                   NanFlag
-
-# Other invalid cases: x infinite, y zero.
-mod inf -inf -> nan                  NanFlag
-mod inf -0x1p0 -> nan                NanFlag
-mod inf -0x0p0 -> nan                NanFlag
-mod inf 0x0p0 -> nan                 NanFlag
-mod inf 0x1p0 -> nan                 NanFlag
-mod inf inf -> nan                   NanFlag
-mod -inf -inf -> nan                 NanFlag
-mod -inf -0x1p0 -> nan               NanFlag
-mod -inf -0x0p0 -> nan               NanFlag
-mod -inf 0x0p0 -> nan                NanFlag
-mod -inf 0x1p0 -> nan                NanFlag
-mod -inf inf -> nan                  NanFlag
-mod -inf 0x0p0 -> nan                NanFlag
-mod -0x1p0 0x0p0 -> nan              NanFlag
-mod -0x0p0 0x0p0 -> nan              NanFlag
-mod 0x0p0 0x0p0 -> nan               NanFlag
-mod 0x1p0 0x0p0 -> nan               NanFlag
-mod inf 0x0p0 -> nan                 NanFlag
-mod -inf -0x0p0 -> nan               NanFlag
-mod -0x1p0 -0x0p0 -> nan             NanFlag
-mod -0x0p0 -0x0p0 -> nan             NanFlag
-mod 0x0p0 -0x0p0 -> nan              NanFlag
-mod 0x1p0 -0x0p0 -> nan              NanFlag
-mod inf -0x0p0 -> nan                NanFlag
-
-# x finite, y infinite.
-mod -0x1p0 inf -> inf
-mod -0x0p0 inf -> 0x0p0
-mod 0x0p0 inf -> 0x0p0
-mod 0x1p0 inf -> 0x1p0
-
-mod -0x1p0 -inf -> -0x1p0
-mod -0x0p0 -inf -> -0x0p0
-mod 0x0p0 -inf -> -0x0p0
-mod 0x1p0 -inf -> -inf
-
-# x zero, y finite but nonzero: sign of x is irrelevant.
-mod 0x0p0 0x5p0 -> 0x0p0
-mod -0x0p0 0x5p0 -> 0x0p0
-mod 0x0p0 -0x5p0 -> -0x0p0
-mod -0x0p0 -0x5p0 -> -0x0p0
-""".split('\n'))
-
-
-ABCTests.test_floordiv = process_lines("""\
-context double_precision
-context RoundTiesToEven
-
-# Simple cases.
-floordiv 0x2p0 0x1p0 -> 0x2p0
-floordiv 0x1p0 0x2p0 -> 0x0p0
-
-# Negative operands.
-floordiv -0x2p0 0x1p0 -> -0x2p0
-floordiv -0x1p0 0x2p0 -> -0x1p0
-
-floordiv 0x2p0 -0x1p0 -> -0x2p0
-floordiv 0x1p0 -0x2p0 -> -0x1p0
-
-# Zeros.
-floordiv 0x0p0 0x1.88p0 -> 0x0p0
-floordiv -0x0p0 0x1.88p0 -> -0x0p0
-floordiv 0x0p0 -0x1.88p0 -> -0x0p0
-floordiv -0x0p0 -0x1.88p0 -> 0x0p0
-
-floordiv 0x1.88p0 0x0p0 -> inf ZeroDivision
-floordiv -0x1.88p0 0x0p0 -> -inf ZeroDivision
-floordiv 0x1.88p0 -0x0p0 -> -inf ZeroDivision
-floordiv -0x1.88p0 -0x0p0 -> inf ZeroDivision
-
-floordiv 0x0p0 0x0p0 -> nan NanFlag
-floordiv -0x0p0 0x0p0 -> nan NanFlag
-floordiv 0x0p0 -0x0p0 -> nan NanFlag
-floordiv -0x0p0 -0x0p0 -> nan NanFlag
-
-# Infinities.
-floordiv 0x0p0 inf -> 0x0p0
-floordiv -0x0p0 inf -> -0x0p0
-floordiv 0x0p0 -inf -> -0x0p0
-floordiv -0x0p0 -inf -> 0x0p0
-
-floordiv 0x1.34ap-23 inf -> 0x0p0
-floordiv -0x1.34ap-23 inf -> -0x0p0
-floordiv 0x1.34ap-23 -inf -> -0x0p0
-floordiv -0x1.34ap-23 -inf -> 0x0p0
-
-floordiv inf inf -> nan NanFlag
-floordiv -inf inf -> nan NanFlag
-floordiv inf -inf -> nan NanFlag
-floordiv -inf -inf -> nan NanFlag
-
-floordiv inf 0x1.adep55 -> inf
-floordiv -inf 0x1.adep55 -> -inf
-floordiv inf -0x1.adep55 -> -inf
-floordiv -inf -0x1.adep55 -> inf
-
-floordiv inf 0x0p0 -> inf
-floordiv -inf 0x0p0 -> -inf
-floordiv inf -0x0p0 -> -inf
-floordiv -inf -0x0p0 -> inf
-
-# NaNs
-floordiv nan 0x0p0 -> nan NanFlag
-floordiv nan 0x1p0 -> nan NanFlag
-floordiv nan inf -> nan NanFlag
-floordiv nan nan -> nan NanFlag
-floordiv inf nan -> nan NanFlag
-floordiv 0x1p0 nan -> nan NanFlag
-floordiv 0x0p0 nan -> nan NanFlag
-
-# A few randomly-generated cases.
-floordiv 0x1.b2a98bbcc49b4p+98 0x1.3d74b2d390501p+48 -> 0x1.5e843fc46ffa8p+50
-floordiv -0x1.b2a98bbcc49b4p+98 -0x1.3d74b2d390501p+48 -> 0x1.5e843fc46ffa8p+50
-floordiv -0x1.b2a98bbcc49b4p+98 0x1.3d74b2d390501p+48 -> -0x1.5e843fc46ffacp+50
-floordiv 0x1.b2a98bbcc49b4p+98 -0x1.3d74b2d390501p+48 -> -0x1.5e843fc46ffacp+50
-
-# Randomly-generated near-halfway cases.
-floordiv 0x1.7455b4855c470p+158 0x1.9f63221b65037p+52 -> 0x1.caef27bbd32c3p+105 Inexact
-floordiv -0x1.7455b4855c470p+158 0x1.9f63221b65037p+52 -> -0x1.caef27bbd32c4p+105 Inexact
-floordiv 0x1.3e80b2f3da4e3p+158 0x1.55d84f1af57e3p+52 -> 0x1.dd0a000b852e5p+105 Inexact
-floordiv -0x1.3e80b2f3da4e3p+158 0x1.55d84f1af57e3p+52 -> -0x1.dd0a000b852e6p+105 Inexact
-floordiv 0x1.1ef2d934ebab9p+158 0x1.b1f7b86b3147fp+52 -> 0x1.528b96ac455bfp+105 Inexact
-floordiv -0x1.1ef2d934ebab9p+158 0x1.b1f7b86b3147fp+52 -> -0x1.528b96ac455c0p+105 Inexact
-floordiv 0x1.d9e46ba382852p+158 0x1.e12e2c5c55f27p+52 -> 0x1.f83ebede8104bp+105 Inexact
-floordiv -0x1.d9e46ba382852p+158 0x1.e12e2c5c55f27p+52 -> -0x1.f83ebede8104cp+105 Inexact
-floordiv 0x1.0a29a5b5b8f7dp+158 0x1.2c53d755c382dp+52 -> 0x1.c5c170a956bd2p+105 Inexact
-floordiv -0x1.0a29a5b5b8f7dp+158 0x1.2c53d755c382dp+52 -> -0x1.c5c170a956bd2p+105 Inexact
-floordiv 0x1.236ba96f8838bp+158 0x1.e2e23e8730f95p+52 -> 0x1.34fe01ad9e1dep+105 Inexact
-floordiv -0x1.236ba96f8838bp+158 0x1.e2e23e8730f95p+52 -> -0x1.34fe01ad9e1dep+105 Inexact
-floordiv 0x1.1ff3215dc95f4p+158 0x1.ec809f7a6c20bp+52 -> 0x1.2b596bfcd1cd1p+105 Inexact
-floordiv -0x1.1ff3215dc95f4p+158 0x1.ec809f7a6c20bp+52 -> -0x1.2b596bfcd1cd2p+105 Inexact
-floordiv 0x1.b55d8ec0da9fep+158 0x1.f6d8adea89b9fp+52 -> 0x1.bd53bacf4e02fp+105 Inexact
-floordiv -0x1.b55d8ec0da9fep+158 0x1.f6d8adea89b9fp+52 -> -0x1.bd53bacf4e030p+105 Inexact
-floordiv 0x1.2852761e5852bp+158 0x1.7ddb08bf86a6fp+52 -> 0x1.8d509db211a47p+105 Inexact
-floordiv -0x1.2852761e5852bp+158 0x1.7ddb08bf86a6fp+52 -> -0x1.8d509db211a48p+105 Inexact
-floordiv 0x1.1c97fd65f4e7cp+158 0x1.a6ba81f4da293p+52 -> 0x1.58b1a7e0e65cdp+105 Inexact
-floordiv -0x1.1c97fd65f4e7cp+158 0x1.a6ba81f4da293p+52 -> -0x1.58b1a7e0e65cep+105 Inexact
-
-floordiv 0x1.8ae6742f94fcap+158 0x1.af61efd069439p+52 -> 0x1.d4b323e4872fcp+105 Inexact
-floordiv -0x1.8ae6742f94fcap+158 0x1.af61efd069439p+52 -> -0x1.d4b323e4872fcp+105 Inexact
-floordiv 0x1.50371bfb1ded8p+158 0x1.64df147fa2c0bp+52 -> 0x1.e25d6618d002ep+105 Inexact
-floordiv -0x1.50371bfb1ded8p+158 0x1.64df147fa2c0bp+52 -> -0x1.e25d6618d002fp+105 Inexact
-floordiv 0x1.29ad82f921e61p+158 0x1.ee88b9d5af47fp+52 -> 0x1.3430ee7ff9a40p+105 Inexact
-floordiv -0x1.29ad82f921e61p+158 0x1.ee88b9d5af47fp+52 -> -0x1.3430ee7ff9a41p+105 Inexact
-floordiv 0x1.341e592b2ef12p+158 0x1.c5715b0058be3p+52 -> 0x1.5be8a10c7f71ap+105 Inexact
-floordiv -0x1.341e592b2ef12p+158 0x1.c5715b0058be3p+52 -> -0x1.5be8a10c7f71bp+105 Inexact
-floordiv 0x1.281ad0d0b6e5ap+158 0x1.84ad50291a943p+52 -> 0x1.860e39fb7ea4ap+105 Inexact
-floordiv -0x1.281ad0d0b6e5ap+158 0x1.84ad50291a943p+52 -> -0x1.860e39fb7ea4bp+105 Inexact
-floordiv 0x1.1016dc07e1acep+158 0x1.70c44c2b976c1p+52 -> 0x1.79c5994d7f360p+105 Inexact
-floordiv -0x1.1016dc07e1acep+158 0x1.70c44c2b976c1p+52 -> -0x1.79c5994d7f360p+105 Inexact
-floordiv 0x1.c348cf5e24425p+158 0x1.d34d5e92de493p+52 -> 0x1.ee73382469332p+105 Inexact
-floordiv -0x1.c348cf5e24425p+158 0x1.d34d5e92de493p+52 -> -0x1.ee73382469333p+105 Inexact
-floordiv 0x1.bcfea94be48e6p+158 0x1.dde69c1267a85p+52 -> 0x1.dcbefc6ebc8dap+105 Inexact
-floordiv -0x1.bcfea94be48e6p+158 0x1.dde69c1267a85p+52 -> -0x1.dcbefc6ebc8dap+105 Inexact
-
-# Some cases where Python's // on floats gets the wrong result.
-floordiv 0x1.0e31636b07d9dp-898 0x1.c68968514f16bp-954 -> 0x1.3059e434dd2bep+55 Inexact
-floordiv 0x1.2bb44bbf6a807p-537 0x1.94a4d2cd73882p-589 -> 0x1.7b3809b6af846p+51
-
-# Overflow and underflow.  (The latter shouldn't be possible unless
-# emin >= 0, which we currently don't check.)
-floordiv 0x1p1000 0x1p-1000 -> Infinity Inexact Overflow
-floordiv 0x1p512 0x1p-512 -> Infinity Inexact Overflow
-floordiv 0x1p511 0x1p-512 -> 0x1p1023
-floordiv 0x1p-1000 0x1p1000 -> 0x0p0
-
-# An extreme case where the floor of the quotient is exactly
-# representable but the quotient is not.
-floordiv 0x1.ff2e8e6fb6a62p+157 0x1.ff973c8000001p+52 -> 0x1.ff973c7ffffffp+104
-floordiv -0x1.ff2e8e6fb6a62p+157 0x1.ff973c8000001p+52 -> -0x1.ff973c7ffffffp+104 Inexact
-# ... and where neither are.
-floordiv 0x1.ff2e8e6fb6a62p+158 0x1.ff973c8000001p+52 -> 0x1.ff973c7ffffffp+105 Inexact
-floordiv -0x1.ff2e8e6fb6a62p+158 0x1.ff973c8000001p+52 -> -0x1.ff973c7ffffffp+105 Inexact
-
-#### Halfway cases: exact quotient is within 1 of a halfway case.
-# Exact quotient is 0x1.b6cb791cacbf37ffffffffffffb6de167b388b7fc8b3666a53bb....p+105
-# floordiv result is 1 smaller than halfway case, rounds down (towards zero)
-floordiv 0x1.800000000003bp+158 0x1.c0104a4a58bd7p+52 -> 0x1.b6cb791cacbf3p+105 Inexact
-# floordiv result *is* halfway case, rounds down (away from zero)
-floordiv -0x1.800000000003bp+158 0x1.c0104a4a58bd7p+52 -> -0x1.b6cb791cacbf4p+105 Inexact
-
-# Exact quotient is 0x1.98aa85ad41b278000000000000441c6b9ce0480bae415da0f245....p+105
-# floordiv result *is* halfway case, rounds up (away from zero)
-floordiv 0x1.8000000000021p+158 0x1.e118cf408df51p+52 -> 0x1.98aa85ad41b28p+105 Inexact
-# floordiv result one smaller than halfway case; rounds down (away from zero)
-floordiv -0x1.8000000000021p+158 0x1.e118cf408df51p+52 -> -0x1.98aa85ad41b28p+105 Inexact
-
-
-#### Check that the rounding mode is being respected.
-floordiv 0x1p53 0x0.fffffffffffff8p0 -> 0x1p53 Inexact
-floordiv 0x1p53 0x0.fffffffffffff0p0 -> 0x20000000000002p0
-floordiv 0x1p53 0x0.ffffffffffffe8p0 -> 0x20000000000004p0 Inexact
-
-context RoundTowardPositive
-floordiv 0x1p53 0x0.fffffffffffff8p0 -> 0x20000000000002p0 Inexact
-floordiv 0x1p53 0x0.fffffffffffff0p0 -> 0x20000000000002p0
-floordiv 0x1p53 0x0.ffffffffffffe8p0 -> 0x20000000000004p0 Inexact
-floordiv 0x1.ff2e8e6fb6a62p+157 0x1.ff973c8000001p+52 -> 0x1.ff973c7ffffffp+104
-floordiv -0x1.ff2e8e6fb6a62p+157 0x1.ff973c8000001p+52 -> -0x1.ff973c7ffffffp+104 Inexact
-
-context RoundTowardNegative
-floordiv 0x1p53 0x0.fffffffffffff8p0 -> 0x20000000000000p0 Inexact
-floordiv 0x1p53 0x0.fffffffffffff0p0 -> 0x20000000000002p0
-floordiv 0x1p53 0x0.ffffffffffffe8p0 -> 0x20000000000002p0 Inexact
-floordiv 0x1.ff2e8e6fb6a62p+157 0x1.ff973c8000001p+52 -> 0x1.ff973c7ffffffp+104
-floordiv -0x1.ff2e8e6fb6a62p+157 0x1.ff973c8000001p+52 -> -0x1.ff973c8000000p+104 Inexact
-
-""".split('\n'))
-
-ABCTests.test_various = process_lines("""\
-# The following tests are not supposed to be exhaustive tests of the behaviour
-# of the individual functions; that job is left to the MPFR test suite.
-# Instead, they're supposed to exercise the functions to catch simple errors
-# like mismatches in wrapping.  So we only need to check one or two
-# characteristic values per function.  The test values below were computed
-# using independent sources (mainly Pari/GP).
-
-context double_precision
-context RoundTiesToEven
-
-# Powers.
-sqr 1.8p0 -> 2.4p0
-rec_sqrt 2.4p0 -> 0.aaaaaaaaaaaaa8p0 Inexact
-cbrt 2p0 -> 1.428a2f98d728bp+0 Inexact
-
-# Log and exponential functions.
-log 2p0 -> 1.62e42fefa39efp-1 Inexact
-log2 2.8p0 -> 1.5269e12f346e3p+0 Inexact
-log10 1p4 -> 1.34413509f79ffp+0 Inexact
-log1p 0.8p0 -> 1.9f323ecbf984cp-2 Inexact
-
-exp 1p-2 -> 1.48b5e3c3e8186p+0 Inexact
-exp2 1p-2 -> 1.306fe0a31b715p+0 Inexact
-exp10 1p-2 -> 1.c73d51c54470ep+0 Inexact
-expm1 0.8p0 -> 1.4c2531c3c0d38p-1 Inexact
-
-# Trigonometric functions and their inverses.
-cos 2p0 -> -1.aa22657537205p-2 Inexact
-sin 2p0 -> 1.d18f6ead1b446p-1 Inexact
-tan 2p0 -> -1.17af62e0950f8p+1 Inexact
-sec 2p0 -> -1.33956fecf9e48p+1 Inexact
-csc 2p0 -> 1.19893a272f912p+0 Inexact
-cot 2p0 -> -1.d4a42e92faa4ep-2 Inexact
-
-acos 0.8p0 -> 1.0c152382d7366p+0 Inexact
-asin 0.8p0 -> 1.0c152382d7366p-1 Inexact
-atan 0.8p0 -> 1.dac670561bb4fp-2 Inexact
-
-# Hyperbolic trigonometric functions and their inverses.
-cosh 0.8p0 -> 1.20ac1862ae8d0p+0 Inexact
-sinh 0.8p0 -> 1.0acd00fe63b97p-1 Inexact
-tanh 0.8p0 -> 1.d9353d7568af3p-2 Inexact
-sech 0.8p0 -> 1.c60d1ff040dd0p-1 Inexact
-csch 0.8p0 -> 1.eb45dc88defedp+0 Inexact
-coth 0.8p0 -> 1.14fc6ceb099bfp+1 Inexact
-
-acosh 1.8p0 -> 1.ecc2caec5160ap-1 Inexact
-asinh 0.8p0 -> 1.ecc2caec5160ap-2 Inexact
-atanh 0.8p0 -> 1.193ea7aad030bp-1 Inexact
-
-# Other transcendental functions.
-eint 1.8p0 -> 1.a690858762f6bp+1 Inexact
-li2 0.cp0 -> 1.f4f9f0b58b974p-1 Inexact
-gamma 2.8p0 -> 1.544fa6d47b390p+0 Inexact
-gamma_inc 0.5p0 1.7p0 -> 0x1.1b29c8af307e2p-3 Inexact
-lngamma 2.8p0 -> 1.2383e809a67e8p-2 Inexact
-digamma 2.8p0 -> 1.680425af12b5ep-1 Inexact
-beta 0.5p0 1.7p0 -> 0x1.619aaeeb6cb2bp+1 Inexact
-zeta 4.0p0 -> 1.151322ac7d848p+0 Inexact
-erf 3.8p0 -> 1.ffffe710d565ep-1 Inexact
-erfc 3.8p0 -> 1.8ef2a9a18d857p-21 Inexact
-agm 1p0 1.6a09e667f3bcdp+0 -> 1.32b95184360ccp+0 Inexact
-ai 0.ap0 -> 1.a2db43a6d812dp-3 Inexact
-
-# Arithmetic functions not tested elsewhere.
-dim 2.8p0 1p0 -> 1.8p0
-dim 1p0 2.8p0 -> 0p0
-fma 3p0 5p0 8p0 -> 17p0
-fms 3p0 5p0 8p0 -> 7p0
-fmma 3 5 8 9 -> 0x57
-fmms 3 5 8 9 -> -0x39
-
-hypot 5p0 cp0 -> dp0
-
-floor -1p0 -> -1p0
-floor -0.dp0 -> -1p0
-floor -0.1p0 -> -1p0
-floor -0p0 -> -0p0
-floor 0p0 -> 0p0
-floor 0.1p0 -> 0p0
-floor 0.dp0 -> 0p0
-floor 1p0 -> 1p0
-
-ceil -1p0 -> -1p0
-ceil -0.dp0 -> -0p0
-ceil -0.1p0 -> -0p0
-ceil -0p0 -> -0p0
-ceil 0p0 -> 0p0
-ceil 0.1p0 -> 1p0
-ceil 0.dp0 -> 1p0
-ceil 1p0 -> 1p0
-
-round -1.8p0 -> -2p0
-round -1p0 -> -1p0
-round -0.8p0 -> -1p0
-round -0.dp0 -> -1p0
-round -0.1p0 -> -0p0
-round -0p0 -> -0p0
-round 0p0 -> 0p0
-round 0.1p0 -> 0p0
-round 0.8p0 -> 1p0
-round 0.dp0 -> 1p0
-round 1p0 -> 1p0
-round 1.8p0 -> 2p0
-
-roundeven -1.8p0 -> -2p0
-roundeven -1p0 -> -1p0
-roundeven -0.8p0 -> -0p0
-roundeven -0.dp0 -> -1p0
-roundeven -0.1p0 -> -0p0
-roundeven -0p0 -> -0p0
-roundeven 0p0 -> 0p0
-roundeven 0.1p0 -> 0p0
-roundeven 0.8p0 -> 0p0
-roundeven 0.dp0 -> 1p0
-roundeven 1p0 -> 1p0
-roundeven 1.8p0 -> 2p0
-
-trunc -1p0 -> -1p0
-trunc -0.dp0 -> -0p0
-trunc -0.1p0 -> -0p0
-trunc -0p0 -> -0p0
-trunc 0p0 -> 0p0
-trunc 0.1p0 -> 0p0
-trunc 0.dp0 -> 0p0
-trunc 1p0 -> 1p0
-
-frac -1p0 -> -0p0
-frac -0.dp0 -> -0.dp0
-frac -0.1p0 -> -0.1p0
-frac -0p0 -> -0p0
-frac 0p0 -> 0p0
-frac 0.1p0 -> 0.1p0
-frac 0.dp0 -> 0.dp0
-frac 1p0 -> 0p0
-
-remainder -5p0 3p0 -> 1p0
-remainder -4p0 3p0 -> -1p0
-remainder -3p0 3p0 -> -0p0
-remainder -2p0 3p0 -> 1p0
-remainder -1p0 3p0 -> -1p0
-remainder -0p0 3p0 -> -0p0
-remainder 0p0 3p0 -> 0p0
-remainder 1p0 3p0 -> 1p0
-remainder 2p0 3p0 -> -1p0
-remainder 3p0 3p0 -> 0p0
-remainder 4p0 3p0 -> 1p0
-remainder 5p0 3p0 -> -1p0
-
-""".split('\n'))
+def tests_from_data(basename):
+    """
+    Return test processing data from a given file.
+
+    Given the basename of a *.bft file in the test_data directory,
+    return a test method that runs the tests for that file.
+    """
+    test_file = pkg_resources.resource_filename(
+        "bigfloat.test",
+        "test_data/{basename}.bft".format(basename=basename),
+    )
+    with io.open(test_file, encoding="utf-8") as f:
+        test_data = f.readlines()
+    return process_lines(test_data)
+
+
+ABCTests.test_next_up = tests_from_data("next_up")
+ABCTests.test_next_down = tests_from_data("next_down")
+ABCTests.test_pos = tests_from_data("pos")
+ABCTests.test_mod = tests_from_data("mod")
+ABCTests.test_floordiv = tests_from_data("floordiv")
+ABCTests.test_various = tests_from_data("various")
 
 
 def load_tests(loader, tests, ignore):

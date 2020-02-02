@@ -279,4 +279,9 @@ setup(
         'bigfloat',
         'bigfloat.test',
     ],
+    package_data={
+        "bigfloat.test": [
+            "test_data/*.bft",
+        ],
+    },
 )
