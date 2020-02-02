@@ -19,6 +19,7 @@
 import contextlib
 import doctest
 import fractions
+import io
 import math
 import operator
 import random
@@ -2128,7 +2129,7 @@ def tests_from_data(basename):
         "bigfloat.test",
         "test_data/{basename}.bft".format(basename=basename),
     )
-    with open(test_file, encoding="utf-8") as f:
+    with io.open(test_file, encoding="utf-8") as f:
         test_data = f.readlines()
     return process_lines(test_data)
 
