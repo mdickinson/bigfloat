@@ -1,0 +1,79 @@
+context double_precision
+context RoundTiesToEven
+
+# Check treatment of signs in normal cases.
+mod 0x5p0 0x3p0 -> 0x2p0
+mod -0x5p0 0x3p0 -> 0x1p0
+mod 0x5p0 -0x3p0 -> -0x1p0
+mod -0x5p0 -0x3p0 -> -0x2p0
+
+# A result of zero should have the same sign
+# as the second argument.
+mod 0x2p0 0x1p0 -> 0x0p0
+mod -0x2p0 0x1p0 -> 0x0p0
+mod 0x2p0 -0x1p0 -> -0x0p0
+mod -0x2p0 -0x1p0 -> -0x0p0
+
+# Finite input cases where the result may not be exact.
+mod 0x1p-100 0x1p0 -> 0x1p-100
+mod -0x1p-100 0x1p0 -> 0x1p0         Inexact
+mod 0x1p-100 -0x1p0 -> -0x1p0        Inexact
+mod -0x1p-100 -0x1p0 -> -0x1p-100
+
+# NaN inputs
+mod nan nan -> nan                   NanFlag
+mod -inf nan -> nan                  NanFlag
+mod -0x1p0 nan -> nan                NanFlag
+mod -0x0p0 nan -> nan                NanFlag
+mod 0x0p0 nan -> nan                 NanFlag
+mod 0x1p0 nan -> nan                 NanFlag
+mod nan inf -> nan                   NanFlag
+mod nan -inf -> nan                  NanFlag
+mod nan -0x1p0 -> nan                NanFlag
+mod nan -0x0p0 -> nan                NanFlag
+mod nan 0x0p0 -> nan                 NanFlag
+mod nan 0x1p0 -> nan                 NanFlag
+mod nan inf -> nan                   NanFlag
+
+# Other invalid cases: x infinite, y zero.
+mod inf -inf -> nan                  NanFlag
+mod inf -0x1p0 -> nan                NanFlag
+mod inf -0x0p0 -> nan                NanFlag
+mod inf 0x0p0 -> nan                 NanFlag
+mod inf 0x1p0 -> nan                 NanFlag
+mod inf inf -> nan                   NanFlag
+mod -inf -inf -> nan                 NanFlag
+mod -inf -0x1p0 -> nan               NanFlag
+mod -inf -0x0p0 -> nan               NanFlag
+mod -inf 0x0p0 -> nan                NanFlag
+mod -inf 0x1p0 -> nan                NanFlag
+mod -inf inf -> nan                  NanFlag
+mod -inf 0x0p0 -> nan                NanFlag
+mod -0x1p0 0x0p0 -> nan              NanFlag
+mod -0x0p0 0x0p0 -> nan              NanFlag
+mod 0x0p0 0x0p0 -> nan               NanFlag
+mod 0x1p0 0x0p0 -> nan               NanFlag
+mod inf 0x0p0 -> nan                 NanFlag
+mod -inf -0x0p0 -> nan               NanFlag
+mod -0x1p0 -0x0p0 -> nan             NanFlag
+mod -0x0p0 -0x0p0 -> nan             NanFlag
+mod 0x0p0 -0x0p0 -> nan              NanFlag
+mod 0x1p0 -0x0p0 -> nan              NanFlag
+mod inf -0x0p0 -> nan                NanFlag
+
+# x finite, y infinite.
+mod -0x1p0 inf -> inf
+mod -0x0p0 inf -> 0x0p0
+mod 0x0p0 inf -> 0x0p0
+mod 0x1p0 inf -> 0x1p0
+
+mod -0x1p0 -inf -> -0x1p0
+mod -0x0p0 -inf -> -0x0p0
+mod 0x0p0 -inf -> -0x0p0
+mod 0x1p0 -inf -> -inf
+
+# x zero, y finite but nonzero: sign of x is irrelevant.
+mod 0x0p0 0x5p0 -> 0x0p0
+mod -0x0p0 0x5p0 -> 0x0p0
+mod 0x0p0 -0x5p0 -> -0x0p0
+mod -0x0p0 -0x5p0 -> -0x0p0

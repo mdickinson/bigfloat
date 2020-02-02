@@ -1,0 +1,92 @@
+context double_precision
+context RoundTiesToEven
+
+pos 0 -> 0
+pos -0 -> -0
+pos inf -> inf
+pos -inf -> -inf
+pos nan -> nan NanFlag
+
+# smallest representable positive value is 1p-1074
+# values in (0, 0.8p-1074] -> 0 Inexact Underflow
+
+# exactly representable with precision 53 and unbounded exponent,
+# but not exactly representable with precision 53 and bounded exponent
+pos 0.8p-1075 -> 0 Inexact Underflow
+pos 0.cp-1075 -> 0 Inexact Underflow
+pos 0.ffffffffffffp-1075 -> 0 Inexact Underflow
+
+# not exactly representable with precision 53 and unbounded exponent
+pos 0.ffffffffffffffffffffp-1075 -> 0 Inexact Underflow
+pos 1p-1075 -> 0 Inexact Underflow
+
+# values in (0.8p-1075, 1p-1074) -> 1p-1074 Inexact Underflow
+
+pos 1.00000000000000000001p-1075 -> 1p-1074 Inexact Underflow
+pos 1.000000001p-1075 -> 1p-1074 Inexact Underflow
+pos 1.8p-1075 -> 1p-1074 Inexact Underflow
+pos 0.ffffffffffff8p-1074 -> 1p-1074 Inexact Underflow
+pos 0.ffffffffffffffffffffp-1074 -> 1p-1074 Inexact Underflow
+
+# 1p-1074 exactly representable
+pos 1p-1074 -> 1p-1074 Underflow
+
+# values in (1p-1074, 1.8p-1074) -> 1p-1074 Inexact Underflow
+pos 1.7p-1074 -> 1p-1074 Inexact Underflow
+pos 1.7ffffffffffffp-1074 -> 1p-1074 Inexact Underflow
+pos 1.7ffffffffffff8p-1074 -> 1p-1074 Inexact Underflow
+
+# values in [1.8p-1074, 2p-1074) -> 2p-1074 Inexact Underflow
+pos 1.8p-1074 -> 2p-1074 Inexact Underflow
+pos 1.80000000000008p-1074 -> 2p-1074 Inexact Underflow
+pos 1.8000000000001p-1074 -> 2p-1074 Inexact Underflow
+pos 2p-1074 -> 2p-1074 Underflow
+
+# test round-half-to-even at some mid-range subnormal values
+pos 123456p-1074 -> 123456p-1074 Underflow
+pos 123456.7p-1074 -> 123456p-1074 Inexact Underflow
+pos 123456.7ffffffffffffp-1074 -> 123456p-1074 Inexact Underflow
+pos 123456.8p-1074 -> 123456p-1074 Inexact Underflow
+pos 123456.8000000000001p-1074 -> 123457p-1074 Inexact Underflow
+pos 123456.9p-1074 -> 123457p-1074 Inexact Underflow
+pos 123456.ap-1074 -> 123457p-1074 Inexact Underflow
+pos 123456.bp-1074 -> 123457p-1074 Inexact Underflow
+pos 123456.cp-1074 -> 123457p-1074 Inexact Underflow
+pos 123456.dp-1074 -> 123457p-1074 Inexact Underflow
+pos 123456.ep-1074 -> 123457p-1074 Inexact Underflow
+pos 123456.fp-1074 -> 123457p-1074 Inexact Underflow
+pos 123457.0p-1074 -> 123457p-1074 Underflow
+pos 123457.1p-1074 -> 123457p-1074 Inexact Underflow
+pos 123457.2p-1074 -> 123457p-1074 Inexact Underflow
+pos 123457.3p-1074 -> 123457p-1074 Inexact Underflow
+pos 123457.4p-1074 -> 123457p-1074 Inexact Underflow
+pos 123457.5p-1074 -> 123457p-1074 Inexact Underflow
+pos 123457.6p-1074 -> 123457p-1074 Inexact Underflow
+pos 123457.7p-1074 -> 123457p-1074 Inexact Underflow
+pos 123457.7fffffffp-1074 -> 123457p-1074 Inexact Underflow
+pos 123457.7fffffff8p-1074 -> 123457p-1074 Inexact Underflow
+pos 123457.8p-1074 -> 123458p-1074 Inexact Underflow
+pos 123457.800000008p-1074 -> 123458p-1074 Inexact Underflow
+pos 123457.80000001p-1074 -> 123458p-1074 Inexact Underflow
+pos 123457.9p-1074 -> 123458p-1074 Inexact Underflow
+
+# values near smallest representable normal value, 1p-1022
+pos 0.8p-1022 -> 0.8p-1022 Underflow
+
+# write e for 2**-53, t for 1p-1022, then:
+#
+#  (1-2e)t -> Underflow  # exactly representable
+#  ((1-2e)t, (1-e)t) -> (1-2e)t Inexact Underflow
+#  [(1-e)t, (1-e/2)t) -> t Inexact Underflow
+#  [(1-e/2)t, t) -> t Inexact  # no underflow!  after rounding at work
+
+pos 0.fffffffffffffp-1022 -> 0.fffffffffffffp-1022            Underflow
+pos 0.fffffffffffff00000000001p-1022 -> 0.fffffffffffffp-1022 Inexact Underflow
+pos 0.fffffffffffff4p-1022 -> 0.fffffffffffffp-1022           Inexact Underflow
+pos 0.fffffffffffff7ffffffffffp-1022 -> 0.fffffffffffffp-1022 Inexact Underflow
+pos 0.fffffffffffff8p-1022 -> 1p-1022                         Inexact Underflow
+pos 0.fffffffffffffbffffffffffp-1022 -> 1p-1022               Inexact Underflow
+pos 0.fffffffffffffcp-1022 -> 1p-1022                         Inexact
+pos 0.ffffffffffffffffffffffffp-1022 -> 1p-1022               Inexact
+pos 1p-1022 -> 1p-1022
+pos 1p+1024 -> inf Inexact Overflow
