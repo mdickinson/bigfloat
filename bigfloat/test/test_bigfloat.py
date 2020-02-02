@@ -38,72 +38,97 @@ import bigfloat.core
 from bigfloat import (
     # version number
     __version__,
-
     # main class
     BigFloat,
-
     # contexts
     Context,
-
     # limits on emin, emax and precision
-    EMIN_MIN, EMAX_MAX,
-
+    EMIN_MIN,
+    EMAX_MAX,
     # context constants...
-    half_precision, single_precision,
-    double_precision, quadruple_precision,
-    RoundTiesToEven, RoundTowardZero,
-    RoundTowardPositive, RoundTowardNegative,
+    half_precision,
+    single_precision,
+    double_precision,
+    quadruple_precision,
+    RoundTiesToEven,
+    RoundTowardZero,
+    RoundTowardPositive,
+    RoundTowardNegative,
     RoundAwayFromZero,
     ROUND_TIES_TO_EVEN,
-
     # ... and functions
-    IEEEContext, precision,
-
+    IEEEContext,
+    precision,
     # get and set current context
     getcontext,
     setcontext,
-
     # flags
-    Inexact, Overflow, ZeroDivision,
-    set_flagstate, get_flagstate,
-
+    Inexact,
+    Overflow,
+    ZeroDivision,
+    set_flagstate,
+    get_flagstate,
     # standard arithmetic functions
-    add, sub, mul, div, fmod, pow,
-    sqrt, floordiv, mod,
-
+    add,
+    sub,
+    mul,
+    div,
+    fmod,
+    pow,
+    sqrt,
+    floordiv,
+    mod,
     # 5.4 Conversion Functions
     frexp,
-
     # 5.5 Basic Arithmetic Functions
-    root, rootn,
-
+    root,
+    rootn,
     # 5.6 Comparison Functions
-    cmp, cmpabs, is_nan, is_inf, is_finite, is_zero, is_regular, sgn,
-    notequal, lessgreater, unordered,
-
+    cmp,
+    cmpabs,
+    is_nan,
+    is_inf,
+    is_finite,
+    is_zero,
+    is_regular,
+    sgn,
+    notequal,
+    lessgreater,
+    unordered,
     # 5.7 Special Functions
     exp,
     factorial,
     zeta_ui,
     lgamma,
-    j0, j1, jn,
-    y0, y1, yn,
-    const_log2, const_pi, const_euler, const_catalan,
+    j0,
+    j1,
+    jn,
+    y0,
+    y1,
+    yn,
+    const_log2,
+    const_pi,
+    const_euler,
+    const_catalan,
     sum,
-
     # 5.10 Integer and Remainder Related Functions
     is_integer,
-
     # 5.12 Miscellaneous Functions
-    min, max,
+    min,
+    max,
     is_negative,
     copysign,
 )
 
 from bigfloat.core import _all_flags
 
-all_rounding_modes = [RoundTowardZero, RoundTowardNegative,
-                      RoundTowardPositive, RoundTiesToEven, RoundAwayFromZero]
+all_rounding_modes = [
+    RoundTowardZero,
+    RoundTowardNegative,
+    RoundTowardPositive,
+    RoundTiesToEven,
+    RoundAwayFromZero,
+]
 
 if sys.version_info < (3,):
     long_integer_type = long  # noqa
@@ -128,8 +153,10 @@ def diffBigFloat(x, y, match_precisions=True):
     failure."""
 
     if not (isinstance(x, BigFloat) and isinstance(y, BigFloat)):
-        raise ValueError("Expected x and y to be BigFloat instances "
-                         "in assertIdenticalBigFloat")
+        raise ValueError(
+            "Expected x and y to be BigFloat instances "
+            "in assertIdenticalBigFloat"
+        )
 
     # precisions should match
     if match_precisions:
@@ -139,8 +166,7 @@ def diffBigFloat(x, y, match_precisions=True):
     # if one of x or y is a nan then both should be
     if is_nan(x) or is_nan(y):
         if not (is_nan(x) and is_nan(y)):
-            return ("One of %r and %r is a nan, but the other is not." %
-                    (x, y))
+            return "One of %r and %r is a nan, but the other is not." % (x, y)
         else:
             return None
 
@@ -162,6 +188,7 @@ class MockBinaryOperation(object):
     Mock binary operation, for testing purposes.
 
     """
+
     def __init__(self, returns=None):
         self.call = lambda self, other: returns
 
@@ -171,16 +198,44 @@ class MockBinaryOperation(object):
 
 # Dummy class with mock implementations of relevant special methods.
 
+
 class RichObject(object):
     pass
 
 
 dummy_ops = [
-    'eq', 'ne', 'le', 'lt', 'ge', 'gt',
-    'add', 'sub', 'mul', 'truediv', 'floordiv', 'mod', 'divmod', 'pow',
-    'lshift', 'rshift', 'and', 'xor', 'or',
-    'radd', 'rsub', 'rmul', 'rtruediv', 'rfloordiv', 'rmod', 'rdivmod', 'rpow',
-    'rlshift', 'rrshift', 'rand', 'rxor', 'ror',
+    "eq",
+    "ne",
+    "le",
+    "lt",
+    "ge",
+    "gt",
+    "add",
+    "sub",
+    "mul",
+    "truediv",
+    "floordiv",
+    "mod",
+    "divmod",
+    "pow",
+    "lshift",
+    "rshift",
+    "and",
+    "xor",
+    "or",
+    "radd",
+    "rsub",
+    "rmul",
+    "rtruediv",
+    "rfloordiv",
+    "rmod",
+    "rdivmod",
+    "rpow",
+    "rlshift",
+    "rrshift",
+    "rand",
+    "rxor",
+    "ror",
 ]
 if sys.version_info < (3,):
     dummy_ops.extend(["div", "rdiv"])
@@ -188,11 +243,11 @@ if sys.version_info >= (3,):
     dummy_ops.extend(["matmul", "rmatmul"])
 
 for op in dummy_ops:
-    setattr(RichObject, '__{op}__'.format(op=op),
-            MockBinaryOperation(op))
+    setattr(RichObject, "__{op}__".format(op=op), MockBinaryOperation(op))
 
 
 # Dummy class with *no* implementations of special methods.
+
 
 class PoorObject(object):
     pass
@@ -212,8 +267,9 @@ class BigFloatTests(unittest.TestCase):
 
     def assertIdenticalFloat(self, x, y):
         if not (isinstance(x, float) and isinstance(y, float)):
-            raise ValueError("Expected x and y to be floats "
-                             "in assertIdenticalFloat")
+            raise ValueError(
+                "Expected x and y to be floats " "in assertIdenticalFloat"
+            )
 
         # if either x or y is a nan...
         if x != x or y != y:
@@ -246,8 +302,10 @@ class BigFloatTests(unittest.TestCase):
         # copysign).
 
         if not (isinstance(x, BigFloat) and isinstance(y, BigFloat)):
-            raise ValueError("Expected x and y to be BigFloat instances "
-                             "in assertIdenticalBigFloat")
+            raise ValueError(
+                "Expected x and y to be BigFloat instances "
+                "in assertIdenticalBigFloat"
+            )
 
         # precisions should match
         if x.precision != y.precision:
@@ -268,8 +326,16 @@ class BigFloatTests(unittest.TestCase):
         test_precisions = [2, 10, 23, 24, 52, 53, 54, 100]
         fns = [add, sub, mul, div, pow, floordiv, fmod]
 
-        values = [2, 3, 1.234, BigFloat('0.678'), BigFloat('nan'),
-                  float('0.0'), float('inf'), True]
+        values = [
+            2,
+            3,
+            1.234,
+            BigFloat("0.678"),
+            BigFloat("nan"),
+            float("0.0"),
+            float("inf"),
+            True,
+        ]
 
         # functions should accept operands of any integer, float or BigFloat
         # type.
@@ -306,14 +372,17 @@ class BigFloatTests(unittest.TestCase):
         # Compare with Python's % operation.
         for _ in range(10000):
             x = struct.unpack(
-                '<d', struct.pack('<Q', random.randrange(2**64)))[0]
+                "<d", struct.pack("<Q", random.randrange(2 ** 64))
+            )[0]
             y = struct.unpack(
-                '<d', struct.pack('<Q', random.randrange(2**64)))[0]
+                "<d", struct.pack("<Q", random.randrange(2 ** 64))
+            )[0]
 
             bigfloat_result = mod(x, y)
             python_result = x % y
-            self.assertIdenticalBigFloat(bigfloat_result,
-                                         BigFloat(python_result))
+            self.assertIdenticalBigFloat(
+                bigfloat_result, BigFloat(python_result)
+            )
 
     def test_floordiv(self):
         x = BigFloat(2.3)
@@ -322,23 +391,23 @@ class BigFloatTests(unittest.TestCase):
 
         # Check some random floats; compare with Python's operation.
         test_pairs = [
-            ('-0x1.5921f71f3a8b7p-407', '0x1.4c71c92d27a31p-460'),
-            ('-0x1.884ea5a94b5f5p+513', '0x1.c058519564476p+460'),
-            ('-0x1.b71ef34af0215p-459', '-0x1.d7c7b08970e2dp-514'),
-            ('-0x1.55b19f5f1eaf4p+888', '-0x1.eab0f46fc89fcp+834'),
-            ('0x1.c655a7928d80ap-148', '0x1.ed6b2d073dbaap-202'),
-            ('0x1.80574cc232b58p+407', '0x1.8017ad6a5cd65p+247'),
+            ("-0x1.5921f71f3a8b7p-407", "0x1.4c71c92d27a31p-460"),
+            ("-0x1.884ea5a94b5f5p+513", "0x1.c058519564476p+460"),
+            ("-0x1.b71ef34af0215p-459", "-0x1.d7c7b08970e2dp-514"),
+            ("-0x1.55b19f5f1eaf4p+888", "-0x1.eab0f46fc89fcp+834"),
+            ("0x1.c655a7928d80ap-148", "0x1.ed6b2d073dbaap-202"),
+            ("0x1.80574cc232b58p+407", "0x1.8017ad6a5cd65p+247"),
             # Cases where the fast method doesn't quite apply
-            ('0x1.29dbe528a1eddp+158', '0x1.ab3bd461baacfp+52'),
-            ('0x1.f0cd027b645e8p+157', '0x1.afc4d2171de7fp+52'),
-            ('0x1.49c34cd7726e3p+158', '0x1.b16193d9ac917p+52'),
-            ('0x1.499cd0115b703p+158', '0x1.ecb8a19525c13p+52'),
-            ('0x1.c042a3dd22594p+157', '0x1.9d26c3340d073p+52'),
-            ('0x1.085e2c60727e6p+158', '0x1.4ab6dab81c08bp+52'),
-            ('0x1.085e2c60727e6p+158', '0x1.945a8d6633e67p+52'),
-            ('0x1.bfed7fed4e317p+158', '0x1.e677da37e992bp+52'),
-            ('0x1.bfed7fed4e317p+158', '0x1.fbb37fe2fe157p+52'),
-            ('0x1.d551fa1318722p+157', '0x1.993e3b11333cbp+52'),
+            ("0x1.29dbe528a1eddp+158", "0x1.ab3bd461baacfp+52"),
+            ("0x1.f0cd027b645e8p+157", "0x1.afc4d2171de7fp+52"),
+            ("0x1.49c34cd7726e3p+158", "0x1.b16193d9ac917p+52"),
+            ("0x1.499cd0115b703p+158", "0x1.ecb8a19525c13p+52"),
+            ("0x1.c042a3dd22594p+157", "0x1.9d26c3340d073p+52"),
+            ("0x1.085e2c60727e6p+158", "0x1.4ab6dab81c08bp+52"),
+            ("0x1.085e2c60727e6p+158", "0x1.945a8d6633e67p+52"),
+            ("0x1.bfed7fed4e317p+158", "0x1.e677da37e992bp+52"),
+            ("0x1.bfed7fed4e317p+158", "0x1.fbb37fe2fe157p+52"),
+            ("0x1.d551fa1318722p+157", "0x1.993e3b11333cbp+52"),
         ]
 
         with double_precision:
@@ -355,9 +424,11 @@ class BigFloatTests(unittest.TestCase):
             # Check a selection of random values.
             for _ in range(10000):
                 x = struct.unpack(
-                    '<d', struct.pack('<Q', random.randrange(2**64)))[0]
+                    "<d", struct.pack("<Q", random.randrange(2 ** 64))
+                )[0]
                 y = struct.unpack(
-                    '<d', struct.pack('<Q', random.randrange(2**64)))[0]
+                    "<d", struct.pack("<Q", random.randrange(2 ** 64))
+                )[0]
                 if math.isnan(x) or math.isinf(x) or x == 0.0:
                     continue
                 if math.isnan(y) or math.isinf(y) or y == 0.0:
@@ -372,13 +443,14 @@ class BigFloatTests(unittest.TestCase):
                     expected_result = float(x_frac // y_frac)
                 except OverflowError:
                     if x_frac / y_frac > 0:
-                        expected_result = float('inf')
+                        expected_result = float("inf")
                     else:
-                        expected_result = float('-inf')
+                        expected_result = float("-inf")
 
                 self.assertEqual(
-                    actual_result, expected_result,
-                    msg="failure for x = {0!r}, y = {1!r}".format(x, y)
+                    actual_result,
+                    expected_result,
+                    msg="failure for x = {0!r}, y = {1!r}".format(x, y),
                 )
 
     def test_binary_operations(self):
@@ -386,12 +458,18 @@ class BigFloatTests(unittest.TestCase):
         # and with integers and floats, using the standard
         # arithmetic operators:  +, -, *, /, **, %, //
 
-        x = BigFloat('17.29')
-        other_values = [2, 3, 1.234, BigFloat('0.678'), False]
+        x = BigFloat("17.29")
+        other_values = [2, 3, 1.234, BigFloat("0.678"), False]
         test_precisions = [2, 20, 53, 2000]
-        operations = [operator.add, operator.mul, operator.floordiv,
-                      operator.sub, operator.pow, operator.truediv,
-                      operator.mod]
+        operations = [
+            operator.add,
+            operator.mul,
+            operator.floordiv,
+            operator.sub,
+            operator.pow,
+            operator.truediv,
+            operator.mod,
+        ]
         # operator.div only defined for Python 2
         if sys.version_info < (3,):
             operations.append(operator.div)
@@ -449,10 +527,19 @@ class BigFloatTests(unittest.TestCase):
         # either way around, with an unsupported type.  Excludes
         # == and !=, which need their own checks.
         binary_ops = [
-            operator.add, operator.sub, operator.mul, operator.pow,
-            operator.truediv, operator.floordiv, operator.mod, divmod,
-            operator.lshift, operator.rshift,
-            operator.and_, operator.xor, operator.or_,
+            operator.add,
+            operator.sub,
+            operator.mul,
+            operator.pow,
+            operator.truediv,
+            operator.floordiv,
+            operator.mod,
+            divmod,
+            operator.lshift,
+            operator.rshift,
+            operator.and_,
+            operator.xor,
+            operator.or_,
         ]
         if sys.version_info < (3,):
             binary_ops.append(operator.div)
@@ -460,7 +547,8 @@ class BigFloatTests(unittest.TestCase):
             # These only raise on Python 3; on Python 2 we get the
             # usual arbitrary ordering.
             binary_ops.extend(
-                [operator.gt, operator.lt, operator.ge, operator.le])
+                [operator.gt, operator.lt, operator.ge, operator.le]
+            )
 
         if sys.version_info >= (3,):
             binary_ops.append(operator.matmul)
@@ -491,19 +579,22 @@ class BigFloatTests(unittest.TestCase):
     def test_bool(self):
         # test __nonzero__ / __bool__
         self.assertIs(bool(BigFloat(0)), False)
-        self.assertIs(bool(BigFloat('-0')), False)
+        self.assertIs(bool(BigFloat("-0")), False)
         self.assertIs(bool(BigFloat(1.0)), True)
         self.assertIs(bool(BigFloat(-123)), True)
-        self.assertIs(bool(BigFloat('nan')), True)
-        self.assertIs(bool(BigFloat('inf')), True)
-        self.assertIs(bool(BigFloat('-inf')), True)
+        self.assertIs(bool(BigFloat("nan")), True)
+        self.assertIs(bool(BigFloat("inf")), True)
+        self.assertIs(bool(BigFloat("-inf")), True)
 
     def test_classifications(self):
         # test classification functions (is_nan, is_inf, is_zero,
         # is_finite, is_integer, is_negative)
 
         nans = [
-            float('nan'), BigFloat('nan'), float('-nan'), -BigFloat('nan'),
+            float("nan"),
+            BigFloat("nan"),
+            float("-nan"),
+            -BigFloat("nan"),
         ]
         for x in nans:
             self.assertIs(is_nan(x), True)
@@ -514,7 +605,10 @@ class BigFloatTests(unittest.TestCase):
             self.assertIs(is_regular(x), False)
 
         infinities = [
-            float('inf'), float('-inf'), BigFloat('inf'), BigFloat('-inf'),
+            float("inf"),
+            float("-inf"),
+            BigFloat("inf"),
+            BigFloat("-inf"),
         ]
         for x in infinities:
             self.assertIs(is_nan(x), False)
@@ -526,8 +620,10 @@ class BigFloatTests(unittest.TestCase):
 
         zeros = [
             0,
-            float('0.0'), float('-0.0'),
-            BigFloat('0.0'), BigFloat('-0.0'),
+            float("0.0"),
+            float("-0.0"),
+            BigFloat("0.0"),
+            BigFloat("-0.0"),
         ]
         for x in zeros:
             self.assertIs(is_nan(x), False)
@@ -537,7 +633,7 @@ class BigFloatTests(unittest.TestCase):
             self.assertIs(is_integer(x), True)
             self.assertIs(is_regular(x), False)
 
-        for x in [-31, -5.13, BigFloat('-2.34e1000')]:
+        for x in [-31, -5.13, BigFloat("-2.34e1000")]:
             self.assertIs(is_nan(x), False)
             self.assertIs(is_inf(x), False)
             self.assertIs(is_zero(x), False)
@@ -545,7 +641,7 @@ class BigFloatTests(unittest.TestCase):
             self.assertIs(is_regular(x), True)
             self.assertIs(is_negative(x), True)
 
-        for x in [2, 24.0, BigFloat('1e-1000')]:
+        for x in [2, 24.0, BigFloat("1e-1000")]:
             self.assertIs(is_nan(x), False)
             self.assertIs(is_inf(x), False)
             self.assertIs(is_zero(x), False)
@@ -554,7 +650,7 @@ class BigFloatTests(unittest.TestCase):
             self.assertIs(is_negative(x), False)
 
         # test is_integer for finite nonzero values
-        for x in [2, -31, 24.0, BigFloat('1e100'), sqrt(BigFloat('2e100'))]:
+        for x in [2, -31, 24.0, BigFloat("1e100"), sqrt(BigFloat("2e100"))]:
             self.assertIs(is_integer(x), True)
 
         for x in [2.1, BigFloat(-1.345), sqrt(BigFloat(2))]:
@@ -562,45 +658,61 @@ class BigFloatTests(unittest.TestCase):
 
         # test is_negative
         negatives = [
-            float('-inf'), float('-0.0'),
-            BigFloat('-inf'), BigFloat('-0.0'),
-            BigFloat(-2.3), -31, -1,
+            float("-inf"),
+            float("-0.0"),
+            BigFloat("-inf"),
+            BigFloat("-0.0"),
+            BigFloat(-2.3),
+            -31,
+            -1,
         ]
         for x in negatives:
             self.assertIs(is_negative(x), True)
 
-        for x in [float('inf'), BigFloat('inf'), float('0.0'), 0, 2, 123,
-                  BigFloat(1.23)]:
+        for x in [
+            float("inf"),
+            BigFloat("inf"),
+            float("0.0"),
+            0,
+            2,
+            123,
+            BigFloat(1.23),
+        ]:
             self.assertIs(is_negative(x), False)
 
         # test signs of NaNs.  (Warning: the MPFR library doesn't guarantee
         # much here; these tests may break.)
-        self.assertIs(is_negative(BigFloat('nan')), False)
-        self.assertIs(is_negative(-BigFloat('nan')), True)
+        self.assertIs(is_negative(BigFloat("nan")), False)
+        self.assertIs(is_negative(-BigFloat("nan")), True)
 
     def test_comparisons(self):
         # here's a list of lists of values; within each sublist all
 
         # entries have the same value; sublists are ordered by increasing value
         values = [
-            [BigFloat('-inf'), float('-inf')],
+            [BigFloat("-inf"), float("-inf")],
             [-1, -1.0, BigFloat(-1.0)],
             [
                 0,
-                float('0.0'), float('-0.0'),
-                BigFloat('0.0'), BigFloat('-0.0'),
+                float("0.0"),
+                float("-0.0"),
+                BigFloat("0.0"),
+                BigFloat("-0.0"),
             ],
-            [BigFloat('4e-324')],
+            [BigFloat("4e-324")],
             [4e-324],
             [1e-320, BigFloat(1e-320)],
             [1, 1.0, BigFloat(1.0)],
             [BigFloat(2 ** 53 + 1)],
             [2 ** 53 + 1],
-            [BigFloat('inf'), float('inf')],
+            [BigFloat("inf"), float("inf")],
         ]
 
         nans = [
-            BigFloat('nan'), -BigFloat('-nan'), float('nan'), -float('nan')
+            BigFloat("nan"),
+            -BigFloat("-nan"),
+            float("nan"),
+            -float("nan"),
         ]
 
         LT_PAIRS = []
@@ -686,8 +798,16 @@ class BigFloatTests(unittest.TestCase):
                 self.assertEqual(bf.precision, p)
 
     def test_creation_from_float(self):
-        test_values = [-12.3456, float('-0.0'), float('0.0'), 5e-310, -1e308,
-                       float('nan'), float('inf'), float('-inf')]
+        test_values = [
+            -12.3456,
+            float("-0.0"),
+            float("0.0"),
+            5e-310,
+            -1e308,
+            float("nan"),
+            float("inf"),
+            float("-inf"),
+        ]
         test_precisions = [2, 20, 53, 2000]
         for value in test_values:
             for p in test_precisions:
@@ -710,13 +830,15 @@ class BigFloatTests(unittest.TestCase):
         self.assertEqual(nearest_half, 123.5)
 
     def test_creation_from_string(self):
-        test_values = ['123.456',
-                       '-1.23',
-                       '1e456',
-                       '+nan',
-                       'inf',
-                       '-inf',
-                       '-451.001']
+        test_values = [
+            "123.456",
+            "-1.23",
+            "1e456",
+            "+nan",
+            "inf",
+            "-inf",
+            "-451.001",
+        ]
         test_precisions = [2, 20, 53, 2000]
         for value in test_values:
             for p in test_precisions:
@@ -731,36 +853,41 @@ class BigFloatTests(unittest.TestCase):
 
         # check that rounding mode affects the conversion
         with RoundTowardNegative:
-            lower = BigFloat('1.1')
+            lower = BigFloat("1.1")
         with RoundTowardPositive:
-            upper = BigFloat('1.1')
+            upper = BigFloat("1.1")
         self.assertLess(lower, upper)
 
         # alternative version, without with statements
-        lower = BigFloat('1.1', RoundTowardNegative)
-        upper = BigFloat('1.1', RoundTowardPositive)
+        lower = BigFloat("1.1", RoundTowardNegative)
+        upper = BigFloat("1.1", RoundTowardPositive)
         self.assertLess(lower, upper)
 
-        self.assertTrue(is_nan(BigFloat('nan')))
-        self.assertTrue(is_inf(BigFloat('inf')))
-        self.assertFalse(is_negative(BigFloat('inf')))
-        self.assertTrue(is_inf(BigFloat('-inf')))
-        self.assertTrue(is_negative(BigFloat('-inf')))
-        self.assertTrue(is_zero(BigFloat('0')))
-        self.assertFalse(is_negative(BigFloat('0')))
-        self.assertTrue(is_zero(BigFloat('-0')))
-        self.assertTrue(is_negative(BigFloat('-0')))
+        self.assertTrue(is_nan(BigFloat("nan")))
+        self.assertTrue(is_inf(BigFloat("inf")))
+        self.assertFalse(is_negative(BigFloat("inf")))
+        self.assertTrue(is_inf(BigFloat("-inf")))
+        self.assertTrue(is_negative(BigFloat("-inf")))
+        self.assertTrue(is_zero(BigFloat("0")))
+        self.assertFalse(is_negative(BigFloat("0")))
+        self.assertTrue(is_zero(BigFloat("-0")))
+        self.assertTrue(is_negative(BigFloat("-0")))
 
     if sys.version_info < (3,):
+
         def test_creation_from_unicode(self):
-            test_values = map(six.text_type,
-                              ['123.456',
-                               '-1.23',
-                               '1e456',
-                               '+nan',
-                               'inf',
-                               '-inf',
-                               '-451.001'])
+            test_values = map(
+                six.text_type,
+                [
+                    "123.456",
+                    "-1.23",
+                    "1e456",
+                    "+nan",
+                    "inf",
+                    "-inf",
+                    "-451.001",
+                ],
+            )
             test_precisions = [2, 20, 53, 2000]
             for value in test_values:
                 for p in test_precisions:
@@ -774,10 +901,12 @@ class BigFloatTests(unittest.TestCase):
                     self.assertEqual(bf.precision, p)
 
     def test_creation_from_BigFloat(self):
-        test_values = [BigFloat(1.0),
-                       BigFloat('nan'),
-                       BigFloat('inf'),
-                       const_pi()]
+        test_values = [
+            BigFloat(1.0),
+            BigFloat("nan"),
+            BigFloat("inf"),
+            const_pi(),
+        ]
         # add a few extra values at other precisions
         with precision(200):
             test_values.append(const_catalan())
@@ -827,8 +956,8 @@ class BigFloatTests(unittest.TestCase):
         # too large or too small to represent.  (Clearly, floats can
         # never be too large or too small, and integers can't ever
         # be too small.  Here we test with strings.)
-        too_large = '1e%d' % (EMAX_MAX // 3)
-        too_small = '1e%d' % (EMIN_MIN // 3)
+        too_large = "1e%d" % (EMAX_MAX // 3)
+        too_small = "1e%d" % (EMIN_MIN // 3)
         self.assertRaises(ValueError, BigFloat.exact, too_large, 53)
         self.assertRaises(ValueError, BigFloat.exact, too_small, 53)
 
@@ -842,7 +971,7 @@ class BigFloatTests(unittest.TestCase):
 
         # check that flags aren't affected by a BigFloat.exact call
         set_flagstate(set())
-        BigFloat.exact('123.45', precision=200)  # shouldn't set inexact flag
+        BigFloat.exact("123.45", precision=200)  # shouldn't set inexact flag
         flags = get_flagstate()
         self.assertEqual(flags, set())
 
@@ -863,8 +992,16 @@ class BigFloatTests(unittest.TestCase):
         self.assertRaises(TypeError, BigFloat.exact, -13, precision=53)
 
     def test_exact_creation_from_float(self):
-        test_values = [-12.3456, float('-0.0'), float('0.0'), 5e-310, -1e308,
-                       float('nan'), float('inf'), float('-inf')]
+        test_values = [
+            -12.3456,
+            float("-0.0"),
+            float("0.0"),
+            5e-310,
+            -1e308,
+            float("nan"),
+            float("inf"),
+            float("-inf"),
+        ]
         test_precisions = [2, 20, 53, 2000]
         for value in test_values:
             for p in test_precisions:
@@ -877,18 +1014,19 @@ class BigFloatTests(unittest.TestCase):
 
         self.assertRaises(TypeError, BigFloat.exact, 1.0, precision=200)
         self.assertRaises(
-            TypeError,
-            BigFloat.exact, float('nan'), precision=53,
+            TypeError, BigFloat.exact, float("nan"), precision=53,
         )
 
     def test_exact_creation_from_string(self):
-        test_values = ['123.456',
-                       '-1.23',
-                       '1e456',
-                       '+nan',
-                       'inf',
-                       '-inf',
-                       '-451.001']
+        test_values = [
+            "123.456",
+            "-1.23",
+            "1e456",
+            "+nan",
+            "inf",
+            "-inf",
+            "-451.001",
+        ]
         test_precisions = [2, 20, 53, 2000]
         for value in test_values:
             for p in test_precisions:
@@ -899,25 +1037,30 @@ class BigFloatTests(unittest.TestCase):
 
         # Check that rounding-mode doesn't affect the conversion
         with RoundTowardNegative:
-            lower = BigFloat.exact('1.1', precision=20)
+            lower = BigFloat.exact("1.1", precision=20)
         with RoundTowardPositive:
-            upper = BigFloat.exact('1.1', precision=20)
+            upper = BigFloat.exact("1.1", precision=20)
         self.assertEqual(lower, upper)
 
         # Check that TypeError is raised if precision not passed.
         with self.assertRaises(TypeError):
-            BigFloat.exact('1.1')
+            BigFloat.exact("1.1")
 
     if sys.version_info < (3,):
+
         def test_exact_creation_from_unicode(self):
-            test_values = map(six.text_type,
-                              ['123.456',
-                               '-1.23',
-                               '1e456',
-                               '+nan',
-                               'inf',
-                               '-inf',
-                               '-451.001'])
+            test_values = map(
+                six.text_type,
+                [
+                    "123.456",
+                    "-1.23",
+                    "1e456",
+                    "+nan",
+                    "inf",
+                    "-inf",
+                    "-451.001",
+                ],
+            )
             test_precisions = [2, 20, 53, 2000]
             for value in test_values:
                 for p in test_precisions:
@@ -928,9 +1071,9 @@ class BigFloatTests(unittest.TestCase):
 
             # check that rounding-mode doesn't affect the conversion
             with RoundTowardNegative:
-                lower = BigFloat.exact('1.1', precision=20)
+                lower = BigFloat.exact("1.1", precision=20)
             with RoundTowardPositive:
-                upper = BigFloat.exact('1.1', precision=20)
+                upper = BigFloat.exact("1.1", precision=20)
             self.assertEqual(lower, upper)
 
     def test_exact_creation_from_BigFloat(self):
@@ -953,7 +1096,7 @@ class BigFloatTests(unittest.TestCase):
     def test_exponent_limits(self):
         with Context(emin=-1000, emax=0):
             x = add(123, 456)
-        self.assertEqual(x, BigFloat('infinity'))
+        self.assertEqual(x, BigFloat("infinity"))
 
     def test_float(self):
         # test conversion to float
@@ -967,13 +1110,13 @@ class BigFloatTests(unittest.TestCase):
         # rounding mode shouldn't affect conversion
         for rnd in all_rounding_modes:
             with rnd:
-                self.assertEqual(float(x), 1.)
-                self.assertEqual(float(y), 1.)
+                self.assertEqual(float(x), 1.0)
+                self.assertEqual(float(y), 1.0)
 
     def test_hash(self):
         # equal values should hash equal
-        pos0 = BigFloat('0')
-        neg0 = BigFloat('-0')
+        pos0 = BigFloat("0")
+        neg0 = BigFloat("-0")
         self.assertEqual(hash(pos0), hash(neg0))
 
         # hash shouldn't depend on precision
@@ -988,8 +1131,8 @@ class BigFloatTests(unittest.TestCase):
 
         # check that hash values match those of floats
         test_values = [
-            float('inf'),
-            float('nan'),
+            float("inf"),
+            float("nan"),
             0.0,
             1.0,
             1.625,
@@ -1003,8 +1146,7 @@ class BigFloatTests(unittest.TestCase):
         test_values += [-x for x in test_values]
         for test_value in test_values:
             self.assertEqual(
-                hash(BigFloat.exact(test_value)),
-                hash(test_value)
+                hash(BigFloat.exact(test_value)), hash(test_value)
             )
 
         # check that hash(n) matches hash(BigFloat(n)) for integers n
@@ -1014,22 +1156,27 @@ class BigFloatTests(unittest.TestCase):
         # values near powers of 2
         for e in [30, 31, 32, 33, 34, 62, 63, 64, 65, 66]:
             for n in range(2 ** e - 50, 2 ** e + 50):
-                self.assertEqual(hash(n), hash(BigFloat.exact(n)),
-                                 "hash(n) != hash(BigFloat.exact(n)) "
-                                 "for n = %s" % n)
-                self.assertEqual(hash(BigFloat(n)), hash(int(BigFloat(n))),
-                                 "hash(BigFloat(n)) != hash(int(BigFloat(n))) "
-                                 "for n = %s" % n)
+                self.assertEqual(
+                    hash(n),
+                    hash(BigFloat.exact(n)),
+                    "hash(n) != hash(BigFloat.exact(n)) " "for n = %s" % n,
+                )
+                self.assertEqual(
+                    hash(BigFloat(n)),
+                    hash(int(BigFloat(n))),
+                    "hash(BigFloat(n)) != hash(int(BigFloat(n))) "
+                    "for n = %s" % n,
+                )
 
-        n = 7**100
+        n = 7 ** 100
         self.assertEqual(hash(BigFloat.exact(n)), hash(n))
 
     if sys.version_info >= (3,):
         # Only Python 3 has consistent hashing for all numeric types,
         # so we can't expect these tests to pass on Python 2.
         def test_hash_compatibility_with_fraction(self):
-            n = 7**100
-            d = 2**999
+            n = 7 ** 100
+            d = 2 ** 999
             f = fractions.Fraction(n, d)
             with precision(1000):
                 bigfloat_f = BigFloat.exact(n) / BigFloat.exact(d)
@@ -1041,38 +1188,33 @@ class BigFloatTests(unittest.TestCase):
 
         test_values = [
             # (input, precision, output)
-            ('NaN', 2, 'nan'),
-            ('NaN', 24, 'nan'),
-            ('NaN', 53, 'nan'),
-            ('NaN', 100, 'nan'),
+            ("NaN", 2, "nan"),
+            ("NaN", 24, "nan"),
+            ("NaN", 53, "nan"),
+            ("NaN", 100, "nan"),
             # ('-NaN', 10, '-NaN'),
-            ('Inf', 2, 'inf'),
-            ('-Inf', 10, '-inf'),
-            ('0', 53, '0'),
-            ('-0', 24, '-0'),
-
-            ('0.25', 4, '0x0.8p-1'),
-            ('0.25', 5, '0x0.80p-1'),
-
-            ('0.5', 2, '0x0.8p+0'),
-            ('0.5', 3, '0x0.8p+0'),
-            ('0.5', 4, '0x0.8p+0'),
-            ('0.5', 5, '0x0.80p+0'),
-            ('0.5', 8, '0x0.80p+0'),
-            ('0.5', 9, '0x0.800p+0'),
-
-            ('1', 2, '0x0.8p+1'),
-            ('1', 3, '0x0.8p+1'),
-            ('1', 4, '0x0.8p+1'),
-            ('1', 5, '0x0.80p+1'),
-            ('1', 8, '0x0.80p+1'),
-            ('1', 9, '0x0.800p+1'),
-
-            ('1.5', 24, '0x0.c00000p+1'),
-            ('-1.5', 24, '-0x0.c00000p+1'),
-            ('3.14159265358979323846264', 52, '0x0.c90fdaa22168cp+2'),
-            ('3.14159265358979323846264', 53, '0x0.c90fdaa22168c0p+2'),
-
+            ("Inf", 2, "inf"),
+            ("-Inf", 10, "-inf"),
+            ("0", 53, "0"),
+            ("-0", 24, "-0"),
+            ("0.25", 4, "0x0.8p-1"),
+            ("0.25", 5, "0x0.80p-1"),
+            ("0.5", 2, "0x0.8p+0"),
+            ("0.5", 3, "0x0.8p+0"),
+            ("0.5", 4, "0x0.8p+0"),
+            ("0.5", 5, "0x0.80p+0"),
+            ("0.5", 8, "0x0.80p+0"),
+            ("0.5", 9, "0x0.800p+0"),
+            ("1", 2, "0x0.8p+1"),
+            ("1", 3, "0x0.8p+1"),
+            ("1", 4, "0x0.8p+1"),
+            ("1", 5, "0x0.80p+1"),
+            ("1", 8, "0x0.80p+1"),
+            ("1", 9, "0x0.800p+1"),
+            ("1.5", 24, "0x0.c00000p+1"),
+            ("-1.5", 24, "-0x0.c00000p+1"),
+            ("3.14159265358979323846264", 52, "0x0.c90fdaa22168cp+2"),
+            ("3.14159265358979323846264", 53, "0x0.c90fdaa22168c0p+2"),
         ]
 
         for strarg, precision_in, expected in test_values:
@@ -1087,38 +1229,44 @@ class BigFloatTests(unittest.TestCase):
         self.assertEqual(int(BigFloat(1729)), 1729)
 
         self.assertEqual(int(BigFloat(-1e-50)), 0)
-        self.assertEqual(int(BigFloat('-2.99999')), -2)
+        self.assertEqual(int(BigFloat("-2.99999")), -2)
         self.assertEqual(int(BigFloat(-5.0)), -5)
 
-        self.assertEqual(int(BigFloat('0.0')), 0)
-        self.assertEqual(int(BigFloat('-0.0')), 0)
+        self.assertEqual(int(BigFloat("0.0")), 0)
+        self.assertEqual(int(BigFloat("-0.0")), 0)
 
-        self.assertRaises(ValueError, int, BigFloat('inf'))
-        self.assertRaises(ValueError, int, BigFloat('-inf'))
-        self.assertRaises(ValueError, int, BigFloat('nan'))
+        self.assertRaises(ValueError, int, BigFloat("inf"))
+        self.assertRaises(ValueError, int, BigFloat("-inf"))
+        self.assertRaises(ValueError, int, BigFloat("nan"))
 
     if sys.version_info < (3,):
+
         def test_long(self):
             self.assertIsInstance(
-                long_integer_type(BigFloat(13.7)), long_integer_type)
+                long_integer_type(BigFloat(13.7)), long_integer_type
+            )
             self.assertEqual(long_integer_type(BigFloat(13.7)), 13)
             self.assertIsInstance(
-                long_integer_type(BigFloat(13.7)), long_integer_type)
+                long_integer_type(BigFloat(13.7)), long_integer_type
+            )
             self.assertEqual(long_integer_type(BigFloat(2.3)), 2)
             self.assertIsInstance(
-                long_integer_type(BigFloat(1729)), long_integer_type)
+                long_integer_type(BigFloat(1729)), long_integer_type
+            )
             self.assertEqual(long_integer_type(BigFloat(1729)), 1729)
 
             self.assertIsInstance(
-                long_integer_type(BigFloat('0.0')), long_integer_type)
-            self.assertEqual(long_integer_type(BigFloat('0.0')), 0)
+                long_integer_type(BigFloat("0.0")), long_integer_type
+            )
+            self.assertEqual(long_integer_type(BigFloat("0.0")), 0)
             self.assertIsInstance(
-                long_integer_type(BigFloat('-0.0')), long_integer_type)
-            self.assertEqual(long_integer_type(BigFloat('-0.0')), 0)
+                long_integer_type(BigFloat("-0.0")), long_integer_type
+            )
+            self.assertEqual(long_integer_type(BigFloat("-0.0")), 0)
 
-            self.assertRaises(ValueError, long_integer_type, BigFloat('inf'))
-            self.assertRaises(ValueError, long_integer_type, BigFloat('-inf'))
-            self.assertRaises(ValueError, long_integer_type, BigFloat('nan'))
+            self.assertRaises(ValueError, long_integer_type, BigFloat("inf"))
+            self.assertRaises(ValueError, long_integer_type, BigFloat("-inf"))
+            self.assertRaises(ValueError, long_integer_type, BigFloat("nan"))
 
     def test_integer_ratio(self):
 
@@ -1127,35 +1275,41 @@ class BigFloatTests(unittest.TestCase):
         test_values = [
             (
                 sqrt(BigFloat(2), context=RoundTowardPositive),
-                (6369051672525773, 4503599627370496)
+                (6369051672525773, 4503599627370496),
             ),
             (
                 sqrt(BigFloat(2), context=RoundTowardNegative),
-                (1592262918131443, 1125899906842624)
+                (1592262918131443, 1125899906842624),
             ),
             (const_pi(), (884279719003555, 281474976710656)),
-            (BigFloat('2.0'), (2, 1)),
-            (BigFloat('0.5'), (1, 2)),
-            (BigFloat('-1.125'), (-9, 8)),
+            (BigFloat("2.0"), (2, 1)),
+            (BigFloat("0.5"), (1, 2)),
+            (BigFloat("-1.125"), (-9, 8)),
         ]
 
         for arg, expected in test_values:
             self.assertEqual(ir(arg), expected)
 
-        self.assertEqual(ir(BigFloat('0.0')), (0, 1))
-        self.assertEqual(ir(BigFloat('-0.0')), (0, 1))
+        self.assertEqual(ir(BigFloat("0.0")), (0, 1))
+        self.assertEqual(ir(BigFloat("-0.0")), (0, 1))
 
-        self.assertRaises(ValueError, ir, BigFloat('inf'))
-        self.assertRaises(ValueError, ir, BigFloat('-inf'))
-        self.assertRaises(ValueError, ir, BigFloat('nan'))
+        self.assertRaises(ValueError, ir, BigFloat("inf"))
+        self.assertRaises(ValueError, ir, BigFloat("-inf"))
+        self.assertRaises(ValueError, ir, BigFloat("nan"))
 
     def test_repr(self):
         # eval(repr(x)) should recover the BigFloat x, with
         # the same precision and value.
 
-        test_values = [const_pi(), BigFloat(12345),
-                       BigFloat('inf'), BigFloat('-inf'), BigFloat('nan'),
-                       BigFloat('0'), BigFloat('-0')]
+        test_values = [
+            const_pi(),
+            BigFloat(12345),
+            BigFloat("inf"),
+            BigFloat("-inf"),
+            BigFloat("nan"),
+            BigFloat("0"),
+            BigFloat("-0"),
+        ]
         with precision(5):
             test_values.append(BigFloat(-1729))
         with precision(200):
@@ -1169,23 +1323,23 @@ class BigFloatTests(unittest.TestCase):
 
     def test_str(self):
         # check special values
-        self.assertEqual(str(BigFloat('0.0')), '0')
-        self.assertEqual(str(BigFloat('-0.0')), '-0')
-        self.assertEqual(str(BigFloat('inf')), 'inf')
-        self.assertEqual(str(BigFloat('-inf')), '-inf')
-        self.assertEqual(str(BigFloat('nan')), 'nan')
+        self.assertEqual(str(BigFloat("0.0")), "0")
+        self.assertEqual(str(BigFloat("-0.0")), "-0")
+        self.assertEqual(str(BigFloat("inf")), "inf")
+        self.assertEqual(str(BigFloat("-inf")), "-inf")
+        self.assertEqual(str(BigFloat("nan")), "nan")
 
-        self.assertEqual(str(BigFloat('1e100')), '1.0000000000000000e+100')
+        self.assertEqual(str(BigFloat("1e100")), "1.0000000000000000e+100")
 
         # check switch from fixed-point to exponential notation
-        self.assertEqual(str(BigFloat('1e-5')), '1.0000000000000001e-05')
-        self.assertEqual(str(BigFloat('9.999e-5')), '9.9989999999999996e-05')
-        self.assertEqual(str(BigFloat('1e-4')), '0.00010000000000000000')
-        self.assertEqual(str(BigFloat('1e14')), '100000000000000.00')
-        self.assertEqual(str(BigFloat('1e15')), '1000000000000000.0')
-        self.assertEqual(str(BigFloat('1e16')), '10000000000000000')
-        self.assertEqual(str(BigFloat('9.999e16')), '99990000000000000')
-        self.assertEqual(str(BigFloat('1e17')), '1.0000000000000000e+17')
+        self.assertEqual(str(BigFloat("1e-5")), "1.0000000000000001e-05")
+        self.assertEqual(str(BigFloat("9.999e-5")), "9.9989999999999996e-05")
+        self.assertEqual(str(BigFloat("1e-4")), "0.00010000000000000000")
+        self.assertEqual(str(BigFloat("1e14")), "100000000000000.00")
+        self.assertEqual(str(BigFloat("1e15")), "1000000000000000.0")
+        self.assertEqual(str(BigFloat("1e16")), "10000000000000000")
+        self.assertEqual(str(BigFloat("9.999e16")), "99990000000000000")
+        self.assertEqual(str(BigFloat("1e17")), "1.0000000000000000e+17")
 
     def test_subnormalization(self):
         # check that subnormalization doesn't result in
@@ -1196,22 +1350,21 @@ class BigFloatTests(unittest.TestCase):
         # check that results are integer multiples of
         # 2**-1074
         with double_precision:
-            self.assertEqual(BigFloat('3e-324'), pow(2, -1074))
-            self.assertEqual(BigFloat('7.4e-324'), pow(2, -1074))
-            self.assertEqual(BigFloat('7.5e-324'), pow(2, -1073))
+            self.assertEqual(BigFloat("3e-324"), pow(2, -1074))
+            self.assertEqual(BigFloat("7.4e-324"), pow(2, -1074))
+            self.assertEqual(BigFloat("7.5e-324"), pow(2, -1073))
 
     def test_const_log2(self):
         with double_precision:
             self.assertEqual(
                 const_log2(),
-                BigFloat.exact('0.69314718055994531', precision=53),
+                BigFloat.exact("0.69314718055994531", precision=53),
             )
 
     def test_const_pi(self):
         with double_precision:
             self.assertEqual(
-                const_pi(),
-                BigFloat.exact('3.14159265358979323', precision=53)
+                const_pi(), BigFloat.exact("3.14159265358979323", precision=53)
             )
         with double_precision + RoundTowardNegative:
             pi_lower = const_pi()
@@ -1222,35 +1375,28 @@ class BigFloatTests(unittest.TestCase):
         # Test passing context argument.
         with double_precision:
             self.assertEqual(
-                const_pi(),
-                BigFloat.exact('3.1415926535897932', precision=53),
+                const_pi(), BigFloat.exact("3.1415926535897932", precision=53),
             )
-            self.assertEqual(
-                const_pi(context=RoundTowardNegative),
-                pi_lower
-            )
-            self.assertEqual(
-                const_pi(context=RoundTowardPositive),
-                pi_upper
-            )
+            self.assertEqual(const_pi(context=RoundTowardNegative), pi_lower)
+            self.assertEqual(const_pi(context=RoundTowardPositive), pi_upper)
 
     def test_const_euler(self):
         with double_precision:
             self.assertEqual(
                 const_euler(),
-                BigFloat.exact('0.57721566490153286', precision=53),
+                BigFloat.exact("0.57721566490153286", precision=53),
             )
 
     def test_const_catalan(self):
         with double_precision:
             self.assertEqual(
                 const_catalan(),
-                BigFloat.exact('0.91596559417721902', precision=53),
+                BigFloat.exact("0.91596559417721902", precision=53),
             )
 
     def test_sum(self):
         with double_precision:
-            inputs = [1.0/n**2 for n in range(1, 1000)]
+            inputs = [1.0 / n ** 2 for n in range(1, 1000)]
             bf_sum = sum(inputs)
             self.assertIsInstance(bf_sum, BigFloat)
             self.assertEqual(bf_sum, math.fsum(inputs))
@@ -1289,8 +1435,7 @@ class BigFloatTests(unittest.TestCase):
 
     def test_copy(self):
         x = BigFloat.exact(
-            '1234091801830413840192384102394810329481324.3',
-            precision=200,
+            "1234091801830413840192384102394810329481324.3", precision=200,
         )
         y = x.copy()
         self.assertEqual(x, y)
@@ -1298,35 +1443,31 @@ class BigFloatTests(unittest.TestCase):
 
     def test_copy_abs(self):
         x = BigFloat.exact(
-            '1234091801830413840192384102394810329481324.3',
-            precision=200,
+            "1234091801830413840192384102394810329481324.3", precision=200,
         )
         neg_x = BigFloat.exact(
-            '-1234091801830413840192384102394810329481324.3',
-            precision=200,
+            "-1234091801830413840192384102394810329481324.3", precision=200,
         )
         self.assertEqual(x.copy_abs(), x)
         self.assertEqual(neg_x.copy_abs(), x)
 
-        inf = BigFloat('infinity')
-        ninf = BigFloat('-infinity')
+        inf = BigFloat("infinity")
+        ninf = BigFloat("-infinity")
         self.assertEqual(inf.copy_abs(), inf)
         self.assertEqual(ninf.copy_abs(), inf)
 
     def test_copy_neg(self):
         x = BigFloat.exact(
-            '1234091801830413840192384102394810329481324.3',
-            precision=200,
+            "1234091801830413840192384102394810329481324.3", precision=200,
         )
         neg_x = BigFloat.exact(
-            '-1234091801830413840192384102394810329481324.3',
-            precision=200,
+            "-1234091801830413840192384102394810329481324.3", precision=200,
         )
         self.assertEqual(x.copy_neg(), neg_x)
         self.assertEqual(neg_x.copy_neg(), x)
 
-        inf = BigFloat('infinity')
-        ninf = BigFloat('-infinity')
+        inf = BigFloat("infinity")
+        ninf = BigFloat("-infinity")
         self.assertEqual(inf.copy_neg(), ninf)
         self.assertEqual(ninf.copy_neg(), inf)
 
@@ -1361,25 +1502,26 @@ class BigFloatTests(unittest.TestCase):
                 else:
                     self.assertEqual(x, absx)
 
-    @unittest.skipUnless(sys.version_info >= (3,),
-                         "round tests only applicable to Python 3")
+    @unittest.skipUnless(
+        sys.version_info >= (3,), "round tests only applicable to Python 3"
+    )
     def test_single_argument_round(self):
         # Rounding with a single argument.
         test_values = [
-            (BigFloat('-2.0'), -2),
-            (BigFloat('-1.5'), -2),
-            (BigFloat('-1.4999'), -1),
-            (BigFloat('-0.6'), -1),
-            (BigFloat('-0.5'), 0),
-            (BigFloat('-0.1'), 0),
-            (BigFloat('-0.0'), 0),
-            (BigFloat('0.0'), 0),
-            (BigFloat('0.1'), 0),
-            (BigFloat('0.5'), 0),
-            (BigFloat('0.6'), 1),
-            (BigFloat('1.4999'), 1),
-            (BigFloat('1.5'), 2),
-            (BigFloat('2.0'), 2),
+            (BigFloat("-2.0"), -2),
+            (BigFloat("-1.5"), -2),
+            (BigFloat("-1.4999"), -1),
+            (BigFloat("-0.6"), -1),
+            (BigFloat("-0.5"), 0),
+            (BigFloat("-0.1"), 0),
+            (BigFloat("-0.0"), 0),
+            (BigFloat("0.0"), 0),
+            (BigFloat("0.1"), 0),
+            (BigFloat("0.5"), 0),
+            (BigFloat("0.6"), 1),
+            (BigFloat("1.4999"), 1),
+            (BigFloat("1.5"), 2),
+            (BigFloat("2.0"), 2),
         ]
         for value, expected_result in test_values:
             result = round(value)
@@ -1387,80 +1529,77 @@ class BigFloatTests(unittest.TestCase):
             self.assertEqual(result, expected_result)
 
         with self.assertRaises(ValueError):
-            round(BigFloat('inf'))
+            round(BigFloat("inf"))
         with self.assertRaises(ValueError):
-            round(BigFloat('nan'))
+            round(BigFloat("nan"))
 
-    @unittest.skipUnless(sys.version_info >= (3,),
-                         "round tests only applicable to Python 3")
+    @unittest.skipUnless(
+        sys.version_info >= (3,), "round tests only applicable to Python 3"
+    )
     def test_two_argument_round(self):
         test_triples = [
             # n = -1 (round to nearest 10)
             (BigFloat(-35), -1, BigFloat(-40)),
             (BigFloat(-25), -1, BigFloat(-20)),
             (BigFloat(-15), -1, BigFloat(-20)),
-            (BigFloat(-5), -1, BigFloat('-0')),
+            (BigFloat(-5), -1, BigFloat("-0")),
             (BigFloat(5), -1, BigFloat(0)),
             (BigFloat(15), -1, BigFloat(20)),
             (BigFloat(25), -1, BigFloat(20)),
             (BigFloat(35), -1, BigFloat(40)),
-
             # n = 0
-            (BigFloat(-1.5), 0, BigFloat('-2')),
-            (BigFloat(-0.5), 0, BigFloat('-0')),
-            (BigFloat(0.49999999999999994), 0, BigFloat('0')),
-            (BigFloat(0.5), 0, BigFloat('0')),
-            (BigFloat(1.5), 0, BigFloat('2')),
-            (BigFloat(2.5), 0, BigFloat('2')),
-            (BigFloat('4503599627370495.5'), 0, BigFloat('4503599627370496')),
-            (BigFloat('4503599627370497'), 0, BigFloat('4503599627370497')),
-
+            (BigFloat(-1.5), 0, BigFloat("-2")),
+            (BigFloat(-0.5), 0, BigFloat("-0")),
+            (BigFloat(0.49999999999999994), 0, BigFloat("0")),
+            (BigFloat(0.5), 0, BigFloat("0")),
+            (BigFloat(1.5), 0, BigFloat("2")),
+            (BigFloat(2.5), 0, BigFloat("2")),
+            (BigFloat("4503599627370495.5"), 0, BigFloat("4503599627370496")),
+            (BigFloat("4503599627370497"), 0, BigFloat("4503599627370497")),
             # n = 1
-            (BigFloat('0.05'), 1, BigFloat('0.1')),
-            (BigFloat('0.1'), 1, BigFloat('0.1')),
-            (BigFloat('0.15'), 1, BigFloat('0.1')),
-            (BigFloat('0.2'), 1, BigFloat('0.2')),
-            (BigFloat('0.25'), 1, BigFloat('0.2')),
-            (BigFloat('0.3'), 1, BigFloat('0.3')),
-            (BigFloat('0.35'), 1, BigFloat('0.3')),
-            (BigFloat('0.4'), 1, BigFloat('0.4')),
-            (BigFloat('0.45'), 1, BigFloat('0.5')),
-            (BigFloat('0.5'), 1, BigFloat('0.5')),
-            (BigFloat('0.55'), 1, BigFloat('0.6')),
-            (BigFloat('0.6'), 1, BigFloat('0.6')),
-            (BigFloat('0.75'), 1, BigFloat('0.8')),
-
+            (BigFloat("0.05"), 1, BigFloat("0.1")),
+            (BigFloat("0.1"), 1, BigFloat("0.1")),
+            (BigFloat("0.15"), 1, BigFloat("0.1")),
+            (BigFloat("0.2"), 1, BigFloat("0.2")),
+            (BigFloat("0.25"), 1, BigFloat("0.2")),
+            (BigFloat("0.3"), 1, BigFloat("0.3")),
+            (BigFloat("0.35"), 1, BigFloat("0.3")),
+            (BigFloat("0.4"), 1, BigFloat("0.4")),
+            (BigFloat("0.45"), 1, BigFloat("0.5")),
+            (BigFloat("0.5"), 1, BigFloat("0.5")),
+            (BigFloat("0.55"), 1, BigFloat("0.6")),
+            (BigFloat("0.6"), 1, BigFloat("0.6")),
+            (BigFloat("0.75"), 1, BigFloat("0.8")),
             # Various n.
-            (BigFloat('314159.265358979323'), -6, BigFloat('0')),
-            (BigFloat('314159.265358979323'), -5, BigFloat('300000')),
-            (BigFloat('314159.265358979323'), -4, BigFloat('310000')),
-            (BigFloat('314159.265358979323'), -3, BigFloat('314000')),
-            (BigFloat('314159.265358979323'), -2, BigFloat('314200')),
-            (BigFloat('314159.265358979323'), -1, BigFloat('314160')),
-            (BigFloat('314159.265358979323'), 0, BigFloat('314159')),
-            (BigFloat('314159.265358979323'), 1, BigFloat('314159.3')),
-            (BigFloat('314159.265358979323'), 2, BigFloat('314159.27')),
-            (BigFloat('314159.265358979323'), 3, BigFloat('314159.265')),
-            (BigFloat('314159.265358979323'), 4, BigFloat('314159.2654')),
-            (BigFloat('314159.265358979323'), 5, BigFloat('314159.26536')),
-            (BigFloat('314159.265358979323'), 6, BigFloat('314159.265359')),
-
+            (BigFloat("314159.265358979323"), -6, BigFloat("0")),
+            (BigFloat("314159.265358979323"), -5, BigFloat("300000")),
+            (BigFloat("314159.265358979323"), -4, BigFloat("310000")),
+            (BigFloat("314159.265358979323"), -3, BigFloat("314000")),
+            (BigFloat("314159.265358979323"), -2, BigFloat("314200")),
+            (BigFloat("314159.265358979323"), -1, BigFloat("314160")),
+            (BigFloat("314159.265358979323"), 0, BigFloat("314159")),
+            (BigFloat("314159.265358979323"), 1, BigFloat("314159.3")),
+            (BigFloat("314159.265358979323"), 2, BigFloat("314159.27")),
+            (BigFloat("314159.265358979323"), 3, BigFloat("314159.265")),
+            (BigFloat("314159.265358979323"), 4, BigFloat("314159.2654")),
+            (BigFloat("314159.265358979323"), 5, BigFloat("314159.26536")),
+            (BigFloat("314159.265358979323"), 6, BigFloat("314159.265359")),
             # Special values.
-            (BigFloat('0'), 0, BigFloat('0')),
-            (BigFloat('-0'), 0, BigFloat('-0')),
-            (BigFloat('0'), 10, BigFloat('0')),
-            (BigFloat('-0'), 10, BigFloat('-0')),
-            (BigFloat('0'), -10, BigFloat('0')),
-            (BigFloat('-0'), -10, BigFloat('-0')),
-            (BigFloat('inf'), 0, BigFloat('inf')),
-            (BigFloat('-inf'), 0, BigFloat('-inf')),
-            (BigFloat('nan'), 0, BigFloat('nan')),
-            (BigFloat('inf'), 10, BigFloat('inf')),
-            (BigFloat('-inf'), 10, BigFloat('-inf')),
-            (BigFloat('nan'), 10, BigFloat('nan')),
-            (BigFloat('inf'), -10, BigFloat('inf')),
-            (BigFloat('-inf'), -10, BigFloat('-inf')),
-            (BigFloat('nan'), -10, BigFloat('nan')),
+            (BigFloat("0"), 0, BigFloat("0")),
+            (BigFloat("-0"), 0, BigFloat("-0")),
+            (BigFloat("0"), 10, BigFloat("0")),
+            (BigFloat("-0"), 10, BigFloat("-0")),
+            (BigFloat("0"), -10, BigFloat("0")),
+            (BigFloat("-0"), -10, BigFloat("-0")),
+            (BigFloat("inf"), 0, BigFloat("inf")),
+            (BigFloat("-inf"), 0, BigFloat("-inf")),
+            (BigFloat("nan"), 0, BigFloat("nan")),
+            (BigFloat("inf"), 10, BigFloat("inf")),
+            (BigFloat("-inf"), 10, BigFloat("-inf")),
+            (BigFloat("nan"), 10, BigFloat("nan")),
+            (BigFloat("inf"), -10, BigFloat("inf")),
+            (BigFloat("-inf"), -10, BigFloat("-inf")),
+            (BigFloat("nan"), -10, BigFloat("nan")),
         ]
         for bf, n, expected in test_triples:
             actual = round(bf, n)
@@ -1493,351 +1632,323 @@ class BigFloatTests(unittest.TestCase):
         # the round-ties-to-even used for the binary to decimal round.
         with RoundTowardNegative:
             # Exact halfway case; should round down.
-            lower = round(BigFloat('1.125'), 2)
-            expected = BigFloat('1.12')
+            lower = round(BigFloat("1.125"), 2)
+            expected = BigFloat("1.12")
             self.assertEqual(lower, expected)
         with RoundTowardPositive:
-            upper = round(BigFloat('1.125'), 2)
-            expected = BigFloat('1.12')
+            upper = round(BigFloat("1.125"), 2)
+            expected = BigFloat("1.12")
             self.assertEqual(upper, expected)
         self.assertLess(lower, upper)
 
         with RoundTowardNegative:
-            lower = round(BigFloat('1.875'), 2)
-            expected = BigFloat('1.88')
+            lower = round(BigFloat("1.875"), 2)
+            expected = BigFloat("1.88")
             self.assertEqual(lower, expected)
         with RoundTowardPositive:
-            upper = round(BigFloat('1.875'), 2)
-            expected = BigFloat('1.88')
+            upper = round(BigFloat("1.875"), 2)
+            expected = BigFloat("1.88")
             self.assertEqual(upper, expected)
         self.assertLess(lower, upper)
 
-    @unittest.skipUnless(sys.version_info >= (3,),
-                         "math.ceil tests only applicable to Python 3")
+    @unittest.skipUnless(
+        sys.version_info >= (3,), "math.ceil tests only applicable to Python 3"
+    )
     def test_math_ceil(self):
-        x = BigFloat('9.55')
+        x = BigFloat("9.55")
         y = math.ceil(x)
         self.assertIsInstance(y, int)
         self.assertEqual(y, 10)
 
-        x = BigFloat('-9.55')
+        x = BigFloat("-9.55")
         y = math.ceil(x)
         self.assertIsInstance(y, int)
         self.assertEqual(y, -9)
 
-        x = BigFloat('-0.00')
+        x = BigFloat("-0.00")
         y = math.ceil(x)
         self.assertIsInstance(y, int)
         self.assertEqual(y, 0)
 
-        x = BigFloat('0.00')
+        x = BigFloat("0.00")
         y = math.ceil(x)
         self.assertIsInstance(y, int)
         self.assertEqual(y, 0)
 
-        x = BigFloat.exact(7**100)
+        x = BigFloat.exact(7 ** 100)
         y = math.ceil(x)
         self.assertIsInstance(y, int)
-        self.assertEqual(y, 7**100)
+        self.assertEqual(y, 7 ** 100)
 
         with self.assertRaises(ValueError):
-            y = math.ceil(BigFloat('inf'))
+            y = math.ceil(BigFloat("inf"))
         with self.assertRaises(ValueError):
-            y = math.ceil(BigFloat('nan'))
+            y = math.ceil(BigFloat("nan"))
 
-    @unittest.skipUnless(sys.version_info >= (3,),
-                         "math.floor tests only applicable to Python 3")
+    @unittest.skipUnless(
+        sys.version_info >= (3,),
+        "math.floor tests only applicable to Python 3",
+    )
     def test_math_floor(self):
-        x = BigFloat('-9.55')
+        x = BigFloat("-9.55")
         y = math.floor(x)
         self.assertIsInstance(y, int)
         self.assertEqual(y, -10)
 
-        x = BigFloat('9.55')
+        x = BigFloat("9.55")
         y = math.floor(x)
         self.assertIsInstance(y, int)
         self.assertEqual(y, 9)
 
-        x = BigFloat('-0.00')
+        x = BigFloat("-0.00")
         y = math.floor(x)
         self.assertIsInstance(y, int)
         self.assertEqual(y, 0)
 
-        x = BigFloat('0.00')
+        x = BigFloat("0.00")
         y = math.floor(x)
         self.assertIsInstance(y, int)
         self.assertEqual(y, 0)
 
-        x = BigFloat.exact(7**100)
+        x = BigFloat.exact(7 ** 100)
         y = math.floor(x)
         self.assertIsInstance(y, int)
-        self.assertEqual(y, 7**100)
+        self.assertEqual(y, 7 ** 100)
 
         with self.assertRaises(ValueError):
-            y = math.floor(BigFloat('inf'))
+            y = math.floor(BigFloat("inf"))
         with self.assertRaises(ValueError):
-            y = math.floor(BigFloat('nan'))
+            y = math.floor(BigFloat("nan"))
 
-    @unittest.skipUnless(sys.version_info >= (3,),
-                         "math.trunc tests only applicable to Python 3")
+    @unittest.skipUnless(
+        sys.version_info >= (3,),
+        "math.trunc tests only applicable to Python 3",
+    )
     def test_math_trunc(self):
-        x = BigFloat('-9.55')
+        x = BigFloat("-9.55")
         y = math.trunc(x)
         self.assertIsInstance(y, int)
         self.assertEqual(y, -9)
 
-        x = BigFloat('9.55')
+        x = BigFloat("9.55")
         y = math.trunc(x)
         self.assertIsInstance(y, int)
         self.assertEqual(y, 9)
 
-        x = BigFloat('-0.00')
+        x = BigFloat("-0.00")
         y = math.trunc(x)
         self.assertIsInstance(y, int)
         self.assertEqual(y, 0)
 
-        x = BigFloat('0.00')
+        x = BigFloat("0.00")
         y = math.trunc(x)
         self.assertIsInstance(y, int)
         self.assertEqual(y, 0)
 
-        x = BigFloat.exact(7**100)
+        x = BigFloat.exact(7 ** 100)
         y = math.trunc(x)
         self.assertIsInstance(y, int)
-        self.assertEqual(y, 7**100)
+        self.assertEqual(y, 7 ** 100)
 
         with self.assertRaises(ValueError):
-            y = math.trunc(BigFloat('inf'))
+            y = math.trunc(BigFloat("inf"))
         with self.assertRaises(ValueError):
-            y = math.trunc(BigFloat('nan'))
+            y = math.trunc(BigFloat("nan"))
 
     def test__format_to_floating_precision(self):
         # Formatting to precision 1.  We need extra testing for this, since
         # it's not supported by the MPFR library itself.
 
-        x = BigFloat('9.55')
+        x = BigFloat("9.55")
         self.assertEqual(
-            x._format_to_floating_precision(1),
-            (False, '1', 1),
+            x._format_to_floating_precision(1), (False, "1", 1),
         )
 
-        x = BigFloat('9.7')
+        x = BigFloat("9.7")
         self.assertEqual(
-            x._format_to_floating_precision(1),
-            (False, '1', 1),
+            x._format_to_floating_precision(1), (False, "1", 1),
         )
 
         # Halfway cases
-        x = BigFloat('-0.5')
+        x = BigFloat("-0.5")
         self.assertEqual(
-            x._format_to_floating_precision(1),
-            (True, '5', -1),
+            x._format_to_floating_precision(1), (True, "5", -1),
         )
-        x = BigFloat('-1.5')
+        x = BigFloat("-1.5")
         self.assertEqual(
-            x._format_to_floating_precision(1),
-            (True, '2', 0),
+            x._format_to_floating_precision(1), (True, "2", 0),
         )
-        x = BigFloat('-2.5')
+        x = BigFloat("-2.5")
         self.assertEqual(
-            x._format_to_floating_precision(1),
-            (True, '2', 0),
+            x._format_to_floating_precision(1), (True, "2", 0),
         )
-        x = BigFloat('-3.5')
+        x = BigFloat("-3.5")
         self.assertEqual(
-            x._format_to_floating_precision(1),
-            (True, '4', 0),
+            x._format_to_floating_precision(1), (True, "4", 0),
         )
-        x = BigFloat('0.5')
+        x = BigFloat("0.5")
         self.assertEqual(
-            x._format_to_floating_precision(1),
-            (False, '5', -1),
+            x._format_to_floating_precision(1), (False, "5", -1),
         )
-        x = BigFloat('1.5')
+        x = BigFloat("1.5")
         self.assertEqual(
-            x._format_to_floating_precision(1),
-            (False, '2', 0),
+            x._format_to_floating_precision(1), (False, "2", 0),
         )
-        x = BigFloat('2.5')
+        x = BigFloat("2.5")
         self.assertEqual(
-            x._format_to_floating_precision(1),
-            (False, '2', 0),
+            x._format_to_floating_precision(1), (False, "2", 0),
         )
-        x = BigFloat('3.5')
+        x = BigFloat("3.5")
         self.assertEqual(
-            x._format_to_floating_precision(1),
-            (False, '4', 0),
+            x._format_to_floating_precision(1), (False, "4", 0),
         )
 
     def test__format_to_fixed_precision(self):
         # Zeros
-        x = BigFloat('0')
+        x = BigFloat("0")
         self.assertEqual(
-            x._format_to_fixed_precision(5),
-            (False, '0', -5),
+            x._format_to_fixed_precision(5), (False, "0", -5),
         )
 
-        x = BigFloat('-0')
+        x = BigFloat("-0")
         self.assertEqual(
-            x._format_to_fixed_precision(-3),
-            (True, '0', 3),
+            x._format_to_fixed_precision(-3), (True, "0", 3),
         )
 
         # Specials
-        x = BigFloat('inf')
+        x = BigFloat("inf")
         self.assertEqual(
-            x._format_to_fixed_precision(5),
-            (False, 'inf', None),
+            x._format_to_fixed_precision(5), (False, "inf", None),
         )
-        x = BigFloat('-inf')
+        x = BigFloat("-inf")
         self.assertEqual(
-            x._format_to_fixed_precision(5),
-            (True, 'inf', None),
+            x._format_to_fixed_precision(5), (True, "inf", None),
         )
-        x = BigFloat('nan')
+        x = BigFloat("nan")
         self.assertEqual(
-            x._format_to_fixed_precision(5),
-            (False, 'nan', None),
+            x._format_to_fixed_precision(5), (False, "nan", None),
         )
 
-        x = BigFloat('4567.892391555555')
+        x = BigFloat("4567.892391555555")
         self.assertEqual(
-            x._format_to_fixed_precision(5),
-            (False, '456789239', -5),
+            x._format_to_fixed_precision(5), (False, "456789239", -5),
         )
 
-        x = BigFloat('-0.000123456')
+        x = BigFloat("-0.000123456")
         self.assertEqual(
-            x._format_to_fixed_precision(10),
-            (True, '1234560', -10),
+            x._format_to_fixed_precision(10), (True, "1234560", -10),
         )
         self.assertEqual(
-            x._format_to_fixed_precision(6),
-            (True, '123', -6),
+            x._format_to_fixed_precision(6), (True, "123", -6),
         )
         self.assertEqual(
-            x._format_to_fixed_precision(5),
-            (True, '12', -5),
+            x._format_to_fixed_precision(5), (True, "12", -5),
         )
 
         self.assertEqual(
-            x._format_to_fixed_precision(4),
-            (True, '1', -4),
+            x._format_to_fixed_precision(4), (True, "1", -4),
         )
 
         self.assertEqual(
-            x._format_to_fixed_precision(3),
-            (True, '0', -3),
+            x._format_to_fixed_precision(3), (True, "0", -3),
         )
 
         # Cases where we end up computing zero significant digits.
         self.assertEqual(
-            BigFloat('0.0999999999')._format_to_fixed_precision(0),
-            (False, '0', 0),
+            BigFloat("0.0999999999")._format_to_fixed_precision(0),
+            (False, "0", 0),
         )
         self.assertEqual(
-            BigFloat('0.1000000001')._format_to_fixed_precision(0),
-            (False, '0', 0),
+            BigFloat("0.1000000001")._format_to_fixed_precision(0),
+            (False, "0", 0),
         )
         self.assertEqual(
-            BigFloat('0.47')._format_to_fixed_precision(0),
-            (False, '0', 0),
+            BigFloat("0.47")._format_to_fixed_precision(0), (False, "0", 0),
         )
         self.assertEqual(
-            BigFloat('0.499999999')._format_to_fixed_precision(0),
-            (False, '0', 0),
+            BigFloat("0.499999999")._format_to_fixed_precision(0),
+            (False, "0", 0),
         )
         self.assertEqual(
-            BigFloat('0.5')._format_to_fixed_precision(0),
-            (False, '0', 0),
+            BigFloat("0.5")._format_to_fixed_precision(0), (False, "0", 0),
         )
         self.assertEqual(
-            BigFloat('0.500000001')._format_to_fixed_precision(0),
-            (False, '1', 0),
+            BigFloat("0.500000001")._format_to_fixed_precision(0),
+            (False, "1", 0),
         )
         self.assertEqual(
-            BigFloat('0.53')._format_to_fixed_precision(0),
-            (False, '1', 0),
+            BigFloat("0.53")._format_to_fixed_precision(0), (False, "1", 0),
         )
         self.assertEqual(
-            BigFloat('0.9')._format_to_fixed_precision(0),
-            (False, '1', 0),
+            BigFloat("0.9")._format_to_fixed_precision(0), (False, "1", 0),
         )
         self.assertEqual(
-            BigFloat('0.99')._format_to_fixed_precision(0),
-            (False, '1', 0),
+            BigFloat("0.99")._format_to_fixed_precision(0), (False, "1", 0),
         )
         self.assertEqual(
-            BigFloat('0.999999999')._format_to_fixed_precision(0),
-            (False, '1', 0),
+            BigFloat("0.999999999")._format_to_fixed_precision(0),
+            (False, "1", 0),
         )
 
         self.assertEqual(
-            BigFloat('-0.0999999999')._format_to_fixed_precision(0),
-            (True, '0', 0),
+            BigFloat("-0.0999999999")._format_to_fixed_precision(0),
+            (True, "0", 0),
         )
         self.assertEqual(
-            BigFloat('-0.1000000001')._format_to_fixed_precision(0),
-            (True, '0', 0),
+            BigFloat("-0.1000000001")._format_to_fixed_precision(0),
+            (True, "0", 0),
         )
         self.assertEqual(
-            BigFloat('-0.499999999')._format_to_fixed_precision(0),
-            (True, '0', 0),
+            BigFloat("-0.499999999")._format_to_fixed_precision(0),
+            (True, "0", 0),
         )
         self.assertEqual(
-            BigFloat('-0.5')._format_to_fixed_precision(0),
-            (True, '0', 0),
+            BigFloat("-0.5")._format_to_fixed_precision(0), (True, "0", 0),
         )
         self.assertEqual(
-            BigFloat('-0.500000001')._format_to_fixed_precision(0),
-            (True, '1', 0),
+            BigFloat("-0.500000001")._format_to_fixed_precision(0),
+            (True, "1", 0),
         )
         self.assertEqual(
-            BigFloat('-0.9')._format_to_fixed_precision(0),
-            (True, '1', 0),
+            BigFloat("-0.9")._format_to_fixed_precision(0), (True, "1", 0),
         )
         self.assertEqual(
-            BigFloat('-0.99')._format_to_fixed_precision(0),
-            (True, '1', 0),
+            BigFloat("-0.99")._format_to_fixed_precision(0), (True, "1", 0),
         )
         self.assertEqual(
-            BigFloat('-0.999999999')._format_to_fixed_precision(0),
-            (True, '1', 0),
+            BigFloat("-0.999999999")._format_to_fixed_precision(0),
+            (True, "1", 0),
         )
 
         # Values close to powers of 10; checking exponent calculation
-        x = BigFloat('1.000000000001')
+        x = BigFloat("1.000000000001")
         self.assertEqual(
-            x._format_to_fixed_precision(3),
-            (False, '1000', -3),
+            x._format_to_fixed_precision(3), (False, "1000", -3),
         )
 
-        x = BigFloat('0.999999999999')
+        x = BigFloat("0.999999999999")
         self.assertEqual(
-            x._format_to_fixed_precision(3),
-            (False, '1000', -3),
+            x._format_to_fixed_precision(3), (False, "1000", -3),
         )
 
-        x = BigFloat('1.0000000000000001')
+        x = BigFloat("1.0000000000000001")
         self.assertEqual(
-            x._format_to_fixed_precision(3),
-            (False, '1000', -3),
+            x._format_to_fixed_precision(3), (False, "1000", -3),
         )
 
-        x = BigFloat('0.9999999999999999')
+        x = BigFloat("0.9999999999999999")
         self.assertEqual(
-            x._format_to_fixed_precision(3),
-            (False, '1000', -3),
+            x._format_to_fixed_precision(3), (False, "1000", -3),
         )
 
     # 5.4 Conversion Functions
     def test_frexp(self):
-        x = BigFloat(float.fromhex('0x1.921fb54442d18p+1'))
+        x = BigFloat(float.fromhex("0x1.921fb54442d18p+1"))
         significand, exponent = frexp(x)
         self.assertIsInstance(exponent, int)
         self.assertEqual(exponent, 2)
 
-        expected_significand = BigFloat(float.fromhex('0x1.921fb54442d18p-1'))
+        expected_significand = BigFloat(float.fromhex("0x1.921fb54442d18p-1"))
         self.assertEqual(significand, expected_significand)
 
     # 5.5 Basic Arithmetic Functions
@@ -1888,11 +1999,11 @@ class BigFloatTests(unittest.TestCase):
 
         # Comparisons involving NaNs should raise an exception
         with self.assertRaises(ValueError):
-            cmp(BigFloat('nan'), 0)
+            cmp(BigFloat("nan"), 0)
         with self.assertRaises(ValueError):
-            cmp(0, BigFloat('nan'))
+            cmp(0, BigFloat("nan"))
         with self.assertRaises(ValueError):
-            cmp(BigFloat('-nan'), BigFloat('nan'))
+            cmp(BigFloat("-nan"), BigFloat("nan"))
 
     def test_cmpabs(self):
         self.assertGreater(cmpabs(BigFloat(2), BigFloat(1)), 0)
@@ -1901,25 +2012,25 @@ class BigFloatTests(unittest.TestCase):
 
         # Comparisons involving NaNs should raise an exception
         with self.assertRaises(ValueError):
-            cmpabs(BigFloat('nan'), 0)
+            cmpabs(BigFloat("nan"), 0)
         with self.assertRaises(ValueError):
-            cmpabs(0, BigFloat('nan'))
+            cmpabs(0, BigFloat("nan"))
         with self.assertRaises(ValueError):
-            cmpabs(BigFloat('-nan'), BigFloat('nan'))
+            cmpabs(BigFloat("-nan"), BigFloat("nan"))
 
     def test_sgn(self):
         self.assertEqual(sgn(BigFloat(2.6)), 1)
         self.assertEqual(sgn(BigFloat(-3.5)), -1)
 
         # Special values
-        self.assertEqual(sgn(BigFloat('-inf')), -1)
-        self.assertEqual(sgn(BigFloat('inf')), 1)
-        self.assertEqual(sgn(BigFloat('0')), 0)
-        self.assertEqual(sgn(BigFloat('-0')), 0)
+        self.assertEqual(sgn(BigFloat("-inf")), -1)
+        self.assertEqual(sgn(BigFloat("inf")), 1)
+        self.assertEqual(sgn(BigFloat("0")), 0)
+        self.assertEqual(sgn(BigFloat("-0")), 0)
 
         # NaNs should raise an exception
         with self.assertRaises(ValueError):
-            sgn(BigFloat('nan'))
+            sgn(BigFloat("nan"))
 
     # 5.7 Special Functions
     def test_factorial(self):
@@ -1936,7 +2047,7 @@ class BigFloatTests(unittest.TestCase):
 
     def test_zeta_ui(self):
         self.assertEqual(zeta_ui(0), -0.5)
-        self.assertEqual(zeta_ui(1), float('inf'))
+        self.assertEqual(zeta_ui(1), float("inf"))
         self.assertEqual(zeta_ui(2), 1.6449340668482264)
 
     def test_lgamma(self):
@@ -2066,9 +2177,11 @@ def _fromhex_exact(value):
     if ternary:
         # conversion should have been exact, except possibly if
         # value overflows or underflows
-        raise ValueError("_fromhex_exact failed to do an exact "
-                         "conversion.  This shouldn't happen. "
-                         "Please report.")
+        raise ValueError(
+            "_fromhex_exact failed to do an exact "
+            "conversion.  This shouldn't happen. "
+            "Please report."
+        )
     return bf
 
 
@@ -2078,7 +2191,7 @@ def process_lines(lines):
         for line in lines:
             # any portion of the line after '#' is a comment; leading
             # and trailing whitespace are ignored
-            comment_pos = line.find('#')
+            comment_pos = line.find("#")
             if comment_pos != -1:
                 line = line[:comment_pos]
             line = line.strip()
@@ -2087,7 +2200,7 @@ def process_lines(lines):
 
             # now we've got a line that should be processed; possibly
             # a directive
-            if line.startswith('context '):
+            if line.startswith("context "):
                 context = getattr(bigfloat, line[8:])
                 setcontext(context)
                 continue
@@ -2111,8 +2224,9 @@ def process_lines(lines):
             actual_flags = get_flagstate()
 
             # compare actual with expected results
-            diff = diffBigFloat(actual_result, expected_result,
-                                match_precisions=False)
+            diff = diffBigFloat(
+                actual_result, expected_result, match_precisions=False
+            )
             if diff is not None:
                 self.fail("{}: {}".format(diff, line))
             self.assertEqual(actual_flags, expected_flags, msg=line)
@@ -2128,8 +2242,7 @@ def tests_from_data(basename):
     return a test method that runs the tests for that file.
     """
     test_file = pkg_resources.resource_filename(
-        "bigfloat.test",
-        "test_data/{basename}.bft".format(basename=basename),
+        "bigfloat.test", "test_data/{basename}.bft".format(basename=basename),
     )
     with io.open(test_file, encoding="utf-8") as f:
         test_data = f.readlines()
@@ -2150,5 +2263,5 @@ def load_tests(loader, tests, ignore):
     return tests
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

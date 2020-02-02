@@ -20,8 +20,9 @@ import unittest
 import warnings
 
 from mpfr import (
-    _LONG_MIN, _LONG_MAX, _ULONG_MAX,
-
+    _LONG_MIN,
+    _LONG_MAX,
+    _ULONG_MAX,
     # Rounding modes
     MPFR_RNDN,
     MPFR_RNDZ,
@@ -29,14 +30,12 @@ from mpfr import (
     MPFR_RNDD,
     MPFR_RNDA,
     MPFR_RNDF,
-
     # Precision limits
-    MPFR_PREC_MIN, MPFR_PREC_MAX,
-
+    MPFR_PREC_MIN,
+    MPFR_PREC_MAX,
     # Free cache policy (for mpfr_free_cache2)
     MPFR_FREE_LOCAL_CACHE,
     MPFR_FREE_GLOBAL_CACHE,
-
     # Flag constants
     MPFR_FLAGS_UNDERFLOW,
     MPFR_FLAGS_OVERFLOW,
@@ -45,17 +44,13 @@ from mpfr import (
     MPFR_FLAGS_ERANGE,
     MPFR_FLAGS_DIVBY0,
     MPFR_FLAGS_ALL,
-
     # Base extension types
     Mpz_t,
     Mpfr_t,
-
     # MPZ functions
     mpz_set_str,
     mpz_get_str,
-
     mpfr_initialized_p,
-
     # 5.1 Initialization Functions
     mpfr_init2,
     mpfr_inits2,
@@ -67,7 +62,6 @@ from mpfr import (
     mpfr_get_default_prec,
     mpfr_set_prec,
     mpfr_get_prec,
-
     # 5.2 Assignment Functions
     mpfr_set,
     mpfr_set_ui,
@@ -83,7 +77,6 @@ from mpfr import (
     mpfr_set_inf,
     mpfr_set_zero,
     mpfr_swap,
-
     # 5.4 Conversion Functions
     mpfr_get_d,
     mpfr_get_si,
@@ -92,11 +85,9 @@ from mpfr import (
     mpfr_frexp,
     mpfr_get_z_2exp,
     mpfr_get_z,
-
     mpfr_get_str,
     mpfr_fits_ulong_p,
     mpfr_fits_slong_p,
-
     # 5.5 Basic Arithmetic Functions
     mpfr_add,
     mpfr_sub,
@@ -112,7 +103,6 @@ from mpfr import (
     mpfr_neg,
     mpfr_abs,
     mpfr_dim,
-
     # 5.6 Comparison Functions
     mpfr_cmp,
     mpfr_cmpabs,
@@ -129,21 +119,16 @@ from mpfr import (
     mpfr_equal_p,
     mpfr_lessgreater_p,
     mpfr_unordered_p,
-
     # 5.7 Special Functions
     mpfr_log,
     mpfr_log_ui,
     mpfr_log2,
     mpfr_log10,
-
     mpfr_log1p,
-
     mpfr_exp,
     mpfr_exp2,
     mpfr_exp10,
-
     mpfr_expm1,
-
     mpfr_cos,
     mpfr_sin,
     mpfr_tan,
@@ -154,9 +139,7 @@ from mpfr import (
     mpfr_acos,
     mpfr_asin,
     mpfr_atan,
-
     mpfr_atan2,
-
     mpfr_cosh,
     mpfr_sinh,
     mpfr_tanh,
@@ -167,9 +150,7 @@ from mpfr import (
     mpfr_acosh,
     mpfr_asinh,
     mpfr_atanh,
-
     mpfr_fac_ui,
-
     mpfr_eint,
     mpfr_li2,
     mpfr_gamma,
@@ -188,16 +169,13 @@ from mpfr import (
     mpfr_y0,
     mpfr_y1,
     mpfr_yn,
-
     mpfr_fma,
     mpfr_fms,
     mpfr_fmma,
     mpfr_fmms,
     mpfr_agm,
     mpfr_hypot,
-
     mpfr_ai,
-
     mpfr_const_log2,
     mpfr_const_pi,
     mpfr_const_euler,
@@ -206,9 +184,7 @@ from mpfr import (
     mpfr_free_cache2,
     mpfr_free_pool,
     mpfr_mp_memory_cleanup,
-
     mpfr_sum,
-
     # 5.10 Integer and Remainder Related Functions
     mpfr_rint,
     mpfr_ceil,
@@ -216,22 +192,18 @@ from mpfr import (
     mpfr_round,
     mpfr_roundeven,
     mpfr_trunc,
-
     mpfr_rint_ceil,
     mpfr_rint_floor,
     mpfr_rint_round,
     mpfr_rint_roundeven,
     mpfr_rint_trunc,
-
     mpfr_frac,
     mpfr_modf,
-
     mpfr_fmod,
     mpfr_fmodquo,
     mpfr_remainder,
     mpfr_remquo,
     mpfr_integer_p,
-
     # 5.11 Rounding Related Functions
     mpfr_set_default_rounding_mode,
     mpfr_get_default_rounding_mode,
@@ -239,7 +211,6 @@ from mpfr import (
     mpfr_can_round,
     mpfr_min_prec,
     mpfr_print_rnd_mode,
-
     # 5.12 Miscellaneous Functions
     mpfr_nexttoward,
     mpfr_nextabove,
@@ -265,45 +236,36 @@ from mpfr import (
     mpfr_buildopt_gmpinternals_p,
     mpfr_buildopt_sharedcache_p,
     mpfr_buildopt_tune_case,
-
     # 5.13 Exception Related Functions
     mpfr_get_emin,
     mpfr_get_emax,
-
     mpfr_set_emin,
     mpfr_set_emax,
-
     mpfr_get_emin_min,
     mpfr_get_emin_max,
     mpfr_get_emax_min,
     mpfr_get_emax_max,
-
     mpfr_check_range,
     mpfr_subnormalize,
-
     mpfr_clear_underflow,
     mpfr_clear_overflow,
     mpfr_clear_divby0,
     mpfr_clear_nanflag,
     mpfr_clear_inexflag,
     mpfr_clear_erangeflag,
-
     mpfr_set_underflow,
     mpfr_set_overflow,
     mpfr_set_divby0,
     mpfr_set_nanflag,
     mpfr_set_inexflag,
     mpfr_set_erangeflag,
-
     mpfr_clear_flags,
-
     mpfr_underflow_p,
     mpfr_overflow_p,
     mpfr_divby0_p,
     mpfr_nanflag_p,
     mpfr_inexflag_p,
     mpfr_erangeflag_p,
-
     mpfr_flags_clear,
     mpfr_flags_set,
     mpfr_flags_test,
@@ -414,8 +376,7 @@ class TestMpfr(unittest.TestCase):
         x = Mpfr_t()
         mpfr_init(x)
         self.assertEqual(
-            mpfr_get_prec(x),
-            mpfr_get_default_prec(),
+            mpfr_get_prec(x), mpfr_get_default_prec(),
         )
 
     def test_init_on_already_initialized_instance(self):
@@ -676,8 +637,7 @@ class TestMpfr(unittest.TestCase):
         mpfr_const_pi(x, MPFR_RNDN)
         mpfr_neg(y, x, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_str(10, 0, y, MPFR_RNDN),
-            ('-31415926553', 1),
+            mpfr_get_str(10, 0, y, MPFR_RNDN), ("-31415926553", 1),
         )
 
     def test_abs(self):
@@ -686,14 +646,12 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_d(x, -0.567, MPFR_RNDN)
         mpfr_abs(y, x, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(y, MPFR_RNDN),
-            0.567,
+            mpfr_get_d(y, MPFR_RNDN), 0.567,
         )
         mpfr_set_d(x, 0.123, MPFR_RNDN)
         mpfr_abs(y, x, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(y, MPFR_RNDN),
-            0.123,
+            mpfr_get_d(y, MPFR_RNDN), 0.123,
         )
 
     def test_add(self):
@@ -704,8 +662,7 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_d(y, 11.0, MPFR_RNDN)
         mpfr_add(z, x, y, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_str(10, 0, z, MPFR_RNDN),
-            ('18000000000', 2),
+            mpfr_get_str(10, 0, z, MPFR_RNDN), ("18000000000", 2),
         )
 
     def test_sub(self):
@@ -716,8 +673,7 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_d(y, 11.0, MPFR_RNDN)
         mpfr_sub(z, x, y, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_str(10, 0, z, MPFR_RNDN),
-            ('-40000000000', 1),
+            mpfr_get_str(10, 0, z, MPFR_RNDN), ("-40000000000", 1),
         )
 
     def test_dim(self):
@@ -728,13 +684,11 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_d(y, 11.0, MPFR_RNDN)
         mpfr_dim(z, x, y, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(z, MPFR_RNDN),
-            0.0,
+            mpfr_get_d(z, MPFR_RNDN), 0.0,
         )
         mpfr_dim(z, y, x, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(z, MPFR_RNDN),
-            4.0,
+            mpfr_get_d(z, MPFR_RNDN), 4.0,
         )
 
     def test_mul(self):
@@ -745,8 +699,7 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_d(y, 11.0, MPFR_RNDN)
         mpfr_mul(z, x, y, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_str(10, 0, z, MPFR_RNDN),
-            ('77000000000', 2),
+            mpfr_get_str(10, 0, z, MPFR_RNDN), ("77000000000", 2),
         )
 
     def test_sqr(self):
@@ -764,8 +717,7 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_d(y, 11.0, MPFR_RNDN)
         mpfr_div(z, x, y, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_str(10, 0, z, MPFR_RNDN),
-            ('63636363670', 0),
+            mpfr_get_str(10, 0, z, MPFR_RNDN), ("63636363670", 0),
         )
 
     def test_sqrt(self):
@@ -830,8 +782,7 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_d(y, 11.0, MPFR_RNDN)
         mpfr_pow(z, x, y, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_str(10, 0, z, MPFR_RNDN),
-            ('19773267440', 10),
+            mpfr_get_str(10, 0, z, MPFR_RNDN), ("19773267440", 10),
         )
 
     # 5.6 Comparison Functions
@@ -889,40 +840,35 @@ class TestMpfr(unittest.TestCase):
         x = Mpfr(30)
         mpfr_const_pi(x, MPFR_RNDN)
         self.assertIs(
-            mpfr_equal_p(x, x),
-            True,
+            mpfr_equal_p(x, x), True,
         )
 
     def test_lessequal_p(self):
         x = Mpfr(30)
         mpfr_const_pi(x, MPFR_RNDN)
         self.assertIs(
-            mpfr_lessequal_p(x, x),
-            True,
+            mpfr_lessequal_p(x, x), True,
         )
 
     def test_less_p(self):
         x = Mpfr(30)
         mpfr_const_pi(x, MPFR_RNDN)
         self.assertIs(
-            mpfr_less_p(x, x),
-            False,
+            mpfr_less_p(x, x), False,
         )
 
     def test_greaterequal_p(self):
         x = Mpfr(30)
         mpfr_const_pi(x, MPFR_RNDN)
         self.assertIs(
-            mpfr_greaterequal_p(x, x),
-            True,
+            mpfr_greaterequal_p(x, x), True,
         )
 
     def test_greater_p(self):
         x = Mpfr(30)
         mpfr_const_pi(x, MPFR_RNDN)
         self.assertIs(
-            mpfr_greater_p(x, x),
-            False,
+            mpfr_greater_p(x, x), False,
         )
 
     def test_lessgreater_p(self):
@@ -933,28 +879,22 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_nan(y)
         mpfr_set_inf(z, 1)
         self.assertIs(
-            mpfr_lessgreater_p(x, x),
-            False,
+            mpfr_lessgreater_p(x, x), False,
         )
         self.assertIs(
-            mpfr_lessgreater_p(x, y),
-            False,
+            mpfr_lessgreater_p(x, y), False,
         )
         self.assertIs(
-            mpfr_lessgreater_p(x, z),
-            True,
+            mpfr_lessgreater_p(x, z), True,
         )
         self.assertIs(
-            mpfr_lessgreater_p(y, y),
-            False,
+            mpfr_lessgreater_p(y, y), False,
         )
         self.assertIs(
-            mpfr_lessgreater_p(y, z),
-            False,
+            mpfr_lessgreater_p(y, z), False,
         )
         self.assertIs(
-            mpfr_lessgreater_p(z, z),
-            False,
+            mpfr_lessgreater_p(z, z), False,
         )
 
     def test_unordered_p(self):
@@ -965,28 +905,22 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_nan(y)
         mpfr_set_inf(z, 1)
         self.assertIs(
-            mpfr_unordered_p(x, x),
-            False,
+            mpfr_unordered_p(x, x), False,
         )
         self.assertIs(
-            mpfr_unordered_p(x, y),
-            True,
+            mpfr_unordered_p(x, y), True,
         )
         self.assertIs(
-            mpfr_unordered_p(x, z),
-            False,
+            mpfr_unordered_p(x, z), False,
         )
         self.assertIs(
-            mpfr_unordered_p(y, y),
-            True,
+            mpfr_unordered_p(y, y), True,
         )
         self.assertIs(
-            mpfr_unordered_p(y, z),
-            True,
+            mpfr_unordered_p(y, z), True,
         )
         self.assertIs(
-            mpfr_unordered_p(z, z),
-            False,
+            mpfr_unordered_p(z, z), False,
         )
 
     # 5.7 Special Functions
@@ -996,16 +930,14 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_d(x, 7.3, MPFR_RNDN)
         mpfr_log(y, x, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(y, MPFR_RNDN),
-            1.9878743481543455,
+            mpfr_get_d(y, MPFR_RNDN), 1.9878743481543455,
         )
 
     def test_log_ui(self):
         y = Mpfr(53)
         mpfr_log_ui(y, 5, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(y, MPFR_RNDN),
-            1.6094379124341003,
+            mpfr_get_d(y, MPFR_RNDN), 1.6094379124341003,
         )
 
     def test_log2(self):
@@ -1014,8 +946,7 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_d(x, 7.3, MPFR_RNDN)
         mpfr_log2(y, x, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(y, MPFR_RNDN),
-            2.867896463992655,
+            mpfr_get_d(y, MPFR_RNDN), 2.867896463992655,
         )
 
     def test_log10(self):
@@ -1024,8 +955,7 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_d(x, 7.3, MPFR_RNDN)
         mpfr_log10(y, x, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(y, MPFR_RNDN),
-            0.8633228601204559,
+            mpfr_get_d(y, MPFR_RNDN), 0.8633228601204559,
         )
 
     def test_exp(self):
@@ -1034,8 +964,7 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_d(x, 7.3, MPFR_RNDN)
         mpfr_exp(y, x, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(y, MPFR_RNDN),
-            1480.299927584545,
+            mpfr_get_d(y, MPFR_RNDN), 1480.299927584545,
         )
 
     def test_exp2(self):
@@ -1044,8 +973,7 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_d(x, 7.3, MPFR_RNDN)
         mpfr_exp2(y, x, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(y, MPFR_RNDN),
-            157.58648490814926,
+            mpfr_get_d(y, MPFR_RNDN), 157.58648490814926,
         )
 
     def test_exp10(self):
@@ -1054,8 +982,7 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_d(x, 7.3, MPFR_RNDN)
         mpfr_exp10(y, x, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(y, MPFR_RNDN),
-            19952623.149688788,
+            mpfr_get_d(y, MPFR_RNDN), 19952623.149688788,
         )
 
     def test_cos(self):
@@ -1064,8 +991,7 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_d(x, 7.3, MPFR_RNDN)
         mpfr_cos(y, x, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(y, MPFR_RNDN),
-            0.52607751738110533998,
+            mpfr_get_d(y, MPFR_RNDN), 0.52607751738110533998,
         )
 
     def test_sin(self):
@@ -1074,8 +1000,7 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_d(x, 7.3, MPFR_RNDN)
         mpfr_sin(y, x, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(y, MPFR_RNDN),
-            0.850436620628564424067,
+            mpfr_get_d(y, MPFR_RNDN), 0.850436620628564424067,
         )
 
     def test_tan(self):
@@ -1084,8 +1009,7 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_d(x, 7.3, MPFR_RNDN)
         mpfr_tan(y, x, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(y, MPFR_RNDN),
-            1.616561423993499104376,
+            mpfr_get_d(y, MPFR_RNDN), 1.616561423993499104376,
         )
 
     def test_sin_cos(self):
@@ -1122,8 +1046,7 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_d(x, 7.3, MPFR_RNDN)
         mpfr_sec(y, x, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(y, MPFR_RNDN),
-            1.90086055184063662072,
+            mpfr_get_d(y, MPFR_RNDN), 1.90086055184063662072,
         )
 
     def test_csc(self):
@@ -1132,8 +1055,7 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_d(x, 7.3, MPFR_RNDN)
         mpfr_csc(y, x, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(y, MPFR_RNDN),
-            1.17586657928828617564,
+            mpfr_get_d(y, MPFR_RNDN), 1.17586657928828617564,
         )
 
     def test_cot(self):
@@ -1142,8 +1064,7 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_d(x, 7.3, MPFR_RNDN)
         mpfr_cot(y, x, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(y, MPFR_RNDN),
-            0.6185969708033942509443,
+            mpfr_get_d(y, MPFR_RNDN), 0.6185969708033942509443,
         )
 
     def test_acos(self):
@@ -1152,8 +1073,7 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_d(x, 0.625, MPFR_RNDN)
         mpfr_acos(y, x, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(y, MPFR_RNDN),
-            0.895664793857864972022,
+            mpfr_get_d(y, MPFR_RNDN), 0.895664793857864972022,
         )
 
     def test_asin(self):
@@ -1162,8 +1082,7 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_d(x, 0.625, MPFR_RNDN)
         mpfr_asin(y, x, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(y, MPFR_RNDN),
-            0.675131532937031647209,
+            mpfr_get_d(y, MPFR_RNDN), 0.675131532937031647209,
         )
 
     def test_atan(self):
@@ -1172,8 +1091,7 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_d(x, 0.625, MPFR_RNDN)
         mpfr_atan(y, x, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(y, MPFR_RNDN),
-            0.558599315343562435972,
+            mpfr_get_d(y, MPFR_RNDN), 0.558599315343562435972,
         )
 
     def test_atan2(self):
@@ -1184,8 +1102,7 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_d(y, 0.88, MPFR_RNDN)
         mpfr_atan2(z, y, x, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(z, MPFR_RNDN),
-            1.1922507314834034,
+            mpfr_get_d(z, MPFR_RNDN), 1.1922507314834034,
         )
 
     def test_cosh(self):
@@ -1194,8 +1111,7 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_d(x, 7.3, MPFR_RNDN)
         mpfr_cosh(y, x, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(y, MPFR_RNDN),
-            740.15030156166007686,
+            mpfr_get_d(y, MPFR_RNDN), 740.15030156166007686,
         )
 
     def test_sinh(self):
@@ -1204,8 +1120,7 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_d(x, 7.3, MPFR_RNDN)
         mpfr_sinh(y, x, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(y, MPFR_RNDN),
-            740.14962602288488302,
+            mpfr_get_d(y, MPFR_RNDN), 740.14962602288488302,
         )
 
     def test_tanh(self):
@@ -1214,8 +1129,7 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_d(x, 7.3, MPFR_RNDN)
         mpfr_tanh(y, x, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(y, MPFR_RNDN),
-            0.99999908729514293447,
+            mpfr_get_d(y, MPFR_RNDN), 0.99999908729514293447,
         )
 
     def test_sinh_cosh(self):
@@ -1272,8 +1186,7 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_d(x, 7.3, MPFR_RNDN)
         mpfr_coth(y, x, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(y, MPFR_RNDN),
-            1.0000009127056900964470593240457667881,
+            mpfr_get_d(y, MPFR_RNDN), 1.0000009127056900964470593240457667881,
         )
 
     def test_acosh(self):
@@ -1282,8 +1195,7 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_d(x, 1.3, MPFR_RNDN)
         mpfr_acosh(y, x, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(y, MPFR_RNDN),
-            0.75643291085695963970413518095370628592,
+            mpfr_get_d(y, MPFR_RNDN), 0.75643291085695963970413518095370628592,
         )
 
     def test_asinh(self):
@@ -1292,8 +1204,7 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_d(x, 1.3, MPFR_RNDN)
         mpfr_asinh(y, x, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(y, MPFR_RNDN),
-            1.0784510589548970088022680582217889485,
+            mpfr_get_d(y, MPFR_RNDN), 1.0784510589548970088022680582217889485,
         )
 
     def test_atanh(self):
@@ -1302,26 +1213,22 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_d(x, 0.78, MPFR_RNDN)
         mpfr_atanh(y, x, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(y, MPFR_RNDN),
-            1.0453705484668847151702051105754406143,
+            mpfr_get_d(y, MPFR_RNDN), 1.0453705484668847151702051105754406143,
         )
 
     def test_fac_ui(self):
         x = Mpfr(53)
         mpfr_fac_ui(x, 4, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(x, MPFR_RNDN),
-            24.0,
+            mpfr_get_d(x, MPFR_RNDN), 24.0,
         )
         mpfr_fac_ui(x, 5, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(x, MPFR_RNDN),
-            120.0,
+            mpfr_get_d(x, MPFR_RNDN), 120.0,
         )
         mpfr_fac_ui(x, 6, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(x, MPFR_RNDN),
-            720.0,
+            mpfr_get_d(x, MPFR_RNDN), 720.0,
         )
 
     def test_miscellaneous_special_functions(self):
@@ -1350,9 +1257,7 @@ class TestMpfr(unittest.TestCase):
             fn(rop, op, MPFR_RNDN)
             actual_output = mpfr_get_d(rop, MPFR_RNDN)
             self.assertEqual(
-                actual_output,
-                expected_output,
-                msg='{}'.format(fn),
+                actual_output, expected_output, msg="{}".format(fn),
             )
 
     def test_gamma_inc(self):
@@ -1373,8 +1278,7 @@ class TestMpfr(unittest.TestCase):
         mpfr_lngamma(z, x, MPFR_RNDN)
         self.assertEqual(sign, 1)
         self.assertEqual(
-            mpfr_get_d(y, MPFR_RNDN),
-            mpfr_get_d(z, MPFR_RNDN),
+            mpfr_get_d(y, MPFR_RNDN), mpfr_get_d(z, MPFR_RNDN),
         )
 
         # Negative value
@@ -1382,8 +1286,7 @@ class TestMpfr(unittest.TestCase):
         ternary, sign = mpfr_lgamma(y, x, MPFR_RNDN)
         self.assertEqual(sign, -1)
         self.assertEqual(
-            mpfr_get_d(y, MPFR_RNDN),
-            1.2655121234846454,  # log(2 * sqrt(pi))
+            mpfr_get_d(y, MPFR_RNDN), 1.2655121234846454,  # log(2 * sqrt(pi))
         )
 
     def test_beta(self):
@@ -1399,18 +1302,15 @@ class TestMpfr(unittest.TestCase):
         x = Mpfr(53)
         mpfr_zeta_ui(x, 0, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(x, MPFR_RNDN),
-            -0.5,
+            mpfr_get_d(x, MPFR_RNDN), -0.5,
         )
         mpfr_zeta_ui(x, 1, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(x, MPFR_RNDN),
-            float('inf'),
+            mpfr_get_d(x, MPFR_RNDN), float("inf"),
         )
         mpfr_zeta_ui(x, 2, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(x, MPFR_RNDN),
-            1.6449340668482264,
+            mpfr_get_d(x, MPFR_RNDN), 1.6449340668482264,
         )
 
     def test_jn(self):
@@ -1424,14 +1324,12 @@ class TestMpfr(unittest.TestCase):
         mpfr_j0(x, z, MPFR_RNDN)
         mpfr_jn(y, 0, z, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(x, MPFR_RNDN),
-            mpfr_get_d(y, MPFR_RNDN),
+            mpfr_get_d(x, MPFR_RNDN), mpfr_get_d(y, MPFR_RNDN),
         )
         mpfr_j1(x, z, MPFR_RNDN)
         mpfr_jn(y, 1, z, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(x, MPFR_RNDN),
-            mpfr_get_d(y, MPFR_RNDN),
+            mpfr_get_d(x, MPFR_RNDN), mpfr_get_d(y, MPFR_RNDN),
         )
 
     def test_yn(self):
@@ -1445,14 +1343,12 @@ class TestMpfr(unittest.TestCase):
         mpfr_y0(x, z, MPFR_RNDN)
         mpfr_yn(y, 0, z, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(x, MPFR_RNDN),
-            mpfr_get_d(y, MPFR_RNDN),
+            mpfr_get_d(x, MPFR_RNDN), mpfr_get_d(y, MPFR_RNDN),
         )
         mpfr_y1(x, z, MPFR_RNDN)
         mpfr_yn(y, 1, z, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(x, MPFR_RNDN),
-            mpfr_get_d(y, MPFR_RNDN),
+            mpfr_get_d(x, MPFR_RNDN), mpfr_get_d(y, MPFR_RNDN),
         )
 
     def test_fma(self):
@@ -1465,8 +1361,7 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_d(op3, 11.0, MPFR_RNDN)
         mpfr_fma(rop, op1, op2, op3, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(rop, MPFR_RNDN),
-            46.0,
+            mpfr_get_d(rop, MPFR_RNDN), 46.0,
         )
 
     def test_fms(self):
@@ -1479,8 +1374,7 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_d(op3, 11.0, MPFR_RNDN)
         mpfr_fms(rop, op1, op2, op3, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(rop, MPFR_RNDN),
-            24.0,
+            mpfr_get_d(rop, MPFR_RNDN), 24.0,
         )
 
     def test_fmma(self):
@@ -1495,8 +1389,7 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_d(op4, 13.0, MPFR_RNDN)
         mpfr_fmma(rop, op1, op2, op3, op4, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(rop, MPFR_RNDN),
-            178.0,
+            mpfr_get_d(rop, MPFR_RNDN), 178.0,
         )
 
     def test_fmms(self):
@@ -1511,8 +1404,7 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_d(op4, 13.0, MPFR_RNDN)
         mpfr_fmms(rop, op1, op2, op3, op4, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(rop, MPFR_RNDN),
-            -108.0,
+            mpfr_get_d(rop, MPFR_RNDN), -108.0,
         )
 
     def test_agm(self):
@@ -1523,8 +1415,7 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_d(y, 1.625, MPFR_RNDN)
         mpfr_agm(rop, x, y, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(rop, MPFR_RNDN),
-            1.2935586022927736,
+            mpfr_get_d(rop, MPFR_RNDN), 1.2935586022927736,
         )
 
     def test_hypot(self):
@@ -1535,40 +1426,35 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_d(y, 12.0, MPFR_RNDN)
         mpfr_hypot(rop, x, y, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(rop, MPFR_RNDN),
-            13.0,
+            mpfr_get_d(rop, MPFR_RNDN), 13.0,
         )
 
     def test_const_log2(self):
         x = Mpfr(53)
         mpfr_const_log2(x, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(x, MPFR_RNDN),
-            0.69314718055994530941723212145817656808,
+            mpfr_get_d(x, MPFR_RNDN), 0.69314718055994530941723212145817656808,
         )
 
     def test_const_pi(self):
         x = Mpfr(53)
         mpfr_const_pi(x, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(x, MPFR_RNDN),
-            3.1415926535897932384626433832795028842,
+            mpfr_get_d(x, MPFR_RNDN), 3.1415926535897932384626433832795028842,
         )
 
     def test_const_euler(self):
         x = Mpfr(53)
         mpfr_const_euler(x, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(x, MPFR_RNDN),
-            0.57721566490153286060651209008240243104,
+            mpfr_get_d(x, MPFR_RNDN), 0.57721566490153286060651209008240243104,
         )
 
     def test_const_catalan(self):
         x = Mpfr(53)
         mpfr_const_catalan(x, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(x, MPFR_RNDN),
-            0.91596559417721901505460351493238411077,
+            mpfr_get_d(x, MPFR_RNDN), 0.91596559417721901505460351493238411077,
         )
 
     def test_free_cache(self):
@@ -1633,8 +1519,7 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_d(y, 10.5, MPFR_RNDN)
         mpfr_rint(x, y, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(x, MPFR_RNDN),
-            12.0,
+            mpfr_get_d(x, MPFR_RNDN), 12.0,
         )
 
     def test_rint_variants(self):
@@ -1711,8 +1596,7 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_d(op, 123.45678, MPFR_RNDN)
         mpfr_frac(rop, op, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(rop, MPFR_RNDN),
-            0.45677999999999486,
+            mpfr_get_d(rop, MPFR_RNDN), 0.45677999999999486,
         )
 
     def test_modf(self):
@@ -1729,8 +1613,8 @@ class TestMpfr(unittest.TestCase):
             1e100,
             15.78,
             -1.56,
-            float('inf'),
-            float('nan'),
+            float("inf"),
+            float("nan"),
         ]
         for test_value in test_values:
             mpfr_set_d(op, test_value, MPFR_RNDN)
@@ -1744,10 +1628,16 @@ class TestMpfr(unittest.TestCase):
             self.assertEqual(ft, ft_single)
 
             # Check trunc and cos values.
-            self.assertTrue(mpfr_equal_p(intop, intop_single) or
-                            mpfr_nan_p(intop) and mpfr_nan_p(intop_single))
-            self.assertTrue(mpfr_equal_p(fracop, fracop_single) or
-                            mpfr_nan_p(fracop) and mpfr_nan_p(fracop_single))
+            self.assertTrue(
+                mpfr_equal_p(intop, intop_single)
+                or mpfr_nan_p(intop)
+                and mpfr_nan_p(intop_single)
+            )
+            self.assertTrue(
+                mpfr_equal_p(fracop, fracop_single)
+                or mpfr_nan_p(fracop)
+                and mpfr_nan_p(fracop_single)
+            )
 
     def test_fmod(self):
         r = Mpfr(53)
@@ -1757,8 +1647,7 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_d(y, 3.1415926535897931, MPFR_RNDN)
         mpfr_fmod(r, x, y, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(r, MPFR_RNDN),
-            2.7168146928204138,
+            mpfr_get_d(r, MPFR_RNDN), 2.7168146928204138,
         )
 
     def test_fmodquo(self):
@@ -1769,8 +1658,7 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_d(y, 3.1415926535897931, MPFR_RNDN)
         ternary, quotient = mpfr_fmodquo(r, x, y, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(r, MPFR_RNDN),
-            2.7168146928204138,
+            mpfr_get_d(r, MPFR_RNDN), 2.7168146928204138,
         )
         # Result should be exact.
         self.assertEqual(ternary, 0)
@@ -1784,8 +1672,7 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_d(y, 3.1415926535897931, MPFR_RNDN)
         mpfr_remainder(r, x, y, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(r, MPFR_RNDN),
-            -0.42477796076937935,
+            mpfr_get_d(r, MPFR_RNDN), -0.42477796076937935,
         )
 
     def test_remquo(self):
@@ -1796,29 +1683,26 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_d(y, 3.1415926535897931, MPFR_RNDN)
         ternary, quotient = mpfr_remquo(r, x, y, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(r, MPFR_RNDN),
-            -0.42477796076937935,
+            mpfr_get_d(r, MPFR_RNDN), -0.42477796076937935,
         )
         # Result should be exact.
         self.assertEqual(ternary, 0)
         self.assertEqual(quotient, 3)
 
     def test_integer_p(self):
-        non_integers = [5.3, 1e-100, float('nan'), float('-inf')]
+        non_integers = [5.3, 1e-100, float("nan"), float("-inf")]
         integers = [2.0, -0.0, 1e100]
 
         x = Mpfr(53)
         for non_integer in non_integers:
             mpfr_set_d(x, non_integer, MPFR_RNDN)
             self.assertIs(
-                mpfr_integer_p(x),
-                False,
+                mpfr_integer_p(x), False,
             )
         for integer in integers:
             mpfr_set_d(x, integer, MPFR_RNDN)
             self.assertIs(
-                mpfr_integer_p(x),
-                True,
+                mpfr_integer_p(x), True,
             )
 
     # 5.11 Rounding Related Functions
@@ -1830,8 +1714,7 @@ class TestMpfr(unittest.TestCase):
         finally:
             mpfr_set_default_rounding_mode(old_default_rounding_mode)
         self.assertEqual(
-            mpfr_get_default_rounding_mode(),
-            old_default_rounding_mode,
+            mpfr_get_default_rounding_mode(), old_default_rounding_mode,
         )
 
     def test_prec_round(self):
@@ -1840,14 +1723,12 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_d(x, 5.123, MPFR_RNDN)
         mpfr_prec_round(x, 200, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(x, MPFR_RNDN),
-            5.123,
+            mpfr_get_d(x, MPFR_RNDN), 5.123,
         )
         self.assertEqual(mpfr_get_prec(x), 200)
         mpfr_prec_round(x, 3, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(x, MPFR_RNDN),
-            5.0,
+            mpfr_get_d(x, MPFR_RNDN), 5.0,
         )
         self.assertEqual(mpfr_get_prec(x), 3)
 
@@ -1866,33 +1747,29 @@ class TestMpfr(unittest.TestCase):
         # Here we can't round to nearest, since we don't know whether to round
         # to 24 or 25.
         self.assertIs(
-            mpfr_can_round(b, 1000, MPFR_RNDN, MPFR_RNDN, 5),
-            False,
+            mpfr_can_round(b, 1000, MPFR_RNDN, MPFR_RNDN, 5), False,
         )
         # But we can round down safely.
         self.assertIs(
-            mpfr_can_round(b, 1000, MPFR_RNDN, MPFR_RNDZ, 5),
-            True,
+            mpfr_can_round(b, 1000, MPFR_RNDN, MPFR_RNDZ, 5), True,
         )
         # We can also round to nearest safely if the original value 24.5 was
         # the result of a rounding up ...
         self.assertIs(
-            mpfr_can_round(b, 1000, MPFR_RNDU, MPFR_RNDN, 5),
-            True,
+            mpfr_can_round(b, 1000, MPFR_RNDU, MPFR_RNDN, 5), True,
         )
         # ... but not if it was the result of a rounding down ...
         self.assertIs(
-            mpfr_can_round(b, 1000, MPFR_RNDD, MPFR_RNDN, 5),
-            False,
+            mpfr_can_round(b, 1000, MPFR_RNDD, MPFR_RNDN, 5), False,
         )
 
     def test_print_rnd_mode(self):
-        self.assertEqual(mpfr_print_rnd_mode(MPFR_RNDN), 'MPFR_RNDN')
-        self.assertEqual(mpfr_print_rnd_mode(MPFR_RNDD), 'MPFR_RNDD')
-        self.assertEqual(mpfr_print_rnd_mode(MPFR_RNDU), 'MPFR_RNDU')
-        self.assertEqual(mpfr_print_rnd_mode(MPFR_RNDZ), 'MPFR_RNDZ')
-        self.assertEqual(mpfr_print_rnd_mode(MPFR_RNDA), 'MPFR_RNDA')
-        self.assertEqual(mpfr_print_rnd_mode(MPFR_RNDF), 'MPFR_RNDF')
+        self.assertEqual(mpfr_print_rnd_mode(MPFR_RNDN), "MPFR_RNDN")
+        self.assertEqual(mpfr_print_rnd_mode(MPFR_RNDD), "MPFR_RNDD")
+        self.assertEqual(mpfr_print_rnd_mode(MPFR_RNDU), "MPFR_RNDU")
+        self.assertEqual(mpfr_print_rnd_mode(MPFR_RNDZ), "MPFR_RNDZ")
+        self.assertEqual(mpfr_print_rnd_mode(MPFR_RNDA), "MPFR_RNDA")
+        self.assertEqual(mpfr_print_rnd_mode(MPFR_RNDF), "MPFR_RNDF")
         with self.assertRaises(ValueError):
             mpfr_print_rnd_mode(-1)
 
@@ -1908,16 +1785,14 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_d(y, 2.001, MPFR_RNDN)
         mpfr_nexttoward(x, y)
         self.assertEqual(
-            mpfr_get_d(x, MPFR_RNDN),
-            2.25,
+            mpfr_get_d(x, MPFR_RNDN), 2.25,
         )
 
         mpfr_set_d(x, 2.0, MPFR_RNDN)
         mpfr_set_d(y, -1.3, MPFR_RNDN)
         mpfr_nexttoward(x, y)
         self.assertEqual(
-            mpfr_get_d(x, MPFR_RNDN),
-            1.875,
+            mpfr_get_d(x, MPFR_RNDN), 1.875,
         )
 
     def test_nextabove(self):
@@ -1925,8 +1800,7 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_d(x, 1.0, MPFR_RNDN)
         mpfr_nextabove(x)
         self.assertEqual(
-            mpfr_get_d(x, MPFR_RNDN),
-            1.125,
+            mpfr_get_d(x, MPFR_RNDN), 1.125,
         )
 
     def test_nextbelow(self):
@@ -1934,26 +1808,22 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_d(x, 1.0, MPFR_RNDN)
         mpfr_nextbelow(x)
         self.assertEqual(
-            mpfr_get_d(x, MPFR_RNDN),
-            0.9375,
+            mpfr_get_d(x, MPFR_RNDN), 0.9375,
         )
 
     def test_get_exp(self):
         x = Mpfr(34)
         mpfr_set_d(x, 0.516, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_exp(x),
-            0,
+            mpfr_get_exp(x), 0,
         )
         mpfr_set_d(x, 8.0, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_exp(x),
-            4,
+            mpfr_get_exp(x), 4,
         )
         mpfr_set_d(x, 1e-9, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_exp(x),
-            -29,
+            mpfr_get_exp(x), -29,
         )
 
     def test_set_exp(self):
@@ -1962,21 +1832,17 @@ class TestMpfr(unittest.TestCase):
         old_exp = mpfr_get_exp(x)
         mpfr_set_exp(x, -1)
         self.assertEqual(
-            mpfr_get_exp(x),
-            -1,
+            mpfr_get_exp(x), -1,
         )
         self.assertEqual(
-            mpfr_get_d(x, MPFR_RNDN),
-            0.375,
+            mpfr_get_d(x, MPFR_RNDN), 0.375,
         )
         mpfr_set_exp(x, old_exp)
         self.assertEqual(
-            mpfr_get_exp(x),
-            old_exp,
+            mpfr_get_exp(x), old_exp,
         )
         self.assertEqual(
-            mpfr_get_d(x, MPFR_RNDN),
-            48.0,
+            mpfr_get_d(x, MPFR_RNDN), 48.0,
         )
 
     def test_min_and_max(self):
@@ -1987,13 +1853,11 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_d(y, 1.3, MPFR_RNDN)
         mpfr_min(z, x, y, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(z, MPFR_RNDN),
-            1.2,
+            mpfr_get_d(z, MPFR_RNDN), 1.2,
         )
         mpfr_max(z, x, y, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(z, MPFR_RNDN),
-            1.3,
+            mpfr_get_d(z, MPFR_RNDN), 1.3,
         )
 
     def test_signbit(self):
@@ -2011,14 +1875,12 @@ class TestMpfr(unittest.TestCase):
         mpfr_setsign(x, y, False, MPFR_RNDN)
         self.assertIs(mpfr_signbit(x), False)
         self.assertEqual(
-            mpfr_get_d(x, MPFR_RNDN),
-            24.5,
+            mpfr_get_d(x, MPFR_RNDN), 24.5,
         )
         mpfr_setsign(x, y, True, MPFR_RNDN)
         self.assertIs(mpfr_signbit(x), True)
         self.assertEqual(
-            mpfr_get_d(x, MPFR_RNDN),
-            -24.5,
+            mpfr_get_d(x, MPFR_RNDN), -24.5,
         )
 
     def test_copysign(self):
@@ -2029,13 +1891,11 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_d(z, -12.3, MPFR_RNDN)
         mpfr_copysign(x, y, z, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(x, MPFR_RNDN),
-            -24.5,
+            mpfr_get_d(x, MPFR_RNDN), -24.5,
         )
         mpfr_copysign(x, z, y, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_d(x, MPFR_RNDN),
-            12.3,
+            mpfr_get_d(x, MPFR_RNDN), 12.3,
         )
 
     def test_MPFR_VERSION(self):
@@ -2080,55 +1940,50 @@ class TestMpfr(unittest.TestCase):
         # Make some tests with precision 3 and exponent range (0, 4).  With
         # this format, the largest representable finite number is 14, and the
         # smallest is 0.5.
-        inf = float('inf')
+        inf = float("inf")
         test_data = [
-            ((14.0, 1, MPFR_RNDN), (14.0, 1, 'inexflag')),
-            ((14.0, 0, MPFR_RNDN), (14.0, 0, '')),
-            ((14.0, -1, MPFR_RNDN), (14.0, -1, 'inexflag')),
-            ((16.0, 1, MPFR_RNDN), (inf, 1, 'inexflag overflow')),
-            ((16.0, 0, MPFR_RNDN), (inf, 1, 'inexflag overflow')),
-            ((16.0, -1, MPFR_RNDN), (inf, 1, 'inexflag overflow')),
-            ((20.0, 1, MPFR_RNDN), (inf, 1, 'inexflag overflow')),
-
-            ((14.0, 1, MPFR_RNDU), (14.0, 1, 'inexflag')),
-            ((14.0, 0, MPFR_RNDU), (14.0, 0, '')),
-            ((16.0, 1, MPFR_RNDU), (inf, 1, 'inexflag overflow')),
-            ((16.0, 0, MPFR_RNDU), (inf, 1, 'inexflag overflow')),
-            ((20.0, 1, MPFR_RNDU), (inf, 1, 'inexflag overflow')),
-
-            ((12.0, -1, MPFR_RNDD), (12.0, -1, 'inexflag')),
-            ((14.0, 0, MPFR_RNDD), (14.0, 0, '')),
-            ((14.0, -1, MPFR_RNDD), (14.0, -1, 'inexflag')),
-            ((16.0, 0, MPFR_RNDD), (14.0, -1, 'inexflag overflow')),
-            ((16.0, -1, MPFR_RNDD), (14.0, -1, 'inexflag overflow')),
-
-            ((0.25, 1, MPFR_RNDN), (0, -1, 'underflow inexflag')),
-            ((0.25, 0, MPFR_RNDN), (0, -1, 'underflow inexflag')),
-            ((0.25, -1, MPFR_RNDN), (0.5, 1, 'underflow inexflag')),
-            ((0.4375, 1, MPFR_RNDN), (0.5, 1, 'underflow inexflag')),
-            ((0.4375, 0, MPFR_RNDN), (0.5, 1, 'underflow inexflag')),
-            ((0.4375, -1, MPFR_RNDN), (0.5, 1, 'underflow inexflag')),
-            ((0.5, 1, MPFR_RNDN), (0.5, 1, 'inexflag')),
-            ((0.5, 0, MPFR_RNDN), (0.5, 0, '')),
-            ((0.5, -1, MPFR_RNDN), (0.5, -1, 'inexflag')),
-
-            ((0.4375, 1, MPFR_RNDU), (0.5, 1, 'underflow inexflag')),
-            ((0.4375, 0, MPFR_RNDU), (0.5, 1, 'underflow inexflag')),
-            ((0.5, 1, MPFR_RNDU), (0.5, 1, 'inexflag')),
-            ((0.5, 0, MPFR_RNDU), (0.5, 0, '')),
-
-            ((0.4375, 0, MPFR_RNDD), (0, -1, 'underflow inexflag')),
-            ((0.4375, -1, MPFR_RNDD), (0, -1, 'underflow inexflag')),
-            ((0.5, 0, MPFR_RNDD), (0.5, 0, '')),
-            ((0.5, -1, MPFR_RNDD), (0.5, -1, 'inexflag')),
+            ((14.0, 1, MPFR_RNDN), (14.0, 1, "inexflag")),
+            ((14.0, 0, MPFR_RNDN), (14.0, 0, "")),
+            ((14.0, -1, MPFR_RNDN), (14.0, -1, "inexflag")),
+            ((16.0, 1, MPFR_RNDN), (inf, 1, "inexflag overflow")),
+            ((16.0, 0, MPFR_RNDN), (inf, 1, "inexflag overflow")),
+            ((16.0, -1, MPFR_RNDN), (inf, 1, "inexflag overflow")),
+            ((20.0, 1, MPFR_RNDN), (inf, 1, "inexflag overflow")),
+            ((14.0, 1, MPFR_RNDU), (14.0, 1, "inexflag")),
+            ((14.0, 0, MPFR_RNDU), (14.0, 0, "")),
+            ((16.0, 1, MPFR_RNDU), (inf, 1, "inexflag overflow")),
+            ((16.0, 0, MPFR_RNDU), (inf, 1, "inexflag overflow")),
+            ((20.0, 1, MPFR_RNDU), (inf, 1, "inexflag overflow")),
+            ((12.0, -1, MPFR_RNDD), (12.0, -1, "inexflag")),
+            ((14.0, 0, MPFR_RNDD), (14.0, 0, "")),
+            ((14.0, -1, MPFR_RNDD), (14.0, -1, "inexflag")),
+            ((16.0, 0, MPFR_RNDD), (14.0, -1, "inexflag overflow")),
+            ((16.0, -1, MPFR_RNDD), (14.0, -1, "inexflag overflow")),
+            ((0.25, 1, MPFR_RNDN), (0, -1, "underflow inexflag")),
+            ((0.25, 0, MPFR_RNDN), (0, -1, "underflow inexflag")),
+            ((0.25, -1, MPFR_RNDN), (0.5, 1, "underflow inexflag")),
+            ((0.4375, 1, MPFR_RNDN), (0.5, 1, "underflow inexflag")),
+            ((0.4375, 0, MPFR_RNDN), (0.5, 1, "underflow inexflag")),
+            ((0.4375, -1, MPFR_RNDN), (0.5, 1, "underflow inexflag")),
+            ((0.5, 1, MPFR_RNDN), (0.5, 1, "inexflag")),
+            ((0.5, 0, MPFR_RNDN), (0.5, 0, "")),
+            ((0.5, -1, MPFR_RNDN), (0.5, -1, "inexflag")),
+            ((0.4375, 1, MPFR_RNDU), (0.5, 1, "underflow inexflag")),
+            ((0.4375, 0, MPFR_RNDU), (0.5, 1, "underflow inexflag")),
+            ((0.5, 1, MPFR_RNDU), (0.5, 1, "inexflag")),
+            ((0.5, 0, MPFR_RNDU), (0.5, 0, "")),
+            ((0.4375, 0, MPFR_RNDD), (0, -1, "underflow inexflag")),
+            ((0.4375, -1, MPFR_RNDD), (0, -1, "underflow inexflag")),
+            ((0.5, 0, MPFR_RNDD), (0.5, 0, "")),
+            ((0.5, -1, MPFR_RNDD), (0.5, -1, "inexflag")),
         ]
 
         flag_testers = {
-            'underflow': mpfr_underflow_p,
-            'inexflag': mpfr_inexflag_p,
-            'overflow': mpfr_overflow_p,
-            'nanflag': mpfr_nanflag_p,
-            'erangeflag': mpfr_erangeflag_p,
+            "underflow": mpfr_underflow_p,
+            "inexflag": mpfr_inexflag_p,
+            "overflow": mpfr_overflow_p,
+            "nanflag": mpfr_nanflag_p,
+            "erangeflag": mpfr_erangeflag_p,
         }
 
         def get_current_flags():
@@ -2175,65 +2030,56 @@ class TestMpfr(unittest.TestCase):
 
         test_data = [
             # Exact result in the range [0, 0.25]
-            ((0.0, 0, MPFR_RNDN), (0.0, 0, '')),
+            ((0.0, 0, MPFR_RNDN), (0.0, 0, "")),
             # Hmm.  Apparently MPFR doesn't set the underflow flag for the case
             # below.  Bug?  Probably not a problem in practice, since a normal
             # function producing the result 0.0 with ternary value -1 will
             # already have set the underflow flag.
-            ((0.0, -1, MPFR_RNDN), (0.0, -1, 'inexflag')),
-
+            ((0.0, -1, MPFR_RNDN), (0.0, -1, "inexflag")),
             # Exact result in the range (0.25, 0.5625]
-            ((0.5, 1, MPFR_RNDN), (0.5, 1, 'inexflag underflow')),
-            ((0.5, 0, MPFR_RNDN), (0.5, 0, 'underflow')),
-            ((0.5, -1, MPFR_RNDN), (0.5, -1, 'inexflag underflow')),
-
+            ((0.5, 1, MPFR_RNDN), (0.5, 1, "inexflag underflow")),
+            ((0.5, 0, MPFR_RNDN), (0.5, 0, "underflow")),
+            ((0.5, -1, MPFR_RNDN), (0.5, -1, "inexflag underflow")),
             # Exact result in the range (0.5625, 0.6875)
-            ((0.625, 1, MPFR_RNDN), (0.5, -1, 'inexflag underflow')),
-            ((0.625, 0, MPFR_RNDN), (0.5, -1, 'inexflag underflow')),
-            ((0.625, -1, MPFR_RNDN), (0.5, -1, 'inexflag underflow')),
-
+            ((0.625, 1, MPFR_RNDN), (0.5, -1, "inexflag underflow")),
+            ((0.625, 0, MPFR_RNDN), (0.5, -1, "inexflag underflow")),
+            ((0.625, -1, MPFR_RNDN), (0.5, -1, "inexflag underflow")),
             # Exact result in the range [0.6875, 0.8125]
-            ((0.75, 1, MPFR_RNDN), (0.5, -1, 'inexflag underflow')),
-            ((0.75, 0, MPFR_RNDN), (1.0, 1, 'inexflag underflow')),
-            ((0.75, -1, MPFR_RNDN), (1.0, 1, 'inexflag underflow')),
-
+            ((0.75, 1, MPFR_RNDN), (0.5, -1, "inexflag underflow")),
+            ((0.75, 0, MPFR_RNDN), (1.0, 1, "inexflag underflow")),
+            ((0.75, -1, MPFR_RNDN), (1.0, 1, "inexflag underflow")),
             # Exact result in the range (0.8125, 0.9375)
-            ((0.875, 1, MPFR_RNDN), (1.0, 1, 'inexflag underflow')),
-            ((0.875, 0, MPFR_RNDN), (1.0, 1, 'inexflag underflow')),
-            ((0.875, -1, MPFR_RNDN), (1.0, 1, 'inexflag underflow')),
-
+            ((0.875, 1, MPFR_RNDN), (1.0, 1, "inexflag underflow")),
+            ((0.875, 0, MPFR_RNDN), (1.0, 1, "inexflag underflow")),
+            ((0.875, -1, MPFR_RNDN), (1.0, 1, "inexflag underflow")),
             # Exact result in the range [0.9375, 1.125]
-            ((1.0, 1, MPFR_RNDN), (1.0, 1, 'inexflag underflow')),
-            ((1.0, 0, MPFR_RNDN), (1.0, 0, 'underflow')),
-            ((1.0, -1, MPFR_RNDN), (1.0, -1, 'inexflag underflow')),
-
+            ((1.0, 1, MPFR_RNDN), (1.0, 1, "inexflag underflow")),
+            ((1.0, 0, MPFR_RNDN), (1.0, 0, "underflow")),
+            ((1.0, -1, MPFR_RNDN), (1.0, -1, "inexflag underflow")),
             # Exact result in the range (1.125, 1.375)
-            ((1.25, 1, MPFR_RNDN), (1.0, -1, 'inexflag underflow')),
-            ((1.25, 0, MPFR_RNDN), (1.0, -1, 'inexflag underflow')),
-            ((1.25, -1, MPFR_RNDN), (1.5, 1, 'inexflag underflow')),
-
+            ((1.25, 1, MPFR_RNDN), (1.0, -1, "inexflag underflow")),
+            ((1.25, 0, MPFR_RNDN), (1.0, -1, "inexflag underflow")),
+            ((1.25, -1, MPFR_RNDN), (1.5, 1, "inexflag underflow")),
             # Exact result in the range [1.375, 1.625]
-            ((1.25, 1, MPFR_RNDN), (1.0, -1, 'inexflag underflow')),
-            ((1.25, 0, MPFR_RNDN), (1.0, -1, 'inexflag underflow')),
-            ((1.25, -1, MPFR_RNDN), (1.5, 1, 'inexflag underflow')),
-
+            ((1.25, 1, MPFR_RNDN), (1.0, -1, "inexflag underflow")),
+            ((1.25, 0, MPFR_RNDN), (1.0, -1, "inexflag underflow")),
+            ((1.25, -1, MPFR_RNDN), (1.5, 1, "inexflag underflow")),
             # Exact result in the range (1.625, 1.875)
-            ((1.75, 1, MPFR_RNDN), (1.5, -1, 'inexflag underflow')),
-            ((1.75, 0, MPFR_RNDN), (2.0, 1, 'inexflag underflow')),
-            ((1.75, -1, MPFR_RNDN), (2.0, 1, 'inexflag underflow')),
-
+            ((1.75, 1, MPFR_RNDN), (1.5, -1, "inexflag underflow")),
+            ((1.75, 0, MPFR_RNDN), (2.0, 1, "inexflag underflow")),
+            ((1.75, -1, MPFR_RNDN), (2.0, 1, "inexflag underflow")),
             # Exact result in the range [1.875, 2.25]
-            ((2.0, 1, MPFR_RNDN), (2.0, 1, 'inexflag')),
-            ((2.0, 0, MPFR_RNDN), (2.0, 0, '')),
-            ((2.0, -1, MPFR_RNDN), (2.0, -1, 'inexflag')),
+            ((2.0, 1, MPFR_RNDN), (2.0, 1, "inexflag")),
+            ((2.0, 0, MPFR_RNDN), (2.0, 0, "")),
+            ((2.0, -1, MPFR_RNDN), (2.0, -1, "inexflag")),
         ]
 
         flag_testers = {
-            'underflow': mpfr_underflow_p,
-            'inexflag': mpfr_inexflag_p,
-            'overflow': mpfr_overflow_p,
-            'nanflag': mpfr_nanflag_p,
-            'erangeflag': mpfr_erangeflag_p,
+            "underflow": mpfr_underflow_p,
+            "inexflag": mpfr_inexflag_p,
+            "overflow": mpfr_overflow_p,
+            "nanflag": mpfr_nanflag_p,
+            "erangeflag": mpfr_erangeflag_p,
         }
 
         def get_current_flags():
@@ -2318,8 +2164,7 @@ class TestMpfr(unittest.TestCase):
         mpfr_set_overflow()
         mpfr_set_erangeflag()
         self.assertEqual(
-            mpfr_flags_save(),
-            MPFR_FLAGS_OVERFLOW | MPFR_FLAGS_ERANGE,
+            mpfr_flags_save(), MPFR_FLAGS_OVERFLOW | MPFR_FLAGS_ERANGE,
         )
 
     def test_flags_restore(self):
@@ -2330,8 +2175,7 @@ class TestMpfr(unittest.TestCase):
         )
 
         self.assertEqual(
-            mpfr_flags_save(),
-            MPFR_FLAGS_OVERFLOW | MPFR_FLAGS_NAN,
+            mpfr_flags_save(), MPFR_FLAGS_OVERFLOW | MPFR_FLAGS_NAN,
         )
 
         with self.assertRaises(ValueError):
@@ -2357,8 +2201,7 @@ class TestMpfr(unittest.TestCase):
 
         # Check all flags are distinct.
         self.assertEqual(
-            len(individual_flags),
-            len(set(individual_flags)),
+            len(individual_flags), len(set(individual_flags)),
         )
 
         # Check MPFR_FLAGS_ALL comprises all the flags.
@@ -2371,8 +2214,7 @@ class TestMpfr(unittest.TestCase):
         x = Mpfr(30)
         mpfr_set_d(x, 0.1, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_str(10, 0, x, MPFR_RNDN),
-            ('99999999977', -1),
+            mpfr_get_str(10, 0, x, MPFR_RNDN), ("99999999977", -1),
         )
 
     def test_set_nan(self):
@@ -2410,32 +2252,29 @@ class TestMpfr(unittest.TestCase):
 
     def test_set_str(self):
         x = Mpfr(30)
-        mpfr_set_str(x, '1.2345', 10, MPFR_RNDU)
+        mpfr_set_str(x, "1.2345", 10, MPFR_RNDU)
         self.assertEqual(
-            mpfr_get_str(10, 0, x, MPFR_RNDN),
-            ('12345000003', 1),
+            mpfr_get_str(10, 0, x, MPFR_RNDN), ("12345000003", 1),
         )
-        mpfr_set_str(x, '1.2345', 10, MPFR_RNDD)
+        mpfr_set_str(x, "1.2345", 10, MPFR_RNDD)
         self.assertEqual(
-            mpfr_get_str(10, 0, x, MPFR_RNDN),
-            ('12344999984', 1),
+            mpfr_get_str(10, 0, x, MPFR_RNDN), ("12344999984", 1),
         )
         # Invalid base
         with self.assertRaises(ValueError):
-            mpfr_set_str(x, '1.2345', 1, MPFR_RNDN)
+            mpfr_set_str(x, "1.2345", 1, MPFR_RNDN)
         with self.assertRaises(ValueError):
-            mpfr_set_str(x, '1.2345', 63, MPFR_RNDN)
+            mpfr_set_str(x, "1.2345", 63, MPFR_RNDN)
 
     def test_strtofr(self):
         x = Mpfr(30)
 
-        result, endindex = mpfr_strtofr(x, '135.6 789', 10, MPFR_RNDN)
+        result, endindex = mpfr_strtofr(x, "135.6 789", 10, MPFR_RNDN)
         self.assertIn(result, (-1, 0, 1))
         self.assertEqual(endindex, 5)
 
         self.assertEqual(
-            mpfr_get_str(10, 0, x, MPFR_RNDN),
-            ('13559999990', 3),
+            mpfr_get_str(10, 0, x, MPFR_RNDN), ("13559999990", 3),
         )
 
     def test_get_d_2exp(self):
@@ -2535,38 +2374,31 @@ class TestMpfr(unittest.TestCase):
 
         # Check the undocumented feature mentioned above.
         x = Mpfr(20)
-        mpfr_set_str(x, '64', 10, MPFR_RNDN)
+        mpfr_set_str(x, "64", 10, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_str(10, 1, x, MPFR_RNDN),
-            ('6', 2),
+            mpfr_get_str(10, 1, x, MPFR_RNDN), ("6", 2),
         )
         self.assertEqual(
-            mpfr_get_str(10, 1, x, MPFR_RNDU),
-            ('7', 2),
+            mpfr_get_str(10, 1, x, MPFR_RNDU), ("7", 2),
         )
 
         # Bases other than 10
         x = Mpfr(20)
-        mpfr_set_str(x, '64', 10, MPFR_RNDN)
+        mpfr_set_str(x, "64", 10, MPFR_RNDN)
         self.assertEqual(
-            mpfr_get_str(10, 2, x, MPFR_RNDN),
-            ('64', 2),
+            mpfr_get_str(10, 2, x, MPFR_RNDN), ("64", 2),
         )
         self.assertEqual(
-            mpfr_get_str(10, 0, x, MPFR_RNDN),
-            ('64000000', 2),
+            mpfr_get_str(10, 0, x, MPFR_RNDN), ("64000000", 2),
         )
         self.assertEqual(
-            mpfr_get_str(2, 0, x, MPFR_RNDN),
-            ('10000000000000000000', 7),
+            mpfr_get_str(2, 0, x, MPFR_RNDN), ("10000000000000000000", 7),
         )
         self.assertEqual(
-            mpfr_get_str(3, 0, x, MPFR_RNDN),
-            ('21010000000000', 4),
+            mpfr_get_str(3, 0, x, MPFR_RNDN), ("21010000000000", 4),
         )
         self.assertEqual(
-            mpfr_get_str(62, 0, x, MPFR_RNDN),
-            ('12000', 2),
+            mpfr_get_str(62, 0, x, MPFR_RNDN), ("12000", 2),
         )
 
         # Type of result.
@@ -2644,8 +2476,8 @@ class TestMpfr(unittest.TestCase):
 
     def test_limits(self):
         # Regression test for badly-defined LONG_MAX and LONG_MIN.
-        self.assertGreaterEqual(_LONG_MAX, 2**31 - 1)
-        self.assertLessEqual(_LONG_MIN, -2**31)
+        self.assertGreaterEqual(_LONG_MAX, 2 ** 31 - 1)
+        self.assertLessEqual(_LONG_MIN, -(2 ** 31))
 
     # Testcase assertions.
 
@@ -2661,5 +2493,5 @@ class TestMpfr(unittest.TestCase):
             self.assertIn(filename, w.filename)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

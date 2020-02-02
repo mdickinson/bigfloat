@@ -18,7 +18,8 @@ def build(python=PYTHON):
             library_path=LIBRARY_PATH,
             include_path=INCLUDE_PATH,
             python=python,
-        ))
+        )
+    )
 
 
 def install(python=PYTHON):
@@ -29,7 +30,8 @@ def install(python=PYTHON):
             library_path=LIBRARY_PATH,
             include_path=INCLUDE_PATH,
             python=python,
-        ))
+        )
+    )
     local("sudo {python} setup.py install".format(python=python))
 
 

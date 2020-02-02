@@ -18,7 +18,7 @@
 major = 0
 minor = 5
 patch = 0
-prerelease = 'dev'
+prerelease = "dev"
 
 if prerelease:
     __version__ = "{}.{}.{}-{}".format(major, minor, patch, prerelease)

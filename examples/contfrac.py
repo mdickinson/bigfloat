@@ -44,7 +44,7 @@ def semiconvergents(x):
     while n:
         (q, n), d = divmod(d, n), n
         for _ in range(q):
-            p0, q0 = p0+p1, q0+q1
+            p0, q0 = p0 + p1, q0 + q1
             yield Fraction(p0, q0)
         p0, q0, p1, q1 = p1, q1, p0, q0
 
@@ -54,7 +54,7 @@ def logn2(n, p):
     with precision(p):
         extra = 10
         while True:
-            with precision(p+extra):
+            with precision(p + extra):
                 # use extra precision for intermediate step
                 log2upper = log2(n, RoundTowardPositive)
                 log2lower = log2(n, RoundTowardNegative)
@@ -64,15 +64,17 @@ def logn2(n, p):
 
             # if lower and upper are adjacent (or equal) we're done
             if next_up(lower) == upper:
-                return (Fraction(*lower.as_integer_ratio()),
-                        Fraction(*upper.as_integer_ratio()))
+                return (
+                    Fraction(*lower.as_integer_ratio()),
+                    Fraction(*upper.as_integer_ratio()),
+                )
 
             # otherwise, increase the precision and try again
             extra += 10
 
 
 marks_results = {}
-all_n = [n for n in range(3, 63) if n & (n-1)]
+all_n = [n for n in range(3, 63) if n & (n - 1)]
 for n in all_n:
     # 76-bit upper approximation used for the computation of m
     approx = logn2(n, 76)[1]
@@ -107,9 +109,11 @@ check_values = r"""
 20, 645428387961  & 36, 1760497520384 & 51, 1435927298893 \\
 """
 
-pauls_results = dict(map(int, piece.split(','))
-                     for line in check_values.rstrip('\\\n').split(r'\\')
-                     for piece in line.split('&'))
+pauls_results = dict(
+    map(int, piece.split(","))
+    for line in check_values.rstrip("\\\n").split(r"\\")
+    for piece in line.split("&")
+)
 
 print("{0:4s} {1:15s}".format("base", "precision"))
 print("{0:4s} {1:15s}".format("====", "==============="))

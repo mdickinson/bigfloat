@@ -205,7 +205,7 @@ Links
 # During package development we want to use Cython, but the distributed
 # egg shouldn't use Cython.  We use the presence of PKG-INFO to determine
 # which of these is true.
-if os.path.exists('PKG-INFO'):
+if os.path.exists("PKG-INFO"):
     USE_CYTHON = False
 else:
     USE_CYTHON = True
@@ -213,18 +213,13 @@ else:
 
 if USE_CYTHON:
     from Cython.Build import cythonize
+
     extensions = cythonize(
-        Extension(
-            "mpfr", ["mpfr.pyx"],
-            libraries=['mpfr', 'gmp'],
-        )
+        Extension("mpfr", ["mpfr.pyx"], libraries=["mpfr", "gmp"],)
     )
 else:
     extensions = [
-        Extension(
-            "mpfr", ["mpfr.c"],
-            libraries=['mpfr', 'gmp'],
-        ),
+        Extension("mpfr", ["mpfr.c"], libraries=["mpfr", "gmp"],),
     ]
 
 
@@ -250,8 +245,8 @@ Topic :: Scientific/Engineering :: Mathematics
 def get_version_info():
     """Extract version information as a dictionary from version.py."""
     version_info = {}
-    with open(os.path.join("bigfloat", "version.py"), 'r') as f:
-        version_code = compile(f.read(), "version.py", 'exec')
+    with open(os.path.join("bigfloat", "version.py"), "r") as f:
+        version_code = compile(f.read(), "version.py", "exec")
         exec(version_code, version_info)
     return version_info
 
@@ -259,29 +254,19 @@ def get_version_info():
 version_info = get_version_info()
 
 setup(
-    name='bigfloat',
-    version=version_info['release'],
+    name="bigfloat",
+    version=version_info["release"],
     description=DESCRIPTION,
     long_description=LONG_DESCRIPTION,
-    long_description_content_type='text/x-rst',
+    long_description_content_type="text/x-rst",
     install_requires=["six"],
-    author='Mark Dickinson',
-    author_email='dickinsm@gmail.com',
-    url='http://github.com/mdickinson/bigfloat',
+    author="Mark Dickinson",
+    author_email="dickinsm@gmail.com",
+    url="http://github.com/mdickinson/bigfloat",
     classifiers=CLASSIFIERS,
-    platforms=[
-        'Linux',
-        'OS X',
-    ],
-    license='GNU Library or Lesser General Public License (LGPL)',
+    platforms=["Linux", "OS X"],
+    license="GNU Library or Lesser General Public License (LGPL)",
     ext_modules=extensions,
-    packages=[
-        'bigfloat',
-        'bigfloat.test',
-    ],
-    package_data={
-        "bigfloat.test": [
-            "test_data/*.bft",
-        ],
-    },
+    packages=["bigfloat", "bigfloat.test"],
+    package_data={"bigfloat.test": ["test_data/*.bft"]},
 )
