@@ -491,12 +491,17 @@ Arithmetic functions
 
 .. autofunction:: fma
 .. autofunction:: fms
+.. autofunction:: fmma
+.. autofunction:: fmms
 .. autofunction:: sqr
 .. autofunction:: sqrt
 .. autofunction:: rec_sqrt
 .. autofunction:: cbrt
 .. autofunction:: root
+.. autofunction:: rootn
 .. autofunction:: hypot
+
+.. autofunction:: sum
 
 
 Exponential and logarithmic functions
@@ -505,13 +510,14 @@ Exponential and logarithmic functions
 .. autofunction:: exp
 .. autofunction:: exp2
 .. autofunction:: exp10
+.. autofunction:: expm1
 
 .. autofunction:: log
 .. autofunction:: log2
 .. autofunction:: log10
-
-.. autofunction:: expm1
 .. autofunction:: log1p
+
+.. autofunction:: frexp
 
 
 Trigonometric functions
@@ -558,8 +564,11 @@ Special functions
 .. autofunction:: eint
 .. autofunction:: li2
 .. autofunction:: gamma
+.. autofunction:: gamma_inc
 .. autofunction:: lngamma
 .. autofunction:: lgamma
+.. autofunction:: digamma
+.. autofunction:: beta
 .. autofunction:: zeta
 .. autofunction:: zeta_ui
 .. autofunction:: erf
@@ -571,6 +580,7 @@ Special functions
 .. autofunction:: y1
 .. autofunction:: yn
 .. autofunction:: agm
+.. autofunction:: ai
 .. autofunction:: factorial
 
 
@@ -595,6 +605,7 @@ Miscellaneous functions
 .. autofunction:: ceil
 .. autofunction:: floor
 .. autofunction:: round
+.. autofunction:: roundeven
 .. autofunction:: trunc
 
 

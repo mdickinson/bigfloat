@@ -18,6 +18,7 @@
 import six
 
 # Standard library imports
+import contextlib
 import doctest
 import fractions
 import math
@@ -27,6 +28,7 @@ import struct
 import sys
 import types
 import unittest
+import warnings
 
 import bigfloat.core
 
@@ -66,8 +68,11 @@ from bigfloat import (
     add, sub, mul, div, fmod, pow,
     sqrt, floordiv, mod,
 
+    # 5.4 Conversion Functions
+    frexp,
+
     # 5.5 Basic Arithmetic Functions
-    root,
+    root, rootn,
 
     # 5.6 Comparison Functions
     cmp, cmpabs, is_nan, is_inf, is_finite, is_zero, is_regular, sgn,
@@ -81,6 +86,7 @@ from bigfloat import (
     j0, j1, jn,
     y0, y1, yn,
     const_log2, const_pi, const_euler, const_catalan,
+    sum,
 
     # 5.10 Integer and Remainder Related Functions
     is_integer,
@@ -588,7 +594,7 @@ class BigFloatTests(unittest.TestCase):
             [BigFloat(2 ** 53 + 1)],
             [2 ** 53 + 1],
             [BigFloat('inf'), float('inf')],
-            ]
+        ]
 
         nans = [
             BigFloat('nan'), -BigFloat('-nan'), float('nan'), -float('nan')
@@ -1064,7 +1070,7 @@ class BigFloatTests(unittest.TestCase):
             ('3.14159265358979323846264', 52, '0x0.c90fdaa22168cp+2'),
             ('3.14159265358979323846264', 53, '0x0.c90fdaa22168c0p+2'),
 
-            ]
+        ]
 
         for strarg, precision_in, expected in test_values:
             arg = BigFloat.exact(strarg, precision=precision_in)
@@ -1128,7 +1134,7 @@ class BigFloatTests(unittest.TestCase):
             (BigFloat('2.0'), (2, 1)),
             (BigFloat('0.5'), (1, 2)),
             (BigFloat('-1.125'), (-9, 8)),
-            ]
+        ]
 
         for arg, expected in test_values:
             self.assertEqual(ir(arg), expected)
@@ -1238,6 +1244,45 @@ class BigFloatTests(unittest.TestCase):
                 const_catalan(),
                 BigFloat.exact('0.91596559417721902', precision=53),
             )
+
+    def test_sum(self):
+        with double_precision:
+            inputs = [1.0/n**2 for n in range(1, 1000)]
+            bf_sum = sum(inputs)
+            self.assertIsInstance(bf_sum, BigFloat)
+            self.assertEqual(bf_sum, math.fsum(inputs))
+
+        # Check the documented behaviours.
+
+        # Check sign of zero when summing zeros.
+        pz, nz = BigFloat("0.0"), BigFloat("-0.0")
+
+        for rounding_mode in all_rounding_modes:
+            with rounding_mode:
+                self.assertFalse(is_negative(sum([])))
+                self.assertFalse(is_negative(sum([pz])))
+                self.assertFalse(is_negative(sum([pz, pz])))
+                self.assertFalse(is_negative(sum([pz, pz, pz])))
+
+                self.assertTrue(is_negative(sum([nz])))
+                self.assertTrue(is_negative(sum([nz, nz])))
+                self.assertTrue(is_negative(sum([nz, nz, nz])))
+
+                if rounding_mode == RoundTowardNegative:
+                    self.assertTrue(is_negative(sum([pz, nz])))
+                else:
+                    self.assertFalse(is_negative(sum([pz, nz])))
+
+        # Check sign of a zero result from non-zero summands.
+        args = [10, -10]
+        for rounding_mode in all_rounding_modes:
+            with rounding_mode:
+                bf_sum = sum(args)
+                self.assertEqual(bf_sum, 0.0)
+                if rounding_mode == RoundTowardNegative:
+                    self.assertTrue(is_negative(bf_sum))
+                else:
+                    self.assertFalse(is_negative(bf_sum))
 
     def test_copy(self):
         x = BigFloat.exact(
@@ -1782,17 +1827,55 @@ class BigFloatTests(unittest.TestCase):
             (False, '1000', -3),
         )
 
+    # 5.4 Conversion Functions
+    def test_frexp(self):
+        x = BigFloat(float.fromhex('0x1.921fb54442d18p+1'))
+        significand, exponent = frexp(x)
+        self.assertIsInstance(exponent, int)
+        self.assertEqual(exponent, 2)
+
+        expected_significand = BigFloat(float.fromhex('0x1.921fb54442d18p-1'))
+        self.assertEqual(significand, expected_significand)
+
     # 5.5 Basic Arithmetic Functions
     def test_root(self):
-        self.assertEqual(root(BigFloat(23), 1), BigFloat(23))
-        self.assertEqual(root(BigFloat(49), 2), BigFloat(7))
-        self.assertEqual(root(BigFloat(27), 3), BigFloat(3))
-        self.assertEqual(root(BigFloat(-27), 3), BigFloat(-3))
-        self.assertEqual(root(BigFloat(16), 4), BigFloat(2))
+
+        this_module = __name__.split(".")[-1]
+
+        def quiet_root(x, n):
+            with self.assertIssuesDeprecationWarning(filename=this_module):
+                return root(x, n)
+
+        self.assertEqual(quiet_root(BigFloat(23), 1), BigFloat(23))
+        self.assertEqual(quiet_root(BigFloat(49), 2), BigFloat(7))
+        self.assertEqual(quiet_root(BigFloat(27), 3), BigFloat(3))
+        self.assertEqual(quiet_root(BigFloat(-27), 3), BigFloat(-3))
+        self.assertEqual(quiet_root(BigFloat(16), 4), BigFloat(2))
         with self.assertRaises(ValueError):
-            root(BigFloat(23), -1)
-        self.assertTrue(is_nan(root(BigFloat(2), 0)))
-        self.assertTrue(is_nan(root(BigFloat(-2), 2)))
+            quiet_root(BigFloat(23), -1)
+        self.assertTrue(is_nan(quiet_root(BigFloat(2), 0)))
+        self.assertTrue(is_nan(quiet_root(BigFloat(-2), 2)))
+
+        self.assertIsNegativeZero(quiet_root(-BigFloat(0), 2))
+        self.assertIsPositiveZero(quiet_root(BigFloat(0), 2))
+        self.assertIsNegativeZero(quiet_root(-BigFloat(0), 3))
+        self.assertIsPositiveZero(quiet_root(BigFloat(0), 3))
+
+    def test_rootn(self):
+        self.assertEqual(rootn(BigFloat(23), 1), BigFloat(23))
+        self.assertEqual(rootn(BigFloat(49), 2), BigFloat(7))
+        self.assertEqual(rootn(BigFloat(27), 3), BigFloat(3))
+        self.assertEqual(rootn(BigFloat(-27), 3), BigFloat(-3))
+        self.assertEqual(rootn(BigFloat(16), 4), BigFloat(2))
+        with self.assertRaises(ValueError):
+            rootn(BigFloat(23), -1)
+        self.assertTrue(is_nan(rootn(BigFloat(2), 0)))
+        self.assertTrue(is_nan(rootn(BigFloat(-2), 2)))
+
+        self.assertIsPositiveZero(rootn(-BigFloat(0), 2))
+        self.assertIsPositiveZero(rootn(BigFloat(0), 2))
+        self.assertIsNegativeZero(rootn(-BigFloat(0), 3))
+        self.assertIsPositiveZero(rootn(BigFloat(0), 3))
 
     # 5.6 Comparison Functions
     def test_cmp(self):
@@ -1877,6 +1960,30 @@ class BigFloatTests(unittest.TestCase):
         self.assertEqual(copysign(5, 7), 5)
         self.assertEqual(copysign(-5, 7), 5)
         self.assertEqual(copysign(-5, -7), -5)
+
+    # Testcase helper assertions
+
+    @contextlib.contextmanager
+    def assertIssuesDeprecationWarning(self, filename=None):
+        with warnings.catch_warnings(record=True) as ws:
+            warnings.simplefilter("always")
+            try:
+                yield
+            finally:
+                self.assertEqual(len(ws), 1)
+                w = ws[-1]
+                self.assertTrue(issubclass(w.category, DeprecationWarning))
+                self.assertIn("deprecated", str(w.message))
+                if filename is not None:
+                    self.assertIn(filename, w.filename)
+
+    def assertIsPositiveZero(self, x):
+        self.assertEqual(x, 0)
+        self.assertFalse(is_negative(x))
+
+    def assertIsNegativeZero(self, x):
+        self.assertEqual(x, 0)
+        self.assertTrue(is_negative(x))
 
 
 class IEEEContextTests(unittest.TestCase):
@@ -2462,8 +2569,10 @@ atanh 0.8p0 -> 1.193ea7aad030bp-1 Inexact
 eint 1.8p0 -> 1.a690858762f6bp+1 Inexact
 li2 0.cp0 -> 1.f4f9f0b58b974p-1 Inexact
 gamma 2.8p0 -> 1.544fa6d47b390p+0 Inexact
+gamma_inc 0.5p0 1.7p0 -> 0x1.1b29c8af307e2p-3 Inexact
 lngamma 2.8p0 -> 1.2383e809a67e8p-2 Inexact
 digamma 2.8p0 -> 1.680425af12b5ep-1 Inexact
+beta 0.5p0 1.7p0 -> 0x1.619aaeeb6cb2bp+1 Inexact
 zeta 4.0p0 -> 1.151322ac7d848p+0 Inexact
 erf 3.8p0 -> 1.ffffe710d565ep-1 Inexact
 erfc 3.8p0 -> 1.8ef2a9a18d857p-21 Inexact
@@ -2475,6 +2584,9 @@ dim 2.8p0 1p0 -> 1.8p0
 dim 1p0 2.8p0 -> 0p0
 fma 3p0 5p0 8p0 -> 17p0
 fms 3p0 5p0 8p0 -> 7p0
+fmma 3 5 8 9 -> 0x57
+fmms 3 5 8 9 -> -0x39
+
 hypot 5p0 cp0 -> dp0
 
 floor -1p0 -> -1p0
@@ -2495,14 +2607,31 @@ ceil 0.1p0 -> 1p0
 ceil 0.dp0 -> 1p0
 ceil 1p0 -> 1p0
 
+round -1.8p0 -> -2p0
 round -1p0 -> -1p0
+round -0.8p0 -> -1p0
 round -0.dp0 -> -1p0
 round -0.1p0 -> -0p0
 round -0p0 -> -0p0
 round 0p0 -> 0p0
 round 0.1p0 -> 0p0
+round 0.8p0 -> 1p0
 round 0.dp0 -> 1p0
 round 1p0 -> 1p0
+round 1.8p0 -> 2p0
+
+roundeven -1.8p0 -> -2p0
+roundeven -1p0 -> -1p0
+roundeven -0.8p0 -> -0p0
+roundeven -0.dp0 -> -1p0
+roundeven -0.1p0 -> -0p0
+roundeven -0p0 -> -0p0
+roundeven 0p0 -> 0p0
+roundeven 0.1p0 -> 0p0
+roundeven 0.8p0 -> 0p0
+roundeven 0.dp0 -> 1p0
+roundeven 1p0 -> 1p0
+roundeven 1.8p0 -> 2p0
 
 trunc -1p0 -> -1p0
 trunc -0.dp0 -> -0p0

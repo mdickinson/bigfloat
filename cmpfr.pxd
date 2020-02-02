@@ -54,6 +54,11 @@ cdef extern from "mpfr.h":
         MPFR_RNDF
         MPFR_RNDNA = -1
 
+    # Free cache policy
+    ctypedef enum mpfr_free_cache_t:
+        MPFR_FREE_LOCAL_CACHE = 1
+        MPFR_FREE_GLOBAL_CACHE = 2
+
     # Limits
     mpfr_prec_t MPFR_PREC_MIN
     mpfr_prec_t MPFR_PREC_MAX
@@ -89,9 +94,13 @@ cdef extern from "mpfr.h":
     ###########################################################################
 
     int mpfr_set(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_set_ui(mpfr_ptr rop, unsigned long int op, mpfr_rnd_t rnd)
     int mpfr_set_si(mpfr_ptr rop, long int op, mpfr_rnd_t rnd)
     int mpfr_set_d(mpfr_ptr rop, double op, mpfr_rnd_t rnd)
     int mpfr_set_z(mpfr_ptr rop, cgmp.mpz_ptr op, mpfr_rnd_t rnd)
+    int mpfr_set_ui_2exp(
+        mpfr_ptr rop, unsigned long int op, mpfr_exp_t e, mpfr_rnd_t rnd
+    )
     int mpfr_set_si_2exp(
         mpfr_ptr rop, long int op, mpfr_exp_t e, mpfr_rnd_t rnd
     )
@@ -116,7 +125,9 @@ cdef extern from "mpfr.h":
 
     double mpfr_get_d(mpfr_ptr op, mpfr_rnd_t rnd)
     long int mpfr_get_si(mpfr_ptr op, mpfr_rnd_t rnd)
+    unsigned long int mpfr_get_ui(mpfr_ptr op, mpfr_rnd_t rnd)
     double mpfr_get_d_2exp(long int *exp, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_frexp(mpfr_exp_t *exp, mpfr_ptr y, mpfr_ptr x, mpfr_rnd_t rnd)
     mpfr_exp_t mpfr_get_z_2exp(cgmp.mpz_ptr rop, mpfr_ptr op)
     int mpfr_get_z(cgmp.mpz_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
 
@@ -125,6 +136,7 @@ cdef extern from "mpfr.h":
         size_t n, mpfr_ptr op, mpfr_rnd_t rnd
     )
     void mpfr_free_str(char *str)
+    int mpfr_fits_ulong_p(mpfr_ptr x, mpfr_rnd_t rnd)
     int mpfr_fits_slong_p(mpfr_ptr x, mpfr_rnd_t rnd)
 
 
@@ -140,6 +152,9 @@ cdef extern from "mpfr.h":
     int mpfr_sqrt(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_rec_sqrt(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_cbrt(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_rootn_ui(
+        mpfr_ptr top, mpfr_ptr op, unsigned long int k, mpfr_rnd_t rnd
+    )
     int mpfr_root(
         mpfr_ptr top, mpfr_ptr op, unsigned long int k, mpfr_rnd_t rnd
     )
@@ -175,12 +190,17 @@ cdef extern from "mpfr.h":
     ###########################################################################
 
     int mpfr_log(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_log_ui(mpfr_ptr rop, unsigned long op, mpfr_rnd_t rnd)
     int mpfr_log2(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_log10(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+
+    int mpfr_log1p(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
 
     int mpfr_exp(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_exp2(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_exp10(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+
+    int mpfr_expm1(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
 
     int mpfr_cos(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_sin(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
@@ -214,14 +234,14 @@ cdef extern from "mpfr.h":
 
     int mpfr_fac_ui(mpfr_ptr rop, unsigned long int op, mpfr_rnd_t rnd)
 
-    int mpfr_log1p(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
-    int mpfr_expm1(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_eint(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_li2(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_gamma(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_gamma_inc(mpfr_ptr rop, mpfr_ptr op, mpfr_ptr op2, mpfr_rnd_t rnd)
     int mpfr_lngamma(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_lgamma(mpfr_ptr rop, int *signp, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_digamma(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_beta(mpfr_ptr rop, mpfr_ptr op1, mpfr_ptr op2, mpfr_rnd_t rnd)
     int mpfr_zeta(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_zeta_ui(mpfr_ptr rop, unsigned long int op, mpfr_rnd_t rnd)
     int mpfr_erf(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
@@ -239,6 +259,14 @@ cdef extern from "mpfr.h":
     int mpfr_fms(
         mpfr_ptr rop, mpfr_ptr op1, mpfr_ptr op2, mpfr_ptr op3, mpfr_rnd_t rnd
     )
+    int mpfr_fmma(
+        mpfr_ptr rop, mpfr_ptr op1, mpfr_ptr op2, mpfr_ptr op3, mpfr_ptr op4,
+        mpfr_rnd_t rnd
+    )
+    int mpfr_fmms(
+        mpfr_ptr rop, mpfr_ptr op1, mpfr_ptr op2, mpfr_ptr op3, mpfr_ptr op4,
+        mpfr_rnd_t rnd
+    )
     int mpfr_agm(mpfr_ptr rop, mpfr_ptr op1, mpfr_ptr op2, mpfr_rnd_t rnd)
     int mpfr_hypot(mpfr_ptr rop, mpfr_ptr x, mpfr_ptr y, mpfr_rnd_t rnd)
 
@@ -248,7 +276,16 @@ cdef extern from "mpfr.h":
     int mpfr_const_pi(mpfr_ptr rop, mpfr_rnd_t rnd)
     int mpfr_const_euler(mpfr_ptr rop, mpfr_rnd_t rnd)
     int mpfr_const_catalan(mpfr_ptr rop, mpfr_rnd_t rnd)
+
     void mpfr_free_cache()
+    void mpfr_free_cache2(mpfr_free_cache_t way)
+    void mpfr_free_pool()
+    int mpfr_mp_memory_cleanup()
+
+    int mpfr_sum(
+        mpfr_ptr rop, const mpfr_ptr tab[], unsigned long int n,
+        mpfr_rnd_t rnd
+    )
 
     ###########################################################################
     # 5.9 Formatted Output Functions
@@ -264,17 +301,22 @@ cdef extern from "mpfr.h":
     int mpfr_ceil(mpfr_ptr rop, mpfr_ptr op)
     int mpfr_floor(mpfr_ptr rop, mpfr_ptr op)
     int mpfr_round(mpfr_ptr rop, mpfr_ptr op)
+    int mpfr_roundeven(mpfr_ptr rop, mpfr_ptr op)
     int mpfr_trunc(mpfr_ptr rop, mpfr_ptr op)
 
     int mpfr_rint_ceil(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_rint_floor(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_rint_round(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
+    int mpfr_rint_roundeven(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_rint_trunc(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
 
     int mpfr_frac(mpfr_ptr rop, mpfr_ptr op, mpfr_rnd_t rnd)
     int mpfr_modf(mpfr_ptr iop, mpfr_ptr fop, mpfr_ptr op, mpfr_rnd_t rnd)
 
     int mpfr_fmod(mpfr_ptr r, mpfr_ptr x, mpfr_ptr y, mpfr_rnd_t rnd)
+    int mpfr_fmodquo(
+        mpfr_ptr r, long int *q, mpfr_ptr x, mpfr_ptr y, mpfr_rnd_t rnd
+    )
     int mpfr_remainder(mpfr_ptr r, mpfr_ptr x, mpfr_ptr y, mpfr_rnd_t rnd)
     int mpfr_remquo(
         mpfr_ptr r, long int *q, mpfr_ptr x, mpfr_ptr y, mpfr_rnd_t rnd
@@ -321,8 +363,10 @@ cdef extern from "mpfr.h":
     int MPFR_VERSION_NUM(int major, int minor, int patchlevel)
     const char *mpfr_get_patches()
     int mpfr_buildopt_tls_p()
+    int mpfr_buildopt_float128_p()
     int mpfr_buildopt_decimal_p()
     int mpfr_buildopt_gmpinternals_p()
+    int mpfr_buildopt_sharedcache_p()
     const char *mpfr_buildopt_tune_case()
 
 

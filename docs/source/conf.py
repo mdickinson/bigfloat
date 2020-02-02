@@ -29,6 +29,8 @@ class MockMpfr(object):
 
     MPFR_RNDA = 4
 
+    MPFR_RNDF = 5
+
     MPFR_EMIN_DEFAULT = -1073741823
 
     MPFR_EMAX_DEFAULT = 1073741823

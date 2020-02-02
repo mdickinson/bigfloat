@@ -67,9 +67,12 @@ __all__ = [
     # 5.2 Assignment Functions
     'pos',
 
+    # 5.4 Conversion functions
+    'frexp',
+
     # 5.5 Basic arithmetic functions
     'add', 'sub', 'mul', 'sqr', 'div', 'sqrt', 'rec_sqrt', 'cbrt', 'root',
-    'pow', 'neg', 'abs', 'dim', 'floordiv', 'mod',
+    'rootn', 'pow', 'neg', 'abs', 'dim', 'floordiv', 'mod',
 
     # 5.6 Comparison functions
     'cmp', 'cmpabs', 'is_nan', 'is_inf', 'is_finite', 'is_zero', 'is_regular',
@@ -77,22 +80,24 @@ __all__ = [
     'notequal', 'lessgreater', 'unordered',
 
     # 5.7 Special Functions
-    'log', 'log2', 'log10', 'exp', 'exp2', 'exp10',
+    'log', 'log2', 'log10', 'log1p', 'exp', 'exp2', 'exp10', 'expm1',
     'cos', 'sin', 'tan', 'sec', 'csc', 'cot', 'acos', 'asin', 'atan',
     'atan2',
     'cosh', 'sinh', 'tanh', 'sech', 'csch', 'coth', 'acosh', 'asinh', 'atanh',
     'factorial',
-    'log1p', 'expm1',
-    'eint', 'li2', 'gamma', 'lngamma', 'lgamma', 'digamma', 'zeta', 'zeta_ui',
+    'eint', 'li2', 'gamma', 'gamma_inc',
+    'lngamma', 'lgamma', 'digamma', 'beta', 'zeta', 'zeta_ui',
     'erf', 'erfc',
     'j0', 'j1', 'jn', 'y0', 'y1', 'yn',
-    'fma', 'fms', 'agm',
+    'fma', 'fms', 'fmma', 'fmms',
+    'agm',
     'hypot',
     'ai',
     'const_log2', 'const_pi', 'const_euler', 'const_catalan',
+    'sum',
 
     # 5.10 Integer and Remainder Related Functions
-    'ceil', 'floor', 'round', 'trunc',
+    'ceil', 'floor', 'round', 'roundeven', 'trunc',
     'frac', 'fmod', 'remainder', 'is_integer',
 
     # 5.12 Miscellaneous Functions
@@ -137,8 +142,12 @@ from bigfloat.core import (
     # 5.2 Assignment Functions
     pos,
 
+    # 5.4 Conversion Functions
+    frexp,
+
     # 5.5 Basic Arithmetic Functions
-    add, sub, mul, sqr, div, sqrt, rec_sqrt, cbrt, root, pow, neg, abs, dim,
+    add, sub, mul, sqr, div, sqrt, rec_sqrt, cbrt, root, rootn,
+    pow, neg, abs, dim,
 
     # Additional arithmetic functions (not implemented directly by MPFR)
     floordiv, mod,
@@ -149,22 +158,24 @@ from bigfloat.core import (
     unordered,
 
     # 5.7 Special Functions
-    log, log2, log10, exp, exp2, exp10,
+    log, log2, log10, log1p, exp, exp2, exp10, expm1,
     cos, sin, tan, sec, csc, cot, acos, asin, atan,
     atan2,
     cosh, sinh, tanh, sech, csch, coth, acosh, asinh, atanh,
     factorial,
-    log1p, expm1,
-    eint, li2, gamma, lngamma, lgamma, digamma, zeta, zeta_ui,
+    eint, li2, gamma, gamma_inc,
+    lngamma, lgamma, digamma, beta, zeta, zeta_ui,
     erf, erfc,
     j0, j1, jn, y0, y1, yn,
-    fma, fms, agm,
+    fma, fms, fmma, fmms,
+    agm,
     hypot,
     ai,
     const_log2, const_pi, const_euler, const_catalan,
+    sum,
 
     # 5.10 Integer and Remainder Related Functions
-    ceil, floor, round, trunc,
+    ceil, floor, round, roundeven, trunc,
     frac, fmod, remainder, is_integer,
 
     # 5.12 Miscellaneous Functions

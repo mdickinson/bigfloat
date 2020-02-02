@@ -121,7 +121,7 @@ def format_align(sign, body, spec):
     elif align == '=':
         result = sign + padding + body
     elif align == '^':
-        half = len(padding)//2
+        half = len(padding) // 2
         result = padding[:half] + sign + body + padding[half:]
     else:
         raise ValueError("Unrecognised alignment field: {!r}".format(align))
