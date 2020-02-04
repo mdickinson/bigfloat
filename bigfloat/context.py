@@ -65,23 +65,37 @@ class Context(object):
     absolute value in the range [0.5, 1.0), and that ``emin`` takes
     the subnormal range into account when ``subnormalize`` is ``True``.
     """
+
     # Contexts are supposed to be immutable.  We make the attributes
     # of a Context private, and provide properties to access them in
     # order to discourage users from trying to set the attributes
     # directly.
 
-    def __new__(cls, precision=None, emin=None, emax=None, subnormalize=None,
-                rounding=None):
-        if precision is not None and \
-                not (PRECISION_MIN <= precision <= PRECISION_MAX):
-            raise ValueError("Precision p should satisfy %d <= p <= %d." %
-                             (PRECISION_MIN, PRECISION_MAX))
+    def __new__(
+        cls,
+        precision=None,
+        emin=None,
+        emax=None,
+        subnormalize=None,
+        rounding=None,
+    ):
+        if precision is not None and not (
+            PRECISION_MIN <= precision <= PRECISION_MAX
+        ):
+            raise ValueError(
+                "Precision p should satisfy %d <= p <= %d."
+                % (PRECISION_MIN, PRECISION_MAX)
+            )
         if emin is not None and not EMIN_MIN <= emin <= EMIN_MAX:
-            raise ValueError("exponent bound emin should satisfy "
-                             "%d <= emin <= %d" % (EMIN_MIN, EMIN_MAX))
+            raise ValueError(
+                "exponent bound emin should satisfy "
+                "%d <= emin <= %d" % (EMIN_MIN, EMIN_MAX)
+            )
         if emax is not None and not EMAX_MIN <= emax <= EMAX_MAX:
-            raise ValueError("exponent bound emax should satisfy "
-                             "%d <= emax <= %d" % (EMAX_MIN, EMAX_MAX))
+            raise ValueError(
+                "exponent bound emax should satisfy "
+                "%d <= emax <= %d" % (EMAX_MIN, EMAX_MAX)
+            )
         if rounding is not None:
             rounding = RoundingMode(rounding)
         if subnormalize is not None and subnormalize not in [False, True]:
@@ -101,34 +115,45 @@ class Context(object):
         precedence."""
 
         return Context(
-            precision=(other.precision
-                       if other.precision is not None
-                       else self.precision),
+            precision=(
+                other.precision
+                if other.precision is not None
+                else self.precision
+            ),
             emin=other.emin if other.emin is not None else self.emin,
             emax=other.emax if other.emax is not None else self.emax,
-            subnormalize=(other.subnormalize
-                          if other.subnormalize is not None
-                          else self.subnormalize),
-            rounding=(other.rounding
-                      if other.rounding is not None
-                      else self.rounding),
+            subnormalize=(
+                other.subnormalize
+                if other.subnormalize is not None
+                else self.subnormalize
+            ),
+            rounding=(
+                other.rounding if other.rounding is not None else self.rounding
+            ),
         )
 
     def __eq__(self, other):
         return (
-            self.precision == other.precision and
-            self.emin == other.emin and
-            self.emax == other.emax and
-            self.subnormalize == other.subnormalize and
-            self.rounding == other.rounding
+            self.precision == other.precision
+            and self.emin == other.emin
+            and self.emax == other.emax
+            and self.subnormalize == other.subnormalize
+            and self.rounding == other.rounding
         )
 
     def __ne__(self, other):
         return not (self == other)
 
     def __hash__(self):
-        return hash((self.precision, self.emin, self.emax,
-                     self.subnormalize, self.rounding))
+        return hash(
+            (
+                self.precision,
+                self.emin,
+                self.emax,
+                self.subnormalize,
+                self.rounding,
+            )
+        )
 
     @property
     def precision(self):
@@ -153,16 +178,16 @@ class Context(object):
     def __repr__(self):
         args = []
         if self.precision is not None:
-            args.append('precision=%r' % self.precision)
+            args.append("precision=%r" % self.precision)
         if self.emax is not None:
-            args.append('emax=%r' % self.emax)
+            args.append("emax=%r" % self.emax)
         if self.emin is not None:
-            args.append('emin=%r' % self.emin)
+            args.append("emin=%r" % self.emin)
         if self.subnormalize is not None:
-            args.append('subnormalize=%r' % self.subnormalize)
+            args.append("subnormalize=%r" % self.subnormalize)
         if self.rounding is not None:
-            args.append('rounding=%r' % self.rounding)
-        return 'Context(%s)' % ', '.join(args)
+            args.append("rounding=%r" % self.rounding)
+        return "Context(%s)" % ", ".join(args)
 
     __str__ = __repr__
 
@@ -191,9 +216,7 @@ EmptyContext = Context()
 # WideExponentContext has the largest exponent range allowed
 # by MPFR; precision and rounding mode are not specified.
 WideExponentContext = Context(
-    emax=EMAX_MAX,
-    emin=EMIN_MIN,
-    subnormalize=False,
+    emax=EMAX_MAX, emin=EMIN_MIN, subnormalize=False,
 )
 
 
@@ -328,9 +351,13 @@ def _apply_function_in_context(cls, f, args, context):
             # if bf is zero but ternary is nonzero, the underflow
             # flag will already have been set by mpfr_check_range;
             underflow = (
-                mpfr.mpfr_number_p(bf) and
-                not mpfr.mpfr_zero_p(bf) and
-                mpfr.mpfr_get_exp(bf) < context.precision - 1 + context.emin)
+                mpfr.mpfr_number_p(bf)
+                and not mpfr.mpfr_zero_p(bf)
+                and (
+                    mpfr.mpfr_get_exp(bf)
+                    < context.precision - 1 + context.emin
+                )
+            )
             if underflow:
                 mpfr.mpfr_set_underflow()
             ternary = mpfr.mpfr_subnormalize(bf, ternary, rounding)

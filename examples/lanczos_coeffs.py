@@ -80,24 +80,24 @@ def M(k, j):
         return 1
     if j > k:
         return 0
-    top = (-1)**(k+j) * factorial(j+k-1) * k
-    bottom = factorial(k-j) * factorial(j)
+    top = (-1) ** (k + j) * factorial(j + k - 1) * k
+    bottom = factorial(k - j) * factorial(j)
     assert top % bottom == 0
     return top // bottom
 
 
 def H(g, j):
-    return exp(j+g+0.5) / (j+g+0.5)**(j+0.5)
+    return exp(j + g + 0.5) / (j + g + 0.5) ** (j + 0.5)
 
 
 def b(j, N):
-    assert 0 <= j <= N-1
+    assert 0 <= j <= N - 1
     coeffs = [1]
-    facs = list(range(j, N-1)) + list(range(-1, -j-1, -1))
+    facs = list(range(j, N - 1)) + list(range(-1, -j - 1, -1))
     for i in facs:
         # multiply by (z+i)
         times_z = [0] + coeffs
-        times_i = [i*c for c in coeffs] + [0]
+        times_i = [i * c for c in coeffs] + [0]
         coeffs = [a + b for a, b in zip(times_z, times_i)]
     assert len(coeffs) == N
     return coeffs
@@ -105,11 +105,15 @@ def b(j, N):
 
 def Lg_num_coeffs(g, N):
     B = [b(j, N) for j in range(N)]
-    MM = [[(M(k, j) if k == 0 else 2*M(k, j))
-           for j in range(N)] for k in range(N)]
+    MM = [
+        [(M(k, j) if k == 0 else 2 * M(k, j)) for j in range(N)]
+        for k in range(N)
+    ]
     # BTM has only integer entries
-    BTM = [[sum(B[k][l] * MM[k][j] for k in range(N))
-            for j in range(N)] for l in range(N)]
+    BTM = [
+        [sum(B[k][l] * MM[k][j] for k in range(N)) for j in range(N)]
+        for l in range(N)
+    ]
 
     HH = [H(g, j) for j in range(N)]
     coeffs = [sum(BTM[i][j] * HH[j] for j in range(N)) for i in range(N)]
@@ -130,11 +134,11 @@ def L(g, z, N):
     den = 0.0
     for c in reversed(den_coeffs):
         den = den * z + c
-    return num/den
+    return num / den
 
 
 def gamma(z, g, N):
-    return (z+g-0.5)**(z-0.5) / exp(z+g-0.5) * L(g, z, N)
+    return (z + g - 0.5) ** (z - 0.5) / exp(z + g - 0.5) * L(g, z, N)
 
 
 # Now express everything as a rational function;  we want to be

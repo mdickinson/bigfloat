@@ -29,7 +29,8 @@ from bigfloat.rounding_mode import (
 )
 
 # Regular expression matching valid format specifiers.
-_parse_format_specifier_regex = re.compile(r"""\A
+_parse_format_specifier_regex = re.compile(
+    r"""\A
 (?:
    (?P<fill>.)?
    (?P<align>[<>=^])
@@ -41,15 +42,17 @@ _parse_format_specifier_regex = re.compile(r"""\A
 (?P<precision>\.[0-9]+)?
 (?P<rounding>[UDYZN])?
 (?P<type>[aAbeEfFgG%])?
-\Z""", re.VERBOSE | re.DOTALL)
+\Z""",
+    re.VERBOSE | re.DOTALL,
+)
 
 
 rounding_mode_from_specifier = {
-    'U': ROUND_TOWARD_POSITIVE,
-    'D': ROUND_TOWARD_NEGATIVE,
-    'Y': ROUND_AWAY_FROM_ZERO,
-    'Z': ROUND_TOWARD_ZERO,
-    'N': ROUND_TIES_TO_EVEN,
+    "U": ROUND_TOWARD_POSITIVE,
+    "D": ROUND_TOWARD_NEGATIVE,
+    "Y": ROUND_AWAY_FROM_ZERO,
+    "Z": ROUND_TOWARD_ZERO,
+    "N": ROUND_TIES_TO_EVEN,
 }
 
 
@@ -62,45 +65,47 @@ def parse_format_specifier(specification):
     m = _parse_format_specifier_regex.match(specification)
     if m is None:
         raise ValueError(
-            "Invalid format specifier: {!r}".format(specification))
-    format_dict = m.groupdict('')
+            "Invalid format specifier: {!r}".format(specification)
+        )
+    format_dict = m.groupdict("")
 
     # Convert zero-padding into fill and alignment.
-    zeropad = format_dict.pop('zeropad')
+    zeropad = format_dict.pop("zeropad")
     if zeropad:
         # If zero padding is requested, fill and align fields should be absent.
-        if format_dict['align']:
+        if format_dict["align"]:
             raise ValueError(
-                "Invalid format specifier: {!r}".format(specification))
+                "Invalid format specifier: {!r}".format(specification)
+            )
         # Impossible to have 'fill' without 'align'.
-        assert not format_dict['fill']
-        format_dict['align'] = '='
-        format_dict['fill'] = '0'
+        assert not format_dict["fill"]
+        format_dict["align"] = "="
+        format_dict["fill"] = "0"
 
     # Default alignment is right-aligned.
-    if not format_dict['align']:
-        format_dict['align'] = '>'
+    if not format_dict["align"]:
+        format_dict["align"] = ">"
 
     # Default fill character is space.
-    if not format_dict['fill']:
-        format_dict['fill'] = ' '
+    if not format_dict["fill"]:
+        format_dict["fill"] = " "
 
     # Default sign is '-'.
-    if not format_dict['sign']:
-        format_dict['sign'] = '-'
+    if not format_dict["sign"]:
+        format_dict["sign"] = "-"
 
     # Convert minimum width to an int; default is zero.
-    format_dict['minimumwidth'] = int(format_dict['minimumwidth'] or '0')
+    format_dict["minimumwidth"] = int(format_dict["minimumwidth"] or "0")
 
     # Convert precision to an int, or `None` if no precision given.
-    if format_dict['precision']:
-        format_dict['precision'] = int(format_dict['precision'][1:])
+    if format_dict["precision"]:
+        format_dict["precision"] = int(format_dict["precision"][1:])
     else:
-        format_dict['precision'] = None
+        format_dict["precision"] = None
 
     # If no rounding mode is given, assume 'N'.
-    if not format_dict['rounding']:
-        format_dict['rounding'] = 'N'
+    if not format_dict["rounding"]:
+        format_dict["rounding"] = "N"
 
     return format_dict
 
@@ -112,15 +117,15 @@ def format_align(sign, body, spec):
     parse_format_specifier).
 
     """
-    padding = spec['fill'] * (spec['minimumwidth'] - len(sign) - len(body))
-    align = spec['align']
-    if align == '<':
+    padding = spec["fill"] * (spec["minimumwidth"] - len(sign) - len(body))
+    align = spec["align"]
+    if align == "<":
         result = sign + body + padding
-    elif align == '>':
+    elif align == ">":
         result = padding + sign + body
-    elif align == '=':
+    elif align == "=":
         result = sign + padding + body
-    elif align == '^':
+    elif align == "^":
         half = len(padding) // 2
         result = padding[:half] + sign + body + padding[half:]
     else:

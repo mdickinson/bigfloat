@@ -40,18 +40,18 @@ class TestRoundingMode(unittest.TestCase):
         self.assertIsInstance(rm, RoundingMode)
 
     def test_str(self):
-        self.assertEqual(str(ROUND_TIES_TO_EVEN), 'ROUND_TIES_TO_EVEN')
-        self.assertEqual(str(ROUND_TOWARD_ZERO), 'ROUND_TOWARD_ZERO')
-        self.assertEqual(str(ROUND_TOWARD_POSITIVE), 'ROUND_TOWARD_POSITIVE')
-        self.assertEqual(str(ROUND_TOWARD_NEGATIVE), 'ROUND_TOWARD_NEGATIVE')
-        self.assertEqual(str(ROUND_AWAY_FROM_ZERO), 'ROUND_AWAY_FROM_ZERO')
+        self.assertEqual(str(ROUND_TIES_TO_EVEN), "ROUND_TIES_TO_EVEN")
+        self.assertEqual(str(ROUND_TOWARD_ZERO), "ROUND_TOWARD_ZERO")
+        self.assertEqual(str(ROUND_TOWARD_POSITIVE), "ROUND_TOWARD_POSITIVE")
+        self.assertEqual(str(ROUND_TOWARD_NEGATIVE), "ROUND_TOWARD_NEGATIVE")
+        self.assertEqual(str(ROUND_AWAY_FROM_ZERO), "ROUND_AWAY_FROM_ZERO")
 
     def test_repr(self):
-        self.assertEqual(repr(ROUND_TIES_TO_EVEN), 'ROUND_TIES_TO_EVEN')
-        self.assertEqual(repr(ROUND_TOWARD_ZERO), 'ROUND_TOWARD_ZERO')
-        self.assertEqual(repr(ROUND_TOWARD_POSITIVE), 'ROUND_TOWARD_POSITIVE')
-        self.assertEqual(repr(ROUND_TOWARD_NEGATIVE), 'ROUND_TOWARD_NEGATIVE')
-        self.assertEqual(repr(ROUND_AWAY_FROM_ZERO), 'ROUND_AWAY_FROM_ZERO')
+        self.assertEqual(repr(ROUND_TIES_TO_EVEN), "ROUND_TIES_TO_EVEN")
+        self.assertEqual(repr(ROUND_TOWARD_ZERO), "ROUND_TOWARD_ZERO")
+        self.assertEqual(repr(ROUND_TOWARD_POSITIVE), "ROUND_TOWARD_POSITIVE")
+        self.assertEqual(repr(ROUND_TOWARD_NEGATIVE), "ROUND_TOWARD_NEGATIVE")
+        self.assertEqual(repr(ROUND_AWAY_FROM_ZERO), "ROUND_AWAY_FROM_ZERO")
 
     def test_int(self):
         self.assertEqual(int(ROUND_TIES_TO_EVEN), mpfr.MPFR_RNDN)
@@ -73,5 +73,5 @@ class TestRoundingMode(unittest.TestCase):
             RoundingMode(-1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

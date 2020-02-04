@@ -73,13 +73,13 @@ class ContextTests(unittest.TestCase):
         self.assertEqual(mpfr.mpfr_get_emax(), original_emax)
 
         with self.assertRaises(OverflowError):
-            with _temporary_exponent_bounds(-10 ** 100, 10):
+            with _temporary_exponent_bounds(-(10 ** 100), 10):
                 pass
         self.assertEqual(mpfr.mpfr_get_emin(), original_emin)
         self.assertEqual(mpfr.mpfr_get_emax(), original_emax)
 
         with self.assertRaises(OverflowError):
-            with _temporary_exponent_bounds(-10 ** 100, 10 ** 100):
+            with _temporary_exponent_bounds(-(10 ** 100), 10 ** 100):
                 pass
         self.assertEqual(mpfr.mpfr_get_emin(), original_emin)
         self.assertEqual(mpfr.mpfr_get_emax(), original_emax)
@@ -104,8 +104,7 @@ class ContextTests(unittest.TestCase):
 
     def test_default_context(self):
         self.assertEqual(
-            DefaultContext,
-            quadruple_precision + RoundTiesToEven,
+            DefaultContext, quadruple_precision + RoundTiesToEven,
         )
 
     def test_rounding_contexts(self):
@@ -151,51 +150,73 @@ class ContextTests(unittest.TestCase):
                 with original_context:
                     with rounding_context:
                         self.assertEqual(
-                            getcontext().precision,
-                            original_context.precision,
+                            getcontext().precision, original_context.precision,
                         )
                         self.assertEqual(
-                            getcontext().emin,
-                            original_context.emin,
+                            getcontext().emin, original_context.emin,
                         )
                         self.assertEqual(
-                            getcontext().emax,
-                            original_context.emax,
+                            getcontext().emax, original_context.emax,
                         )
                         self.assertEqual(
                             getcontext().subnormalize,
                             original_context.subnormalize,
                         )
                         self.assertEqual(
-                            getcontext().rounding,
-                            rounding_context.rounding,
+                            getcontext().rounding, rounding_context.rounding,
                         )
 
     def test_hashable(self):
         # create equal but non-identical contexts
-        c1 = Context(emin=-999, emax=999, precision=100,
-                     subnormalize=True, rounding=ROUND_TOWARD_POSITIVE)
-        c2 = (Context(emax=999, emin=-999, rounding=ROUND_TOWARD_POSITIVE) +
-              Context(precision=100, subnormalize=True))
+        c1 = Context(
+            emin=-999,
+            emax=999,
+            precision=100,
+            subnormalize=True,
+            rounding=ROUND_TOWARD_POSITIVE,
+        )
+        c2 = Context(
+            emax=999, emin=-999, rounding=ROUND_TOWARD_POSITIVE
+        ) + Context(precision=100, subnormalize=True)
         self.assertEqual(hash(c1), hash(c2))
         self.assertEqual(c1, c2)
         self.assertIs(c1 == c2, True)
         self.assertIs(c1 != c2, False)
 
         # distinct contexts
-        d1 = Context(emin=-999, emax=999, precision=100,
-                     subnormalize=True, rounding=ROUND_TOWARD_POSITIVE)
-        d2 = Context(emin=-999, emax=999, precision=101,
-                     subnormalize=True, rounding=ROUND_TOWARD_POSITIVE)
+        d1 = Context(
+            emin=-999,
+            emax=999,
+            precision=100,
+            subnormalize=True,
+            rounding=ROUND_TOWARD_POSITIVE,
+        )
+        d2 = Context(
+            emin=-999,
+            emax=999,
+            precision=101,
+            subnormalize=True,
+            rounding=ROUND_TOWARD_POSITIVE,
+        )
         self.assertIs(d1 != d2, True)
         self.assertIs(d1 == d2, False)
 
     def test_with(self):
         # check use of contexts in with statements
-        c = Context(emin=-123, emax=456, precision=1729,
-                    subnormalize=True, rounding=ROUND_TOWARD_POSITIVE)
-        d = Context(emin=0, emax=10585, precision=20,
-                    subnormalize=False, rounding=ROUND_TOWARD_NEGATIVE)
+        c = Context(
+            emin=-123,
+            emax=456,
+            precision=1729,
+            subnormalize=True,
+            rounding=ROUND_TOWARD_POSITIVE,
+        )
+        d = Context(
+            emin=0,
+            emax=10585,
+            precision=20,
+            subnormalize=False,
+            rounding=ROUND_TOWARD_NEGATIVE,
+        )
 
         with c:
             # check nested with
@@ -221,7 +242,7 @@ class ContextTests(unittest.TestCase):
             except ValueError:
                 pass
             else:
-                self.fail('ValueError not propagated from with block')
+                self.fail("ValueError not propagated from with block")
 
             self.assertEqual(getcontext().precision, c.precision)
             self.assertEqual(getcontext().emin, c.emin)
@@ -296,5 +317,5 @@ class ContextTests(unittest.TestCase):
         )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

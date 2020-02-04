@@ -35,8 +35,10 @@ def IEEEContext(bitwidth):
         precision = {16: 11, 32: 24, 64: 53, 128: 113}[bitwidth]
     except KeyError:
         if not (bitwidth >= 128 and bitwidth % 32 == 0):
-            raise ValueError("nonstandard bitwidth: bitwidth should be "
-                             "16, 32, 64, 128, or k*32 for some k >= 4")
+            raise ValueError(
+                "nonstandard bitwidth: bitwidth should be "
+                "16, 32, 64, 128, or k*32 for some k >= 4"
+            )
         # The formula for the precision involves rounding 4*log2(width) to the
         # nearest integer. We have:
         #

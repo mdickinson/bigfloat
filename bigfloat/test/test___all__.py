@@ -9,6 +9,7 @@ class TestAll(unittest.TestCase):
     def test_duplicates(self):
         # Check for duplicate entries in __all__.
         from bigfloat import __all__
+
         counts = collections.defaultdict(int)
         for item in __all__:
             counts[item] += 1
@@ -16,5 +17,5 @@ class TestAll(unittest.TestCase):
         self.assertEqual(duplicates, [])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
