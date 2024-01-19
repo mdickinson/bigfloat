@@ -37,7 +37,7 @@ cdef extern from "limits.h":
 # Mpz_t type and functions
 ###############################################################################
 
-ctypedef void (*free_func) (void *, size_t)
+ctypedef void (*free_func) (void *, size_t) noexcept
 
 
 cdef class Mpz_t:
