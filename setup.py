@@ -208,16 +208,23 @@ Links
 if os.path.exists("PKG-INFO"):
     USE_CYTHON = False
 else:
-    USE_CYTHON = True
-
+    try:
+        from Cython.Build import cythonize
+        USE_CYTHON = True
+    except:
+        print("Failed to import Cython, using pre-generated .c version")
+        USE_CYTHON = False
 
 if USE_CYTHON:
-    from Cython.Build import cythonize
+    try:
+        extensions = cythonize(
+            Extension("mpfr", ["mpfr.pyx"], libraries=["mpfr", "gmp"],)
+        )
+    except:
+        print("Failed Cythonize, fallback to pre-generated .c version")
+        USE_CYTHON = False
 
-    extensions = cythonize(
-        Extension("mpfr", ["mpfr.pyx"], libraries=["mpfr", "gmp"],)
-    )
-else:
+if not USE_CYTHON:
     extensions = [
         Extension("mpfr", ["mpfr.c"], libraries=["mpfr", "gmp"],),
     ]
