@@ -37,9 +37,6 @@ cdef extern from "limits.h":
 # Mpz_t type and functions
 ###############################################################################
 
-ctypedef void (*free_func) (void *, size_t) noexcept
-
-
 cdef class Mpz_t:
     """
     GMP integer object.
@@ -101,7 +98,7 @@ def mpz_get_str(int base, Mpz_t op not None):
     """
     cdef bytes digits
     cdef char *c_digits
-    cdef free_func freefunc
+    cdef void (*freefunc)(void *, size_t) noexcept
     cdef size_t c_digits_len
 
     if not (2 <= base <= 62 or -36 <= base <= -2):
